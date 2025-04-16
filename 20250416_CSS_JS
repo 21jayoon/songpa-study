@@ -1,0 +1,258 @@
+#20250416 HTML+CSS 실습 및 JS강의
+#HTML+CSS practice and listening Javascript basic grammar lecture
+
+#새로배운연산자 Newly learned
+#type of 
+#in
+
+#자바스크립트 강의 오늘 들은 내용
+#learned javascript
+#from 01_variable(data type, dynamically typed language, implicit/explicit coercion)
+#to 03_object literal(object, property, ES6(shorthand), additional operator and traversal)
+
+#Figma 예시를 보며 8번~10번, 13~17번 HTML+CSS 실습 문제 풀었음
+#done some HTML+CSS challenges(refer to Figma works) no.8-10, 13-17
+
+#Previous code of Figma problems 1-9
+#어제 작성하다만 1-9실습 코드
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .midsummer {
+            width: 278px;
+            height: 80px;
+            background: #CA785c;
+            margin-top: 16px;
+            margin-left: 16px;
+        }
+
+        .summer {
+            margin-top: 26px;
+            margin-left: 105px;
+            height: 19px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 24px;
+            font-style: inter;
+            line-height: 100%;
+            letter-spacing: 0%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="midsummer">
+        <p class="summer">한여름</p>
+    </div>
+</body>
+</html>
+
+#고친 코드 Fixed Code
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .midsummer {
+            width: 278px;
+            height: 80px;
+            background-color: #CA785c;
+            top: 16px;
+            left: 16px;
+        }
+
+        .text {
+            position: absolute;
+            top: 26px;
+            margin-left: 105px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 0%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="midsummer">
+        <span class="text">한여름</span>
+    </div>
+</body>
+</html>
+
+
+#오늘 어려웠던 코드(미완)
+#Today's unsolved codes
+#11번 문제 HTML+CSS challenge No.11
+#막힌 이유: 이미지 사진이 320px,320px로 안 줄어든다.
+#Why is it blocked?: the image sizes doesn't shrinks 320px. 320px.
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .design {
+            position: sticky;
+            width: 320px;
+            height: 320px;
+            top: 16px;
+            left: 16px;
+        }
+
+        .txt {
+            position: absolute;
+            top: 26px;
+            margin-left: 177px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 0%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="design">
+        <img class="image" src="sample/image/1-11&1-12.jpg">
+        <span class="txt">인테리어 디자인</span>
+    </div>
+</body>
+</html>
+
+
+#17번 문제 HTML+CSS challenge No.17
+#막힌 이유: 글자가 검은색 반투명박스 위로 안 올라온다.
+#Why is it blocked?: the letters doesn't come to top of the black box.
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .circle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #d9d9d9;
+            border-radius: 9999px;
+            top: 32px;
+            left: 260px;
+        }
+
+        .image {
+            position: absolute;
+            width: 300px;
+            height: 250px;
+            border-radius: 8px;
+        }
+
+        .blackbox {
+            position: sticky;
+            background: black;
+            opacity: 0.5;
+            width: 300px;
+            height: 56px;
+            margin-top: 170px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .msg {
+            color: white;
+            top: 8px;
+            left: 8px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .name {
+            color: #d1d1d1;
+            font-weight: 700;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box5">
+        <img class="image" src="sample/image/1-17.jpg">
+        <h5 class="msg">새로운 시작!</h5>
+        <h5 class="name">김작가</h5>
+        <div class="circle"></div>
+        <div class="blackbox"></div>
+    </div>
+</body>
+</html>
+
+
+#18번 문제 HTML+CSS challenge No.18
+#막힌 이유: '반가워요!' 글자가 세로기준 가운데에 들어오지 않는다.
+#Why is it blocked?: the letters doesn't fit in vertical center no matter what tags i use
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .tinypink {
+            position: absolute;
+            background: #ffb9b9;
+            width: 96px;
+            height: 19px;
+            border-radius: 2px;
+            margin-left: 160px;
+            margin-top: 10px;
+        }
+
+        .pink {
+            position: absolute;
+            background: #ffb9b9;
+            width: 160px;
+            height: 100px;
+            border-radius: 8px;
+        }
+
+        .palepink {
+            background: #ffe4e4;
+            width: 332px;
+            height: 100px;
+            border-radius: 8px;
+            margin-top: 16px;
+            margin-left: 16px;
+        }
+
+        .Hello {
+            width: 48px;
+            color: white;
+            margin-left: 18px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pink"></div>
+
+    <div class="palepink">
+        <div class="tinypink">
+            <span class="Hello">반가워요!</span>
+        </div>
+    </div>
+</body>
+</html>
