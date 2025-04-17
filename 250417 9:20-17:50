@@ -1,0 +1,339 @@
+# 20250417 3rd class - Javascript(code) 이론 수업 theory class
+# from 5.function to 8.prototype
+
+# 자바스크립트 실습문제2 javascript(code) practice no2
+# 코드 작성 감 자체를 못 잡겠어서 깃허브의 코파일럿을 이용했다. 작동 원리 이해 필요.
+# Made a code by using copilot from github. Need to understand how it worked.
+# 문제: 아래의 객체를 for in 반복문을 사용하여, 객체의 모든 키와 그에 해당하는 값을 출력하는 코드를 작성하세요.
+# Q.Write a code that print all the keys and values of all instances by using for-in loop.
+var person = {
+    firstName: 'GilDong',
+    lastName: 'Hong',
+    age: 20
+};
+
+// Using for-in loop to iterate over the keys of the object
+for (var key in person) {
+    if (person.hasOwnProperty(key)) {
+        console.log(key + ': ' + person[key]);
+    }
+};
+# 코드 실행 결과 Results after running code
+# firstName: GilDong
+# lastName: Hong
+# age: 20
+
+
+# 자바스크립트 실습문제3 javascript(code) practice no3
+# 코드 작성 감 자체를 못 잡겠어서 깃허브의 코파일럿을 이용했다. 작동 원리 이해 필요.
+# made a code by using copilot from github. Need to understand how it worked.
+# 문제: 두 개의 숫자를 매개변수로 받아서 그 합을 반환하는 함수를 작성하세요.
+# Q.Write a code that receiving two numbers as parameters and returns their sum.
+
+// Define a function that takes two numbers as parameters and returns their sum
+function sum(a, b) {
+    return a + b;
+}
+
+// Example usage:
+let result = sum(5, 7); // Replace 5 and 7 with your desired numbers
+console.log('The sum is:', result);
+
+
+# 자바스크립트 실습문제4 javascript(code) practice no4
+# 코드 작성 감 자체를 못 잡겠어서 깃허브의 코파일럿을 이용했다. 작동 원리 이해 필요.
+# made a code by using copilot from github. Need to understand how it worked.
+
+# 문제: 아래의 함수들을 화살표 함수로 변환해보세요.
+# Q.Change the functions below into arrow function
+# function greet() {
+#   return "Hello!";
+#}
+# function getInfo(name, age) {
+#   return `name: ${name}, age: ${age}`;
+# };
+
+const greet = () => "Hello!";
+
+const getInfo = (name, age) => `name: ${name}, age: ${age}`;
+
+
+# 자바스크립트 실습문제5 javascript(code) practice no5
+# 문제: 아래의 코드를 실행했을 때 출력결과가 나오도록 Person 생성자 함수를 정의하세요.
+# Q.Define constructor function, Person, to print the result '안녕하세요, 제 이름은 홍길동 이고 나이는 20세입니다.' when the code below runned.
+# const person = new Person("홍길동", 20);
+# person.sayHello();
+function Person(name, age) { 
+    this.name = name; // Assign name to the instance
+    this.age = age;   // Assign age to the instance
+
+    // Define the sayHello method
+    this.sayHello = function () {
+        console.log(`안녕하세요, 제 이름은 ${this.name} 이고 나이는 ${this.age}세입니다.`);
+    };
+}
+
+// Example usage
+const person = new Person("홍길동", 20);
+person.sayHello();
+
+# 자바스크립트 실습문제6 javascript(code) practice no6
+# 문제: (1) user 객체에 email 프로퍼티를 추가하고 "koala.ohgiraffers@gmail.com" 값을 넣으세요.
+# (2) age 값을 21로 수정하세요.
+# (3) name 값을 삭제하세요.
+# Q.Made a code with 3 conditions and an example code below.
+# (1) Add email property into user instance and put "koala.ohgiraffers@gmail.com" value.
+# (2) Edit the value of age into 21.
+# (3) Delete the name value.
+
+const user = {
+   name : "koala",
+   age : 20
+}; */
+const user = {
+    name: "koala",
+    age: 20
+};
+
+// 1. Add email property with the given value
+user.email = "koala.ohgiraffers@gmail.com";
+
+// 2. Edit the value of age to 21
+user.age = 21;
+
+// 3. Delete the name property
+delete user.name;
+
+// Output the updated user object
+console.log(user);
+
+
+# 자바스크립트 실습문제7 javascript(code) practice no6
+# 문제: car 객체와 fireCar 객체 정의하기: 아래 예제에서 자기 자신의 프로퍼티와 상속된 프로퍼티를 구분하세요.
+# - car 객체는 brand 프로퍼티를 갖고있다.
+# - fireCar 객체는 brand, color 프로퍼티를 갖고 있고 car객체를 상속받는다.
+# - fireCar 객체에서 brand는 상속받은 프로퍼티이고, color는 자기 자신의 프로퍼티이다.
+# Q.Define car instance and fireCar instance: Distinguish own property and inherited property in two instances.
+# Also it must meet the 3 conditions down below.
+# 1. car instance has brand property
+# 2. fireCar instance has brand property, color property and inherited car instance.
+# 3. In fireCar instance, brand is inherited property and color is their own property.
+
+# 동료인 예람님으로부터 설명을 듣고 직접 구분해보았다.
+# car객체의 자기 자신 프로퍼티(고유 프로퍼티)= brand
+# fireCar객체의 고유 프로퍼티= color / 상속된 프로퍼티= brand(from car Instance)
+# My colleague, who is familiar with computar language, walked through the definition and example of instance and property.
+# These are the answer I made after I listened to her explanation
+# Their own property in car Instance : brand
+# Own property in fireCar instance : color / inherited property = brand
+
+
+
+# Figma 실습 문제(HTML+CSS) HTML+CSS Practice with Figma
+# 오늘 푸는 데 성공한 문제 Today solved challenges
+
+# No. 11
+# 어제 글자를 사진 위로 끌어오는 데까진 성공했으나 사진 크기가 안 줄어들어서 다른 문제들로 넘어갔음
+# Yesterday: Succeeded with insert white letters on the picture, but failed to decrease the picture. So I moved to another problems.
+
+# 완성본 Solved ver. (Helped by Copilot in Github)
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-11practice</title>
+    <style>
+       
+        #design {
+            width: 320px;
+            height: 320px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #design img {
+            position: absolute;
+            width: auto;
+            height: auto;
+            transform: translate(-105px, -297px);
+            /*이 transplate부분이 키였다!! This above part was the crucial!!*/
+        }
+
+        #sogaegul {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="design">
+        <img src="sample/image/1-11&1-12.jpg" alt="Zoomed Image">
+        <div id="sogaegul">인테리어 디자인</div>
+    </div>
+</body>
+
+</html>
+
+# 어제 작성한 미완성 코드 Unsolved ver.(code written yesterday)
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .design {
+            position: sticky;
+            width: 320px;
+            height: 320px;
+            top: 16px;
+            left: 16px;
+        }
+
+        .txt {
+            position: absolute;
+            top: 26px;
+            margin-left: 177px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 0%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="design">
+        <img class="image" src="sample/image/1-11&1-12.jpg">
+        <span class="txt">인테리어 디자인</span>
+    </div>
+</body>
+</html>
+
+# No. 19
+# 마지막 단어인 '베스트도전'과 회색 점이 원하는 위치에 들어가지 않았음
+# Yesterday: the word '베스트도전' and two gray spots doesn't get into position that I want.
+
+# 성공본 Completed ver. (asking fix some part with unsolved version at Copilot in Github)
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /*이 코드는 '실습19실패작'을 Github copilot에서 고쳐준 것을
+        살짝 수정한 코드
+        This code is little trimmed from Github copilot fixed code.*/
+        .pink {
+            position: absolute;
+            background: #ffb9b9;
+            width: 280px;
+            height: 35px;
+
+            /* Use Flexbox for consistent layout */
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .pink p {
+            margin-left: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .circle {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background: #d9d9d9;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pink">
+        <p class="home"><b>웹툰홈</b></p>
+        <span class="circle"></span>
+        <p class="dbd"><b>요일별웹툰</b></p>
+        <span class="circle"></span>
+        <p class="bedo"><b>베스트도전</b></p>
+    </div>
+</body>
+</html>
+
+# 어제 작성한 미완성 코드 Unsolved ver.(code written yesterday)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .pink {
+            position: absolute;
+            background: #ffb9b9;
+            width: 300px;
+            height: 35px;
+        }
+
+        .home {
+            display: inline-block;
+            color: white;
+            margin-left: 20px;
+            margin-top: 6px;
+        }
+
+        .dbd {
+            display: inline-block;
+            color: white;
+            margin-left: 20px;
+            margin-top: 6px;
+        }
+
+        .bedo {
+            display: inline-block;
+            color: white;
+            margin-left: 20px;
+            margin-top: 6px;
+        }
+
+        .circle {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background: #d9d9d9;
+            border-radius: 9999px;
+            margin-top: 1px;
+            margin-inline-start: 17px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pink">
+        <p class="home"><b>웹툰홈</b></p>
+        <div class="circle"></div>
+        <p class="dbd"><b>요일별웹툰</b></p>
+        <div class="circle"></div>
+    </div>
+    <p class="bedo"><b>베스트도전</b></p>
+    </div>
+</body>
+</html>
+
+# Solved 16 problems out of 19 challenges. (HTML+CSS+Figma challenges)
