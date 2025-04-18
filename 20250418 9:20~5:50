@@ -1,0 +1,130 @@
+# 자바스크립트(core) 이론 수업 : 9.array부터 자바스크립트(web) 3. DOM 노드 프로퍼티까지
+# learned Javascript(core) 9.array to Javascript(web) DOM 1.get element-3.node property
+
+# 팀 스터디: 팀원 실습문제 도와주며 자바스크립트 공부
+# Team Study: Studying javascript during helping solving teammate's practice.
+# Also write a code again to training myself, because I need to get used to the javascript code structure.
+
+
+# Javascript Practice NO.2
+# 2.아래의 객체를 for in 반복문을 사용하여, 객체의 모든 키와 그에 해당하는 값을 출력하는 코드를 작성하세요.
+# Write a code that print all keys and values of object down below. also using 'for-in loop'
+# var person = {
+#   firstName: 'GilDong',
+#   lastName: 'Hong',
+#   age: 20
+# };
+# 첫번째 시도 First try
+for (var things in person) {
+  console.log(things);
+}
+console.log(`${key} : ${person[key]}`);
+# Result ReferenceError: key is not defined
+
+# Answer from Copilot : Undefined Variable key
+# Inside the for-in loop, you used key in console.log(${key} : ${person[key]}) but your loop variable is named things (not key).
+
+
+# 두번째 시도 Second try (deleted the last code)
+for (var things in person) {
+    console.log(things);
+}
+# Result firstName lastName age >printed only key values.
+# Answer from Copilot : 1)Accessing Values of Keys
+# The for-in loop iterates over the keys (properties) of the object.
+# To access the values of the keys, you use person[key] inside the loop.
+# 2) Printing Both Keys and Values
+# Use console.log(key + " : " + person[key]) to print both the key and its value in the format key : value.
+
+#Copilot에서 수정된 버전으로 변경
+var person = {
+  firstName: 'GilDong',
+  lastName: 'Hong',
+  age: 20
+};
+
+for (var key in person) {
+  console.log(key + " : " + person[key]);
+}
+# Result
+# firstName : GilDong
+# lastName : Hong
+# age : 20
+
+# 2번째 버전과 3번째 버전의 결과에 차이가 나는 이유
+# Why the second tried code and third tried code have difference?
+# The difference lies in how you are accessing the values of the `person` object in the two codes. Let me explain the key differences step by step:
+### Code 1 (Your first example):
+# var person = {
+#   firstName: 'GilDong',
+#   lastName: 'Hong',
+#   age: 20
+# };
+
+# for (var things in person) {
+#   console.log(things);
+# }
+
+#### Behavior:
+# - In this code, the `for-in` loop iterates over the **keys** (property names) of the `person` object.
+# - Inside the loop, you are simply printing `things`, which is the variable holding the key name during each iteration.
+# - Result: It only prints the keys (`firstName`, `lastName`, `age`) because you are not accessing the values in this code.
+
+### Code 2 (Your second example):
+# var person = {
+#   firstName: 'GilDong',
+#   lastName: 'Hong',
+#   age: 20
+# };
+
+# for (var key in person) {
+#   console.log(key + " : " + person[key]);
+# }
+
+#### Behavior:
+# Similar to the first code, the `for-in` loop iterates over the **keys** (property names) of the `person` object.
+# However, in this code, you are accessing both the **key** and its corresponding **value**:
+# `key` contains the property name (e.g., `firstName`).
+# `person[key]` accesses the value associated with that property (e.g., `GilDong`).
+# By using `console.log(key + " : " + person[key])`, you print both the key and its value.
+
+### Why They Produce Different Results:
+# 1. In Code 1, you are only printing the key (`things`), so you only see the property names (`firstName`, `lastName`, `age`).
+# 2. In Code 2, you explicitly access both the key (`key`) and its value (`person[key]`) to construct a `key : value` pair, and that's why you see both.
+
+### Key Takeaways:
+# The `for-in` loop always iterates over **keys** of an object.
+# To access the value corresponding to a key, you need to use the syntax `object[key]`.
+# If you only print the variable holding the key (like `things` in Code 1), you will only get the keys.
+# If you want both keys and values, you must explicitly access the value using `object[key]`.
+
+### Example Output:
+# For the same `person` object:
+# Code 1 Output:
+#  firstName
+#  lastName
+#  age
+
+# Code 2 Output:
+#  firstName : GilDong
+#  lastName : Hong
+#  age : 20
+
+
+# Javascript Practice NO.3
+# 3.두 개의 숫자를 매개변수로 받아서 그 합을 반환하는 함수를 작성하세요.
+# Write a function receiving two numbers as a parameter and return those two numbers sum.
+# 첫 시도 First try
+# function sum (a.b) {
+#  hap = a + b
+#  return(hap);
+# }
+# console.log(sum(1,2));
+# Copilot answer: the code will run but it will throw an error because the variable hap is not declared before being used. In JavaScript, you need to declare variables using let, const, or var.
+
+# 수정한 버전 Revise ver.
+# function sum(a, b) {
+    let hap = a + b
+    return (hap);
+}
+console.log(sum(1, 2));
