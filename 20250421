@@ -1,0 +1,169 @@
+# 오늘 배운 내용 :
+# Javascript-DOM-attribute에서부터 Javascript-Event handler & Event Object
+# Today I learned :
+# from Javascript-DOM-attribute to Javascript-Event handler & Event Object
+
+# 스터디 시간에 풀었던 문제 코드 잘 돌아가는지 확인
+# Revised the code with flaw and chenk if it runs properly
+# 이전 안 돌아가던 코드:
+# Code with Flaw:
+function gugu(num) {
+    for (var i = 1; i <= 9; i++) {
+        var gop = gugu * i;
+        process.stdout.write(gop);
+    }
+}
+gugu(2);
+
+# 새로 짠 코드 
+# Revised code
+function gugu(num) {
+    for (var i = 1; i <= 9; i++) {
+        var gop = num * i;
+        process.stdout.write(`${gop}` + " ");
+    }
+}
+gugu(2);
+
+
+# 오늘 배운 내용 기반으로 문제 출제
+# Made a Javascript Practice based on today learning
+# Q.버튼을 클릭하면 difficult가 메세지로 뜨는 베이지색, 부드러운 곡선 사각형(8px) 버튼을 만들었다가, 이벤트를 삭제하시오
+# Q.Make a round-border(8px), beige color button that print the message 'difficult' if it clicked, and remove that event.
+# 답 코드 Answer code
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #btn {
+            background-color: beige;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="btn">클릭</button>
+
+    <script>
+        const $button = document.getElementById('btn');
+
+        const ClicknAlert = () => alert('Difficult');
+
+        $button.addEventListener('click', ClicknAlert);
+        $button.removeEventListener('click', ClicknAlert);
+    </script>
+</body>
+</html>
+
+
+# 스터디 팀원의 코드구조 이해를 돕기 위해 빈칸 채워넣기 문제 출제
+# For assisting study-group member's comprehension of stucture HTML and JS, present a "Fill-in-the-blank" question
+# https://www.notion.so/ohgiraffers/1dc649136c11809a922bd8483b8ad701?pvs=4
+
+# <!DOCTYPE html>
+# <html lang="en">
+# <head>
+#   <meta charset="UTF-8">
+#   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+#   <title>Click_the_button</title>
+#   <style>
+#       #btn {
+#           background-color: beige;
+#           border-radius: 8px;
+#       }
+#   </style>
+# </head>
+# <body>
+#   <button _1_ = "btn">클릭해</button>
+#   <!--1. ①id ②user ③name -->
+#    <script>
+#       const _2_button = document.____3_____('btn');
+#       //2. ①$ ②`` ③#
+#       //3. ①node ②/script ③getElementById
+#        const noted = () => __4__('It clicked');
+#       //4. ①click ②alert ③print
+
+#        __5__.addEventListener(__6__, __7__);
+#       //5. ①$button ②.btn ③ +i
+#       //6. ①click ②'click' ③'mouseover'
+#       //7. ①const ②noted ③"area"
+#   </script>
+# </body>
+# </html>
+
+
+# 팀원이 내준 난도 있는 코딩 실습 문제 풀기(오늘 수업 기반)
+# Solving the JS practice challenge based on today's learning, made by another study-group member (difficulty: 4/5)
+# Write my own code in <script>
+# https://www.notion.so/ohgiraffers/1dc649136c1180dba315d744ff01a89a?pvs=4
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        #home {
+            width: 200px;
+            height: 200px;
+            border-radius: 5px;
+            background: lightblue;
+        };
+    </style>
+</head>
+
+<body>
+    <h1>2025.04.32</h1>
+    <h2>고양이 강아지 입양하기 프로젝트!</h2>
+    <h3>고양이 및 강아지 입양을 누르면 목록에 고양이 또는 강아지 버튼이 추가 됩니다.</h3>
+    <h3>해당 버튼을 누르면 알람으로 멍멍 또는 냐옹하고 웁니다.</h3>
+    <h3>강아지 입양 버튼은 더블클릭해야 알람이 뜨도록 해보세용</h3>
+
+    <h3>🏠우리집 반려 멍냥이들</h3>
+    <div id="home">
+
+    </div>
+
+    <button id="btn1">🐶강아지 데려오기🐶</button>
+    <button id="btn2">😺고양이 데려오기😺</button>
+
+    <script>
+        //1.btn1버튼 or btn2버튼을 누르면 use click
+        //2.div 공간에 고양이 버튼or강아지 버튼이 추가되도록 설정 use container
+        const $btn11 = document.getElementById('btn1');
+        const container = document.getElementById("home");
+        $btn11.addEventListener('dblclick', function () {
+            const $newButton = document.createElement("button");
+            //document.createElement("button")이 킥이었음
+            $newButton.textContent = "🐶";
+            container.appendChild($newButton);
+          
+            const Mongmong = () => alert('멍멍!');
+            $newButton.addEventListener('click', Mongmong);
+        });
+
+        const $btn21 = document.getElementById('btn2');
+        const container2 = document.getElementById("home");
+        $btn21.addEventListener('click', function () {
+            const $newButton2 = document.createElement("button");
+            //document.createElement("button")이 킥이었음
+            $newButton2.textContent = "😺";
+            container2.appendChild($newButton2);
+
+            const Nyaong = () => alert('냐아옹~');
+            $newButton2.addEventListener('click', Nyaong);
+        });
+    </script>
+</body>
+</html>
+
+# line 142-147 : Googled how to add new button in new space that created by container and edited variable etc.
+# Search term: "javascript button click add another button in another space as program"
