@@ -1,0 +1,22 @@
+# 오늘 학습 내용: 대단원2.Event-3.이벤트 전파부터 대단원4.BOM-1.window까지
+# From 2.EVENT_3)event_propagation to 4.BOM_1)window
+
+# JS(web) 첫 번째 강의영상 재시청
+
+# JS 13번 문제 풀이 Solving No.13 problem from 100challenges of JS
+# 입력으로 태양계 행성의 순서를 나타내는 숫자 n이 입력됩니다.출력으로 그 순서에 해당하는 행성의 이름을 출력해 주세요.
+# If the number n is inputed, print that planet in order of solar system
+# Example Input : 1, Output : 수성Mercury
+# 처음에는 키-밸류 구성으로 코드를 짜보려고 헀는데 잘 되지 않아 답을 보고 분석해보는 걸 먼저 했다.
+# First, I was trying to write a code with key-value structure, but it didn't worked.
+# Rather, I checked and analyzed the answer first.
+const planets = ['태양', '수성', '금성', '지구', '화성', '목성', '토성', '천왕성', '해왕성'];
+
+console.log(planets[3]);
+# Result: 지구
+
+# 수정하면 좋을 점 Need to revised
+# Find out the function that count the order from 1. not from 0, and use it
+
+# .querySelector에 대한 개념 정리 (
+# Asking Copilot
