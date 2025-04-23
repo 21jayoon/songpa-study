@@ -1,0 +1,164 @@
+# 강의 듣기 Syntax class
+# From 3.2_JS(web)-04_BOM-02)BOM-01_location
+# to 3.3.JS(ES6)-04_distructing-02)object_distructing_assignment
+
+# Form구조 이용한 HTML+CSS+JS 실습 문제 풀이
+# HTML+CSS+JS challenge using form structure
+# 미완성된 최종 버전 unfinished latest version
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어렵다고!!</title>
+    <style>
+        .lightcyan {
+            background: lightcyan;
+        }
+
+        .focused {
+            outline: 3px dashed green;
+        }
+
+        #sinchung {
+            width: 80px;
+            height: 40px;
+            background-color: blue;
+            text-align: center;
+            color: white;
+        }
+
+        span {
+            color: gray;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>사용자 입력 양식 이벤트 연습하기</h1>
+
+    <form name="registerform">
+
+        <label for="username">이름</label>
+        <br>
+        <input type="text" name="username" id="username" value="">
+
+        <br><br>
+
+        <label>이메일</label>
+        <br>
+        <input type="email" name="emailinput" id="emailid"><label for="male"></label>
+
+        <br><br>
+
+        <label>성별</label>
+        <br>
+        <input type="radio" name="gender" id="male" value="m"><label for="male">남자</label>
+        <input type="radio" name="gender" id="female" value="f"><label for="female">여자</label>
+
+        <br><br>
+
+        <label id="chsedate">참여 일자 선택</label>
+        <br>
+        <form>
+
+            <select>
+                <option>--날짜 선택--</option>
+                <option>2024년 5월 15일</option>
+                <option>2042년 8월 19일</option>
+                <option>1024년 11월 23일</option>
+            </select>
+
+        </form>
+
+        <br><br>
+
+        <label>자기소개</label>
+        <br>
+        <textarea name="introduce" id="introduce2" rows="5" cols="30" style="resize: none;"></textarea>
+        <br>
+        <span id="writelimit">0</span><span>/500자</span>
+
+        <br><br>
+
+        <input type="checkbox" id="ckbox">개인정보 수집에 동의합니다.
+        <br>
+        <br>
+        <input id='sinchung' type="submit" value="신청하기">
+    </form>
+
+    <script>
+        // 폼 취득
+        const $form = document.forms.registerform;
+
+        const $username = $form.username;
+
+        const $emailid = $form.emailid;
+
+        const $gender = $form.gender;
+
+        const $chsedate = $form.chsedate;
+
+        const $age = $form.age;
+
+        const $introduce = $form.introduce2;
+
+        // 자기소개 textarea와 글자 수를 표시할 span 요소 가져오기
+        const $introduce3 = document.getElementById('introduce2');
+        const $writelimit = document.getElementById('writelimit');
+
+        // 글자 수 제한 및 실시간 업데이트
+        $introduce3.addEventListener('input', (e) => {
+            const value = e.target.value; // 입력된 값
+            let len = value.length; // 글자 수 계산
+
+            // 500자를 초과하면 잘라내기
+            if (len > 500) {
+                e.target.value = value.slice(0, 500); // 500자까지 자름
+                len = 500; // 글자 수 500으로 고정
+            }
+            // 글자 수를 span 요소에 업데이트
+            $writelimit.textContent = len;
+        });
+    </script>
+
+    <script>
+        $username.onfocus = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+        $emailid.onfocus = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+        $chsedate.onfocus = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+        $introduce.onfocus = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+
+
+        $username.onblur = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+        $emailid.onblur = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+        $chsedate.onblur = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+        $introduce.onblur = (e) => {
+            e.target.classList.toggle('lightcyan');
+        };
+    
+        $form.addEventListener('focusin', (e) => e.target.classList.add('focused'));
+        $form.addEventListener('focusout', (e) => e.target.classList.remove('focused'));
+    </script>
+</body>
+</html>
+
+# 내일 코드 수정할 일
+# Tomorrow : needs to be revised
+# 1.이름과 이메일 공간에 입력 없을 시 alert 뜨는 코드 어디갔는지 확인 혹은 재입력 필요
+# 2.checkbox css입력
+# 3.class에 이벤트 연결
