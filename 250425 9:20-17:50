@@ -1,0 +1,143 @@
+# 수업 진도 : 자바-1.리터럴과 변수-3_상수부터 3.메소드와 api-1_메소드까지
+# Learned JAVA-1.literal and variable-3_constant to 3.method and api-1_method
+
+# 수업 내용 응용 문제 제작 Made a challenge using with today's learning
+# 1. 논리식과 논리연산자 Logical and logical operator
+public class applying250425TodayLearned {
+    public static void main(String[] args) {
+      // 동생과 참거짓참 내기를 하기로 했어요.
+      // 동생은 1.거짓 2.참 3.참 4.거짓을 낸다고 하네요.
+      // 다음과 같은 논리식이 주어질 떄
+      int a = 14;
+      int b = 60;
+      int c = 50;
+      int d = 99;
+
+      //아래 주석을 이용하여 동생과 반대값을 내도록 해봅시다(연산자는 삭제하지 말아주세요)
+      /* System.out.println(___ && ___); 
+         System.out.println(___ && ___);
+         System.out.println(___ || ___);
+         System.out.println(___ || ___); */
+# 예시 답안 (내 답안) Example Answer(My Answer)
+public class applying250425TodayLearned {
+    public static void main(String[] args) {
+        int a = 14;
+        int b = 60;
+        int c = 50;
+        int d = 99;
+
+        //동생과 반대값을 내도록 수정
+        System.out.println(a < d && c < b); //true 출력 필요, true출력 확인
+        //a14<d99, c50<b60 모두 참이라 true 출력
+        System.out.println(a == d && a < b); //false 출력 필요, false출력 확인
+        //14==99 false, 14<60 true로 둘 중 하나가 false이기 때문에 false출력
+        System.out.println(a > b || c > d); //false 출력 필요, false
+        //oror은 둘 다 거짓인 경우에만 false를 반환. 14>60 false, 50>99 false이기 떼문에
+        //false 출력
+        System.out.println(d == d || c > d); //true 출력 필요, true 확인
+        // d == d true, c > d false. 둘 중 하나라도 true이기 때문에 true출력
+    }
+}
+
+#2. Method
+package com.testOrEtc;
+
+public class Application11 {
+    public static void main(String[] args) {
+        Application11 trip = new Application11();
+      /* 빨간머리 앤이 어느 날 초록지붕집에서 나와 짧은 여행을 떠났습니다 */
+        System.out.println("여행 시작됨");
+
+        /* 1. 첫 번째 갈림길을 마주쳤네요.
+        * 오른쪽 길 나무들이 더 멋있는 느낌이 납니다.
+        * 사용할이름.메소드명();을 사용해 오른쪽 길로 가봅시다. */
+
+        // (주석을 삭제하고 이 줄에 코드를 적어주세요)
+    }
+
+    public void roadR() {
+        System.out.println("오른쪽 길을 택해봄");
+        /* 2.오른쪽길을 쭉 들어가보니 냇가가 나옵니다.
+        * 돌다리와 나무다리가 나오는데, 아무래도 안전한 나무다리가 낫겠네요.
+        * 메소드명();을 이용해 나무다리를 건너가봅시다.*/
+
+        //(주석을 삭제하고 이 줄에 코드를 적어주세요)
+
+        /* 6. 짧지만 알찬 하루 여행이 끝났습니다.
+        * System.out.println("집 도착");을 선언해봅시다.
+        * 어디에 코드를 넣어야할까요? */
+    }
+
+    public void treeB() {
+        System.out.println("나무다리를 건넜다.");
+
+        /* 3. 어라? 나무다리를 건넜는데 친구 Caroline을 만났어요.
+        * 메소드를 이용해 친구를 불러볼까요 */
+        // (주석을 삭제하고 이 줄에 코드를 적어주세요)
+
+        /*5. 버찌가 정말 맛있네요. 먹다보니 아주머니와 아저씨가 그리워졌어요.
+        * System.out.println("집으로 돌아가자");을 이용해 집으로 돌아가봅시다.
+        * 어느 줄에 코드를 넣어야할까요? */
+    }
+
+    public void friendC() {
+        System.out.println("friend Caroline 만남 ");
+        // 친구를 만나서 수다를 떨다보니 Caroline네 집 앞에 가까워졌어요.
+
+        /* 4. 친구네 가족이 방금 막 땄다며 버찌를 나눠줬어요.
+        * System.out.println("버찌를 받았다");를 이용해
+        * 집으로 가져가 봅시다. 어디에 코드를 달아야할까요? */
+    }
+}
+# 답안
+package com.testOrEtc;
+
+public class Application11 {
+    public static void main(String[] args) {
+        Application11 trip = new Application11();
+      /* 빨간머리 앤이 어느 날 초록지붕집에서 나와 짧은 여행을 떠났습니다 */
+        System.out.println("여행 시작됨");
+
+        /* 1. */
+        trip.roadR();
+        
+        /*6. */
+        System.out.println("집 도착");
+    }
+
+    public void roadR() {
+        System.out.println("오른쪽 길을 택해봄");
+        
+        /* 2.*/
+        treeB();
+				
+				/* 5. */
+				System.out.println("집으로 돌아가자");
+    }
+
+    public void treeB() {
+        System.out.println("나무다리를 건넜다.");
+
+        /* 3. */       
+        friendC();
+
+				/*4. */
+				System.out.println("버찌를 받았다");
+    }
+
+    public void friendC() {
+        System.out.println("friend Caroline 만남 ");
+        // 친구를 만나서 수다를 떨다보니 Caroline네 집 앞에 가까워졌어요.
+        System.out.println("Caroline 집 도착");
+    }
+}
+
+# 15:15-16:13 팀스터디 Team-study
+# 출제한 위의 두 문제를 이용, 1번 문제는 15:19-15:32까지 각자 풀고 코드 발표(코드리뷰)
+# 2번 문제는 팀원 중 method 구조의 이해가 필요한 팀원이 먼저 15분 가량 풀고
+# 함께 코드리뷰하며 구조파악
+# Using these two challenges in team-studying time.
+# Solving challenge no.1(logical and logiacl operator) separately from 15:19-15:32.
+# Than reviewing codes together
+# One of team member who needs some help to comprehence how method structure works solved the problem alone, (about 15 minutes)
+# and break down the method structure together. Checked colleague's misunderstanding with going back to second method after last method runned.
