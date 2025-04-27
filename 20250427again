@@ -1,0 +1,45 @@
+# 토요일 스터디 끝나고 남은 문제 풀어보기
+# After saturday study meeting, solving leftover problems for monday team-study
+
+public class MainClass{
+
+    public static void main(String[] args) {
+        int inum1 = 5;
+        int inum2  = 7;
+
+         // 2. Operator 연습
+
+        int inum3 = inum1++ + inum2;
+
+        System.out.println(inum3); // 2-1. inum3의 값은 어떻게 되나요? 정답 :
+        System.out.println(inum1); // 2-2. inum1의 값은 어떻게 되나요? 정답 :
+
+        int inum4 = ++inum1 + inum2;
+
+        System.out.println(inum4); // 2-3. inum4 값은 어떻게 되나요? 정답 :
+        System.out.println(inum1); // 2-4. inum1의 값은 어떻게 되나요? 정답 :
+
+        }        
+}
+# Answer :  //20250427 Sun
+
+#       /* 2-1. inum3의 값은 어떻게 되나요? 정답 : 12  What does the inum3 printed? Answer : 12
+#       * Why? : inum++로 연산자가 변수 뒤에 있어      Why? : Because the ++operator located behind inum1
+#       inum1 + inum2가 먼저 기능(?)하기 때문에*/      so inum1 + inum2 works prior to the ++operator works.
+
+#       /* 2-2. inum1의 값은 어떻게 되나요? 정답 : 6  How about the value of inum1? Answer : 6
+#       Why? : inum1 + inum2 연산 이후 ++가 동작해서 inum1 + 1 =6이 되었기 때문에
+#       Why? : After inum1 + inum2 caculated, the operator ++ worked as inum1 +1. so it became 6. */ 
+
+#       int inum4 = ++inum1 + inum2;
+
+#       System.out.println(inum4);
+#       /* 2-3. inum4 값은 어떻게 되나요? 정답 : 13 -> 14
+#       Why : ++가 inum1 앞에 붙어서 먼저 기능한다. 1 + inum1 = 6, 6 + 7 = 13   The operator ++ is preceding to inum1. 1 + inum1 = 6, 6+7 = 13
+#       따라서 답은 13  The answer is 13
+#       ....이라고 생각했는데 결과가 14다.  ....I thought like this but the result was 14.
+#       왜? ..아하! int inum3 = inum1++해줬던 값이  WHY? ..oh. Since the inum1,2,3,4 is still in the same class,
+#       아직 같은 class 안이니까 그대로 적용됐구나.   what I runned previously influenced to inum1 value, changing 5 to 6.
+#       그렇다면 1 + 새로운 inum1 = 7, 7 + 7 =14    Therefore, the 1 + inum1 = 7, 7 + 7 = 14. The Answer is 14 */
+#       System.out.println(inum1);
+#       /*2-4. inum1의 값은 어떻게 되나요? 정답 : 7  Operator ++ already worked to inum, so the answer is 7 */
