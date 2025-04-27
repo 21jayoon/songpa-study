@@ -1,0 +1,198 @@
+# ¡Worked as a study group leader!
+# 스터디 팀장으로서 어제 스터디 시간에 약속한대로
+# 삼항 연산자 중첩사용 문제를 내서 노션에 올렸다.
+# As the study group leader,
+# I posted the problem on Notion as promised during study time yesterday.
+# https://www.notion.so/ohgiraffers/Using-nested-ternary-operator-1e0649136c1180aba744c99c79415870?pvs=4
+# (부모페이지의 잠금 속성 떄문에 안 보일 수 있음 This link may not work due to the protected feature of parent page)
+# another link : https://www.notion.so/team-study-Using-nested-ternary-operator-1e2fc892a16f80c29696d55c4e9abaf6?pvs=4
+
+# /* 삼항 연산자 중첩 사용
+# 	* 삼항연산자는 피연산자 항목이 3개인 유일한 연산자이며
+# 	* (조건식)? (참일 때 사용/출력할 값) : (거짓일 때 사용/출력할 값) 의 형태로 쓴다.
+#	* 조건식의 결과는 반드시 boolean 값으로 나오게끔 작성해야한다.*/
+		
+#		/*Q. 여기 Number University에서 유명한 숫자 삼형제가 있습니다.
+#		* 이들은 모두 정수(양수, 0, 음수)로, 오늘 미팅에 나와 상대에게 자신을 소개하고자합니다.
+#		* 삼항연산자를 중첩 사용하고 아래 int 변수를 이용해
+#		* 양수가 "안녕하세요 양수입니다.", 음수가 "..안녕 난 음수야", 0이 "반가워! 난 0이야!"라고
+#		* 소개하게 만들어주세요. 
+#		int num1 = 
+#		int num2 = 
+#		int num3 = */
+
+# Practicing nested ternary operator
+# ternary operator is the only operator which has 3 operand items.
+# And it's used as (conditional expression)? (true value) : (false value) structure.
+# Also the conditional expression must be resulting boolean value
+
+# /* Q. There are famous three brothers in Number University.
+# They're all integer(positive integer, 0, negative integer), and they're participated in group blind date today.
+# Make them introduce themselves as "Hello I am P.I"(positive int), "..hi,i'm N.I"(negative int), "Good to see you all! I'm 0!" (0)
+# with using nested ternary operator, and int variable down below.
+# int num1 = ;
+# int num2 = ;
+# int num3 = ; */
+
+# 예상 답안 Expected Answer
+    int num1 = 10;
+    int num2 = 0; 
+    int num3 = -10;
+    
+    String result1 = (num1 > 0)? "안녕하세요 양수입니다." : (num1 < 0)? "..안녕 난 음수야": "반가워! 난 0이야!";
+    String result2 = (num2 > 0)? "안녕하세요 양수입니다." : (num2 < 0)? "..안녕 난 음수야": "반가워! 난 0이야!";
+    String result3 = (num3 > 0)? "안녕하세요 양수입니다." : (num3 < 0)? "..안녕 난 음수야": "반가워! 난 0이야!";
+    
+    System.out.println("positive int = " + result1);
+    System.out.println("0 = " + result2);
+    System.out.println("negative int = " + result3);
+
+# Results    
+# positive int = 안녕하세요 양수입니다.
+# 0 = 반가워! 난 0이야!
+# negative int = ..안녕 난 음수야
+
+# 같은 노션페이지에 삼항연산자에 대한 아래의 설명글도 링크해놓음
+# Also linked this explanation of nested ternary operator bottom of the notion page
+# https://www.lenovo.com/kr/ko/glossary/ternary-operator/?orgRef=https%253A%252F%252Fwww.google.com%252F
+
+# 20250426 Sat
+# ¡Worked as a study group member!
+# 자동 형변환 문제 Typecasting-Impliciit conversion problem
+public class MainClass {
+	  public static void main(String[] args){
+      /* 어느날 갑자기 모든 인간이 하루에 숫자를 두 번씩만 One day, all humans cursed and became able to use number just twice in a day.
+      * 사용할 수 있게 되는 저주에 걸렸습니다.
+      * float 변수명 = eight;과 같은 형식과 문자형을 이용하고 Use float variable_name = eight; type of structurd and character(char).
+      * 3번 이하의 단계를 거쳐서 Also end within 3 steps.
+      * 426이란 숫자를 출력해주세요. Print the number 426 like the form below.
+      * 출력은 다음과 같은 형태로 출력되도록 넣으세요.
+      * 
+      * 두번만
+      * = 426 */
+    }
+}
+
+#Expected Answer
+public class Solution {
+	public static void main(String[] args) {
+		long oneH = 100L;
+    float numBack = oneH;
+    float result1 = oneH + numBack; //1단계
+
+    // System.out.println("result1 = " + result1); //result1 = 200.0
+
+    char ch1 = 'z';
+    int charNumber = ch1; //2단계
+
+    System.out.println("두번만 " + "\n" + "= " + ((result1 + charNumber) + 104)); //3단계
+	}
+}	
+
+# Study group member1's answer (Couldn't solved in time)
+public class Study01 {
+    public static void main(String[] args) {
+
+        float fnum1 = '4';
+        float fnum2 = '2';
+        float fnum3 = '6';
+
+
+        System.out.println("두번만");
+        System.out.println(//?);
+
+    }
+
+}
+# What did I miss when I made a problem? : Specify the condition of 'Curse', like 'you also cannot use the number as a character'
+
+# Study group member2's answer 
+public class MainClass {
+	  public static void main(String[] args){
+      /* 어느날 갑자기 모든 인간이 하루에 숫자를 두 번씩만
+      * 사용할 수 있게 되는 저주에 걸렸습니다.
+      * float 변수명 = eight;과 같은 형식과 문자형을 이용하고 
+      * 3번 이하의  단계를 거쳐서
+      * 426이란 숫자를 출력해주세요.
+      * 출력은 다음과 같은 형태로 출력되도록 넣으세요.
+      * 
+      * 두번만
+      * = 426 */
+      
+      float num = 426;
+      System.out.println("두번만");
+      System.out.println("= " + (int)num);
+
+    }
+}
+# What did I missed? : the type of the last result. int 426 and double(float) 426.0 is different, but I still take them as the same type.
+
+# 다른 팀원이 낸 문제 풀기 Solving other study member's problem
+# 다음 문장을 조건식으로 나타내보자
+# 1. a는 b보다 크거나 같다
+# 2. c는 d보다 작고 e보다 크다
+# 3. f 더하기 5는 10과 같지 않다
+# 4. g는 10보다 크거나 h와 같다
+
+# My answer
+public class Main{
+	public static void main(String[] args) {
+		 System.out.print(a >= b);
+		 System.out.print(c <= d && c>e);
+		 System.out.print(f + 5 != 10);
+		 System.out.print(g > 10 || h == g);
+	}
+}	
+
+# // 1. Typecasting 연습
+#  /* 1-1 실수 fnum이 주어질 때
+#   소수점과 소수점 아래가 나오지 않도록 출력하시오.*/        
+#       double fnum = 14.234;
+#       System.out.println(fnum);
+
+#   /* 1-2 정수 2개가 주어질 때 두 수의 합을
+#      소수점 첫째 자리 까지 출력하시오.*/
+#       int inum1 = 5;
+#       int inum2  = 7;
+#       System.out.println(inum1+ inum2);
+
+# // 2-5. 아래의 코드를 삼항 연산자를 이용해서 바꿔보세요.
+#       int inum5 = 10;
+#       String result = "";
+       
+#       if(inum5 % 2 == 0) {
+#           result = "isEven";
+#       }
+#       else{
+#           result = "isOdd";
+#       }
+#       System.out.println(result);
+
+public class Solution {
+	public static void main(String[] args) {
+		   /*실수 fnum이 주어질 때 소수점과 소수점 아래가 나오지 않도록 출력하시오.*/
+        double fnum = 14.234;
+        
+        System.out.println((int) fnum); 
+
+        /* 1-2 정수 2개가 주어질 때 두 수의 합을
+        소수점 첫째 자리 까지 출력하시오.*/
+        int inum1 = 5;
+        int inum2  = 7;
+        //강제 형변환을 쓰란 소린가??? Does this problem inducing using explicit conversion?
+        System.out.println((float) inum1+ inum2);
+# warning: in JAVA, use double instead of float as possible.                
+        
+        /* 2-5. 아래의 코드(if(홀짝구분){}else{}코드)를 삼항 연산자를 이용해서 바꿔보세요.*/
+        int inum5 = 10;
+        String result = (inum5 % 2 == 0)? "isEven": "isOdd"; 
+        
+        System.out.println(result); //isEven, 여기까지가 문제가 요구한 내용
+        
+        //제대로 작동하는지, 홀수 넣으면 잘 돌아가는지 확인
+        int inum6 = 19;
+        String result2 = (inum6 % 2 == 0)? "isEven": "isOdd"; //
+        
+        System.out.println(result2); //isOdd
+	}
+}	
