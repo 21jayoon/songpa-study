@@ -1,0 +1,124 @@
+# 빠른 문제 풀이를 위해 30분 시간 제한을 두고 1번부터 풀 수 있는만큼 휙휙 풀었다.
+# To reduce the time, I practiced solving challenges as quickly as possible, starting with problem number 1, within a time limit of 30 minutes.
+
+package com.ohgiraffers.section01.conditional;
+
+public class challenges250428 {
+    public static void main(String[] args) {
+
+    /* @@1.정수형 변수 2개를 선언하여, 각 20과 30으로 초기화 한 후,
+    두 수의 더하기, 빼기, 곱하기, 나누기, 나머지를 다음과 같이 출력하세요.
+
+    -- 출력 예시 --
+    더하기 결과  : 50
+    빼기 결과 : -10
+    곱하기 결과 : 600
+    나누기한 몫 : 0
+    나누기한 나머지 : 20*/
+      int num1 = 20;
+      int num2 =30;
+      System.out.println("더하기 결과 : " + (num1 + num2));
+      System.out.println("빼기 결과 : " + (num1 - num2));
+      System.out.println("곱하기 결과 : " + (num1 * num2));
+      System.out.println("나누기한 몫 : " + (num1 / num2));
+      System.out.println("나누기한 나머지 : " + (num % num2));
+      
+      /* @@2. 사각형의 넓이와 둘레를 구하여 출력합니다.
+    너비 12.5 높이 36.4를 변수에 저장하고,
+    넓이와 둘레를 계산한 뒤 각각 넓이와 둘레를 변수에 담아 아래와 같이 출력하세요.
+
+    -- 출력 예시 --
+    면적 : 455.0
+    둘레 : 97.8 */
+      double width = 12.5;
+      double height = 36.4;
+      
+      double area = width * height;
+      double perimeter = (width + height)*2;
+      System.out.println("면적 : " + area);
+      System.out.println("둘레 : " + perimeter);
+
+      /* @@3. 국어점수 80.5점, 수학점수 50.6점, 영어점수 70.8점을 실수 형태로 저장한 뒤,
+      총점과 평균을 정수 형태로 출력하세요.
+
+      -- 출력 예시 --
+      총점 : 201
+      평균 : 67 */
+      double korean = 80.5;
+      double math = 50.6;
+      double english = 70.8;
+      
+      int sum = (int)(korean + math + english);
+      int avg = (int)((korean + math + english)/3);
+
+      /* @@4. 두 개의 정수형 변수를 선언하고, 삼항 연산자를 사용하여
+      두 수 중 큰 수를 출력하는 프로그램을 작성하세요.
+
+      -- 출력예시 --
+      두 수 중 큰 수는 20입니다. */
+      int num3 = 4;
+      int num4 = 20;
+      System.out.println("두 수 중 큰 수는 " + (num3>num4)? num3:num4 +"입니다.");
+    
+    }    
+}
+
+package com.ohgiraffers.section01.conditional;
+
+public class challenges250428_5678 {
+    public static void main(String[] args) {
+      /* @@5. 정수형 변수를 선언하여 점수를 저장하고,
+      삼항 연산자를 사용하여 점수가 60점 이상이면 “합격입니다”,
+      그렇지 않으면 “아쉽지만 불합격입니다.” 을 출력하는 프로그램을 작성하세요.
+
+      -- 출력예시 --
+      합격입니다~~!!!
+
+      또는 아쉽지만 불합격입니다… */
+        int score = 0;
+
+        sumTwoNumbers(80); //아래에 삼항연산자 method있음
+
+      /*6.정수형 변수를 선언하고, 삼항연산자를 사용하여
+      입력된 수가 짝수인지 홀수인지 출력하는 프로그램을 작성하세요.
+      참고사항 : 조건식에 %를 활용하여 짝수인지 홀수인지를 판단해보세요
+          -- 출력예시 --
+      입력하신 수는 짝수입니다.
+
+      또는 입력하신 수는 홀수입니다. */
+        int num5 = 15;
+        
+        String result = (num5 % 2 == 0)? "입력하신 수는 짝수입니다." : "입력하신 수는 홀수입니다.";
+        System.out.println(result);
+        
+      /* @ 7. 정수형 변수를 두개 선언하여 회원의 월(month)과 일(day)를 저장합니다.
+      월이 1월부터 6월까지이면서, 일이 1일부터 15일까지인 경우 “배민 쿠폰”을,
+      월이 7월부터 12월까지이면서, 일이 16일부터 31일까지인 경우 “스타벅스 커피”를
+      그 외의 경우는 “사탕”이 선물로 선택되는 프로그램을 작성하세요.
+  
+          -- 출력예시 --
+      “본인이름”의 선물은 스타벅스 커피 입니다.
+
+      또는 “본인이름”의 선물은 사탕 입니다.
+
+      또는 “본인이름”의 선물은 배민 쿠폰 입니다. */
+        int month = 4;
+        int day = 28;
+        
+
+        /*8.코알라가 축제 아르바이트를 시작했습니다.맥주를 판매하려면 성인인지 확인을 해야 해요.
+        '나이가 어떻게 되세요?'를 출력하고 나이(정수)를 입력받아,
+        성인이면 '판매 가능합니다.'를 출력하고,
+        미성년자이면 '판매 불가능합니다. 음료 코너에서 골라주세요.' 를 출력하세요.
+
+            -- 입력 예시 --
+          성인이십니까? 21
+
+            -- 출력 예시 --
+        판매 가능합니다. */
+    }
+    public static int scoreMark(int score) {
+
+        return (score >=60)? "합격입니다" : "아쉽지만 불합격입니다.";
+    }
+}
