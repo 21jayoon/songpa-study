@@ -1,0 +1,484 @@
+# 오늘 진도 나간 강의 :
+# What today learned :
+# JAVA chapter5_array(array, dimensional array, copy, sort) & chapter6_class_object
+
+# Loop7번 문제 풀기
+# Solving yesterday's challenge, no.7
+
+# first try
+public void no7() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("정수를 입력하세요 : ");
+        int cutLine = sc.nextInt();
+
+        for (int i = 1; i <= cutLine; i++) {
+            if (cutLine % 2 == 0) {
+                System.out.print("마");
+                for (int j = 1; i <= cutLine; j++) {
+                    if ((cutLine & 2) != 0) {
+                        System.out.print("토");
+                    }
+                }
+            }
+        }
+    }
+
+# Asked copilot what is wrong with this code
+public void no7() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("정수를 입력하세요 : ");
+        int cutLine = sc.nextInt();
+
+        for (int i = 1; i <= cutLine; i++) {
+            if (i % 2 != 0) { // Odd iteration
+                System.out.print("토");
+            } else { // Even iteration
+                System.out.print("마");
+            }
+        }
+    }
+
+# 반복문 실습문제 8번
+# LOOP Challenge No.8
+# 1차 시도 First try
+public void no8() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("첫 번째 정수 입력 : ");
+        int first = sc.nextInt();
+        System.out.print("두 번째 정수 입력 : ");
+        int second = sc.nextInt();
+
+        int result = 0;
+
+        switch (result) {
+            case '+':
+                result = first + second;
+                break;
+            case '-':
+                result = first - second;
+                break;
+            case '*':
+                result = first * second;
+                break;
+            case '/':
+                result = first / second;
+                break;
+            case '%':
+                result = first % second;
+                break;
+        }
+
+        System.out.println("========================");
+        System.out.println("첫 번째 정수를 입력하세요: " + first);
+        System.out.println("두 번째 정수를 입력하세요: " + second);
+        System.out.println("더하기 결과 : " + result);
+        System.out.println("빼기 결과 : " + result);
+        System.out.println("곱하기 결과 : " + result);
+        System.out.println("나누기한 몫 : " + result);
+        System.out.println("나누기한 나머지 : " + result);
+        System.out.println("========================");
+    }
+# 정수 2개를 Scanner로 받아서 메소드에 들어가게끔 하고자 했으나
+# switch 사용 방법을 잘 몰라 copilot에 물어봄
+
+# Asked Copilot
+public void no8() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("첫 번째 정수 입력 : ");
+        int first = sc.nextInt();
+        System.out.print("두 번째 정수 입력 : ");
+        int second = sc.nextInt();
+
+        System.out.print("연산자를 입력하세요 (+, -, *, /, %) : ");
+        char operator = sc.next().charAt(0); // Take the operator as input from the user
+
+        int result = 0; // Variable to store the result
+
+        if ((operator == '/' || operator == '%') && second == 0) {
+            System.out.println("0으로 나눌 수 없습니다.");
+            return; // Exit the method to prevent further execution
+        }
+
+        switch (operator) {
+            case '+':
+                result = first + second;
+                System.out.println("더하기 결과 : " + result);
+                break;
+            case '-':
+                result = first - second;
+                System.out.println("빼기 결과 : " + result);
+                break;
+            case '*':
+                result = first * second;
+                System.out.println("곱하기 결과 : " + result);
+                break;
+            case '/':
+                result = first / second;
+                System.out.println("나누기한 몫 : " + result);
+                break;
+            case '%':
+                result = first % second;
+                System.out.println("나누기한 나머지 : " + result);
+                break;
+            default:
+                System.out.println("잘못된 연산자입니다.");
+        }
+    }
+
+# Result
+# 첫 번째 정수 입력 : 20
+# 두 번째 정수 입력 : 0
+# 연산자를 입력하세요 (+, -, *, /, %) : /
+# 0으로 나눌 수 없습니다.
+
+# code 정상 작동하나, "연산자를 입력하세요" 부분이 문제에서 요구한 결과가 아니었음
+# 또한 Switch문 작성하려면 어떤 연산자를 사용할지 입력을 해줘야 한다는 걸
+# 알게되어 (괄호) 안에서 연산자를 받기로 함
+
+# 2차 시도 Second try
+public void no8(char operator) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("첫 번째 정수 입력 : ");
+        int first = sc.nextInt();
+        System.out.print("두 번째 정수 입력 : ");
+        int second = sc.nextInt();
+
+        if(second == 0 && (operator == '/' || operator == '%')){
+            System.out.printf("0으로 나눌 수 없습니다");
+            return;
+        }
+
+        int result = 0;
+        switch (operator) {
+            case '+':
+                result = first + second;
+                break;
+            case '-':
+                result = first - second;
+                break;
+            case '*':
+                result = first * second;
+                break;
+            case '/':
+                result = first / second;
+                break;
+            case '%':
+                result = first % second;
+                break;
+        }
+
+        System.out.println("========================");
+        System.out.println("첫 번째 정수를 입력하세요: " + first);
+        System.out.println("두 번째 정수를 입력하세요: " + second);
+        System.out.println("빼기 결과 : " + result);
+        System.out.println("곱하기 결과 : " + result);
+        System.out.println("나누기한 몫 : " + result);
+        System.out.println("나누기한 나머지 : " + result);
+        System.out.println("========================");
+    }
+
+# Run
+package com.ohgiraffers.section02.looping;
+public class tc_Application {
+    public static void main(String[] args) {
+        teachersChallenges0429 tc08 = new teachersChallenges0429();
+        tc08.no8('+');
+    }
+}
+
+# Results
+# 첫 번째 정수 입력 : 30
+# 두 번째 정수 입력 : 20
+# ========================
+# 첫 번째 정수를 입력하세요: 30
+# 두 번째 정수를 입력하세요: 20
+# 더하기 결과 : 50
+# 빼기 결과 : 50
+# 곱하기 결과 : 50
+# 나누기한 몫 : 50
+# 나누기한 나머지 : 50
+# ========================
+
+# 3번째 시도 Third try
+# console창 "첫 번째 정수 입력 : first", "두 번째 정수 입력 : second" 중복 출력 없애기 위해
+# 메소드 괄호 내에서 바로 정수 2개와 연산자를 받기로 함
+public void no8(int first, int second, char operator) {
+        if(second == 0 && (operator == '/' || operator == '%')){
+            System.out.printf("0으로 나눌 수 없습니다");
+            return;
+        }
+
+        int result = 0;
+        switch (operator) {
+            case '+':
+                result = first + second;
+                System.out.println("더하기 결과 : " + result);
+                break;
+            case '-':
+                result = first - second;
+                System.out.println("빼기 결과 : " + result);
+                break;
+            case '*':
+                result = first * second;
+                System.out.println("곱하기 결과 : " + result);
+                break;
+            case '/':
+                result = first / second;
+                System.out.println("나누기한 몫 : " + result);
+                break;
+            case '%':
+                result = first % second;
+                System.out.println("나누기한 나머지 : " + result);
+                break;
+        }
+
+        System.out.println("========================");
+        System.out.println("첫 번째 정수를 입력하세요: " + first);
+        System.out.println("두 번째 정수를 입력하세요: " + second);
+        System.out.println(switch (result));
+        System.out.println("========================");
+    }
+# switch 결과물을 System.out.println(switch (result));에서 나올 수 있게 만들고 싶은데 방법을 모르겠음
+# Asked copilot
+public void no8(int first, int second, char operator) {
+    if (second == 0 && (operator == '/' || operator == '%')) {
+        System.out.printf("0으로 나눌 수 없습니다");
+        return;
+    }
+
+    int result = 0;
+    String resultMessage = ""; // Variable to store the result message
+
+    switch (operator) {
+        case '+':
+            result = first + second;
+            resultMessage = "더하기 결과 : " + result;
+            break;
+        case '-':
+            result = first - second;
+            resultMessage = "빼기 결과 : " + result;
+            break;
+        case '*':
+            result = first * second;
+            resultMessage = "곱하기 결과 : " + result;
+            break;
+        case '/':
+            result = first / second;
+            resultMessage = "나누기한 몫 : " + result;
+            break;
+        case '%':
+            result = first % second;
+            resultMessage = "나누기한 나머지 : " + result;
+            break;
+        /*default:
+            resultMessage = "잘못된 연산자입니다.";
+	//run this code without this part and it worked well. */
+    }
+
+    System.out.println("========================");
+    System.out.println("첫 번째 정수를 입력하세요: " + first);
+    System.out.println("두 번째 정수를 입력하세요: " + second);
+    System.out.println(resultMessage); // Print the result message
+    System.out.println("========================");
+}
+
+# Run the code
+package com.ohgiraffers.section02.looping;
+
+public class tc_Application {
+    public static void main(String[] args) {
+        teachersChallenges0429 tc08 = new teachersChallenges0429();
+        tc08.no8(30, 0, '/');
+    }
+}
+# Result
+0으로 나눌 수 없습니다
+
+# Rerun the code
+package com.ohgiraffers.section02.looping;
+
+public class tc_Application {
+    public static void main(String[] args) {
+        teachersChallenges0429 tc08 = new teachersChallenges0429();
+        tc08.no8(30, 20, '*');
+    }
+}
+# Result
+========================
+첫 번째 정수를 입력하세요: 30
+두 번째 정수를 입력하세요: 20
+곱하기 결과 : 600
+========================
+
+
+# Final code
+public void no8(int first, int second, char operator) {
+        if (second == 0 && (operator == '/' || operator == '%')) {
+            System.out.printf("0으로 나눌 수 없습니다");
+            return;
+        }
+
+        int result = 0;
+        String resultMessage = ""; // Variable to store the result message
+
+        switch (operator) {
+            case '+':
+                result = first + second;
+                resultMessage = "더하기 결과 : " + result;
+                break;
+            case '-':
+                result = first - second;
+                resultMessage = "빼기 결과 : " + result;
+                break;
+            case '*':
+                result = first * second;
+                resultMessage = "곱하기 결과 : " + result;
+                break;
+            case '/':
+                result = first / second;
+                resultMessage = "나누기한 몫 : " + result;
+                break;
+            case '%':
+                result = first % second;
+                resultMessage = "나누기한 나머지 : " + result;
+                break;
+        }
+
+        System.out.println("========================");
+        System.out.println("첫 번째 정수를 입력하세요: " + first);
+        System.out.println("두 번째 정수를 입력하세요: " + second);
+        System.out.println(resultMessage);
+        System.out.println("========================");
+    }
+# Run
+package com.ohgiraffers.section02.looping;
+
+public class tc_Application {
+    public static void main(String[] args) {
+        teachersChallenges0429 tc08 = new teachersChallenges0429();
+        tc08.no8(20, 30, '/');
+    }
+}
+# Result
+========================
+첫 번째 정수를 입력하세요: 20
+두 번째 정수를 입력하세요: 30
+나누기한 몫 : 0
+========================
+
+
+# Reference (one of study team members code)
+public void calculate(int a, int b, char operate){
+        if(b == 0 && (operate == '/' || operate == '%')){
+            System.out.printf("0으로 나눌 수 없습니다");
+            return;
+        }
+        String soper = "";
+        int result = 0;
+        switch (operate){
+            case '+':
+                soper = "더하기 결과";
+                result = a + b;
+                break;
+            case '-':
+                soper = "빼기 결과";
+                result = a - b;
+                break;
+            case '*':
+                soper = "곱하기 결과";
+                result = a * b;
+                break;
+            case '/':
+                soper = "나누기한 몫";
+                result = a / b;
+                break;
+            case '%':
+                soper = "나누기한 나머지";
+                result = a % b;
+                break;
+        }
+        System.out.println(soper + " : " + result);
+        return;
+    }
+
+
+# Notion 개인스터디-Daily Log-복습시간 열 정리 : 되도록 30분 단위(반올림)로 기록.
+# eg) 43분 -> 0.43(기존) X, 0.5(30분이라고 이해) O
+
+
+
+# Solving Method Challenge2
+package com.ohgiraffers.practice02;
+
+public class SimpleOperations {
+public void printMessage() {
+	System.out.println("메소드 호출 확인")
+}
+
+public int sumNumbers(int start, int end) {
+        int sum = 0;
+        for(int i = start; i <= end; i++) {
+            sum +=i;
+        }
+        System.out.println(start + "부터 " + end + "까지의 숫자의 합은 : " + sum);
+        return sum;
+}
+
+public boolean isEvenNumber (int num) {
+        System.out.println((num%2 ==0)? (num +"은 짝수입니다.") : (num + "은 홀수입니다."));
+        return false;
+}
+
+public int countCharacter (String input, char ch) {
+	      int count = 0;
+        for (int i = 0; i < input.length(); i++){
+            if(input.charAt(i) == ch) {
+                count++;
+            }
+        }
+        System.out.println('"' + input + '"' + "에서 '" +ch +"'의 개수는 : " + count);
+        return count;
+}
+
+public String reverseString (String input) {
+        /* 1. transform String into character array than reverse
+	//String을 문자형 배열(?)로 받아서 reverse 해주는 방법
+        //(searching on internet2)
+        char[] arr = input.toCharArray(); // String -> char[]
+        char[] reversedArr = new char[arr.length];
+        for(int i=0; i<arr.length; i++){
+            reversedArr[arr.length-1-i] = arr[i];
+        }
+
+        String reversedStr = new String(reversedArr);
+        System.out.println(reversedStr);
+        return reversedStr; */
+
+        //2. Solve with StringBuffer (searching on internet3)
+        StringBuffer sb = new StringBuffer(input);
+        String reversedStr = sb.reverse().toString();
+
+        System.out.println('"' + input +'"'+"를 뒤집은 결과는 : " + reversedStr);
+        return reversedStr;
+    }
+}
+
+
+# Run
+package com.ohgiraffers.practice02;
+public class Application {
+    public static void main(String[] args) {
+        SimpleOperations so1 = new SimpleOperations();
+        so1.printMessage();
+        so1.sumNumbers(1, 10);
+        so1.isEvenNumber(10);
+        so1.countCharacter("Hello World", 'o');
+        so1.reverseString("Hello World");
+    }
+}
+# Results
+# 메소드 호출 확인
+# 1부터 10까지의 숫자의 합은 : 55
+# 10은 짝수입니다.
+# "Hello World"에서 'o'의 개수는 : 2
+# "Hello World"를 뒤집은 결과는 : dlroW olleH
