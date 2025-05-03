@@ -63,7 +63,7 @@ public class oliveU {
 
 # Condition02 : (Deep Copy)
 # Last month, OvileU launched private label 'toUlive'.
-# This time, the new product "sleepinMask" is come onto the market.
+# This time, the new product "sleepingMask" is come onto the market.
 # Any products released after "sleepingMask" will only be available for purchase on the new website.
 # Therefore, copy the original products by using Array.copyof() and add "sleepingMask" into the copied array.
 # In addition, print the hashcodes and values of two arrays.
@@ -122,7 +122,7 @@ public class oliveU2 {
     }
 }
 
-# Condition03 : (Deep Copy)
+# Condition03 : (Multi-dimensional Array)
 # While moving the all products to new online-sale page,
 # you find one of the brand "singAlone" launched "bodyscrub" and discontinue the "footShampoo"
 # For update the products, copy the "singAlone" with System.arraycopy(), in index2.
