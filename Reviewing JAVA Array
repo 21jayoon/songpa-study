@@ -1,0 +1,371 @@
+# Make my own challenge for reviewing Java array
+
+# Background :
+# Beauty Retailor 'Olive-U' is trying to make a new online shop that specialized in skincare.
+# Assist them with build new site while reviewing JAVA array.
+
+# Condition01 : (Shallow Copy)
+# Olive-U is trying to move the existing brands into new shop 'o_skincare'.
+# (let's just consider new shop as a new array here)
+# Copy the original brand array. But it must be synchronized.
+# It means, if you change the value of original array or 'o_skincare', it should influence to the other array. 
+# Check the hashcodes and values of two arrays and print them.
+
+# Example Answer
+public class oliveU {
+    public static void main(String[] args) {
+        String[] originalBrand = {"얘!뛰어", "닥터자란다", "누리든"};
+
+        //1. shallow copying originalBrand array
+        String[] o_skinCare = originalBrand;
+
+        /*Why it should be shallow copying?
+        * Due to the condition, two arrays must be synchronized. 
+        * Unlike deep copy, shallow copy influenced (the values of) each other array.
+        * (the original array and the copied array both)
+        * Because according to the hashcode of both array,
+        * those two arrays are same. (same hashcode) */
+
+
+        //2. Check the hashcode and values of two arrays
+        System.out.println("원본 페이지 브랜드 : " + originalBrand.hashCode());  // 원본 페이지 브랜드 : 1704064279 (eg)
+        System.out.println("기존 브랜드 새 홈페이지에 복사 : " +o_skinCare.hashCode());  // 기존 브랜드 새 홈페이지에 복사 : 1704064279
+
+        for(int i = 0; i < originalBrand.length; i++) {
+            System.out.print(originalBrand[i] + " ");
+        }
+        System.out.println();  //얘!뛰어 닥터자란다 누리든
+
+        for(int i = 0; i <o_skinCare.length; i++) {
+            System.out.print(o_skinCare[i] + " ");
+        }
+        System.out.println();  //얘!뛰어 닥터자란다 누리든
+
+
+        //3. look over the synchronization
+        o_skinCare[2] = "수달";  // change the index 2 in the o_skinCare, the copied array
+
+        // Reconfirm the values and hashcodes of two arrays
+        for(int i = 0; i < originalBrand.length; i++) {
+            System.out.print(originalBrand[i] + " ");
+        }
+        System.out.println();  //얘!뛰어 닥터자란다 수달
+
+        for(int i = 0; i <o_skinCare.length; i++) {
+            System.out.print(o_skinCare[i] + " ");
+        }
+        System.out.println();  //얘!뛰어 닥터자란다 수달
+
+        System.out.println("원본 브랜드 : " + originalBrand.hashCode());  // 원본 브랜드 : 1704064279 (eg)
+        System.out.println("복사 후 수정한 브랜드 : " +o_skinCare.hashCode());  // 복사 후 수정한 브랜드 : 1704064279
+    }
+}
+
+# Condition02 : (Deep Copy)
+# Last month, OvileU launched private label 'toUlive'.
+# This time, the new product "sleepinMask" is come onto the market.
+# Any products released after "sleepingMask" will only be available for purchase on the new website.
+# Therefore, copy the original products by using Array.copyof() and add "sleepingMask" into the copied array.
+# In addition, print the hashcodes and values of two arrays.
+
+# Example Answer
+import java.util.Arrays; // Import Arrays for using copyOf()
+
+public class oliveU2 {
+    public static void main(String[] args) {
+        /* 깊은 복사는 heap에 생성된 배열이 가지고 있는 값을
+         *  또 다른 배열에 복사를 해 놓은 것이다.
+         *  서로 같은 값을 가지고 있지만, 두 배열은 서로 다른 배열이기에
+         *  하나의 배열에 변경을 하더라도 다른 배열에는 영향을 주지 않는다.
+         */
+
+        /* 깊은 복사를 하는 방법은 4가지가 있다.
+         *  1. for문을 이용한 동일한 인덱스의 값 복사
+         *  2. Object의 clone()을 이용한 복사
+         *  3. System의 arraycopy()를 이용한 복사
+         *  4. Arrays의 copyOf()를 이용한 복사
+         */
+
+        // 1-1. Declare String array toUlive
+        String[] toUlive = new String[] {"toner", "moisturizer", "facialOil"};
+
+        // 2-2. Make a method 'print' outside of the main to confirm declaration of array
+        print(toUlive);  // toner moisturizer facialOil
+
+        // 2-3. Deep cloning with Arrays.copyOf();
+        String[] nwHomepage = Arrays.copyOf(toUlive, 4);
+
+        print(nwHomepage);  // toner moisturizer facialOil null 
+
+        // 2-4. Compare two array's hashcode
+        System.out.println("업데이트 전 제품 라인 : " + toUlive.hashCode());  // 업데이트 전 제품 라인 : 112810359
+        System.out.println("기존 브랜드 새 홈페이지에 복사 : " + nwHomepage.hashCode());  // 기존 브랜드 새 홈페이지에 복사 : 205029188
+
+        // 2-5. According to the condition of the quiz, attach a new value "sleepingMask"
+        nwHomepage[3] = "sleepingMask";
+
+        // 2-6. Reconfirm values and hashcodes of two arrays
+        print(toUlive);  // toner moisturizer facialOil
+        print(nwHomepage);  // toner moisturizer facialOil sleepingMask 
+        System.out.println("업데이트 전 제품 라인 : " + toUlive.hashCode());  // 업데이트 전 제품 라인 : 112810359
+        System.out.println("새 홈페이지에 복사 후 제품 추가: " + nwHomepage.hashCode());  // 새 홈페이지에 복사 후 제품 추가: 205029188
+    }
+
+    // 배열을 출력하는 메소드
+    public static void print(String[] iarr) {
+        System.out.println("array의 hashcode : " + iarr.hashCode());
+
+        for (int i = 0; i < iarr.length; i++) {
+            System.out.print(iarr[i] + " ");
+        }
+        System.out.println();
+    }
+}
+
+# Condition03 : (Deep Copy)
+# While moving the all products to new online-sale page,
+# you find one of the brand "singAlone" launched "bodyscrub" and discontinue the "footShampoo"
+# For update the products, copy the "singAlone" with System.arraycopy(), in index2.
+# Lastly, print the hashcodes and values of two arrays.
+
+# Example Answer
+public class oliveU3 {
+    public static void main(String[] args) {
+        /* 깊은 복사는 heap에 생성된 배열이 가지고 있는 값을
+         *  또 다른 배열에 복사를 해 놓은 것이다.
+         *  서로 같은 값을 가지고 있지만, 두 배열은 서로 다른 배열이기에
+         *  하나의 배열에 변경을 하더라도 다른 배열에는 영향을 주지 않는다.
+         */
+
+        /* 깊은 복사를 하는 방법은 4가지가 있다.
+         *  3. System의 arraycopy()를 이용한 복사
+         *  4. Arrays의 copyOf()를 이용한 복사
+         */
+
+        //3-1. Declare String array "singAlone"
+        String[] singAlone = {"풋샴푸", "바디로션", "바디워시"};
+        
+        /* It could be also declared by
+         * String[] singAlone = new String[] {"풋샴푸", "바디로션", "바디워시"}; */
+
+        // 3-1-2. Declare 2-dimensional(3 lines) String array updatePd
+         String[][] updatePd;
+         updatePd = new String[3][];
+
+        // 3-2. Copy into a multi-dimensional array
+         updatePd[2] = singAlone;
+         
+        // 3-3. Confirming if the copying works well 
+		     //for (int i = 0; i < updatePd[0].length; i++) {
+         //    System.out.print(updatePd[0][i] + " ");
+         //}
+         //System.out.println();
+         //for (int i = 0; i < updatePd[1].length; i++) {
+         //    System.out.print(updatePd[1][i] + " ");
+         //}
+         //System.out.println();
+        for (int i = 0; i < updatePd[2].length; i++) {
+             System.out.print(updatePd[2][i] + " ");
+         }
+         System.out.println();
+         //print(updatePd[0]);
+         
+        // 3-3. Compare two array's hashcode
+        System.out.println("1차원 배열 singAlone : " + singAlone.hashCode());
+        System.out.println("2차원 배열 updatePd의 hashCode : " + updatePd.hashCode());
+        System.out.println("2D array에 들어간 singAlone : " + updatePd[2].hashCode());         
+    }
+
+    // 배열을 출력하는 메소드
+    public static void print(String[] iarr) {
+        for (int i = 0; i < iarr.length; i++) {
+            System.out.print(iarr[i] + " ");
+        }
+        System.out.println();
+    }
+}
+
+# At this point, I wanted to edit the method-print for print "null" if the value is null,
+# I tried to use if(){}; but it didn't worked. So I asked to copilot how to change the code.
+# Question: (Code attached) I want to see all structure of multi-dimensional array by line by line.
+# But due to the nullpointerexception error, the other arrays like updatePd[0] or updatePd[1] don't show up.
+# So I would like to change the print method bottom in this code. What should I fix?
+
+# Part of the Answer:
+public static void print(String[] iarr) {
+        if (iarr == null) {
+            System.out.println("null");
+            return;
+        }
+        for (int i = 0; i < iarr.length; i++) {
+            System.out.print(iarr[i] + " ");
+        }
+        System.out.println();
+}
+
+# Applying the result to the Answer code of Condition03
+public class oliveU3 {
+   public static void main(String[] args) {
+        //3-1. Declare String array "singAlone"
+        String[] singAlone = {"풋샴푸", "바디로션", "바디워시"};
+        
+        /* It could be also declared by
+         * String[] singAlone = new String[] {"풋샴푸", "바디로션", "바디워시"}; */
+
+        // 3-1-2. Declare 2-dimensional(3 lines) String array updatePd
+         String[][] updatePd;
+         updatePd = new String[3][];
+
+        // 3-2. Copy into a multi-dimensional array
+         updatePd[2] = singAlone;
+         
+        // 3-3. Confirming if the copying works well 
+        print(updatePd[0]);  // null
+        print(updatePd[1]);  // null
+		    print(updatePd[2]);  // 풋샴푸 바디로션 바디워시 
+        
+        /* for (int i = 0; i < updatePd[2].length; i++) {
+             System.out.print(updatePd[2][i] + " ");
+         }
+         System.out.println(); */
+         
+        // 3-3. Compare all array's hashcode
+        System.out.println("1차원 배열 singAlone : " + singAlone.hashCode());  // 1차원 배열 singAlone : 2001049719
+        System.out.println("2차원 배열 updatePd의 hashCode : " + updatePd.hashCode());  // 2차원 배열 updatePd의 hashCode : 531885035
+        System.out.println("2D array에 들어간 singAlone : " + updatePd[2].hashCode());  // 2D array에 들어간 singAlone : 2001049719 
+
+        // 3-4. Change the index 0 of copied array into "bodyScrub"
+        updatePd[2][0] = "bodyScrub";
+        // 3-4-1. Check the changes
+        print(updatePd[2]);  // bodyScrub 바디로션 바디워시 
+
+        // 3-5. Analyze all array's hashcode after change the value
+        System.out.println("1차원 배열 singAlone hc : " + singAlone.hashCode());  //1차원 배열 singAlone hc : 2001049719
+        System.out.println("2차원 배열 updatePd hashCode : " + updatePd.hashCode());  // 2차원 배열 updatePd hashCode : 531885035
+        System.out.println("2D array singAlone : " + updatePd[2].hashCode());  // 2D array singAlone : 2001049719
+    }
+
+    // 배열을 출력하는 메소드
+    public static void print(String[] iarr) {
+    	if (iarr == null) {
+            System.out.println("null");
+            return;
+        }
+        for (int i = 0; i < iarr.length; i++) {
+            System.out.print(iarr[i] + " ");
+        }
+        System.out.println();
+    }
+}
+
+# After overviewed this code, I was wondering 
+# why the single array's hashcode and copied array's hashcode is the same.
+# Than I realized I did shallow cloning with ' updatePd[2] = singAlone; ' this code.
+# What if I deep cloning singAlone into the 2-dimensional array?
+# I tried to deep cloning like this
+        System.arraycopy(singAlone, 0, updatePd, 0, singAlone.length);
+# but it didn't work. so i asked to copilot.
+# The Answer Code (Revised little to see all hashCodes and ditinguish shallow / deep copy)
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        // Single-dimensional array
+        String[] singAlone = {"풋샴푸", "바디로션", "바디워시"};
+        System.out.println("The first sA: " + singAlone.hashCode());  // The first sA: 1933863327
+
+        // Declare Multi-dimensional array (3 rows, initially uninitialized)
+        String[][] updatePd = new String[3][];
+
+
+        // Deep cloning01_using System.arraycopy()
+        updatePd[0] = new String[singAlone.length]; // Allocate space for the row
+        System.arraycopy(singAlone, 0, updatePd[0], 0, singAlone.length); // Copy elements
+
+        // Deep cloning02_using Arrays.copyOf()
+        updatePd[1] = Arrays.copyOf(singAlone, singAlone.length); // Directly copy
+        /* 여기가 중요! deep cloning to multi-dimensional array 어떻게 하는지 잘 볼 것 */
+
+
+        // Print all rows of the multi-dimensional array
+        System.out.println("Row 0 (System.arraycopy - Deep Copy01):");
+        print(updatePd[0]);  // 풋샴푸 바디로션 바디워시 
+        System.out.println(updatePd[0].hashCode());  // 205029188
+
+        System.out.println("Row 1 (Arrays.copyOf - Deep Copy02):");
+        print(updatePd[1]);  // 풋샴푸 바디로션 바디워시 
+        System.out.println(updatePd[1].hashCode());  // 1309552426
+
+
+
+        // Shallow copying for comparison (for reference)
+        updatePd[2] = singAlone; // Only copies the reference, not the content
+        System.out.println("Row 2 (Shallow Copy):");
+        print(updatePd[2]);  // 풋샴푸 바디로션 바디워시 
+        System.out.println(updatePd[2].hashCode());  // 1933863327
+
+
+
+        // Modify the original array to test deep cloning
+        singAlone[0] = "bodyScrub";
+
+        System.out.println("\nAfter modifying the original array:");
+
+        System.out.println("Original array (singAlone):");
+        print(singAlone);  // bodyScrub 바디로션 바디워시 
+        System.out.println(singAlone.hashCode());  // 1933863327
+
+        System.out.println("Row 0-2 (System.arraycopy - Deep Copy01):");
+        print(updatePd[0]); // Should remain unchanged, 풋샴푸 바디로션 바디워시 
+        System.out.println(updatePd[0].hashCode());  //205029188
+
+        System.out.println("Row 1-2 (Arrays.copyOf - Deep Copy02):");
+        print(updatePd[1]); // Should remain unchanged, 풋샴푸 바디로션 바디워시 
+        System.out.println(updatePd[1].hashCode());  // 1309552426
+
+        System.out.println("Row 2-2 (Shallow Copy):");
+        print(updatePd[2]); // Will reflect the change, bodyScrub 바디로션 바디워시 
+        System.out.println(updatePd[2].hashCode());  // 1933863327
+
+    }
+    // Helper method to print an array
+    public static void print(String[] arr) {
+        if (arr == null) {
+            System.out.println("null");
+            return;
+        }
+        for (String item : arr) {
+            System.out.print(item + " ");
+        }
+        System.out.println();
+    }
+}
+
+# Conclusion
+# It also can deep cloning with System.arraycopy(); and Arrays.copyOf();
+# But the structure is changed due to multi-dimensional feature
+# Contrast the usage between single array and multi-dimensional array
+# In single array
+String[] toUlive = new String[] {"toner", "moisturizer", "facialOil"};
+String[] nwHomepage = Arrays.copyOf(toUlive, 4);
+print(nwHomepage);   // toner moisturizer facialOil null
+
+int[] originArr = new int[] {1, 2, 3, 4, 5};
+int[] copyArr3 = new int[10];
+System.arraycopy(originArr, 0, copyArr3, 3, originArr.length);
+
+# In multi-dimensional array
+updatePd[1] = Arrays.copyOf(singAlone, singAlone.length);
+print(updatePd[1]);  // 풋샴푸 바디로션 바디워시 
+
+updatePd[0] = new String[singAlone.length];
+System.arraycopy(singAlone, 0, updatePd[0], 0, singAlone.length);
+print(updatePd[0]);
+
+# Also deep cloning into the multi-dimensional array 
+# is showing the remain unchanged like deep cloning in single array
+# (Printing same hashCode eventhough the original array's value is changed)
+
+# Deep Copy means copy another array into other array (single or multi-dimensinal)
+# and its change is not linked with the original array.
+# When the Shallow copy doesn't. 
