@@ -1,0 +1,483 @@
+# Reviewing all the lecture score from chapter01.literal
+# 값의 형태에는 4가지 종류가 있다.
+# 1. 숫자 형태의 값
+# - 정수 형태의 값
+    System.out.println(123);
+# - 실수 형태의 값
+    System.out.println(1.23);
+# 2. 문자 형태의 값
+    System.out.println('a');    // 문자 형태의 값은 홑따옴표로 감싸주어야 한다.
+//      System.out.println('ab'); // 두 개 이상은 문자로 취급하지 않기 때문에 에러가 발생한다.
+//      System.out.println('');   // 아무 문자로 기록되지 않는 경우도 에러가 발생한다.
+# 3. 문자열 형태의 값
+    System.out.println("안녕하세요");    // 문자열로 문자 여러 개가 나열된 형태를 말하며 쌍따옴표로 감싸주어야 한다.
+    System.out.println("");             // 아무것도 없는 빈 쌍따옴표도 문자열로 취급한다.
+    System.out.println("a");            // 한 개의 문자도 쌍따옴표로 감싸면 문자열이다. (문자 a와 다르다)
+# 4. 논리 boolean 형태의 값
+    System.out.println(true);
+    System.out.println(false);
+
+# 값의 형태에 따른 계산 가부
+public class Application2 {
+    public static void main(String[] args) {
+        /* 값의 형태에 따라 사용할 수 있는 연산자의 종류와 연산의 결과가 달라진다. */
+
+        /* 1. 숫자와 숫자의 연산 */
+        /* 1-1. 정수와 정수의 연산 */
+        // + - * / % 모두 가능
+        System.out.println(123 % 456);  // 나머지를 구하는 연산
+
+        /* 1-2. 실수와 실수의 연산 */
+        // + - * / % 모두 가능. 단, % 사용 시 실수로 계산하면 약간의 오차가 생긴다.
+        System.out.println(1.23 + 1.23);
+        System.out.println(1.23 - 0.23);
+        System.out.println(1.23 * 10.0);
+        System.out.println(1.23 / 10.0);
+        System.out.println(1.23 % 1.0); // 약간의 오차가 생긴다
+
+        /* 1-3. 정수와 실수의 연산 */
+        /* 결과는 항상 실수가 나온다. */
+        // + - * / % 모두 가능
+        System.out.println("========== 정수와 실수의 연산 ============");
+        System.out.println(123 * 0.5);
+
+        /* 2. 문자의 연산 */
+        /* 2-1. 문자와 문자의 연산 */
+        // 문자와 문자의 연산은 각 알파벳에 부여된 ASCII코드로 이루어지기 때문에
+        //아래 예시의 결과는 숫자로 나온다.
+        // + - * / % 모두 가능
+        System.out.println('a' - 'b');
+        System.out.println('a' / 'b');
+        System.out.println('a' % 'b');
+
+        /* 2-2. 문자와 정수의 연산 */
+        // 문자와 정수의 연산 역시 ASCII 코드에 배정된 숫자와 연산할 정수가 계산된 값이 출력된다.
+        System.out.println('a' + 1);  // 98
+        System.out.println('a' - 1);  // 96
+        System.out.println('a' * 1);  // 97
+        System.out.println('a' / 1);  // 97
+        System.out.println('a' % 1);  // 0
+
+        /* 2-3. 문자와 실수의 연산 */
+        // 실수 형태의 숫자가 출력된다.
+        System.out.println('a' - 1.0);  // 96.0
+        System.out.println('a' / 1.0);  // 97.0
+        System.out.println('a' % 1.0);  // 0.0
+
+        /* 3. 문자열의 연산 */
+        /* 3-1. 문자열과 문자열의 연산 */
+        /* 문자열과 문자열의 '+' 연산 결과 문자열 합치기(이어 붙이기)가 된다. */
+        System.out.println("hello" + "world");
+        // 나머지 연산자는 사용 불가
+
+        /* 3-2. 문자열과 다른 형태의 값 연산 */
+        /* 문자열과의 연산은 '+' 연산만 가능하다. */
+        /* 3-2-1. 문자열과 정수의 연산 */
+        System.out.println("helloworld" + 123);
+        /* 3-2-2. 문자열과 실수의 연산 */
+        System.out.println("helloworld" + 1.23);
+        /* 3-2-3. 문자열과 문자의 연산 */
+        System.out.println("helloworld" + 'a');  // helloworlda
+        /* 3-2-4. 문자열과 논리값의 연산 */
+        System.out.println("helloworld" + true);  // helloworldtrue
+
+        System.out.println("123" + "456");  // 123456
+
+        /* 4. 논리값 연산 */
+        /* 4-1. 논리값과 논리값 연산 */
+        // boolean과 boolean은 어떤 연산자operator로도 연산 불가능하다
+
+        /* 4-2. 논리값과 정수 연산 : 불가능*/
+
+        /* 4-3. 논리값과 실수 연산 : 불가능*/
+
+        /* 4-4. 논리값과 문자 연산 : 불가능*/
+
+        /* 4-5. 논리값과 문자열 연산 */
+        System.out.println(true + "a"); // truea
+        // 나머지 연산자 불가능
+
+        /* +)세 개의 문자열 합치기 */
+        System.out.println("========= 세 개의 문자열 합치기 =========");
+        System.out.println(9 + 9 + "9");  // 189 
+        // '+' 연산 방향은 왼쪽에서 오른쪽이다.
+        System.out.println(9 + "9" + 9);  // 999
+        System.out.println("9" + 9 + 9);  // 999
+        System.out.println("9" + (9 + 9));  // 918
+    }
+}
+
+# 변수variable의 사용 목적
+/* 1. 값에 의미를 부여하기 위한 목적(의미 전달이 쉬워야 코드 읽기 쉬워지고, 협업 및 유지보수에 유리하기 때문이다.)
+   2. 한 번 저장해둔 값을 재사용 하기 위한 목적(값을 변경할 때도 보다 간편하게 변경할 수 있다.)
+   3. 시간에 따라 변하는 값을 저장하고 사용할 수 있다.(변하는 값을 저장하기 위한 공간이다.) */
+   
+# 1, 2 예시 : 코드에 매번 숫자 100을 입력해주는 것보다 int coin = 100;으로 의미 부여 후
+# System.out.print("보상가격은 : " + coin + "원입니다."); (반복) 이런 식으로 사용해야
+# 코드 가독성도 좋아지고 ("100이 뭐야? 아 coin 값이구나" 등 파악 가능) 협업 시, 유지보수 시에도 유리하다.
+
+# 3 예시 :
+        int sum = 0;
+
+        sum = sum + 10;
+        System.out.println("sum에 10을 더하면 현재 sum의 값은? : " + sum);
+
+        sum = sum + 10;
+        System.out.println(sum);
+
+# 변수를 사용하는 방법
+# 1. 변수를 준비한다.(선언)
+# 2. 변수에 값을 대입한다.(값 대입 및 초기화)
+# 3. 변수를 사용한다.
+
+/* 1-1. 변수를 선언하는 방법 */
+/* 자료형 변수명; */
+
+        /* 자료형이란?
+        * 다양한 값의 형태별로 어느 정도 크기를 하나의 값으로 취급할 것인지 미리 compiler와 약속한 키워드이다.
+        * 예) 앞에서 사용한 int 자료형은 정수를 4byte만큼을 읽어서 하나의 값을 취급하겠다는 약속이다.
+        * 이러한 자료형은 기본자료형과 참조자료형으로 나누어진다.
+        * 그 중 기본자료형 8가지부터 살펴보자.
+        * */
+
+        /* 1-1-1. 숫자를 취급하는 자료형 */
+        /* 정수를 취급하는 자료형은 4가지가 있다. */
+        byte bnum; // 1byte
+        short snum; // 2byte
+        int inum; // 4byte
+        long lnum; // 8byte
+
+        /* 실수를 취급하는 자료형은 2가지가 있다. */
+        float fnum; // 4byte
+        double dnum; // 8byte
+
+        /* 1-1-2. 문자를 취급하는 자료형 */
+        /* 문자를 취급하는 자료형은 1가지가 있다. */
+        char ch;    // 2byte
+        char ch2;
+
+        /* 1-1-3. 논리값을 취급하는 자료형 */
+        boolean isTrue; // 1byte
+
+        /* 이상 8가지를 기본자료형이라고 한다. */
+
+        /* 1-1-4. 문자열을 취급하는 자료형 */
+        String str; // 4byte
+
+        /* 2. 변수에 값을 대입한다. (값 대입 및 초기화) */
+        /* 2-1. 정수를 취급하는 자료형에 값 대입 */
+        inum = 4;
+        lnum = 8L;  // 소문자 l을 써도 되지만 대문자로 하는 것이 권장이다.
+
+        /* 2-2. 실수를 취급하는 자료형에 값 대입 */
+        fnum = 4.0f; // 실수 뒤에 'f'를 붙여야한다. 소문자를 사용하는 것이 일반적이다.
+        dnum = 8.0;
+
+        /* 2-3. 문자를 취급하는 자료형에 값 대입 */
+        ch = 'a';
+        ch2 = 97;   // 숫자로도 저장할 수 있다.
+
+        /* 2-4. 논리를 취급하는 자료형에 값 대입 */
+        isTrue = true;
+        isTrue = false;
+
+        /* 2-5. 문자열을 취급하는 자료형에 값 대입 */
+        str = "안녕하세요";
+
+        /*  숫자로 된 형태의 값을 그대로 사용하는 자료형은 byte,short,int,double이다.
+        *   일반적으로 사용하는 값을 독특한 형태가 아닌 일반적인 형태로 사용할 수 있는 자료형을 대표자료형이라고 하며
+        *   정수형은 int, 실수형은 double이 대표 자료형이다.
+        * */
+
+        /* 선언과 동시에 초기화 */
+        int point = 100;
+        int bonus = 10;
+
+# 변수의 명명 규칙
+# 1. 컴파일 에러를 발생시키는 규칙
+        /* 1-1. 동일한 범위 내에서 동일한 변수명을 가질 수 없다. */
+        int age = 20;
+//        int age = 30;
+
+        /* 1-2. 예약어는 사용이 불가능하다. (자바에서 미리 사용하겠다고 compiler와 약속한 키워드를 예약어라고 한다.) */
+//        int true = 1;
+//        int for = 20;  // true와 for는 예약어
+
+        /* 1-3. 변수명은 대/소문자를 구분한다. (자바는 대/소문자를 엄격하게 구분하는 언어이다.) */
+        int Age = 20;   // 위에서 만든 age와 다른 것으로 취급한다.
+        int True = 10;  // 예약어 true와 다른 것으로 취급한다.
+
+        /*  1-4. 변수명은 숫자로 시작할 수 없다. (시작만 할 수 없고 숫자를 섞어서 사용하는 것은 가능하다.) */
+//        int 1age = 20;
+        int age1 = 20;
+
+        /*  1-5. 특수기호는 '_'와 '$'만 사용 가능하다. (따라서 공백을 사용할 수 없다.) */
+//        int sh@rp = 20; 불가
+        int _age = 20;  // 처음도 가능하고 중간이나 끝에도 가능
+        int $harp = 20; // $도 사용 가능
+
+        /* 2. 컴파일 에러를 발생시키지는 않지만 개발자들끼리의 암묵적인 규칙 */
+        /*  2-1. 변수명의 길이 제한은 없다. (하지만 적당히..) */
+        int adjkajldjakldjkljaljewidlskjklajkljdlska;
+
+        /*  2-2. 변수명이 합성어로 이루어진 경우 첫 단어는 소문자, 두 번째 시작 단어는 대문자로 시작한다. (camel-case) */
+        /* 자바에서는 클래스명만 유일하게 대문자로 시작한다. */
+        int maxAge = 20;
+        int minAge = 10;
+
+        /*  2-3. 단어와 단어 사이의 연결을 언더스코어(_)로 하지 않는다. */
+        String user_name;   // 에러가 발생하지는 않으나...
+        String userName;    // 이게 올바른 표현이다.
+
+        /*  2-4. 한글로 변수명을 짓는 것이 가능하지만, 권장하지 않는다. (한글을 취급하는 다양한 방식들이 존재하기 때문에 에러를 유발할 수 있다.) */
+        int 나이;
+
+        /*  2-5. 변수 안에 저장된 값이 어떤 의미를 가지는지 명확하게 표현하도록 한다. */
+        String s;
+        String name;
+
+        /*  2-6. 전형적인 변수 이름이 있다면 가급적 사용하도록 한다. */
+        int sum = 0;
+        int max = 10;
+        int min = 0;
+        int count = 1;
+
+        /*  2-7. 명사형으로 작성할 수 있도록 한다. */
+        String goHome;  // 가능하긴 하지만
+        String home;    // 가급적 명사형으로 짓는다.
+
+        /*  2-8. boolean형은 의문문으로 가급적 긍정형태로 네이밍한다. */
+        boolean isAlive = true;
+        boolean isDead = false; // 부정형보다는 긍정형이 더 나은 방식이다.
+        
+# 상수Constant란?
+        /* 변수가 메모리에 변경될 값을 저장하기 위한 공간을 나타낸다면, 상수는 이와 상반되는 개념이다.
+        *  변하지 않는 값을(항상 고정된 값을) 저장해두기 위한 메모리상의 공간을 상수라고 한다.
+        *
+        *  상수의 사용 목적
+        *  변경되지 않는 고정된 값을 저장할 목적으로 사용한다.
+        *  초기화 이후 값 대입 시 컴파일 에러를 발생시켜 값이 수정되지 못하도록 한다.
+        *
+        *  사용방법
+        *  1. 상수를 선언한다. (변수 선언과 유사하지만 final 키워드를 사용함)
+        *  2. 값을 초기화 한다. (초기화 이후에는 값 변경 불가능함)
+        *  3. 필요한 위치에 상수를 호출해서 사용한다.
+        * */
+        final int AGE;
+
+        AGE = 20;
+//        AGE = 30; 값이 고정되기 때문에 AGE에 새로운 값을 또 넣을 순 없다
+
+        /* 출력 구문에서 사용 */
+        System.out.println(AGE);
+
+        /* 대입연산자시 활용 */
+        int sum = AGE; // 대입 연산자의 오른 편에는 기술 가능함
+//        int AGE = AGE + 10; // 대입 연산자의 왼쪽 편에는 기술 불가능함
+
+# 상수의 명명 규칙에 대해 이해할 수 있다.
+        /* 상수의 명명 규칙에서 컴파일 에러를 발생시키는 규칙은 변수의 명명규칙과 동일하다.
+        *  단, 개발자들끼리의 암묵적인 규칙에서 일부 차이를 보인다.
+        *  1. 모든 문자는 영문자 대문자 혹은 숫자만 사용한다.
+        *  2. 단어와 단어 연결은 언더스코어(_) 사용한다.
+        * */
+        final int AGE2 = 30;
+        final int age3 = 40;    // 소문자로 사용은 가능하지만 변수와 구분하기 힘듦. 지양할 것
+
+        final int MAX_AGE = 60;
+        final int MIN_AGE = 20;
+        final int minAge = 30;  // camel-case 사용이 가능하지만 역시 변수와 구분하기 힘들다. 지양해야함
+
+# 오버플로overflow에 대해 이해할 수 있다.
+        /* 자료형 별 값의 최대 범위를 벗어나는 경우
+        *  발생한 carry를 버림처리하고 sign bit를 반전시켜 최소값으로 순환시킴
+        * */
+
+        /* 오버플로우 */
+        byte num1 = 127;
+
+        System.out.println("num1 = " + num1);   // byte의 최대 저장 범위
+
+        num1++;
+
+        System.out.println("num1 = " + num1);   // byte의 최소 저장 범위
+
+        /* 언더플로우underflow */
+        /* 오버플로우와 반대 개념으로 최소 범위보다 작은 수를 발생시키는 경우 언더플로우가 발생한다. */
+        byte num2 = -128;
+
+        System.out.println("num2 = " + num2);   // byte의 최소 저장 범위 -128
+
+        num2--;
+
+        System.out.println("num2 = " + num2);   // byte의 최대 저장 범위 127로 출력됨 (언더플로우 발생됨)
+
+        int firstNum = 1000000;
+        int secondNum = 700000;
+
+        // 범위를 벗어난 계산은 오버플로우를 발생시켜서 원하지 않는 결과값이 나오게 될 수 있다.
+        int multi = firstNum * secondNum;   // 7천억이 나와야함
+        System.out.println("multi = " + multi);
+
+        /* 해결방법 - 안됨 */
+        long longMulti = firstNum * secondNum;
+        System.out.println("longMulti = " + longMulti);
+
+        /* 이미 오버플로우 처리 된 결과를 가지고 변수에 담기 때문에 위에 결과랑 별 차이가 없다.
+        *  계산이 처리되기 전에 long 타입으로 자료형을 변경해주어야 한다. (강제형변환 이용) */
+        long result = (long) firstNum * secondNum;
+        System.out.println("result = " + result);
+
+# 자동 형변환 규칙에 대해 이해할 수 있다.
+        /* 데이터 형변환이 필요한 이유
+        *  - 자바에서 다른 타입끼리의 연산은 피연산자들이 모두 같은 타입인 경우 실행할 수 있다.
+        *  - 즉, 같은 데이터 타입끼리만 연산을 수행할 수 있다. */
+
+        /* 형변환 종류와 규칙
+        *  1. 자동형변환 (묵시적 형변환) : 컴파일러가 자동으로 수행해주는 타입 변환
+        *  1-1. 작은 자료형에서 큰 자료형으로는 자동 형변환 된다.
+        *  1-2. 정수는 실수로 자동 형변환 된다.
+        *  1-3. 문자형은 int형으로 자동 형변환 된다.
+        *  1-4. 논리형은 형변환 규칙에서 제외된다.
+        *
+        *  2. 강제형변환 (명시적 형변환) : 형변환(cast) 연산자를 이용한 강제적으로 수행하는 형변환
+        *  2-1. 자동형변환이 적용되지 않는 경우 강제형변환이 필요하다. */
+
+        /* 자동형변환 규칙 테스트 */
+        /* 1-1. 작은 자료형에서 큰 자료형으로 공간만 옮기는 경우 데이터 손실 발생하지 않기 때문에 자동으로 처리해준다. */
+
+        /* 1-1-1. 정수끼리의 자동 형변환 */
+        byte bnum = 1;
+        short snum = bnum;
+        int inum = snum;
+        long lnum = inum;
+
+        int num1 = 10;
+        long num2 = 20;
+//        int result1 = num1 + num2;  // 큰 쪽 자료형인 long으로 자동형변환 후 계산하기 때문에 int형 변수에 값을 담을 수 없다.
+        long result1 = num1 + num2; // long 자료형으로 담으면 해결!
+
+        System.out.println("result1 = " + result1);
+
+        /* 1-1-2. 실수 끼리의 자동 형변환 */
+        float fnum = 4.0f;
+        double dnum = fnum;
+
+        double result2 = fnum + dnum;
+
+        System.out.println("result2 = " + result2);
+
+        /* 1-2. 정수는 실수로 자동 형변환된다. */
+        /* 정수를 실수로 변경할 때 소수점 자리수가 없어도 실수형태로 표현이 가능하다. 이 때 데이터 손실이 없기 때문에 자동 형변환이 가능하다. */
+        long eight = 8L;
+        float four = eight;
+
+        System.out.println("four = " + four);
+
+        float result3 = eight + four;
+        System.out.println("result3 = " + result3);
+
+        /* 1-3. 문자형은 int형으로 자동 형변환 된다. */
+        char ch1 = 'a';
+        int charNumber = ch1;
+
+        System.out.println("charNumber = " + charNumber);
+
+        /* 1-4. 논리형은 형변환 규칙에서 제외된다. -> 어느 자료형이든 boolean을 형변환 해서 담을 수 없다. */
+        boolean isTrue = true;
+//        byte b = isTrue;
+//        short s = isTrue; ... 등 불가능
+
+# 강제 형변환 : 바꾸려는 자료형으로 캐스트 연산자를 이용하여 형변환한다.
+        // 예) (바꿀자료형) 값;
+
+        /* 자동형변환의 규칙의 반대 상황에서 강제 형변환이 필요하다.
+        *  1. 강제 형변환 규칙
+        *  1-1. 큰 자료형에서 작은 자료형으로 변경 시 강제 형변환이 필요하다.
+        *  1-2. 실수를 정수로 변경할 때
+        *  1-3. 문자형을 int미만 크기의 변수에 저장할 때
+        *  1-4. 논리형은 강제 형변환 규칙에서도 제외된다. */
+
+        /* 1-1-1. 정수끼리의 강제 형변환 */
+        long lnum = 8L;
+//        int inum = lnum;    // 데이터 손실 가능성을 컴파일러가 빨갛게 error 표시로 알려준다. 그래서 이 방식으로는 계산 불가
+        int inum = (int) lnum;   // 변경하려는 자료형을 명시하여 강제 형변환을 해야한다.
+
+        short snum = (short) inum;
+        byte bnum = (byte) snum;
+
+        /* 1-1-2. 실수 끼리의 강제 형변환 */
+        double dnum = 8.0;
+//        float fnum = dnum; 마찬가지로 다른 자료형끼리는 연산 불간, 강제 형변환이 안 이뤄졌으므로 계산 불가
+        float fnum = (float) dnum;
+        System.out.println("fnum = " + fnum);  // fnum = 8.0
+
+
+        /* 1-2. 실수를 정수로 변경할 때 */
+        float fnum2 = 4.0f;
+//        long lnum2 = fnum2;   // 소수점 자리 이하 데이터 손실 가능성 있음
+        long lnum2 = (long) fnum2;
+
+        /* 1-3. 문자형을 int미만 크기의 변수에 저장할 때 */
+        char ch = 'a';
+        byte bnum2 = (byte) ch;
+        short snum2 = (short) ch;
+
+        int num1 = 97;
+        int num2 = -97;
+
+        char ch2 = (char) num1;
+        char ch3 = (char) num2; // 음수도 강제 형변환 하면 대입할 수 있다.
+
+        System.out.println("ch2 = " + ch2); // ch2 = a
+        System.out.println("ch3 = " + ch3); // ch3 = ﾟ
+
+        /* 1-4. 논리형 강제 형변환 규칙에서도 제외된다. */
+        boolean isTrue = true;
+//        byte b = (byte) isTrue; 등..... 불가
+# 자동 형변환과 강제 형변환을 이용하여 서로 다른 자료형끼리 연산을 수행할 수 있다.
+        int inum = 10;
+        long lnum = 100;
+
+        /* 1. 두 수의 연산 결과를 int 형으로 변한 후 int 자료형 변수에 리턴받는다. */
+//        int isum = inum + lnum; 두 수의 자료형이 다르므로 연산 불가
+        int isum = (int) (inum + lnum); // 둘 다 같이 int형으로 강제 형변환 해줌
+
+        /* 2. long형 값을 int 강제 형변환 한다. */
+        int isum2 = inum + (int) lnum;
+
+        /* 3. 결과 값을 long형 자료형으로 받는다. (자동형변환 이용) */
+        long lsum = inum + lnum;
+
+        /* 주의사항. int미만 연산의 처리 결과는 int형이다. */
+        byte byteNum1 = 1;
+        byte byteNum2 = 2;
+        short shortNum1 = 3;
+        short shortNum2 = 4;
+
+        int result1 = byteNum1 + byteNum2;
+        int result2 = byteNum1 + shortNum1;
+        int result3 = shortNum1 + byteNum1;
+        int result4 = shortNum1 + shortNum2;
+
+        System.out.println("result1 = " + result1);  // result1 = 3
+        System.out.println("result2 = " + result2); // result2 = 4
+        System.out.println("result3 = " + result3);  // result3 = 4
+        System.out.println("result4 = " + result4);  // result4 = 7
+
+# 형변환 시 주의할 점을 이해하고 사용할 수 있다.
+        /* 1. 의도하지 않은 데이터 손실 */
+        int inum = 290;
+        byte bnum = (byte) inum;
+
+        System.out.println("inum = " + inum);  // inum = 290
+        System.out.println("bnum = " + bnum);  // bnum = 34
+        // bnum = 34, int를 byte형에 강제로 넣는 과정에서 데이터 손실이 일어났고, 그 결과로 원래 값과 다른 이상한 값이 나왔다.
+
+        /* 2. 의도한 데이터 손실 */
+        double height = 175.5;
+        int floorHeight = (int) height;
+
+        System.out.println("height = " + height);  // height = 175.5
+        System.out.println("floorHeight = " + floorHeight); // floorHeight = 175
+        // 소수점 절삭에 이용할 수 있다.
