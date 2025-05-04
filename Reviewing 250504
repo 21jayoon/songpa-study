@@ -1,0 +1,277 @@
+# Edit the incomplete code
+# Revised code : 1
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>make-it-work</title>
+    <style>
+        .lightcyan {
+            background: lightcyan;
+        }
+        .green {
+            border-radius: 3px;
+            background-color: lightgreen;
+        }
+
+        .focused {
+            outline: 3px dashed green;
+            background-color: skyblue;
+        }
+
+        #sinchung {
+            width: 80px;
+            height: 40px;
+            background-color: blue;
+            text-align: center;
+            border : none;
+            color: white;
+        }
+
+        span {
+            color: gray;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>사용자 입력 양식 이벤트 연습하기</h1>
+
+    <form name="registerform">
+
+        <label for="username">이름</label>
+        <br>
+        <input type="text" name="username2" id="name" value="">
+
+        <br><br>
+
+        <label>이메일</label>
+        <br>
+        <input type="email" name="emailinput" id="emailid" value="">
+
+        <br><br>
+
+        <label>성별</label>
+        <br>
+        <input type="radio" name="gender" id="male" value="m"><label for="male">남자</label>
+        <input type="radio" name="gender" id="female" value="f"><label for="female">여자</label>
+
+        <br><br>
+
+        <label>참여 일자 선택</label>
+        <br>
+        <form for="chsedate">
+            <select id = "dates">
+                <option>--날짜 선택--</option>
+                <option>2024년 5월 15일</option>
+                <option>2042년 8월 19일</option>
+                <option>1024년 11월 23일</option>
+            </select>
+        </form>
+
+        <br><br>
+
+        <label>자기소개</label>
+        <br>
+        <textarea name="introduce" id="introduce2" rows="5" cols="30" style="resize: none;"></textarea>
+        <br>
+        <span id="writelimit">0</span><span>/500자</span>
+
+        <br><br>
+
+        <!--<input type="checkbox" name="gender" id="male">개인정보 수집에 동의합니다.</label> before revised by AI-->
+        <input type="checkbox" name="agree" id="checkbox">개인정보 수집에 동의합니다.</label>
+        <br>
+        <br>
+        <!--<input id="sinchung" type="submit" value="신청하기" style="width: 90px;">-->
+        <button id="sinchung">신청하기</button>
+
+    </form>
+
+    <script>
+        const $introduce = document.getElementById('introduce2');
+        const $writelimit = document.getElementById('writelimit');
+        
+        let isValid = false;
+        // 1. 이름, 이메일 input 유효성 체크
+        // 제출 버튼과 연동
+        $submitBtn = document.getElementById('sinchung');
+        $name = document.getElementById('name');
+        $mail = document.getElementById('emailid');
+        $submitBtn.addEventListener('click', function () {
+            if ($name.value === "") {
+                alert("이름 필수작성")
+                return;
+            }
+            if ($mail.value === "") {
+                alert("이메일 필수작성!")
+                return;
+            }
+            if ($mail.value.includes('@') === false) {
+                alert("이메일에 @ 기호가 포함되어야 합니다.")
+                return;
+            }
+            // made my own event to check if the 'sinchung' button clicked well after name and email filled
+            if ($name.value !== "" && $mail.value !== "") {
+              alert("신청이 완료되었습니다.")
+              return;
+            }
+            isValid = true;
+        })
+
+        $dates = document.getElementById('dates');
+
+        $introduce.addEventListener('input', (e) => {
+            let value = e.target.value;
+            let len = value.trim().length;
+            if (len > 500) {
+                e.target.value = value.slice(0, 500);
+                len = 500;
+            }
+            $writelimit.textContent = len;
+        });
+        
+        // onfocus, onblur application 
+        contents = [$name, $mail, $dates, $introduce]
+
+        contents.forEach(element => {
+            element.onfocus = (e) => {
+                e.target.classList.toggle('focused');
+            };
+            element.onblur = (e) => {
+                e.target.classList.toggle('focused');
+            };
+        });
+
+        /* $checkbox.addEventListener('click', e => {
+        * $checkbox.classList.toggle('green');
+        * console.log($checkbox) this codes are former version*/
+        
+        // Asked copilot how to fix the code if I want to change background-color when checkbox checked.
+        $checkbox = document.getElementById('checkbox');
+
+        /*$ checkbox.addEventListener('click', e => {
+        *const label = $checkbox.nextSibling; // 체크박스 바로 다음에 있는 텍스트 노드
+        *if ($checkbox.checked) {
+        *    label.parentElement.classList.add('green'); // 부모 요소에 클래스 추가
+        *} else {
+        *    label.parentElement.classList.remove('green'); // 부모 요소에서 클래스 제거
+        *}
+        }); */
+        // But with this code, all the background-color change.
+        // I only want to change background-color of sibling text node of checkbox
+        
+          /* and Copilot introduce this code
+          * $checkbox.addEventListener('click', e => {
+          * const label = $checkbox.nextSibling; // Get the next sibling node
+          * Ensure the next sibling node is an element (and not a text node or whitespace)
+          * if (label.nodeType === Node.TEXT_NODE) {
+          * Wrap the text node in a <span> or similar element to manipulate styles
+          * const span = document.createElement */
+        //but this doesn't work either. so I referenced my colleague's code
+    </script>
+</body>
+</html>
+
+# Former code
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어렵다고!!</title>
+    <style>
+        .lightcyan {
+            background: lightcyan;
+        }
+
+        .focused {
+            outline: 3px dashed green;
+        }
+
+        #sinchung {
+            width: 80px;
+            height: 40px;
+            background-color: blue;
+            text-align: center;
+            color: white;
+        }
+
+        span {
+            color: gray;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>사용자 입력 양식 이벤트 연습하기</h1>
+
+    <form name="registerform">
+
+        <label for="username">이름</label>
+        <br>
+        <input type="text" name="username2" id="username3" value="">
+
+        <br><br>
+
+        <label>이메일</label>
+        <br>
+        <input type="email" name="emailinput" id="emailid" value="">
+
+        <br><br>
+
+        <label>성별</label>
+        <br>
+        <input type="radio" name="gender" id="male" value="m"><label for="male">남자</label>
+        <input type="radio" name="gender" id="female" value="f"><label for="female">여자</label>
+
+        <br><br>
+
+        <label>참여 일자 선택</label>
+        <br>
+        <form for="chsedate">
+            <select>
+                <option>--날짜 선택--</option>
+                <option>2024년 5월 15일</option>
+                <option>2042년 8월 19일</option>
+                <option>1024년 11월 23일</option>
+            </select>
+        </form>
+
+        <br><br>
+
+        <label>자기소개</label>
+        <br>
+        <textarea name="introduce" id="introduce2" rows="5" cols="30" style="resize: none;"></textarea>
+        <br>
+        <span id="writelimit">0</span><span>/500자</span>
+
+        <br><br>
+
+        <input type="checkbox" name="gender" id="male" value="m"><label for="male">개인정보 수집에 동의합니다.</label>
+        <br>
+        <br>
+        <button id="sinchung">신청하기</button> <!--버튼으로 바꿨다. 왜 input이었지?-->
+    </form>
+
+    <script>
+        const $introduce = document.getElementById('introduce2');
+        const $writelimit = document.getElementById('writelimit');
+
+        $introduce.addEventListener('input', (e) => {
+            let value = e.target.value;
+            let len = value.trim().length;
+            if (len > 500) {
+                e.target.value = value.slice(0, 500);
+                len = 500;
+            }
+            $writelimit.textContent = len;
+        });
+    </script>
+
+</body>
+
+</html>
