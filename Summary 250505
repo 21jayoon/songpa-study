@@ -1,0 +1,407 @@
+# JAVA lecture_Chapter02_Operator
+
+# arithmetic 산술연산자
+# 산술연산자는 주로 사칙연산과 관련된 연산자로 가장 기본적이면서도 많이 사용되는 연산자이다.
+# 연산의 실행이 가능하기 위해 필요한 값이나 변수가 두 개인 이항 연산자로 분류되며
+# 피연산자들의 연산 방향은 왼쪽에서 오른쪽이다.
+
+# 산술 연산자의 우선순위
+# 수학의 개념과 유사하게 곱하기*와 나누기/ 연산이 더하기+와 빼기- 연산보다 우선적으로 동작한다.
+# 우선순위가 같은 경우 연산자의 결합 방향에 의해 실행 순서가 결정된다.
+
+# assignment 대입연산자
+ public static void main(String[] args) {
+
+        /* 대입연산자와 산술 복합 대입 연산자를 이해하고 활용할 수 있다. */
+        /* '=' : 왼쪽의 피연산자에 오른쪽의 피연산자를 대입함
+        *  '+=' : 왼쪽의 피연산자에 오른쪽의 피연산자를 더한 결과를 왼쪽의 피연산자에 대입함
+        *  '-=' : 왼쪽의 피연산자에 오른쪽의 피연산자를 뺀 결과를 왼쪽의 피연산자에 대입함
+        *  '*=' : 왼쪽의 피연산자에 오른쪽의 피연산자를 곱한 결과를 왼쪽의 피연산자에 대입함
+        *  '/=' : 왼쪽의 피연산자에 오른쪽의 피연산자를 나눈 결과를 왼쪽의 피연산자에 대입함
+        *  '%=' : 왼쪽의 피연산자에 오른쪽의 피연산자를 나눈 나머지 결과를 왼쪽의 피연산자에 대입함 */
+        int num = 12;
+
+        num = num + 3;  // 대입연산자의 오른쪽은 값, 왼쪽은 공간의 의미이다.
+        System.out.println(num);  // 15
+
+        num += 3;
+        System.out.println("+=3 : " +num);  // +=3 : 18
+
+        num -= 5;   // num = num - 5;
+        System.out.println("-=5 : " +num);  // -=5 : 13
+
+        num *= 2;
+        System.out.println("*=2 : " + num);  // *=2 : 26
+
+        num /= 2;
+        System.out.println("/=2 : " +num);  // /=2 : 13
+
+        /* 주의사항
+        * 산술 복합 대입 연산자의 작성 순서에 주의해야한다. */
+        num =- 5;
+        System.out.println("num = " + num);  // num = -5
+    }
+
+# increment 증감연산자
+        /*  피연산자의 앞 or 뒤에 사용이 가능하다.
+        *  '++' : 1 증가의 의미
+        *  '--' : 1 감소의 의미
+        * */
+
+        /* 1. 증감연산자를 단항으로만 사용 */
+        /* 단항으로 사용될 때는 1 증가/1 감소의 의미를 가진다. */
+        int num = 20;
+
+        num++;  // 1 증가
+        System.out.println("num++ : " + num);  // num++ : 21
+
+        ++num;  // 1 증가
+        System.out.println("++num : " + num);  // ++num : 22
+
+        num--;  // 1 감소
+        System.out.println("num-- : " + num);  // num-- : 21
+
+        --num;  // 1 감소
+        System.out.println("--num : " + num);  // --num : 20
+
+        /* 2. 증감연산자를 다른 연산자와 함께 사용 */
+        /* 주의사항.
+        *  다른 연산자와 함께 사용 할 때 증감 연산자의 의미
+        *  '++var' : 피연산자의 값을 먼저 1을 증가시킨 후 다른 연산을 진행함
+        *  'var++' : 다른 연산을 먼저 진행하고 난 뒤 마지막에 피연산자의 값을 1 증가시킴
+        *  '--var' : 피연산자의 값을 먼저 1을 감소시킨 후 다른 연산을 진행함
+        *  'var--' : 다른 연산을 먼저 진행하고 난 뒤 마지막에 피연산자의 값을 1 감소시킴
+        * */
+        int firstNum = 20;
+
+        int result1 = firstNum++ * 3;
+
+        System.out.println("result1 = " + result1);  // result1 = 60
+        System.out.println("firstNum = " + firstNum);  // firstNum = 21
+
+        int secondNum = 20;
+
+        int result2 = ++secondNum * 3;
+
+        System.out.println("result2 = " + result2);  // result2 = 63
+        System.out.println("secondNum = " + secondNum);  // secondNum = 21
+
+# comparison 비교연산자
+        /* 비교연산자는 피연산자 사이에서 상대적인 크기를 판단해서 참 혹은 거짓을 반환하는 연산자이다.
+        * 연산자 중 참 혹은 거짓을 반환하는 연산자는 삼항연산자의 조건식이나 조건문의 조건절에 많이 사용된다. */
+
+        /* 비교연산자의 종류
+        *  '==' : 왼쪽의 피연산자와 오른쪽의 피연산자가 같으면 true 다르면 false를 반환
+        *  '!=' : 왼쪽의 피연산자와 오른쪽의 피연산자가 다르면 true 같으면 false를 반환
+        *  '>' : 왼쪽의 피연산자가 오른쪽의 피연산자보다 크면 true 작으면 false를 반환
+        *  '>=' : 왼쪽의 피연산자와 오른쪽의 피연산자보다 크거나 같으면 true 아니면 false를 반환
+        *  '<' : 왼쪽의 피연산자와 오른쪽의 피연산자보다 작으면 true 아니면 false를 반환
+        *  '<=' : 왼쪽의 피연산자와 오른쪽의 피연산자보다 작거나 같으면 true 아니면 false를 반환
+        * */
+
+        /* 숫자값 비교 - 정수 비교 */
+        int inum1 = 10;
+        int inum2 = 20;
+
+        System.out.println(inum1 == inum2);  // false
+        System.out.println(inum1 != inum2);  // true
+        System.out.println(inum1 > inum2);  // false
+        System.out.println(inum1 >= inum2);  // false
+        System.out.println(inum1 < inum2);  // true
+        System.out.println(inum1 <= inum2);  // true
+
+        /* 숫자값 비교 - 실수 비교 */
+        double dnum1 = 10.0;
+        double dnum2 = 20.0;
+
+        System.out.println(dnum1 == dnum2);  // false
+        System.out.println(dnum1 != dnum2);  // true
+        System.out.println(dnum1 > dnum2);  // false
+        System.out.println(dnum1 >= dnum2);  // false
+        System.out.println(dnum1 < dnum2);  // true
+        System.out.println(dnum1 <= dnum2);  // true
+
+        /* 문자값 비교 */
+        char ch1 = 'a';
+        char ch2 = 'A';
+
+        System.out.println(ch1 == ch2);  // false
+        System.out.println(ch1 != ch2);  // true
+        System.out.println(ch1 > ch2);  // true
+        System.out.println(ch1 >= ch2);  // true
+        System.out.println(ch1 < ch2);  // false
+        System.out.println(ch1 <= ch2);  // false
+
+        /* 논리값 비교 */
+        boolean bool1 = true;
+        boolean bool2 = false;
+
+        System.out.println(bool1 == bool2);  // false
+        System.out.println(bool1 != bool2);  // true
+//        System.out.println(bool1 > bool2);    // boolean논리값은 대소 비교 불가능
+
+        /* 문자열값 비교 */
+        String str1 = "java";
+        String str2 = "java";
+
+        System.out.println(str1 == str2);  // true
+        System.out.println(str1 != str2);  // false
+//        System.out.println(str1 > str2);      // String 간의 대소 비교 불가능
+
+        int x = 10;
+        int y = 11;
+
+        boolean result = x <= y;
+        System.out.println(result);  // true
+
+# Logical operator 논리 연산자
+        /* 논리연산자의 종류
+        * 1. 논리 연결 연산자 : 두 개의 피연산자를 가지는 이항 연산자이며, 연산자의 결합 방향은 왼쪽에서 오른쪽이다.
+        *                     두 개의 논리식을 판단하여 참과 거짓을 판단한다.
+        *    1-1. &&(논리 AND) 연산자 : 두 개의 논리식 모두 참 일 경우 참을 반환, 둘 중 한 개라도 거짓인 경우 거짓을 반환한다.
+        *    1-2. ||(논리 OR) 연산자 : 두 개의 논리식 중 둘 중 하나라도 참 일 경우 참을 반환, 둘 다 모두 거짓일 경우 거짓을 반환한다.
+        *
+        * 2. 논리 부정 연산자 : 피연산자가 하나인 단항연산자로, 피연산자의 결합 방향을 왼쪽에서 오른쪽이다.
+        *    2-1. !(논리 NOT) 연산자 : 논리식의 결과가 참이면 거짓을, 거짓이면 참을 반환한다.
+        * */
+
+        /* 1. 논리 연산자 결과값 확인 */
+        System.out.println(true && true);  // true
+        System.out.println(true && false);  // false
+        System.out.println(false && true);  // false
+        System.out.println(false && false);  // false
+
+        System.out.println(true || true);  // true
+        System.out.println(true || false);  // true
+        System.out.println(false || true);  // true
+        System.out.println(false || false);  // false
+
+        System.out.println(!true);  // false
+        System.out.println(!false);  // true
+
+        /* 2. 논리식에 논리연산자 활용 */
+        int a = 10;
+        int b = 20;
+        int c = 30;
+        int d = 40;
+
+        System.out.println(a < b && c < d); // true, 둘 다 참이라 참
+        System.out.println(a < b && c > d); // false, 두 논리식 중 하나인 c > d가 거짓이라 false
+        System.out.println(a > b && c < d); // false
+        System.out.println(a > b && c > d); // false, 둘 다 거짓이라 false
+
+        System.out.println(a < b || c < d); // true, 두 논리식 모두 참이라 참
+        System.out.println(a < b || c > d); // true, 첫번째 논리식 a < b가 참이라서 참
+        System.out.println(a > b || c < d); // true, 둘 중 하나 c < d가 참이라서 참 반환
+        System.out.println(a > b || c > d); // false, 둘 다 모두 거짓
+
+# 논리 연산자의 우선순위와 활용
+        /*  && : 11순위
+        *  || : 12순위 */
+
+        /* 1. 1부터 100 사이의 값인지 확인 */
+        /* 1 <= 변수 <= 100 이렇게는 사용 못함 --> 변수 => 1 && 변수 <= 100 이렇게 사용해야한다. */
+        int num1 = 55;
+        System.out.println(num1 >= 1 && num1 <= 100); // true
+
+        int num2 = 166;
+        System.out.println(num2 >= 1 && num2 <= 100); // false
+
+        /* 2. 영어 대문자인지 확인 */
+        char ch1 = 'G';
+        System.out.println(ch1 >= 'A' && ch1 <= 'Z');  // true
+
+        char ch2 = 'g';
+        System.out.println(ch2 >= 'A' && ch2 <= 'Z');  // false
+
+        /* 3. 대소문자 상관없이 영문자 y인지 확인 */
+        char ch3 = 'Y';
+        System.out.println(ch3 == 'y' || ch3 == 'Y'); // true
+        // 소문자 y이거나 대문자 Y이면 (둘 중 하나라도 true면 true 출력하는) oror 사용
+
+        /* 4. 영문자인지 확인 */
+        /* A : 65, Z : 90, a : 97, z : 122 */
+        char ch5 = 'f';
+        System.out.println((ch5 >= 'A' && ch5 <= 'Z') || (ch5 >= 'a' && ch5 <= 'z')); // true
+        // char 'A'보다 크고(B, C, D...) char 'Z'보다 작다(Y, X, W, V...) OR
+        // char 'a'보다 크고(b, c...) char 'z'보다 작다(y, x, w..) : OROR 썼으니 둘 중 하나만 true여도 true.
+        System.out.println((ch5 >= 65 && ch5 <= 90) || (ch5 >= 97 && ch5 <= 122));
+        // 이렇게도 쓸 수 있음. char는 ASCII 코드를 통해 부여된 숫자값이 있기 때문
+
+        char ch6 = 'F';
+        System.out.println((ch6 >= 'A' && ch6 <= 'Z') || (ch6 >= 'a' && ch6 <= 'z'));  // true
+        // F가 영문자인지 확인
+        System.out.println((ch6 >= 65 && ch6 <= 90) || (ch6 >= 97 && ch6 <= 122)); // true
+        // ASCII코드 값으로 ch6, F가 영문자인지 확인
+
+# ternary 삼항연산자
+        /* 자바에서 유일하게 피연산자 항목이 3개인 연산자이다.
+        *  항목이 3개이다 : (조건식)? 참일 때 사용할 값 : 거짓일 때 사용할 값
+        *  조건식은 반드시 결과가 true 또는 false가 나오게끔 작성해야 한다.
+        * */
+
+        /* 1. 삼항 연산자 단독 사용 */
+        int num1 = 10;
+        int num2 = -10;
+
+        String result1 = (num1 > 0)? "양수다" : "양수가 아니다";
+        String result2 = (num2 > 0)? "양수다" : "양수가 아니다";
+
+        System.out.println("result1 = " + result1);  // result1 = 양수다
+        System.out.println("result2 = " + result2);  // result2 = 양수가 아니다
+
+        /* 2. 삼항 연산자 중첩 사용 */
+        int num3 = 5;
+        int num4 = 0;
+        int num5 = -5;
+
+        String result3 = (num3 > 0)? "양수다" : (num3 == 0)? "0이다": "음수다";
+        String result4 = (num4 > 0)? "양수다" : (num4 == 0)? "0이다": "음수다";
+        String result5 = (num5 > 0)? "양수다" : (num5 == 0)? "0이다": "음수다";
+
+        System.out.println("result3 = " + result3);  // result2 = 양수가 아니다
+        System.out.println("result4 = " + result4);  // result4 = 0이다
+        System.out.println("result5 = " + result5);  // result5 = 음수다
+
+# Chapter03_Method and API
+        /*  메소드(method)는 어떤 특정 작업을 수행하기 위한 명령문의 집합이라고 할 수 있다.
+        * */
+
+        /* 메소드 호출 방법
+        *  클래스명 사용할이름 = new 클래스명();             // 객체 생성
+        *  사용할이름.메소드명();                           // 메소드 호출
+        * */
+        Application1 app1 = new Application1();
+        app1.methodA();
+
+         public void methodA() {
+
+        System.out.println("methodA() 호출함...");
+        }
+# 메소드는 호출 흐름을 이해하는 것이 중요.
+# methodX를 호출 후 methodX의 모든 명령문이 끝나면 호출한 라인으로 다시 돌아온다.
+
+# method의 argument전달인자와 parameter매개변수
+        /* 전달인자(argument)와 매개변수(parameter)를 이용한 메소드 호출
+        *  지금까지 우리가 배운 변수는 지역변수에 해당한다. */
+
+        /* 변수의 종류
+        *  1. 지역변수
+        *  2. 매개변수
+        *  3. 전역변수(필드)
+        *  4. 클래스(static)변수
+        * */
+
+        /* 지역변수는 선언한 메소드 블럭 내부에서만 사용이 가능하다. 이것을 지역변수의 스코프라고 한다.
+        *  다른 메소드간 서로 공유해야 하는 값이 존재하는 경우 메소드 호출 시 사용하는 괄호를 이용해서 값을 전달할 수 있다.
+        *  이 때 전달하는 값을 전달인자라고 부르고,
+        *  메소드 선언부 괄호 안에 전달 인자를 받기 위해 선언하는 변수를 매개변수라고 부른다.
+        * */
+
+        Application3 app3 = new Application3();
+
+        /* 1. 전달인자로 값 전달 테스트 */
+        app3.testMethod(40);  // 당신의 나이는 40세 입니다.
+//        app3.testMethod("40");    // 매개변수 age는 int형이지만 인자가 String 형이기 때문에 호출할 수 없다.
+//        app3.testMethod(20, 30, 40); // 매개변수를 int age 하나만 받고 있는데 여러개를 인자로 넣어줬기 때문에 호출 불가
+//        app3.testMethod(); // int age를 매개변수로 넣어줘서 전달인자를 꼭 받아야하는데 아무것도 안 넣어줘서 호출 불가
+//        found : no arguments, error : method testMethod in class Applicaion3 cannot be applied to given types;
+
+        /* 2. 변수에 저장한 값 전달 테스트 */
+        int age = 20;
+        app3.testMethod(age); // 당신의 나이는 20세 입니다.
+
+        /* 자동형변환 이용하여 값 전달 */
+        byte byteAge = 10;
+        app3.testMethod(byteAge); // 당신의 나이는 10세 입니다.
+
+        /* 강제형변환 이용하여 값 전달 */
+        long longAge = 80;
+//        app3.testMethod(longAge); 
+          // long형이 8바이트로 4byte int보다 더 큰 값이라 강제형변환을 해주지 않으면 전달인자로 쓸 수 없음
+          // error : incompatible types: possible lossy conversion from long to int
+        app3.testMethod((int) longAge); // 당신의 나이는 80세 입니다.
+
+        /* 연산 결과를 이용해서 값 전달 */
+        app3.testMethod(age * 3); // 당신의 나이는 60세 입니다.
+    }
+
+    public void testMethod(int age) {
+
+        System.out.println("당신의 나이는 " + age + "세 입니다.");
+    }
+
+public static void main(String[] args) {
+    /* 1. 여러 개의 매개변수를 가진 메소드 호출 */
+        Application4 app4 = new Application4();
+        app4.testMethod("홍길동", 20, '남');
+        // 당신의 이름은 홍길동이고, 나이는 20세 이며, 성별은 남입니다.
+//        app4.testMethod(20, "유관순", '여');      // 순서 불일치
+
+        /* 2. 변수에 저장된 값을 전달하며 호출할 수 있다. */
+         String name = "유관순";
+         int age = 20;
+         char gender = '여';
+
+         app4.testMethod(name, age, gender);
+        // 당신의 이름은 유관순이고, 나이는 20세 이며, 성별은 여입니다.
+    }
+
+    public void testMethod(String name, int age, final char gender) {
+
+        System.out.println("당신의 이름은 " + name +"이고, 나이는 " + age + "세 이며, 성별은 " + gender + "입니다.");
+    }
+
+# Method Return 메소드 리턴
+    public static void main(String[] args) {
+        /* 모든 메소드 내부에는 return; 이 존재한다.
+        *  void 메소드의 경우 return;을 명시적으로 작성하지 않아도 마지막줄에 컴파일러가 자동으로 추가를 해준다.
+        * (void method 아랫줄에 return; 적으면 이미 기능한단(?) 의미로 희미한 회색 글씨로 보임)
+        *  return은 현재 메소드를 강제 종료하고 호출한 구문으로 다시 돌아가는 명령어이다. */
+
+        System.out.println("main() 메소드 시작함...");
+
+        /* 1. 메소드 리턴 테스트 */
+        Application5 app5 = new Application5();
+        app5.testMethod();
+
+        System.out.println("main() 메소드 종료됨...");
+
+        // main() 메소드 시작함...  <-- System.out.println("main() 메소드 시작함...");
+        // testMethod() 동작 확인...  <--app5.testMethod(); : public void testMethod() 내의 System.out.println("testMethod() 동작 확인...");
+        // main() 메소드 종료됨...  <--System.out.println("main() 메소드 종료됨...");
+    }
+    public void testMethod() {
+
+        System.out.println("testMethod() 동작 확인...");
+
+        return;
+
+        // 가장 마지막에 return을 작성해야하고, 그렇지 않으면 컴파일 에러 발생.
+//        System.out.println("단순한 출력문....");
+    }
+
+# 메소드 리턴값을 이해하고 활용할 수 있다.
+        /* 메소드 리턴값 테스트
+        *  복귀를 할 때 그냥 복귀를 할 수도 있지만, 값을 가지고 복귀할 수도 있다.
+        *  이 때 가지고 가는 값을 리턴값이라고 한다.
+        * */
+    public static void main(String[] args) {
+        Application6 app6 = new Application6();
+
+        /* 1. 메소드 리턴값 확인 */
+        app6.testMethod();
+
+        String returnText = app6.testMethod();
+        System.out.println("returnText = " + returnText); // returnText = hello world
+
+        System.out.println(app6.testMethod()); // hello world
+    }
+
+    public String testMethod() {
+
+        /* public 뒤에 바로 return으로 가지고 갈 타입을 명시한다.
+        *  아무것도 리턴하지 않는 경우 void, 값을 반환하는 경우에는 반환값의 자료형을 작성해야 한다.
+        * */
+        return "hello world";
+    }
