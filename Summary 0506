@@ -1,0 +1,461 @@
+ public static void main(String[] args) {
+
+        /* 메소드 리턴값을 이해하고 활용할 수 있다. */
+
+        /* 메소드 리턴값 테스트
+        *  복귀를 할 때 그냥 복귀를 할 수도 있지만, 값을 가지고 복귀할 수도 있다.
+        *  이 때 가지고 가는 값을 리턴값이라고 한다.
+        * */
+
+        Application6 app6 = new Application6();
+
+        /* 1. 메소드 리턴값 확인 */
+        app6.testMethod();
+
+        String returnText = app6.testMethod();
+        System.out.println("returnText = " + returnText);  // returnText = hello world
+
+        System.out.println(app6.testMethod());  // hello world
+    }
+
+    public String testMethod() {
+
+        /* public 뒤에 바로 return으로 가지고 갈 타입을 명시한다.
+        * 아무것도 리턴하지 않는 경우 void,
+        * 값을 반환하는 경우에는 public String의 String처럼 반환값의 자료형을 작성해야 한다.
+        * */
+        return "hello world";
+    }
+}
+
+# 매개변수와 리턴값을 복합적으로 활용하는 것을 이해하고 활용할 수 있다.
+ public class Application7 {
+
+    public static void main(String[] args) {
+        int first = 20;
+        int second = 10;
+
+        Application7 app7 = new Application7();
+        System.out.println(app7.plusTwoNumbers(first, second)); // 30
+        // 매개변수 first, second
+        System.out.println(app7.minusTwoNumbers(first, second));  // 10
+        System.out.println(app7.multipleTwoNumbers(first, second));  // 200
+        System.out.println(app7.divideTwoNumbers(first, second));  // 2
+    }
+
+    public int plusTwoNumbers(int first, int second) {
+
+        return first + second; // 리턴값
+    }
+
+    public int minusTwoNumbers(int first, int second) {
+
+        return first - second; // 리턴값
+    }
+
+    public int multipleTwoNumbers(int first, int second) {
+
+        return first * second; // 리턴값
+    }
+
+    public int divideTwoNumbers(int first, int second) {
+
+        return first / second;  // 리턴값
+    }
+}
+
+# static 메소드를 호출할 수 있다
+public class Application8 {
+    public static void main(String[] args) {
+
+        /* static 메소드를 호출하는 방법
+        *  클래스명.메소드명();
+        * */
+
+        Application8.sumTwoNumbers(10, 20);
+
+        sumTwoNumbers(20, 30);  // 동일한 클래스 안이라면 클래스명 생략 가능
+
+    }
+
+    public static int sumTwoNumbers(int first, int second) {
+
+        return first + second;
+    }
+}
+
+# 다른 클래스에 작성한 메소드를 호출할 수 있다.
+import static com.ohgiraffers.section01.method.Calculator.maxNumberOf;
+
+public class Application9 {
+
+    public static void main(String[] args) {
+        int first = 100;
+        int second = 50;
+
+        /* 1. non-static 메소드의 경우 */
+        Calculator calc = new Calculator();
+        int min = calc.minNumberOf(first, second);
+
+        System.out.println("두 수 중 최소값은 : " + min);
+
+        /* 2. static 메소드의 경우 */
+        /* 다른 클래스에 작성한 static 메소드의 경우 호출할 때 클래스명을
+        *  반드시 기술해야 한다. */
+//        int max = maxNumberOf(first, second); // 임포트 하지 않으면 에러가 발생한다.
+        int max = Calculator.maxNumberOf(first, second);
+
+        System.out.println("두 수 중 최대값은 : " + max);
+
+        /* 주의사항
+        * static 메소드도 non-static 메소드처럼 호출은 가능하다.
+        * 하지만 권장하지 않는다.
+        * 이미 메모리에 로딩되어 있는 static 메소드는 여러 객체가 공유하게 된다.
+        * 그 때 객체로 접근하게 되면 인스턴스가 가진 값으로 공유된 값에 예상치 못하는 동작을
+        * 유발할 수 있기 때문에 사용을 제한해달라는 경고이다.
+        * 시스템이 복잡해질 수록 객체의 상태를 추적하기 어려워 유지보수에 악영향을 준다.
+        * */
+        int max2 = calc.maxNumberOf(first, second); // 권장하지 않는다.
+    }
+}
+
+package com.ohgiraffers.section01.method;
+public class Calculator {
+
+    public int minNumberOf(int first, int second) {
+
+        return (first > second)? second : first;
+    }
+
+    public static int maxNumberOf(int first, int second) {
+
+        return (first > second)? first : second;
+    }
+}
+# Reference : https://www.geeksforgeeks.org/difference-between-static-and-non-static-method-in-java/
+
+# Static method : A static method can only access static data members and static methods of another class or the same class
+# but cannot access non-static methods and variables. Also, a static method can rewrite the values of any static data member.
+
+# The memory of a static method is fixed in the ram, for this reason,
+# we don’t need the object of a class in which the static method is defined to call the static method.
+# To call the method we need to write the class name followed by the name of the method
+
+# In the static method, the method use compile-time or early binding.
+# For this reason, we can access the static method without creating an instance.
+
+# In the static method, we cannot override a static method, because of early binding.
+
+# In the static method, memory allocation happens only once,
+# because the static keyword fixed a particular memory for that method in ram.
+# So when the method is called every time in a program, each time that particular memory is used.
+# For that reason, less memory is allocated.
+
+
+# Non-static method : A non-static method can access static data members and static methods
+# as well as non-static members and methods of another class or the same class, and also can change the values of any static data member.
+
+# The memory of the non-static method is not fixed in the ram, so we need a class object to call a non-static method.
+# To call the method we need to write the name of the method followed by the class object name
+
+# In a non-static method, the method use runtime or dynamic binding. So that we cannot access a non-static method without creating an instance. 
+
+# In the non-static method, we can override a non-static method. Because for override we need runtime polymorphism, which happens only in runtime binding.
+
+# In the non-static method, here memory allocation happens when the method is invoked
+# and the memory is allocated every time when the method is called.
+# So much memory is used here.
+
+
+# 패키지에 대해 이해할 수 있다.
+package com.ohgiraffers.section02.package_and_import;
+public class Application1 {
+    public static void main(String[] args) {
+        /* 패키지란?
+        * 서로 관련 있는 클래스 또는 인터페이스 등을 모아 하나의 묶음(그룹)으로 단위를 구성하는 것을 말한다.
+        * 같은 패키지 내에서는 동일한 이름의 클래스를 만들 수 없지만, 패키지가 다르면 동일한 이름을 가진 클래스를 만들 수 있다.
+        * 클래스명은 원래 패키지명을 포함하고 있기 때문이다. 예)com.ohgiraffers.section01.method.Calculator 이게 클래스명이다.
+        * */
+
+        /* 1. non-static 메소드의 경우 */
+        com.ohgiraffers.section01.method.Calculator calc = new com.ohgiraffers.section01.method.Calculator();
+        // new라는 키워드(혹은 operator)를 통해 메소드를 불러온 후 calc라는 변수명에 초기화한다.
+        int min = calc.minNumberOf(30, 20);
+        // 매개변수의 자료형과 동일한 자료형인 변수명에 method의 새로운 변수명 calc.메소드이름(전달인자); 형식으로 메소드를 불러와준다.
+
+        System.out.println(min); // 20
+
+        /* 2. static 메소드의 경우 */
+        int max = com.ohgiraffers.section01.method.Calculator.maxNumberOf(30, 20);
+
+        System.out.println(max); // 30
+    }
+}
+
+
+# import에 대해 이해할 수 있다.
+package com.ohgiraffers.section02.package_and_import;
+
+import com.ohgiraffers.section01.method.Calculator;
+
+import static com.ohgiraffers.section01.method.Calculator.maxNumberOf;
+
+public class Application2 {
+
+    public static void main(String[] args) {
+        /* 임포트란?
+        *  패키지명을 생략하고 사용할 수 있도록 한 구문이 import이다.
+        *  import는 package 선언문과 class 선언문 사이에 작성하며
+        *  어떠한 패키지 내에 있는 클래스를 사용할 것인지에 대해 미리 선언하는 효과를 가진다.
+        * */
+
+        /* 1. non-static 메소드인 경우 */
+        Calculator calc = new Calculator();
+        int min = calc.minNumberOf(50, 60);
+
+        System.out.println(min); // 50
+
+        /* 2. static 메소드인 경우 */
+        int max = Calculator.maxNumberOf(50, 60);
+
+        System.out.println(max); // 60
+
+        /* 3. static 메소드를 호출할 때 클래스명도 생략하고 사용(import static) */
+        // import 단축키 : ctrl + alt + O (이클립스에서는 ctrl + shift + o)
+        int max2 = maxNumberOf(100, 200);
+
+        System.out.println("max2 = " + max2); // 200
+    }
+}
+
+
+# Math 클래스에서 제공하는 static 메소드를 호출할 수 있다. */
+package com.ohgiraffers.section03.math;
+
+public class Application1 {
+
+    public static void main(String[] args) {
+        /* API : Application Programming Interface는 운영체제에서
+        *  프로그래밍 언어가 제공하는 기능을 제어할 수 있도록 (응용프로그램에서 사용할 수 있도록) 만든 인터페이스를 뜻한다.
+        *  쉽게 말해 우리가 구현할 수 없거나 구현하기 번거로운 기능들을
+        * JDK를 설치하면 사용할 수 있도록 제공해놓은 소스코드(클래스나 인터페이스)들을 의미한다.
+        *  더 쉽게 말해 누가 작성해놓은 소스코드이니 가져다 쓰는 방법을 본다는 말이다.
+        *  모든 코드를 우리가 다 외울 수 없으니 API 문서를 별도로 제공해주고 있다.
+        * */
+
+        /* java.lang.Math
+        *  Math 클래스는 수학에서 자주 사용하는 상수들과 함수들을 미리 구현해놓은 클래스이다.
+        *  모든 메소드가 "static method"로 작성되어 있다. */
+
+        /* 1. 절대값 출력 */
+        /* 1-1. 클래스의 full-name을 다 적는 경우 */
+        System.out.println("-7의 절대값 : " + (java.lang.Math.abs(-7)));  // -7의 절대값 : 7
+
+        /* 1-2. import를 해서 사용 */
+        System.out.println(Math.abs(-1.25)); // 1.25
+
+        /* 2. 최대값, 최소값 출력 */
+        System.out.println(Math.min(10, 20));  // 10
+        //굳이 앞에서처럼 min이나 max 메소드를 만들어서 불러와 사용할 필요없이 Math.min(), Math.max()사용) 
+        System.out.println(Math.max(20, 30));  // 30
+
+        System.out.println(Math.PI); // 파이 3.141592...값 출력
+
+        /* 3. 난수 출력 */
+        System.out.println(Math.random()); // 0-1 사이 난수 출력
+    }
+}
+
+# 사용자 지정 범위의 난수를 발생시킬 수 있다.
+        /* 난수의 활용
+        *  Math.random()을 이용해 발생한 난수는 0부터 1 사이 실수 범위의 난수값을 반환한다.
+        *  필요에 따라 정수 형태의 값을 원하는 범위 만큼 발생시켜야 하는 경우들이 존재한다.
+        * 난수는 run할 때마다 값이 바뀐다. */
+
+        /* 원하는 범위의 난수를 구하는 공식
+        *  (int) (Math.random * 구하려는 난수의 갯수) + 구하려는 난수의 최소값
+        * */
+
+        /* 1. 0 ~ 9까지의 난수 발생 */
+        int random1 = (int) (Math.random() * 10);
+        System.out.println(random1);  // 1
+
+        /* 2. 1 ~ 10까지의 난수 발생 */
+        int random2 = (int) (Math.random() * 10) + 1;
+        System.out.println(random2);  // 7
+
+        /* 3. 10 ~ 15까지의 난수 발생 */
+        int random3 = (int) (Math.random() * 6) + 10;
+        System.out.println(random3); // 10
+
+        /* 4. -128 ~ 127까지의 난수 발생 */
+        int random4 = (int) (Math.random() * 256) - 128;
+        System.out.println(random4); // -89
+
+# java.util.Random 클래스를 활용하여 사용자 지정 범위의 난수를 발생시킬 수 있다. */
+package com.ohgiraffers.section03.math;
+
+import java.util.Random;
+
+public class Application3 {
+
+    public static void main(String[] args) {
+        /* java.util.Random 클래스의 nextInt() 메소드를 이용한 난수 발생
+        * (아깐 Math.random()을 이용해 난수를 발생시켰다)*/
+
+        /* 원하는 범위의 난수를 구하는 공식
+        *  random.nextInt(구하려는 난수의 갯수) + 구하려는 난수의 최소값
+        * */
+
+        Random random = new Random();
+
+        /* 1. 0 ~ 9까지 난수 발생 */
+        int random1 = random.nextInt(10);
+        System.out.println("random1 = " + random1); // 8
+
+        /* 2. 1 ~ 10까지 난수 발생 */
+        int random2 = random.nextInt(10) + 1;
+
+        /* 3. 20 ~ 45까지 난수 발생 */
+        int random3 = random.nextInt(26) + 20;
+
+        /* 4. -128 ~ 127까지 난수 발생 */
+        int random4 = random.nextInt(256) - 128;
+    }
+}
+
+# java.util.Scanner를 이용, 다양한 자료형 값 입력 받기
+package com.ohgiraffers.section04.scanner;
+
+import java.util.Scanner;
+
+public class Application1 {
+    public static void main(String[] args) {
+        /* 1. Scanner 객체 생성 */
+    //    java.util.Scanner sc = new java.util.Scanner(java.lang.System.in);
+    //    java.util.Scanner sc = new java.util.Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
+
+        /* 2. 자료형별 값 입력받기 */
+        /* 2-1. 문자열 입력 받기 */
+        /* nextLine() : 입력받은 값을 문자열로 반환해준다. */
+        System.out.print("이름을 입력하세요 : ");
+        String name = sc.nextLine();
+        System.out.println("입력하신 이름은 " + name + "입니다.");
+
+        /* 2-2. 정수형 값 입력 받기 */
+        /* nextInt() : 입력받은 값을 int형으로 반환한다. */
+        System.out.print("나이를 입력하세요 : ");
+        int age = sc.nextInt();
+        System.out.println("입력하신 나이는 " + age + "입니다.");
+
+        /* nextLong() : 입력받은 값을 long형으로 반환한다. */
+        System.out.print("금액을 입력해주세요 : ");
+        long money = sc.nextLong();
+        System.out.println("입력하신 금액은 " + money + "원 입니다.");
+
+        /* 2-3. 실수형 값 입력 받기 */
+        /* nextFloat() : 입력받은 값을 float형으로 반환한다. */
+        System.out.print("키를 입력해주세요 : ");
+        float height = sc.nextFloat();
+        System.out.println("입력하신 키는 " + height + "cm 입니다.");
+
+        /* nextDouble() : 입력받은 값을 double형으로 반환한다. */
+        System.out.print("원하는 실수를 입력하세요 : ");
+        double number = sc.nextDouble();
+        System.out.println("입력하신 실수는 " + number + "입니다.");
+
+        /* 2-4. 논리형 값 입력받기 */
+        /* nextBoolean() : 입력받은 값을 boolean형으로 반환한다. */
+        System.out.print("참과 거짓 중에 한 가지를 true or false로 입력해주세요 : ");
+        boolean isTrue = sc.nextBoolean();
+        System.out.println("입력하신 논리 값은 : " + isTrue + "입니다.");
+
+        /* 2-5. 문자형 값 입력받기 */
+        sc.nextLine();
+        System.out.print("아무 문자나 입력해주세요 : ");
+        char ch = sc.nextLine().charAt(5);
+        System.out.println("입력하신 문자는 " + ch + "입니다.");
+    }
+}
+
+# Scanner의 nextLine()과 next()에 대해 구분하여 사용할 수 있다.
+package com.ohgiraffers.section04.scanner;
+
+import java.util.Scanner;
+
+public class Application2 {
+    public static void main(String[] args) {
+        /* nextLine() : 공백을 포함한 한 줄을 입력을 위한 개행문자 전까지 읽어서 문자열로 반환한다. (공백문자 포함)
+        *  next() : 공백문자나 개행문자 전까지 읽어서 문자열로 반환한다.
+        * */
+        Scanner sc = new Scanner(System.in);
+        /* nextLine */
+        System.out.print("인사말을 입력해주세요 : ");
+        String greeting1 = sc.nextLine();
+
+        System.out.println("greeting1 = " + greeting1);
+
+        /* next */
+        System.out.print("인사말을 입력해주세요 : ");
+        String greeting2 = sc.next();
+
+        System.out.println("greeting2 = " + greeting2);
+    }
+}
+
+# 스캐너 사용 시 주의 사항에 대해 이해하고 사용 시 주의사항을 고려하여 사용할 수 있다.
+package com.ohgiraffers.section04.scanner;
+import java.util.Scanner;
+
+public class Application3 {
+public static void main(String[] args) {
+		/*  스캐너의 next 메소드들은 입력한 내용을 버퍼로부터 토큰단위로 분리해서 읽어온다.
+		 *  그래서 크게 두 가지 사항을 주의해야 한다.
+		 *  1. next()로 문자열 입력 받은 후 정수, 실수, 논리값 입력 받을 때
+		 *  2. 정수, 실수, 논리값 입력 후 next()로 문자열 입력받을 때
+		 * */
+		Scanner sc = new Scanner(System.in);
+
+		/* 1. next()로 문자열 입력 받은 후 정수, 실수, 논리값 입력 받을 때  */
+		System.out.print("문자열을 입력해주세요 : ");
+		String str1 = sc.next();				//공백이나 개행문자 전 까지를 읽어온다.
+		System.out.println("str1 : " + str1);
+
+		System.out.print("숫자를 입력해주세요 : ");
+		int num1 = sc.nextInt();				//정수 값을 읽어온다.
+		System.out.println("num1 : " + num1);
+
+		/*  여기까지 작성하고 나면 작성상에(compile 시)는 문제되지 않는다.
+		 *  처음 실행할 때 문자열에 "안녕" 이라고 입력하고 정수를 입력하면 정상적으로 동작한다.
+		 *  하지만, "안녕하세요 반갑습니다" 입력 하면 동작 시(Runtime) 숫자를 입력하기도 전에 InputMismatchException이 발생한다.
+		 *
+		 *  "안녕하세요 반갑습니다" <- 입력 시 공백을 기준으로 두 개의 토큰 "안녕하세요"와 "반갑습니다"로 분리가 된다.
+		 *  next()는 다음 토큰인 "안녕하세요"를 읽었고, nextInt()는 다음 토큰을 정수로 읽어야 하는데 "반갑습니다"가 나왔다.
+		 *  정수를 입력해야 하는데 "반갑습니다"를 읽으면 당연히 InputMismatchException이 발생하게 된다.
+		 *  공백이 있는 문자열을 받을거면 nextLine()을 이용하자
+		 *
+		 *  혹은 입력받은 버퍼를 줄 단위로 토큰을 분리하기 때문에 해당 라인의 토큰을 다 읽고 다음 줄로 이동시키고 싶을 때는
+		 *  한 라인의 모든 토큰을 읽어오는 sc.nextLine(); 호출을 중간에 한 번 넣어줘도 해결은 된다.
+		 * */
+		
+		/* 2. 정수, 실수, 논리값 입력 후 nextLine()로 문자열 입력받을 때 */
+		System.out.print("다시 숫자를 입력해주세요 : ");
+		int num2 = sc.nextInt();
+		System.out.println("num2 : " + num2);
+		
+		System.out.print("공백이 있는 문자열을 하나 입력해주세요 : ");
+		
+		sc.nextLine();
+		
+		String str2 = sc.nextLine();
+		System.out.println("str2 : " + str2);		
+		
+		/*  입력받을 시 nextLine()을 호출한 것이 아직 행을 바꾸지 않고
+     *  한 라인을 읽어들인다고 판단해서
+     *  아무 것도 읽지 못하고 넘어간 뒤 다음 출력구문을 실행시킨 것이다.
+		 *  이걸 해결하기 위해서는 sc.nextLine() 호출 전에 미리 sc.nextLine()을 한 번 호출 하면
+		 *  그 행을 읽어드리는걸 다음 행으로 넘기게 되고, 그 이후 새로 입력받은 한 라인을 읽어와서 str2에 저장하게 되므로 정상 동작하게 된다.
+		 * */
+	}
+}
