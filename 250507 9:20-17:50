@@ -1,0 +1,485 @@
+# 오늘자 강의 진도 Today's lecture
+# From Chapter06-section05(overloading, parameter) to Chapter07-section01(init)
+
+# Programmers에서 코딩 기초 트레이닝 문제 풀기 (2문제)
+# Solving basic java challenges in Programmers
+# https://school.programmers.co.kr/learn/challenges/training?order=acceptance_desc&languages=java
+
+# No.3 문제
+# 문자열 str과 정수 n이 주어집니다. str이 n번 반복된 문자열을 만들어 출력하는 코드를 작성해 보세요.
+# There's a given String str and int n. Write the code that String repeats n times.
+# Existing code
+# import java.util.Scanner;
+# public class Solution {
+#   public static void main(String[] args) {
+#       Scanner sc = new Scanner(System.in);
+#       String str = sc.next();
+#       int n = sc.nextInt();
+#   }
+# }
+
+# Solution
+public class Solution {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String str = sc.next();
+        int n = sc.nextInt();
+
+        System.out.print(str.repeat(n));
+    }
+}
+# SOLVED
+
+
+# No.5 문제
+# 다음과 같이 출력하도록 코드를 작성해 주세요.
+# 출력 예시
+# !@#$%^&*(\'"<>?:;
+# Write a code that prints like this.
+# Example
+# !@#$%^&*(\'"<>?:;
+
+# First Answer
+System.out.println("!@#$%^&*\(\'\"<>?:;");
+# Error occurred
+
+# Asked Copilot
+# Question : I have to print !@#$%^&*(\'"<>?:; this line in java with string or char.
+# I made a code like this. System.out.println("!@#$%^&*\('\"\<\>\?\:\;");
+# but it doesn't work. What should i do?
+
+# Answer:
+# The issue with your code is in how escape sequences are handled in Java.
+# In Java strings, certain characters like the backslash (\), double quotes ("),
+# and others have special meanings and need to be escaped properly.
+# Here is the corrected code:
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("!@#$%^&*(\\'\"<>?:;");
+    }
+}
+# Explanation of Changes:
+# Backslash (\): Since the backslash itself is a special character in Java, you need to escape it by using \\.
+# Single Quote ('): You don't need to escape a single quote inside a string, so you can leave it as '.
+# Double Quote ("): Inside a string, double quotes must be escaped using \".
+# Other Characters: The rest of the characters like !@#$%^&*<>?:; don't need to be escaped
+# because they are not special characters in Java strings.
+
+# Second Answer
+public class Solution {
+    public static void main(String[] args) {
+        System.out.println("!@#$%^&*(\\'\"<>?:;");
+    }
+}
+# SOLVED
+
+
+# Solving Overloading Challenge
+# https://www.notion.so/Solving-Overloading-Challenges-1ecfc892a16f809d9d8beccd251f8885?pvs=4
+# No.1
+package com.ohgiraffers.level01.basic.member.model.dto;
+
+public class MemberDTO {
+    // 여기에 메소드 작성
+    private String id;
+    private String pwd;
+    private String name;
+    private int age;
+    private char gender;
+    private String phone;
+    private String email;
+
+    public MemberDTO() {}
+
+    /*public class Member {
+    String id;
+    String pwd;
+    String name;
+    int age;
+    char gender;
+    String[] hobby;} 이 형태를 원하는 건가?*/
+
+    //두 개의 필드값을 확인할 수 있는 getter 생성
+    public String getId() { return id;}
+    public String getPwd() { return pwd;}
+    public String getName() { return name;}
+    public int getAge() { return age;}
+    public char getGender() { return gender;}
+    public String getPhone() { return phone;}
+    public String getEmail() { return email;}
+
+    // setter 생성
+    /*Eg) public void setWidth(double width) {
+        this.width = width;
+    }
+    public void setHeight(double height) {
+        this.height = height;
+    } 예시 */
+    public void setId(String id) {this.id = id;}
+    public void setPwd(String  pwd) {this.pwd = pwd;}
+    public void setName(String name) {this.name = name;}
+    public void setAge(int age) {this.age = age;}
+    public void setGender(char gender) {this.gender = gender;}
+    public void setPhone(String phone) {this.phone = phone;}
+    public void setEmail(String email) {this.email = email;}
+}
+
+package com.ohgiraffers.level01.basic.member.model.run;
+import com.ohgiraffers.level01.basic.member.model.dto.MemberDTO;
+public class Application {
+    public static void main(String[] args) {
+        MemberDTO member = new MemberDTO();
+
+        //getter를 이용해서 필드의 초기값 확인
+        System.out.println("id : " + member.getId()); // id : null
+        System.out.println("pwd : " + member.getPwd()); // pwd : null
+        System.out.println("name : " + member.getName()); // name : null
+        System.out.println("age : " + member.getAge()); // age : 0
+        System.out.println("gender : "+ member.getGender()); // gender :
+        System.out.println("phone : "+member.getPhone()); // phone : null
+        System.out.println("email : "+member.getEmail()); // email : null
+
+        //setter를 이용해서 필드 값 변경
+        member.setId("user01");
+        member.setPwd("pass01");
+        member.setName("홍길동");
+        member.setAge(20);
+        member.setGender('M');
+        member.setPhone("010-1234-5678");
+        member.setEmail("hong123@ohgiraffers.com");
+
+        //getter를 이용해서 변경된 필드값 확인
+        System.out.println("변경 후 id : " + member.getId()); // 변경 후 id : user01
+        System.out.println("변경 후 pwd : " + member.getPwd()); // 변경 후 pwd : pass01
+        System.out.println("변경 후 name : " + member.getName()); // 변경 후 name : 홍길동
+        System.out.println("변경 후 age : " + member.getAge()); // 변경 후 name : 홍길동
+        System.out.println("변경 후 gender : "+ member.getGender()); // 변경 후 gender : M
+        System.out.println("변경 후 phone : "+member.getPhone()); // 변경 후 phone : 010-1234-5678
+        System.out.println("변경 후 email : "+member.getEmail()); // 변경 후 email : hong123@ohgiraffers.com
+    }
+}
+
+
+# No.2
+package com.ohgiraffers.level01.basic.member.model.dto;
+
+import com.ohgiraffers.level01.basic.member.model.run.BookApplication;
+
+public class BookDTO {
+    private String title;
+    private String publisher;
+    private String author;
+    private int price;
+    private double discountRate;
+
+/*- publisher : String
+- author : String
+- price : int
+- discountRate : double */
+
+    public BookDTO() {} // chapter06-section04_constructor_User.java 참고
+    public BookDTO(String title, String publisher, String author){
+        this.title = title;
+        this.publisher = publisher;
+        this.author = author;
+    }
+    public BookDTO(String title, String publisher, String author, int price, double discountRate){
+        this(title, publisher, author);
+        this.price = price;
+        this.discountRate = discountRate;
+    }
+
+   // + setters / getters  필드 수정용 메소드 / 필드값 리턴용 메소드
+    public String getTitle() { return title;}
+    public String getPublisher() { return publisher;}
+    public String getAuthor() { return author;}
+    public int getPrice() { return price;}
+    public double getDiscountRate() { return discountRate;}
+
+    public void setTitle(String title) {this.title = title;}
+    public void setPublisher(String publisher) {this.publisher = publisher;}
+    public void setAuthor(String author) {this.author = author;}
+    public void setPrice(int price) {this.price = price;}
+    public void setDiscountRate(double discountRate) {this.discountRate = discountRate;}
+
+    // 필드값 출력용 메소드
+    public void printInformation() {
+        System.out.println(title + ", " + publisher + ", " + author + ", " + price + ", " + discountRate);
+    } //chap06-section05_parameter_parameterTest.java line 30-40 참조
+    /* printInformation() 괄호 안을 정리하고 {} 안에 넣어줘어야 할 필요 있음.
+    * BookApplication에서 System.out.println(book.printInformation());이 출력이 안 됨 */
+    /* 15:16 해결! 그냥 printInformation() 괄호 안을 비워줌.
+    * solved 15:16! Just erased inside of prinInformation(). */
+
+    /* public String printInformation() {
+        return this.title + ", " + this.publisher + ", " + this.author+ ", " + this.price + ", " + this.discountRate;
+    } public void로 작성해야함! Different with condition : void (not a String) */
+}
+
+
+# No.3
+package com.ohgiraffers.level01.basic.member.model.run;
+
+import com.ohgiraffers.level01.basic.member.model.dto.MemberDTO;
+
+public class Application {
+    public static void main(String[] args) {
+        MemberDTO member = new MemberDTO();
+
+        //getter를 이용해서 필드의 초기값 확인
+        System.out.println("id : " + member.getId()); // id : null
+        System.out.println("pwd : " + member.getPwd()); // pwd : null
+        System.out.println("name : " + member.getName()); // name : null
+        System.out.println("age : " + member.getAge()); // age : 0
+        System.out.println("gender : "+ member.getGender()); // gender :
+        System.out.println("phone : "+member.getPhone()); // phone : null
+        System.out.println("email : "+member.getEmail()); // email : null
+
+        //setter를 이용해서 필드 값 변경
+        member.setId("user01");
+        member.setPwd("pass01");
+        member.setName("홍길동");
+        member.setAge(20);
+        member.setGender('M');
+        member.setPhone("010-1234-5678");
+        member.setEmail("hong123@ohgiraffers.com");
+
+        //getter를 이용해서 변경된 필드값 확인
+        System.out.println("변경 후 id : " + member.getId()); // 변경 후 id : user01
+        System.out.println("변경 후 pwd : " + member.getPwd()); // 변경 후 pwd : pass01
+        System.out.println("변경 후 name : " + member.getName()); // 변경 후 name : 홍길동
+        System.out.println("변경 후 age : " + member.getAge()); // 변경 후 name : 홍길동
+        System.out.println("변경 후 gender : "+ member.getGender()); // 변경 후 gender : M
+        System.out.println("변경 후 phone : "+member.getPhone()); // 변경 후 phone : 010-1234-5678
+        System.out.println("변경 후 email : "+member.getEmail()); // 변경 후 email : hong123@ohgiraffers.com
+    }
+}
+
+package com.ohgiraffers.level03.hard.emp.run;
+
+import com.ohgiraffers.level03.hard.emp.model.dto.Employee;
+import java.util.Scanner;
+public class Application {
+    public static void main(String[] args) {
+        // 조건1 스캐너를 이용해서 모든 직원 정보를 입력받음
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("사원번호: ");
+        int number = sc.nextInt();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("이름: ");
+        String name = sc.nextLine();
+
+        System.out.print("부서명: ");
+        String dept = sc.nextLine();
+
+        System.out.print("직함: ");
+        String job = sc.nextLine();
+
+        System.out.print("나이: ");
+        int age = sc.nextInt();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("성별: ");
+        char gender = sc.next().charAt(0);
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("급여: ");
+        int salary = sc.nextInt();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("보너스 비율: ");
+        double bonusP = sc.nextDouble();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("전화번호: ");
+        String phoneNum = sc.nextLine();
+
+        System.out.print("주소: ");
+        String address = sc.nextLine();
+
+        //조건2 기본 생성자로 인스턴스 생성 후 setter를 이용하여 필드 값 변경 후
+        Employee employee = new Employee();
+        employee.setNumber(200);
+        employee.setName("홍길동");
+        employee.setDept("영업부");
+        employee.setJob("과장");
+        employee.setAge(20);
+        employee.setGender('남');
+        employee.setSalary(2000000);
+        employee.setBonusPoint(0.5);
+        employee.setPhone("010-1234-5678");
+        employee.setAddress("서울시 서초구 서초동");
+
+        //조건3 getter를 이용하여 모든 필드 값 출력
+        System.out.println(employee.getNumber());
+        System.out.println(employee.getName());
+        System.out.println(employee.getDept());
+        System.out.println(employee.getJob());
+        System.out.println(employee.getAge());
+        System.out.println(employee.getGender());
+        System.out.println(employee.getSalary());
+        System.out.println(employee.getBonusPoint());
+        System.out.println(employee.getPhone());
+        System.out.println(employee.getAddress());
+    }
+}
+
+# 264-300번째 줄 이전 버전 코드
+# Former code of line 264-300
+// 조건1 스캐너를 이용해서 모든 직원 정보를 입력 받아
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("사원번호: " + number);
+        int number = sc.nextInt();
+
+        System.out.print("이름 : " + name);
+        String name = sc.nextLine();
+
+        System.out.print("부서명 : " + dept);
+        String dept = sc.nextLine();
+
+         System.out.print("직함 : " + job);
+        String job = sc.nextLine();
+
+        System.out.print("age = " + age);
+        int age = sc.nextInt();
+
+        System.out.print("gender = " + gender);
+        char gender = sc.next().charAt(0);
+
+        System.out.print("salary = " + salary);
+        int salary = sc.nextInt();
+
+        System.out.print("bonusP = " + bonusP);
+        double bonusP = sc.nextDouble();
+
+        System.out.print("전화번호 : " + phoneNum);
+        String phoneNum = sc.nextLine();
+
+        System.out.print("address = " + address);
+        String address = sc.nextLine();
+# 문제1 : 실행이 안 된다. (시간만 속절없이 흐름)
+# Problem1 : Run permanently without any output
+
+# 문제2 : 이름 : 부서명 : 이렇게 붙어서 출력된다.
+# Problem2 : Print like 이름 : 부서명: continuously
+
+# Asked Copilot
+# Answer code
+// 조건1 스캐너를 이용해서 모든 직원 정보를 입력받음
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("사원번호: ");
+        int number = sc.nextInt();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("이름: ");
+        String name = sc.nextLine();
+
+        System.out.print("부서명: ");
+        String dept = sc.nextLine();
+
+        System.out.print("직함: ");
+        String job = sc.nextLine();
+
+        System.out.print("나이: ");
+        int age = sc.nextInt();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("성별: ");
+        char gender = sc.next().charAt(0);
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("급여: ");
+        int salary = sc.nextInt();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("보너스 비율: ");
+        double bonusP = sc.nextDouble();
+        sc.nextLine(); // Consume the leftover newline
+
+        System.out.print("전화번호: ");
+        String phoneNum = sc.nextLine();
+
+        System.out.print("주소: ");
+        String address = sc.nextLine();
+# Applied to the original code
+
+
+# Copilot에게 위 코드를 기반으로 또 다른 질문 물어봄
+# Asking another qusetion based on the code above to Copilot
+
+# Why do I need sc.nextLin(); after int and double?
+
+# === Answer ===
+# The reason you need to include sc.nextLine();
+# after reading int or double values with sc.nextInt() or sc.nextDouble()
+# is due to how the Scanner class processes input.
+# --- Explanation ---
+# 1. Input Buffer Behavior:
+# When you use sc.nextInt() or sc.nextDouble(), these methods only read the numeric portion of the input
+# (until the next whitespace, such as a space or a newline).
+# After reading the number, the newline character (\n)
+# that the user entered to submit the input
+# remains in the input buffer.
+
+# 2. Effect on sc.nextLine():
+# sc.nextLine() reads everything in the input buffer up to the next newline character (\n).
+# If you don't call sc.nextLine() after using sc.nextInt() or sc.nextDouble(),
+# the leftover newline character from the previous input
+# will be consumed by the next sc.nextLine() call.
+# This can cause issues because it will make sc.nextLine() appear to "skip" an input.
+
+# 3. Why It's Necessary:
+# To ensure that sc.nextLine() correctly reads the next full line of input
+# (e.g., for strings like a name, department, or address),
+# you need to clear out the leftover newline character from the input buffer.
+# This is done by calling sc.nextLine() right after sc.nextInt() or sc.nextDouble().
+
+
+# To better explain why `sc.nextLine()` is needed
+# after reading `int` or `double` values in Java when using `Scanner`,
+# I'll describe the concept with a visual representation and explanation.
+
+# Here’s an image-like textual drawing to clarify the behavior:
+
+# User Input: 25 (press Enter)
+# Buffer after sc.nextInt():
+# [ \n ] <- Enter key's newline remains in the buffer
+
+# sc.nextLine() reads:
+# [ \n ] <- Consumes the leftover newline
+
+# Now, next sc.nextLine() reads:
+# [Actual input] <- Reads the user's next actual input
+
+
+# ## Key Visual Steps:
+# 1. Input Buffer Behavior (Before Reading):
+#   ```
+#  User Input: 25 (press Enter)
+#  Input Buffer: [ 2  5  \n ]
+# -----
+
+# 2. Calling `sc.nextInt()`:
+#  - `sc.nextInt()` reads the numeric part (`25`) but
+# leaves the newline character (`\n`) in the buffer.
+#   ```
+#  Input Buffer after sc.nextInt(): [ \n ]
+# -----
+
+# 3. Calling `sc.nextLine()` Next:
+#   - If you immediately call `sc.nextLine()` after `sc.nextInt()`,
+#   it will consume the leftover `\n`.
+#   ```
+#    Input Buffer after sc.nextLine(): [ ]
+# -----
+
+# 4. Now Ready for Actual Input:
+#   - After clearing the buffer, the next `sc.nextLine()` will correctly read the next full line of input.
+#   ```
+   User Input: "John Doe"
+   Input Buffer: [ J  o  h  n     D  o  e  \n ]
+# -----
