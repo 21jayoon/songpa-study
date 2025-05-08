@@ -1,0 +1,452 @@
+# 강의 진도 Today's lecture
+# From Chapter07(objetct_array)-section02(uses) To Chapter08(inheritance)-section03(overrideing)
+
+# 상속-오버라이딩 관련 문제 출제 (오늘 배운 내용 중 chapter08 기반)
+# Make a Inheritance-Overriding original challenge (Based on today's lesson, Chapter08)
+# 먼저 코드를 짬 First, write a code
+package com.ohgiraffers.MakeChallenge.productList;
+import java.util.Date;
+public class productList {
+    private int code; // 상품코드
+    private String type;
+    private String name;
+    private Date searchingDate; // java.uti.Date import해서 사용
+
+    public productList() {
+        System.out.println("productList: 기본 생성자 호출");
+    }
+
+    // 3. productList 클래스 내의 모든 필드 초기화하는 생성자 작성
+    /* VV 얘는 오버로딩인가???? 왜냐면 위에서 public productList(){} 기본생성자가 작성이 됐잖아. */
+    // Copilot에 물어봄. 오버로딩 맞다고 함. Asked Copilot, it saids this is 'OVERLOAIDNG'. 17:23
+    public productList(int code, String type, String name, Date searchingDate) {
+        this.code = code;
+        this.type = type;
+        this.name = name;
+        this.searchingDate = searchingDate;
+        System.out.println("productList의 매개변수 있는 생성자 호출");
+    }
+
+    public int getCode() {return code;}
+    public void setCode(int code) {this.code = code;}
+
+    public String getType() {return type;}
+    public void setType(String type) {this.type = type;}
+
+    public String getName() {return name;}
+    public void setName(String name) {this.name = name;}
+
+    public Date getSearchingDate() {return searchingDate;}
+
+    public void setSearchingDate(Date searchingDate) {this.searchingDate = searchingDate;}
+
+    public String callInformation() {
+        return "productList{" +
+                "상품 코드 ='" + code + '\'' +
+                ", 종류 ='" + type + '\'' +
+                ", 상품이름 ='" + name + '\'' +
+                ", 검색일자 =" + searchingDate +
+                '}';
+    }
+}
+
+
+
+package com.ohgiraffers.MakeChallenge.Bond;
+import com.ohgiraffers.MakeChallenge.productList.productList;
+import java.util.Date;
+
+public class bondList extends productList { //6. override 상속이 왜 안 되나 했더니... extends productList를 안 해줌
+       // Product와 Bond 사이에 IS-A 관계 성립. Bond is a Product.
+       // 부모 클래스: Product, 자식 클래스 : Bond
+    //1. 작은 것부터 설정하자. bondList부터
+    private int maturity;
+    private int principal;
+    private double coupon;
+    // maturity = 만기(기간), principal = 원금, coupon = 이자
+
+    public bondList() {
+        System.out.println("bondList: 기본 생성자 호출함");
+    }
+
+   // 모든 필드 초기화하는 생성자 작성
+    // ALT+INSERT --> CONSTRUCTOR, 모두 선택 후 OK(생성)
+    public bondList(int maturity, int principal, double coupon) {
+        this.maturity = maturity;
+        this.principal = principal;
+        this.coupon = coupon;
+        System.out.println("bondList의 모든 필드를 초기화하는 생성자 호출함");
+    }
+
+    //2. 부모필드 productList 설정하러 갑시다. 13:49
+
+    // 4. 부모 필드까지 모두 초기화하는 생성자 작성
+    public bondList(int code, String type, String name, Date searchingDate, int maturity, int principal, double coupon){
+        /*부모클래스 productList가 가진 필드를 초기화할 값 전달*/
+        super(code, type, name, searchingDate);
+
+        /* 나머지 내 클래스 필드 초기화*/
+        // 14:07 bondList에 있던 private String name 삭제
+        this.maturity = maturity;
+        this.principal = principal;
+        this.coupon = coupon;
+        System.out.println("bondList의 부모필드까지 초기화하는 생성자 호출");
+    }
+
+    // 5. getter setter 설정 (ALT + INSERT 이용)
+    public int getMaturity() {return maturity;}
+    public void setMaturity(int maturity) {this.maturity = maturity;}
+
+    public int getPrincipal() {return principal;}
+    public void setPrincipal(int principal) {this.principal = principal;}
+
+    public double getCoupon() {return coupon;}
+    public void setCoupon(double coupon) {this.coupon = coupon;}
+
+    @Override
+    public String callInformation() {
+        return super.callInformation() //super.로 부모productList가 가진 callInformation호출
+                + " 채권Bond ["
+                + "만기 = " + this.maturity
+                + ", 원금(투자금액) = " + this.principal
+                + ", 이율 = " + this.coupon
+                + ", 만기 시 예상 수령액 = " + (this.principal * this.coupon)
+                + "]";
+    }
+   }
+
+
+
+package com.ohgiraffers.MakeChallenge.run;
+import com.ohgiraffers.MakeChallenge.Bond.bondList;
+import com.ohgiraffers.MakeChallenge.productList.productList;
+import java.util.Date;
+
+public class RunApplication {
+    public static void main(String[] args) {
+        productList product1 = new productList();
+        System.out.println(product1.callInformation());
+
+        productList product2 = new productList(123, "채권", "최고은행-0123갑", new java.util.Date());
+        System.out.println(product2.callInformation());
+
+        bondList bond00 = new bondList();
+        System.out.println(bond00.callInformation());
+
+        bondList bond01 = new bondList(2, 2000000, 3.4);
+        System.out.println((bond01.callInformation()));
+
+        bondList bond02 = new bondList(456, "채권", "핸다카드017-04", new java.util.Date(), 1, 1000000, 1.2);
+        System.out.println(bond02.callInformation());
+    }
+}
+
+# Results
+# productList: 기본 생성자 호출
+# productList{상품 코드 ='0', 종류 ='null', 상품이름 ='null', 검색일자 =null}
+# productList의 매개변수 있는 생성자 호출
+# productList{상품 코드 ='123', 종류 ='채권', 상품이름 ='최고은행-0123갑', 검색일자 =Thu May 08 17:06:29 KST 2025}
+# productList: 기본 생성자 호출
+# bondList: 기본 생성자 호출함
+# productList{상품 코드 ='0', 종류 ='null', 상품이름 ='null', 검색일자 =null} 채권Bond [만기 = 0, 원금(투자금액) = 0, 이율 = 0.0, 만기 시 예상 수령액 = 0.0]
+# productList: 기본 생성자 호출
+# bondList의 모든 필드를 초기화하는 생성자 호출함
+# productList{상품 코드 ='0', 종류 ='null', 상품이름 ='null', 검색일자 =null} 채권Bond [만기 = 2, 원금(투자금액) = 2000000, 이율 = 3.4, 만기 시 예상 수령액 = 6800000.0]
+# productList의 매개변수 있는 생성자 호출
+# bondList의 부모필드까지 초기화하는 생성자 호출
+# productList{상품 코드 ='456', 종류 ='채권', 상품이름 ='핸다카드017-04', 검색일자 =Thu May 08 17:06:29 KST 2025} 채권Bond [만기 = 1, 원금(투자금액) = 1000000, 이율 = 1.2, 만기 시 예상 수령액 = 1200000.0]
+
+
+
+# 이후 강사님이 출제했던 문제형식을 참고하여 notion에 문제 출제
+# After complete the code, refenencing lecturer's Challenge Condition, publish the challenge in Notion team-page
+# https://www.notion.so/ohgiraffers/1ed649136c118045bb35c4319ec725ff?pvs=4
+
+# 다음과 같은 조건을 만족하는 프로그램을 작성하시오.
+# 반환형과 매개변수 유무에 따라 메소드를 작성하고, 이를 호출하거나 출력하시오.
+
+# 1. 구현 클래스 및 구현 내용
+# com.ohgiraffers.MakeChallenge.productList;
+# - code : int;
+# - type : String;
+# - name : String;
+# - searchingDate : Date; // java.util.Date import
+ 
+# + productList()
+ 
+# + //productList 클래스 내의 모든 필드 초기화하는 생성자 작성
+ 
+# + setters / getters 
+ 
+
+# com.ohgiraffers.MakeChallenge.Bond;
+# - maturity : int;
+# - principal : int;
+# - coupon : double
+
+# + bondList()
+
+# + //bondList 클래스의 모든 필드 초기화하는 생성자 작성
+
+# + //부모필드까지 초기화하는 생성자 작성
+
+# + setters / getters             // 필드 수정용 메소드 / 필드값 리턴용 메소드
+
+
+# com.ohgiraffers.MakeChallenge.run;
+
+# + main(args:String[]):void       // 모든 메소드는 main함수에서 호출하여 출력시킨다.             
+
+# ------------------------------------------------------------------------------------
+# 2. Application 클래스 작성 내용
+
+# public class RunApplication {
+#   public static void main(String[] args) {
+#       //기본 생성자를 이용하여 인스턴스 생성 후 필드 값 출력
+#       //필드 4가지를 초기화하는 생성자를 이용하여 인스턴스 생성 후 필드 값 출력
+        
+#       //기본 생성자를 이용하여 인스턴스 생성 후 필드 값 출력
+#       //필드 3가지를 초기화하는 생성자를 이용하여 인스턴스 생성 후 필드 값 출력
+        
+#       //모든 필드를 초기화하는 생성자를 이용하여 인스턴스 생성 후 필드 값 출력
+#   }
+# }
+# ------------------------------------------------------------------------------------
+# 3. 실행 결과 예시
+
+# productList: 기본 생성자 호출
+# productList{상품 코드 ='0', 종류 ='null', 상품이름 ='null', 검색일자 =null}
+# productList의 매개변수 있는 생성자 호출
+# productList{상품 코드 ='123', 종류 ='채권', 상품이름 ='최고은행-0123갑', 검색일자 =Thu May 08 14:53:51 KST 2025}
+
+# productList: 기본 생성자 호출
+# bondList: 기본 생성자 호출함
+# productList{상품 코드 ='0', 종류 ='null', 상품이름 ='null', 검색일자 =null} 채권Bond [만기 = 0, 원금(투자금액) = 0, 이율 = 0.0 만기 시 예상 수령액 = 0.0]
+# productList: 기본 생성자 호출
+# bondList의 모든 필드를 초기화하는 생성자 호출함
+# productList{상품 코드 ='0', 종류 ='null', 상품이름 ='null', 검색일자 =null} 채권Bond [만기 = 2, 원금(투자금액) = 2000000, 이율 = 3.4 만기 시 예상 수령액 = 6800000.0]
+
+# productList의 매개변수 있는 생성자 호출
+# bondList의 부모필드까지 초기화하는 생성자 호출
+# productList{상품 코드 ='456', 종류 ='채권', 상품이름 ='핸다카드017-04', 검색일자 =Thu May 08 14:56:56 KST 2025} 채권Bond [만기 = 1, 원금(투자금액) = 1000000, 이율 = 1.2, 만기 시 예상 수령액 = 1200000.0]
+
+
+
+# 스터디 팀원이 각자 한 문제씩 내고 시간관계 상 4문제 중 한 문제 선택해 풀어보기
+# Every studygroup member made a original challenge, and choose among one from 4 challenges. Than solve that problem.
+# 선택된 문제 Selectedd Challenge :
+#  https://www.notion.so/ohgiraffers/1ed649136c11807ab827dd049ba15104?pvs=4
+# - Dog 클래스는 Animal 클래스를 상속 받고 있습니다.
+# - 그런데, 몇 가지 메서드에서 오류가 나고 있습니다.. 접근 제한자가 잘못 작성되어 있는 것 같아요.
+# - 부모 클래스인 Animal 클래스의 메서드의 접근 제한자를 수정해서 해당 오류를 해결해주세요!!!
+# - 자식 클래스인 Dog 클래스의 메서드의 접근 제한자를 수정해서 해당 오류를 해결해주세요!!!
+
+# 문제 코드 Challenge Code
+package study.reviewtest;
+
+public class Animal {
+    private String name;
+    private int age;
+    private String gender;
+    private boolean isWalking;
+
+    public Animal(){}
+
+    public Animal(String name, int age, String gender) {
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+    }
+
+    void walk(){  // ❌ 1 related problem
+        if(isWalking){
+            System.out.println("이미 걷고 있습니다~");
+        }else{
+            System.out.println("걷고 있습니다");
+            isWalking = true;
+        }
+    }
+
+    private void stop(){ // ❌ 2 related problem
+        if(isWalking){
+            System.out.println("멈췄습니다!");
+            isWalking =false;
+        }else{
+            System.out.println("이미 멈춰 있습니다.");
+        }
+    }
+
+    protected void sayInfo(){
+        System.out.printf("이름은" + name +"이고, 나이는" + age + "이고, 성별은 " + gender + "입니다.");
+    }
+}
+
+
+package study.reviewtest;
+
+public class Dog extends Animal{
+    private boolean isBarking;
+
+    public Dog(boolean isBarking) {
+        this.isBarking = isBarking;
+    }
+
+    public Dog(String name, int age, String gender, boolean isBarking) {
+        super(name, age, gender);
+        this.isBarking = isBarking;
+    }
+
+    @Override
+    private void walk(){ // ❌ Error
+        if(isBarking){
+            System.out.println("강아지는 짖으면서 걸을 수 없어요!");
+            return;
+        }
+
+        System.out.println("강아지가");
+        super.walk();
+    }
+
+    @Override
+    public void stop(){
+        System.out.println("강아지가");
+        super.stop();
+    }
+
+    @Override
+    public void sayInfo(){
+        System.out.println("강아지의");
+        super.sayInfo();
+    }
+
+    public void bark(){
+        if(isBarking){
+            System.out.println("강아지가 짖는것을 멈춥니다.");
+            isBarking = false;
+        }else{
+            System.out.println("강아지가 짖습니다.");
+            isBarking = true;
+        }
+    }
+}
+
+# 내 답안 My Answer
+package com.ohgiraffers.study.reviewtest;
+public class Animal {
+    private String name;
+    private int age;
+    private String gender;
+    private boolean isWalking;
+
+    public Animal(){}
+
+    public Animal(String name, int age, String gender) {
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+    }
+
+    // 이전 선언부 previous declaration : void walk() {}
+    // 고친 선언부 Edited declaration:
+    public void walk(){
+        if(isWalking){
+            System.out.println("이미 걷고 있습니다~");
+        }else{
+            System.out.println("걷고 있습니다");
+            isWalking = true;
+        }
+    }
+
+    // 이전 선언부 previous declaration : private void stop() {}
+    // 고친 선언부 Edited declaration:
+    public void stop(){
+        if(isWalking){
+            System.out.println("멈췄습니다!");
+            isWalking =false;
+        }else{
+            System.out.println("이미 멈춰 있습니다.");
+        }
+    }
+
+    protected void sayInfo(){
+        System.out.printf("이름은" + name +"이고, 나이는" + age + "이고, 성별은 " + gender + "입니다.");
+    }
+}
+
+package com.ohgiraffers.study.reviewtest;
+
+public class Dog extends Animal{
+        /*- Dog 클래스는 Animal 클래스를 상속 받고 있습니다.
+- 그런데 몇 가지 메서드에서 오류가 나고 있습니다.. 접근 제한자가 잘못 작성되어 있는 것 같아요.
+- 부모 클래스인 Animal 클래스의 메서드의 접근 제한자를 수정해서 해당 오류를 해결해주세요!!!
+- 자식 클래스인 Dog 클래스의 메서드의 접근 제한자를 수정해서 해당 오류를 해결해주세요!!! */
+        private boolean isBarking;
+
+        public Dog (boolean isBarking) {
+            this.isBarking = isBarking;
+        }
+
+        public Dog(String name, int age, String gender, boolean isBarking) {
+            super(name, age, gender);
+            this.isBarking = isBarking;
+        }
+
+        @Override
+        // 이전 선언부 previous declaration: private void walk() {}
+        //고친 선언부 Fixed decalration :
+        public void walk(){
+            if(isBarking){
+                System.out.println("강아지는 짖으면서 걸을 수 없어요!");
+                return;
+            }
+            System.out.println("강아지가");
+            super.walk();
+        }
+
+        @Override
+        public void stop(){
+            System.out.println("강아지가");
+            super.stop();
+        }
+
+        @Override
+        public void sayInfo(){
+            System.out.println("강아지의");
+            super.sayInfo();
+        }
+
+        public void bark(){
+            if(isBarking){
+                System.out.println("강아지가 짖는것을 멈춥니다.");
+                isBarking = false;
+            }else{
+                System.out.println("강아지가 짖습니다.");
+                isBarking = true;
+            }
+        }
+    }
+
+package com.ohgiraffers.study.reviewtest;
+
+public class RunReviewtest {
+    public static void main(String[] args) {
+        Animal animal = new Animal();
+        animal.walk(); // 걷고 있습니다
+        animal.sayInfo(); // 이름은null이고, 나이는0이고, 성별은 null입니다.
+
+//        Dog dog = new Dog(true);
+//        dog.walk(); //강아지는 짖으면서 걸을 수 없어요!
+
+        Dog dog = new Dog(false);
+        dog.walk(); // 강아지가\n걷고 있습니다
+        dog.walk(); // 강아지가\n이미 걷고 있습니다~
+        dog.stop(); // 강아지가\n멈췄습니다!
+        dog.stop(); // 강아지가\n이미 멈춰 있습니다.
+        dog.sayInfo(); // 강아지의\n이름은null이고, 나이는0이고, 성별은 null입니다.
+        dog.bark(); // 강아지가 짖습니다.
+        dog.walk(); // 강아지는 짖으면서 걸을 수 없어요!
+        dog.bark(); // 강아지가 짖는것을 멈춥니다.
+        Dog dog2 = new Dog("Choco", 4, "Female", true);
+        dog2.sayInfo(); // 강아지의\n이름은Choco이고, 나이는4이고, 성별은 Female입니다.
+    }
+}
