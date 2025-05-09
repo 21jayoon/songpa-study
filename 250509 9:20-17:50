@@ -1,0 +1,412 @@
+# 오늘 배운 내용 What today learned
+# JAVA Polymorphism 다형성 - dynamic binding 동적 바인딩, up-casting & down-casting 업캐스팅과 다운캐스팅
+# instanceOf 연산자의 사용, abstract class, interface
+
+# OOP : reviewing polymorphism and using abstract class
+# https://github.com/21jayoon/practicingJAVA.git
+
+# Class 1
+package com.ohgiraffers.Kiosk;
+
+public abstract class KioskProgram { // 추상클래스 runKiosk 사용, userPay에 overriding 해줌
+    public abstract void selectEatin();
+
+    public abstract int selectMenu(int menu); // 결제 금액 반환용 메소드
+
+    public abstract boolean isOn(); // 상태 확인 메소드 추가
+
+    public abstract void setOn(boolean isOn); // 상태 변경 메소드 추가
+
+    public void payWithWhat(String payments, int amount) {
+        // 결제 방식 처리 로직
+        switch (payments) {
+            case "card":
+                System.out.println("카드로 " + amount + "원 결제하였습니다.");
+                break;
+            case "cash":
+                System.out.println("현금으로 " + amount + "원 결제하였습니다.");
+                break;
+            case "barcode":
+                System.out.println("간편결제로 " + amount + "원 결제하였습니다.");
+                break;
+            default:
+                System.out.println("잘못된 결제 방식입니다. 다시 시도해주세요.");
+                break;
+        }
+    }
+}
+
+# Class2
+package com.ohgiraffers.User;
+
+import com.ohgiraffers.Kiosk.KioskProgram;
+
+public class UserPay extends KioskProgram {
+    private boolean isOn = false; // 상태 관리 변수
+
+    @Override
+    public void selectEatin() {
+        if (!isOn) {
+            System.out.println("선택해주세요 : 먹고가기 / 포장하기");
+        }
+    }
+
+    @Override
+    public int selectMenu(int menu) {
+        // 메뉴 선택 및 결제 금액 반환
+        if (menu == 1) {
+            System.out.println("비빔막국수는 10000원입니다.");
+            return 10000;
+        } else if (menu == 2) {
+            System.out.println("물막국수는 11000원입니다.");
+            return 11000;
+        } else {
+            System.out.println("저희 매장은 물/비빔 두 메뉴만 제공합니다.");
+            return 0;
+        }
+    }
+
+    @Override
+    public void setOn(boolean isOn) {
+        this.isOn = isOn; // 상태 변경
+    }
+
+    @Override
+    public boolean isOn() {
+        return this.isOn; // 상태 반환
+    }
+
+    @Override
+    public void payWithWhat(String payments, int amount) {
+        // 부모 클래스의 payWithWhat 메소드를 그대로 사용하거나 추가 로직을 구현할 수 있습니다.
+        super.payWithWhat(payments, amount);
+    }
+}
+
+# Class3
+package com.ohgiraffers.Run;
+
+import com.ohgiraffers.User.UserPay;
+import java.util.Scanner;
+
+public class RunKiosk {
+    public static void main(String[] args) {
+        UserPay kiosk = new UserPay(); // userPay 객체 생성
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("====어서오십시오. 인제내린촌 막국수입니다.=====");
+            System.out.print("화면을 \'touch\'하거나 \'quit\'해주세요: ");
+            String touch = sc.nextLine();
+
+            if (touch.equals("touch")) {
+                kiosk.setOn(true); // userPay의 상태를 변경
+                kiosk.selectEatin(); // 먹고가기/포장하기 선택
+
+                // 메뉴 선택
+                System.out.println("메뉴를 선택해주세요 (1: 비빔막국수, 2: 물막국수): ");
+                int menu = sc.nextInt();
+                int amount = kiosk.selectMenu(menu); // 메뉴 선택 및 결제 금액 반환
+              
+                if (amount > 0) {
+                    // 결제 방식 선택
+                    sc.nextLine(); // 버퍼 클리어
+                    System.out.print("결제 방식을 선택해주세요 : card, cash, barcode = ");
+                    String paymentMethod = sc.nextLine();
+                    kiosk.payWithWhat(paymentMethod, amount); // 결제 메소드 호출
+                    break;
+                } if (amount == 0) {
+                    System.out.println("메뉴를 선택해주세요 (1: 비빔막국수, 2: 물막국수): ");
+                    int menu2 = sc.nextInt();
+                    amount = kiosk.selectMenu(menu2);
+                    sc.nextLine(); // 버퍼 클리어
+                    System.out.print("결제 방식을 선택해주세요 : card, cash, barcode = ");
+                    String paymentMethod = sc.nextLine();
+                    kiosk.payWithWhat(paymentMethod, amount);
+                    break;
+                }
+            } else if (touch.equals("quit")) {
+                System.out.println("방문 감사합니다. 다음에 또 뵙겠습니다.");
+                break;
+            } else {
+                System.out.println("잘못된 입력입니다. 화면을 터치해주세요.");
+            }
+        }
+    }
+}
+
+# First try of RunKiosk
+# 처음 직접 썼던 첫줄 코드
+while (true) {
+ System.out.println("====어서오십시오. 인제내린촌 막국수입니다.=====");
+ String touch = sc.nextLine();
+ if (touch.equals("touch")) {
+  kiosk2.setOn(true); // userPay의 상태를 변경
+  kiosk2.selectEatin(); // 메뉴 선택 메소드 호출
+  } else {
+      System.out.println("방문 감사합니다.다음에 또 뵙겠습니다.");
+      break;
+  }
+  }
+
+# Question to Copilot
+14:09
+
+package com.ohgiraffers.Kiosk;
+
+import com.ohgiraffers.User.userPay;
+import java.util.Scanner;
+
+public class kioskProgram {
+    public static void main(String[] args) {
+        userPay kiosk2 = new userPay(); // userPay 객체 생성
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("====어서오십시오. 인제내린촌 막국수입니다.=====");
+            String touch = sc.nextLine();
+            if (touch.equals("touch")) {
+//                kiosk2.setOn(true); // userPay의 상태를 변경
+                kiosk2.selectEatin(); // 메뉴 선택 메소드 호출
+
+            } else {
+                System.out.println("방문 감사합니다.다음에 또 뵙겠습니다.");
+                break;
+            }
+        }
+        
+    }
+}
+
+
+package com.ohgiraffers.Run;
+
+public abstract class runKiosk {
+    public abstract void selectEatin();
+
+    public abstract void selectMenu();
+
+    boolean isOn(); // 상태 확인 메소드 추가
+    public abstract boolean isOn();
+
+
+    public void payWithWhat(String payments) {
+        if(payments.equals("card")) {
+            System.out.println(payments + "로 " + selectMenu + "원 결제하였습니다.");
+        }
+        if(payments.equals("cash")) {
+            System.out.println(payments + "로 " + selectMenu + "원 결제하였습니다.");
+        }
+        if(payments.equals("barcode")) {
+            System.out.println(payments + "로 " + selectMenu + "원 결제하였습니다.");
+        }
+    }
+
+    public abstract void setOn(boolean isOn); // 상태 변경 메소드 추가
+
+
+}
+
+
+
+package com.ohgiraffers.User;
+
+import com.ohgiraffers.Run.runKiosk;
+
+public class userPay extends runKiosk { //implements runKiosk2
+    private boolean isOn = false; // 상태 관리 변수
+
+    @Override
+    public void selectEatin() {
+        if (!isOn) {
+            System.out.println("선택해주세요 : 먹고가기 / 포장하기");
+        }
+    }
+
+    @Override
+    public void selectMenu() {
+
+
+    }
+
+    @Override
+    public void payWithWhat() {
+        // 결제 방법 구현 예정
+    }
+
+    @Override
+    public void setOn(boolean isOn) {
+        this.isOn = isOn; // 상태 변경
+    }
+
+    @Override
+    public boolean isOn() {
+        return this.isOn; // 상태 반환
+    }
+
+    /*카드로 결제하는 경우*/
+    public void payWithWhat(card) {
+        card.paying();
+    }
+    /* 현금으로 결제하는 경우 */
+    public void payWithWhat(cash) {
+        cash.paying();
+    }
+
+    public void payWithWhat(barcode) {
+        barcode.paying();
+    }
+}
+추상 클래스runKiosk에 method payWithWhat(payments)를 넣고,
+그걸 상속받은 userPay가 kioskProgram에서
+Scanner로 받은 String 값(payments값과 동일)이 어떻게 (card, cash, barcode) 되는지에 따라
+다른 결과
+System.out.println(payments + "로 " + selectMenu + "원 결제하였습니다.");
+를 출력하려고 해.
+코드를 어떻게 고쳐야 할까?
+
+# Question2 to Copilot
+14:47
+코드를 이렇게 짰어
+package com.ohgiraffers.Kiosk;
+
+import com.ohgiraffers.User.userPay;
+import java.util.Scanner;
+
+public class kioskProgram {
+    public static void main(String[] args) {
+        userPay kiosk2 = new userPay(); // userPay 객체 생성
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("====어서오십시오. 인제내린촌 막국수입니다.=====");
+            System.out.print("화면을 \'touch\'하거나 \'quit\'해주세요: ");
+            String touch = sc.nextLine();
+
+            if (touch.equals("touch")) {
+                kiosk2.setOn(true); // userPay의 상태를 변경
+                kiosk2.selectEatin(); // 먹고가기/포장하기 선택
+
+                // 메뉴 선택
+                System.out.println("메뉴를 선택해주세요 (1: 비빔막국수, 2: 물막국수): ");
+                int menu = sc.nextInt();
+                int amount = kiosk2.selectMenu(menu); // 메뉴 선택 및 결제 금액 반환
+
+                if (amount > 0) {
+                    // 결제 방식 선택
+                    sc.nextLine(); // 버퍼 클리어
+                    System.out.print("결제 방식을 선택해주세요 : card, cash, barcode = ");
+                    String paymentMethod = sc.nextLine();
+                    kiosk2.payWithWhat(paymentMethod, amount); // 결제 메소드 호출
+                }
+            } else if (touch.equals("quit")) {
+                System.out.println("방문 감사합니다. 다음에 또 뵙겠습니다.");
+                break;
+            } else {
+                System.out.println("잘못된 입력입니다. 화면을 터치해주세요.");
+            }
+        }
+
+
+package com.ohgiraffers.Run;
+
+public abstract class runKiosk {
+    public abstract void selectEatin();
+
+    public abstract int selectMenu(int menu); // 결제 금액 반환용 메소드
+
+    public abstract boolean isOn(); // 상태 확인 메소드 추가
+
+    public abstract void setOn(boolean isOn); // 상태 변경 메소드 추가
+
+    public void payWithWhat(String payments, int amount) {
+        // 결제 방식 처리 로직
+        switch (payments) {
+            case "card":
+                System.out.println("카드로 " + amount + "원 결제하였습니다.");
+                break;
+            case "cash":
+                System.out.println("현금으로 " + amount + "원 결제하였습니다.");
+                break;
+            case "barcode":
+                System.out.println("간편결제로 " + amount + "원 결제하였습니다.");
+                break;
+            default:
+                System.out.println("잘못된 결제 방식입니다. 다시 시도해주세요.");
+                break;
+        }
+    }
+}
+
+
+package com.ohgiraffers.User;
+
+import com.ohgiraffers.Run.runKiosk;
+
+public class userPay extends runKiosk { //implements runKiosk2
+    private boolean isOn = false; // 상태 관리 변수
+
+    @Override
+    public void selectEatin() {
+        if (!isOn) {
+            System.out.println("선택해주세요 : 먹고가기 / 포장하기");
+        }
+    }
+
+    @Override
+    public int selectMenu(int menu) {
+        // 메뉴 선택 및 결제 금액 반환
+        if (menu == 1) {
+            System.out.println("비빔막국수는 10000원입니다.");
+            return 10000;
+        } else if (menu == 2) {
+            System.out.println("물막국수는 11000원입니다.");
+            return 11000;
+        } else {
+            System.out.println("저희 매장은 물/비빔 두 메뉴만 제공합니다.");
+            return 0;
+        }
+    }
+
+    @Override
+    public void setOn(boolean isOn) {
+        this.isOn = isOn; // 상태 변경
+    }
+
+    @Override
+    public boolean isOn() {
+        return this.isOn; // 상태 반환
+    }
+
+    @Override
+    public void payWithWhat(String payments, int amount) {
+        super.payWithWhat(payments, amount);
+    }
+}
+
+근데 kioskProgram에서 이렇게 실행하면 
+> Task :com.ohgiraffers.Kiosk.kioskProgram.main()
+====어서오십시오. 인제내린촌 막국수입니다.=====
+화면을 'touch'하거나 'quit'해주세요: saf
+잘못된 입력입니다. 화면을 터치해주세요.
+====어서오십시오. 인제내린촌 막국수입니다.=====
+화면을 'touch'하거나 'quit'해주세요: touch
+메뉴를 선택해주세요 (1: 비빔막국수, 2: 물막국수): 
+3
+저희 매장은 물/비빔 두 메뉴만 제공합니다.
+====어서오십시오. 인제내린촌 막국수입니다.=====
+화면을 'touch'하거나 'quit'해주세요: 잘못된 입력입니다. 화면을 터치해주세요.
+====어서오십시오. 인제내린촌 막국수입니다.=====
+화면을 'touch'하거나 'quit'해주세요: 
+이렇게 떠.
+
+근데 여기에서 
+"저희 매장은 물/비빔 두 메뉴만 제공합니다." 뒤에 
+"메뉴를 선택해주세요 (1: 비빔막국수, 2: 물막국수): " 이게 뜨게 만들고 싶은데
+완전 처음으로 돌아가서
+====어서오십시오. 인제내린촌 막국수입니다.=====
+화면을 'touch'하거나 'quit'해주세요: 잘못된 입력입니다. 화면을 터치해주세요.
+====어서오십시오. 인제내린촌 막국수입니다.=====
+화면을 'touch'하거나 'quit'해주세요: 
+이게 중복 출력되는 오류가 나.
+왜 그런지 알려줘
