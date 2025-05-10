@@ -1,0 +1,407 @@
+# Reviewing the lecture-Chapter04_Control&Flow
+# 이전 수업내용 복습
+# Section01 - Conditional
+package com.ohgiraffers.section01.conditional;
+
+public class Application {
+
+    public static void main(String[] args) {
+
+        A_if a = new A_if();
+//        a.testSimpleIfStatement();
+        a.simpleIf();
+//        a.testNestedIfStatement();
+        a.nestedIf();
+
+        B_ifElse b = new B_ifElse();
+//        b.testSimpleIfElseStatement();
+        b.simpleIfElse();
+//        b.testNestedIfElseStatement();
+        b.nestedIfElse();
+
+        C_ifElseIf c = new C_ifElseIf();
+//        c.testSimpleIfElseIfStatement();
+//        c.testNestedIfElseIfStatement();
+
+        D_switch d = new D_switch();
+//        d.testSimpleSwitchStatement();
+        d.testSwitchVendingMachine();
+    }
+}
+
+# A_if loop
+# Rewrite the code
+public class A_ifLoop{
+    /*조건식 Conditional Expression : 
+    true or false가 나오는 연산식을 조건식이라고 한다.
+    if문은 조건식의 결과값이 true참이면 {} 안에 있는 코드를 실행하고,
+    조건식의 결과값이 fasel거짓이면 {} 안에 있는 코드를 무시하고 넘어간다.*/
+
+  public void simpleIf{
+    /*문제 1. "숫자 7이 좋아 I love the number 7."
+    숫자 7이 너무 좋아 7이거나 7의 배수가 아니라면 숫자로 취급하지 않기로 했습니다.
+    I love the number 7 so much. Eventually, I decided to treat only 7 or multiples of 7 as numbers.
+    정수 한 개를 Scanner로 입력받아 7의 배수인 경우 "내 사랑 7!"를 출력하게 만들어주세요
+    Input an integer using with scanner, and print "My love 7!" if the number is a multiple of 7.
+    단, 7의 배수 외의 숫자를 입력받는다면 프로그램을 종료하며 종료한다는 문구가 출력되게 만들어주세요.
+    When the number that doesnt't included in a multiple of 7, end the program. Also, print the message that end the program.
+    (삼항연산자 사용 금지Do not use ternary operator)*/
+
+  Scanner sc = new Scanner(System.in);
+  System.out.println("정수 하나를 입력해주세요 : ");
+  int number = sc.nextInt();
+
+  if(number % 7 == 0) {
+      System.out.println("내 사랑 7!");
+    }
+    System.out.println("프로그램 종료");
+  }
+
+
+public void nestedIf{
+  /* 문제 2.
+  *  정수 한 개를 입력 받아 그 숫자 양수인 경우에만 짝수인지를 확인하여
+  *  짝수이면 "입력하신 숫자는 양수이면서 짝수입니다." 라고 출력하고,
+  *  둘 중 하나라도 해당하지 않으면 아무 내용도 출력하지 않는 구문을 작성해보자
+  *  단, 조건과 상관 없이 프로그램이 종료될 때 "프로그램을 종료합니다." 라고 출력되도록 한다.
+  * */
+
+  Scanner sc = new Scanner(System.in);
+  System.out.println("정수 하나 입력 : "); //Scanner 입력 받고 print로 입력 구문 입력하는 거 잊지 않기 Don't forget print input message after using Scanner
+  int num = sc.nextInt();
+  if(num > 0) {
+      if(num % 2 == 0) {
+        System.out.println("입력하신 숫자는 양수이면서 짝수입니다.");
+      }
+  }
+  System.out,println("프로그램을 종료합니다.");
+}
+    /* 문제 1. (얘는 if-else문제로 ㄱㄱ)
+    정수 한 개를 Scanner로 입력받는다. 정수는 10 이상 100 이하의 숫자여야하며 */
+}
+
+# original code
+package com.ohgiraffers.section01.conditional;
+import java.util.Scanner;
+public class A_if {
+    public void testSimpleIfStatement() {
+
+    /* comment. if문 단독 사용에 대한 흐름을 이해하고 적용할 수 있다. */
+    /* [if문 표현식]
+    *  if(조건식) {
+    *      조건식이 true일 때 실행할 명령문;
+    *  }
+    *
+    *  조건식 : true or false가 나오는 연산식을 조건식이라고 한다.
+    *  if문은 조건식의 결과 값이 참(true)이면 { } 안에 있는 코드를 실행하고,
+    *  조건식의 결과 값이 거짓(false)이면 { } 안에 있는 코드를 무시하고 넘어감
+    * */
+
+    /* 문제 1.
+    *  정수 한 개를 입력 받아 그 수가 짝수이면 "입력하신 숫자는 짝수입니다." 라고 출력하고,
+    *  짝수가 아니면 출력하지 않는 구문을 작성해보자
+    *  단, 조건과 상관 없이 프로그램이 종료될 때 "프로그램을 종료합니다." 라고 출력되도록 한다.
+    * */
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("숫자 한 개를 입력하세요 : ");
+
+        int num = sc.nextInt();
+
+        if(num % 2 == 0) {
+
+            System.out.println("입력하신 숫자는 짝수입니다.");
+        }
+
+        System.out.println("프로그램을 종료합니다.");
+    }
+
+    public void testNestedIfStatement() {
+
+        /* comment. 중첩된 if문의 흐름을 이해하고 적용할 수 있다. */
+        /* 문제 2.
+        *  정수 한 개를 입력 받아 그 숫자 양수인 경우에만 짝수인지를 확인하여
+        *  짝수이면 "입력하신 숫자는 양수이면서 짝수입니다." 라고 출력하고,
+        *  둘 중 하나라도 해당하지 않으면 아무 내용도 출력하지 않는 구문을 작성해보자
+        *  단, 조건과 상관 없이 프로그램이 종료될 때 "프로그램을 종료합니다." 라고 출력되도록 한다.
+        * */
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("숫자 한 개를 입력하세요 : ");
+
+        int num = sc.nextInt();
+
+        if(num > 0) {
+            if(num % 2 == 0) {
+                System.out.println("입력하신 숫자는 양수이면서 짝수입니다.");
+            }
+        }
+        System.out.println("프로그램을 종료합니다.");
+    }
+}
+
+# B_ifElseStatement
+public class B_ifElseStatement {
+  public void simpleIfElse() {
+    /* 문제 3.
+    *  정수 한 개를 입력 받아 그 수가 홀수이면 "입력하신 숫자는 홀수입니다." 라고 출력하고,
+    *  홀수가 아니면 "입력하신 숫자는 짝수입니다." 라고 출력하는 프로그램을 작성해보자.
+    *  단, 조건과 상관 없이 프로그램이 종료될 때 "프로그램을 종료합니다." 라고 출력되도록 한다.
+    * */
+    Scanner sc = new Scanner(System.in);
+    System.out.println("정수 입력 : ");
+    int nyam = sc.nextInt();
+
+    if(nyam % 2 !== 0) {
+      System.out.println("입력하신 숫자는 홀수입니다.");
+    } else {
+      System.out.println("입력하신 숫자는 짝수입니다.");
+    }
+    System.out.println("프로그램을 종료합니다.");
+}
+
+  public void nestedIfElse() {
+    /* 문제 4.
+    * 숫자를 하나 입력 받아 양수이면 "입력하신 숫자는 양수입니다." 출력하고,
+    * 음수이면 "입력하신 숫자는 음수입니다." 출력
+    * 단, 0이면 "0입니다." 라고 출력하세요
+    * 조건과 상관없이 프로그램이 종료될 때 "프로그램을 종료합니다." 라고 출력되도록 한다.
+    * */
+    Scanner sc = new Scanner(System.in);
+    System.out.println("숫자를 입력하시오.");
+    int nuumber = sc.nextInt();
+
+    if (nuumber != 0) {
+       if (nuumber < 0) {
+          System.out.println("입력하신 숫자는 음수입니다.");
+       } else {
+          System.out.println("입력하신 숫자는 양수입니다."); // if() {}안에 if-else를 한 번 더 넣는 게 nested if-else구나. 23:29
+       }
+    } else {
+      System.out.println("0입니다");
+    }
+    System.out.println("프로그램을 종료합니다.");
+
+//    if (nuumber < 0) {
+//      System.out.println("입력하신 숫자는 음수입니다.");
+//    } if (number == 0) {
+//      System.out.println("0입니다.");
+//    } else {
+//      System.out.println("입력하신 숫자는 양수입니다.");
+//    }
+//    System.out.println("프로그램을 종료합니다.");
+/* Error : -3(음수) 넣으면 If I put -3
+* 입력하신 숫자는 음수입니다.
+* 입력하신 숫자는 양수입니다.
+* 한꺼번에 출력함 print out these two phase together. 23:20*/
+}
+
+
+# Original lecture source
+package com.ohgiraffers.section01.conditional;
+
+import java.util.Scanner;
+
+public class B_ifElse {
+
+    public void testSimpleIfElseStatement() {
+
+        /* comment. if-else문 단독 사용에 대한 흐름을 이해하고 적용할 수 있다. */
+        /* [if-else문 표현식]
+        *  if(조건식) {
+        *       조건식이 true일 때 실행할 명령문;
+        *  } else {
+        *       조건식 false일 때 실행할 명령문;
+        *  }
+        * */
+
+        /* 문제 3.
+        *  정수 한 개를 입력 받아 그 수가 홀수이면 "입력하신 숫자는 홀수입니다." 라고 출력하고,
+        *  홀수가 아니면 "입력하신 숫자는 짝수입니다." 라고 출력하는 프로그램을 작성해보자.
+        *  단, 조건과 상관 없이 프로그램이 종료될 때 "프로그램을 종료합니다." 라고 출력되도록 한다.
+        * */
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("정수 한 개를 입력하세요 : ");
+
+        int num = sc.nextInt();
+
+        if(num % 2 != 0) {
+
+            System.out.println("입력하신 숫자는 홀수입니다.");
+
+        } else {
+
+            System.out.println("입력하신 숫자는 짝수입니다.");
+
+        }
+
+        System.out.println("프로그램을 종료합니다.");
+
+    }
+
+    public void testNestedIfElseStatement() {
+
+        /* comment. 중첩된 if-else문의 흐름을 이해하고 적용할 수 있다. */
+        /* 문제 4.
+        * 숫자를 하나 입력 받아 양수이면 "입력하신 숫자는 양수입니다." 출력하고,
+        * 음수이면 "입력하신 숫자는 음수입니다." 출력
+        * 단, 0이면 "0입니다." 라고 출력하세요
+        * 조건과 상관없이 프로그램이 종료될 때 "프로그램을 종료합니다." 라고 출력되도록 한다.
+        * */
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("숫자를 하나 입력하세요 : ");
+
+        int num = sc.nextInt();
+
+        if(num != 0) {
+
+            if(num > 0) {
+
+                System.out.println("입력하신 숫자는 양수입니다.");
+
+            } else {
+
+                System.out.println("입력하신 숫자는 음수입니다.");
+
+            }
+
+        } else {
+
+            System.out.println("입력하신 숫자는 0입니다.");
+
+        }
+
+        System.out.println("프로그램을 종료합니다.");
+
+    }
+}
+
+# C_ifElseIf
+public class C_ifElseifStatement {
+    /* [if-else-if 표현식]
+    *  if(조건식1) {
+    *      조건식1이 true일 때 실행할 명령문;
+    *  } else if(조건식2) {
+    *      조건식1이 false이고 조건식2가 true일 때 실행할 명령문;
+    *  } else {
+    *      위의 조건 2개가 모두 거짓인 경우 실행할 명령문;
+    *  }  */
+
+    /* 문제 5. */
+    System.out.println("산 속에서 나무를 하던 나무꾼이 연못에 도끼를 빠뜨리고 말았다.");
+    System.out.println("연못에서 산신령이 나타나 금도끼, 은도끼, 쇠도끼를 들고 나타났다.");
+    System.out.println("나무꾼에게 셋 중 어떤 도끼가 나무꾼의 도끼인지 물어보았다.");
+
+    Scanner sc = new Scanner(System.in);
+    System.out.print("어느 도끼가 너의 도끼이냐? (1. 금도끼, 2. 은도끼, 3. 쇠도끼 : ");
+    int anAx = sc.nextInt();
+
+    if(anAx == 1) {
+      System.out.println("네 도끼가 금도끼라고? 욕심이 너무 과하구나...");
+    } else if(anAx == 2) {
+      System.out.println("네 도끼가 은도끼라니.. 욕심이 아직 과하구나...");
+    } else {
+      System.out.println("양심적이구나. 세 가지 도끼를 전부 주겠다.");
+    }
+    System.out.println("산신령은 다시 연못 속으로 사라졌다.");
+}
+
+# Original lecture source
+package com.ohgiraffers.section01.conditional;
+import java.util.Scanner;
+
+public class C_ifElseIf {
+    public void testSimpleIfElseIfStatement() {
+        /* comment. if-else-if문 단독 사용에 대한 흐름을 이해하고 적용할 수 있다. */
+        /* [if-else-if 표현식]
+        *  if(조건식1) {
+        *      조건식1이 true일 때 실행할 명령문;
+        *  } else if(조건식2) {
+        *      조건식1이 false이고 조건식2가 true일 때 실행할 명령문;
+        *  } else {
+        *      위의 조건 2개가 모두 거짓인 경우 실행할 명령문;
+        *  }
+        * */
+
+        /* 문제 5. */
+        System.out.println("산 속에서 나무를 하던 나무꾼이 연못에 도끼를 빠뜨리고 말았다.");
+        System.out.println("연못에서 산신령이 나타나 금도끼, 은도끼, 쇠도끼를 들고 나타났다.");
+        System.out.println("나무꾼에게 셋 중 어떤 도끼가 나무꾼의 도끼인지 물어보았다.");
+
+        System.out.print("어느 도끼가 너의 도끼이냐? (1. 금도끼, 2. 은도끼, 3. 쇠도끼 : ");
+        Scanner sc = new Scanner(System.in);
+        int answer = sc.nextInt();
+
+        if(answer == 1) {
+            System.out.println("이런 거짓말 쟁이!! 너에겐 아무런 도끼도 줄 수 없다...");
+        } else if(answer == 2) {
+            System.out.println("욕심이 과하지는 않지만 그래도 넌 거짓말을 하고 있다...");
+        } else {
+            System.out.println("너 정직하구나~ 이 세 개 도끼를 다 주겠다~");
+        }
+        System.out.println("그렇게 산신령은 다시 연못 속으로 사라지고 말았다...");
+    }
+
+    public void testNestedIfElseIfStatement() {
+        /* comment. 중첩된 if-else-if문의 흐름을 이해하고 적용할 수 있다. */
+        /* 문제 6.
+        *  ohgiraffers 대학의 김xx교수님은 학생들 시험 성적을 수기로 계산해서 학점 등급을 매기는 채점방식을 사용하고 있었다.
+        *  90점 이상이면 'A', 80점 이상이면 'B', 70점 이상이면 'C', 60점 이상이면 'D'를
+        *  60점 미만인 경우에는 'F'를 학점 등급으로 하는 기준이다.
+        *  추가로 각 등급의 중간점수(95, 85, 75..)인 경우 '+'를 붙여서 등급을 세분화 하다보니 복잡하다.
+        *  그래서 학생의 이름과 점수를 입력하면 자동으로 학점 등급이 계산되는 프로그램을 만들기로 했다.
+        * */
+        Scanner sc = new Scanner(System.in);
+        System.out.print("학생의 이름을 입력하세요 : ");
+        String name = sc.nextLine();
+        System.out.print("학생의 점수를 입력하세요 : ");
+        int point = sc.nextInt();
+
+        String grade = "";
+
+        if(point >= 90) {
+
+            grade = "A";
+
+            if(point >= 95) {
+
+                grade += "+";
+            }
+
+        } else if(point >= 80) {
+
+            grade = "B";
+
+            if(point >= 85) {
+
+                grade += "+";
+            }
+
+        } else if (point >= 70) {
+
+            grade = "C";
+
+            if(point >= 75) {
+
+                grade += "+";
+            }
+
+        } else if(point >= 60) {
+
+            grade = "D";
+
+            if(point >= 65) {
+
+                grade += "+";
+            }
+        } else {
+            grade = "F";
+        }
+        System.out.println(name + " 학생의 점수는 " + point + "이고, 등급은 " + grade + "입니다.");
+        System.out.println("프로그램을 종료합니다.");
+    }
+}
