@@ -1,0 +1,447 @@
+# 오늘 진도나간 부분
+# Today's lecture source
+# From Chapter12-collection(comparator, map.etc) To Chapter13-exception
+# And Collection Challenges
+
+# 1. 미완성 콜렉션 챌린지Collection Challenge (Unsolved..)
+# 코파일럿에게 코드 물어보고 약간 수정함
+# Revised with Github Copilot and edit by my own little 
+package com.ohgiraffers.hw1.controller;
+
+import com.ohgiraffers.hw1.model.comparator.AscCategory;
+import com.ohgiraffers.hw1.model.comparator.DescCategory;
+import com.ohgiraffers.hw1.model.dto.BookDTO;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class BookManager2 {
+//    private ArrayList<BookDTO> bookList;
+    List<BookDTO> bookList = new ArrayList<>();
+
+    public BookManager2() {
+        bookList = new ArrayList<>(); // ArrayList 초기화
+    }
+
+    public void addBook(BookDTO book) {
+        /* +addBook(book:BookDTO) : void
+        * 전달받은 BookDTO객체를 생성 시 선언한 ArrayList객체에 추가*/
+        bookList.add(book); // 새 도서 추가
+    }
+
+    public void deleteBook(int index) {
+        if (index >= 0 && index < bookList.size()) {
+            bookList.remove(index); // 전달받은 index로 삭제
+            System.out.println("도서가 삭제되었습니다.");
+        } else {
+            System.out.println("삭제할 도서가 존재하지 않습니다.");
+        }
+    }
+
+    public int searchBook(String title) {
+        for (int i = 0; i < bookList.size(); i++) {
+            if (bookList.get(i).getTitle().equals(title)) {
+                return i; // 제목이 일치하는 도서의 index 반환
+            }
+        }
+        return -1; // 찾지 못한 경우 -1 반환
+    }
+
+    public void printBook(int index) {
+        if (index >= 0 && index < bookList.size()) {
+            System.out.println(bookList.get(index)); // 해당 index의 도서 출력
+        } else {
+            System.out.println("조회한 도서가 존재하지 않습니다.");
+        }
+    }
+
+    public void displayAll() {
+        if (!bookList.isEmpty()) {
+            for (BookDTO book : bookList) {
+                System.out.println(book);
+            }
+        } else {
+            System.out.println("출력할 도서가 없습니다.");
+        }
+    }
+
+    public ArrayList<BookDTO> sortedBookList(int select){
+//        ArrayList<BookDTO> sortedList = new ArrayList<>(bookList); // 기존 리스트 복사
+
+        switch (select) {
+            case 1: // 오름차순
+                bookList.sort(new AscCategory());
+                //Collections.sort(sortedList, new AscCategory());
+                break;
+            case 2: // 내림차순
+//                Collections.sort(sortedList, new DescCategory());
+                bookList.sort(new DescCategory());
+                break;
+            default:
+                System.out.println("번호를 잘못 입력하였습니다.");
+                return null;
+        }
+
+        return (ArrayList<BookDTO>) bookList;
+        /* 전달받은 매개변수의 값에 따라 정렬(1. 오름차순,2. 내림차순)
+        * for문을 이용하여 ArrayList<BookDTO> 에 추가
+        * 해당 배열 주소 값 리턴
+        * 전달받은 번호를 기준으로 해당 카테고리(오름차순/내림차순) 순으로 정렬해서
+        * ArrayList<BookDTO>에 담아서 리턴 */
+    }
+
+    public void printBookList(ArrayList<BookDTO> br) {
+    /* 향상된 for문을 이용하여 전달받은 ArrayList<BookDTO> 전체 출력 */
+        for(BookDTO list : bookList) {
+            System.out.println(list);
+        }
+    }
+}
+
+
+# Same package com.ohgiraffers.hw1.model.comparator;
+# public class AscCategory implements Comparator<BookDTO> {}
+# public class DescCategory implements Comparator<BookDTO> {}
+
+# Same package com.ohgiraffers.hw1.model.dto;
+# public class BookDTO {}
+
+package com.ohgiraffers.hw1.view;
+import com.ohgiraffers.hw1.controller.BookManager;
+import com.ohgiraffers.hw1.model.dto.BookDTO;
+import java.util.Scanner;
+
+public class BookMenu2 {
+    public void menu() {
+        BookManager bm = new BookManager();
+
+        System.out.println("*** 도서 관리 프로그램 ***");
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("1. 새 도서 추가");
+            System.out.println("2. 도서정보 정렬 후 출력");
+            System.out.println("3. 도서 삭제");
+            System.out.println("4. 도서 검색 출력");
+            System.out.println("5. 전체 출력");
+            System.out.println("6. 끝내기");
+            int executeNum = sc.nextInt();
+
+            switch (executeNum) {
+                case 1:
+                    System.out.println("1. 새 도서 추가");
+                    BookDTO newBook = inputBook(); // inputBook 메서드 호출
+                    bm.addBook(newBook); // BookManager의 addBook 호출
+                    System.out.println("새 도서가 추가되었습니다.");
+                    break;
+                case 2:
+                    System.out.println("2. 도서정보 정렬 후 출력");
+                    /* sortedBookList(정렬종류번호) 실행
+                    =>입력받은 매개변수를 이용하여 정렬방식에 따라 출력
+                    정렬방식을 선택해주세요 (1. 오름차순, 2.내림차순)
+                    1,2 이외의 값을 입력했을 시에는 “번호를 잘못입력하였습니다”를 출력
+                    => ArrayList<BookDTO> 리턴 받아 printBookList(ArrayList<BookDTO>) 실행 */
+
+                    break;
+                case 3:
+                    System.out.println("3. 도서 삭제");
+                    // deleteBook 로직 추가 필요
+                    break;
+                case 4:
+                    System.out.println("4. 도서 검색 출력");
+                    // searchBook 로직 추가 필요
+                    break;
+                case 5:
+                    System.out.println("5. 전체 출력");
+                    bm.displayAll();
+                    break;
+                case 6:
+                    System.out.println("6. 끝내기");
+                    return;
+                default:
+                    System.out.println("잘못된 입력입니다. 다시 시도해주세요.");
+            }
+        }
+    }
+
+    public BookDTO inputBook() {
+        /* BookDTO 객체의 필드 값을 키보드로 입력 받아 초기화 하고 객체 리턴 */
+        Scanner sc = new Scanner(System.in);
+
+        // 도서 번호 생성 (1~200)
+        int bookNumber = (int) (Math.random() * 200) + 1;
+        System.out.println("도서 번호 : " + bookNumber);
+
+        // 도서 제목 입력
+        System.out.print("도서 제목 : ");
+        String title = sc.nextLine();
+
+        // 도서 장르 입력
+        System.out.print("도서 장르 (1:인문 / 2:자연과학 / 3:의료 / 4:기타) : ");
+        int category = sc.nextInt();
+
+        // 도서 저자 입력
+        sc.nextLine(); // 버퍼 비우기
+        System.out.print("도서 저자 : ");
+        String author = sc.nextLine();
+
+        // BookDTO 객체 생성 후 리턴
+        return new BookDTO(bookNumber, category, title, author);
+    }
+}
+
+
+# 첫번째 시도 First try
+package com.ohgiraffers.hw1.controller;
+import com.ohgiraffers.hw1.model.dto.BookDTO;
+import java.util.ArrayList;
+import java.util.List;
+
+public class BookManager {
+    private ArrayList<BookDTO> bookList;
+
+    public BookManager() {
+        bookList.add(new BookDTO());
+    }
+
+    public void addBook(BookDTO book) {
+
+    }
+
+    public void deleteBook(int index){
+        // 전달받은 index를 삭제
+    }
+
+    public int searchBook(String title) {
+
+        return 0;
+    }
+
+    public void printBook(int index){
+
+    }
+
+    public void displayAll() {
+        if (false) {
+            System.out.println(bookList);
+        } else {
+            System.out.println("출력할 도서가 없습니다.");
+        }
+    }
+
+    public ArrayList<BookDTO> sortedBookList(int select){
+        // 전달받은 매개변수의 값에 따라 정렬(1. 오름차순,2. 내림차순)
+        // for문을 이용하여 ArrayList<BookDTO> 에 추가
+        // 해당 배열 주소 값 리턴
+        //전달받은 번호를 기준으로 해당 카테고리(오름차순/내림차순) 순으로 정렬해서
+        //ArrayList<BookDTO>에 담아서 리턴
+    }
+
+    public void printBookList(ArrayList<BookDTO> br) {
+        // 향상된 for문을 이용하여 전달받은 ArrayList<BookDTO> 전체 출력
+        for(BookDTO list : bookList) {
+            System.out.println(list);
+        }
+    }
+}
+
+
+package com.ohgiraffers.hw1.model.comparator;
+import com.ohgiraffers.hw1.model.dto.BookDTO;
+import java.util.Comparator;
+
+public class AscCategory implements Comparator<BookDTO> {
+    @Override
+    public int compare(BookDTO o1, BookDTO o2) {
+        int resultAsc = 0;
+        if(o1.getCategory() > o2.getCategory()) {
+            resultAsc = 1;
+        } else if (o1.getCategory() < o2.getCategory()) {
+            resultAsc = -1;
+        } else {
+            resultAsc = 0;
+        }
+        return resultAsc;
+    }
+    /* >입력받은 매개변수를 이용하여 정렬방식에 따라 출력
+    정렬방식을 선택해주세요 (1. 오름차순, 2.내림차순)
+    1,2 이외의 값을 입력했을 시에는 “번호를 잘못입력하였습니다”를 출력
+    => ArrayList<BookDTO> 리턴 받아 printBookList(ArrayList<BookDTO>) 실행 */
+}
+
+
+package com.ohgiraffers.hw1.model.comparator;
+import com.ohgiraffers.hw1.model.dto.BookDTO;
+import java.util.Comparator;
+
+public class DescCategory implements Comparator<BookDTO> {
+    // category 내림차순 정렬
+    @Override
+    public int compare(BookDTO o1, BookDTO o2) {
+        int resultDesc = 0;
+        if(o1.getCategory() < o2.getCategory()) {
+            resultDesc = 1;
+        } else if (o1.getCategory() > o2.getCategory()) {
+            resultDesc = -1;
+        } else {
+            resultDesc = 0;
+        }
+        return resultDesc;
+    }
+    /* >입력받은 매개변수를 이용하여 정렬방식에 따라 출력
+    정렬방식을 선택해주세요 (1. 오름차순, 2.내림차순)
+ 1,2 이외의 값을 입력했을 시에는 “번호를 잘못입력하였습니다”를 출력
+=> ArrayList<BookDTO> 리턴 받아 printBookList(ArrayList<BookDTO>) 실행 */
+}
+
+
+package com.ohgiraffers.hw1.model.dto;
+
+public class BookDTO {
+    private int bNo; //도서번호
+    private int category; //도서분류코드
+    private String title; //도서 제목
+    private String author; //도서 저자
+
+    public BookDTO() {}
+
+    public BookDTO(int bNo, int category, String title, String author) {
+        //+ BookDTO(category:int, title:String, author:String)
+        // 문제 조건에 따라 category, title, author만 받음>>15:06 일단 bNo 받아봄
+        this.bNo = bNo;
+        this.category = category;
+        this.title = title;
+        this.author = author;
+    }
+
+    public int getbNo() {
+        return bNo;
+    }
+
+    public void setbNo(int bNo) {
+        this.bNo = bNo;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+    public void setCategory(int category) {
+        this.category = category;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+    public void setAuthor() {
+        this.author = author;
+    }
+
+    @Override
+    public String toString() {
+        /* +toString() : String
+        필드 값 문자열 합친 후 리턴
+        * category 분류 별로 출력 >> 1 : 인문 / 2 : 자연과학 /3 : 의료 / 4 : 기타 */
+        return "BookDTO{" +
+                "bNo=" + bNo +
+                ", category=" + category +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                '}';
+    }
+}
+
+
+package com.ohgiraffers.hw1.run;
+import com.ohgiraffers.hw1.view.BookMenu2;
+
+public class Application {
+    public static void main(String[] args) {
+        /* BookMenu 클래스 객체 생성하고 menu() 메소드 실행 */
+        BookMenu2 bm2 = new BookMenu2();
+        bm2.menu();
+    }
+}
+
+
+package com.ohgiraffers.hw1.view;
+import com.ohgiraffers.hw1.controller.BookManager;
+import com.ohgiraffers.hw1.model.dto.BookDTO;
+import java.util.Scanner;
+
+public class BookMenu {
+    public void menu() {
+        BookManager bm = new BookManager();
+
+        System.out.println("*** 도서 관리 프로그램 ***");
+        Scanner sc = new Scanner(System.in);
+        int executeNum = sc.nextInt();
+
+        switch (executeNum) {
+            case 1:
+                System.out.println("1. 새 도서 추가");
+                //addBook (inputBook()이 리턴한 객체) 실행
+                break;
+            case 2:
+                System.out.println("2. 도서정보 정렬 후 출력");
+                // sortedBookList(정렬종류 번호 1,2, 3, 4) 실행
+                break;
+            case 3:
+                System.out.println("3.도서 삭제");
+                // searchBook() 메소드를 이용, deleteBook(도서번호) 실행.
+                // 결과값을 리턴 받아 0일 경우엔 "성공적으로 삭제", 1일 경우(false) "삭제할 글이 존재하지 않음)
+                break;
+            case 4:
+                System.out.println("4. 도서 검색출력");
+                // searchBook (inputBookTitle()이 리턴한 도서 제목) 실행
+                // => index 리턴 받아 -1일 경우 “조회한 도서가 존재하지 않음”
+                //-1이 아닐 경우 printBook(index) 출력
+                break;
+            case 5:
+                System.out.println("5. 전체 출력");
+                //displayAll()실행
+                //=> 결과 리스트 리턴 받아 비어있을 경우 “출력할 도서가 없습니다.”
+                // 아닌 경우는 전체 출력
+                bm.displayAll();
+                break;
+            case 6:
+                System.out.println("6. 끝내기");
+                //main()으로 리턴
+                return;
+        }
+    }
+
+    public BookDTO inputBook(){
+        BookDTO dto = new BookDTO();
+//        int bookNumber = dto.getbNo((Math.random()*200) +1);
+//        System.out.println("도서 번호 : " + bookNumber);
+        Scanner sc = new Scanner(System.in);
+
+
+        return ;
+        // 도서 번호 : >> 임의 값 입력
+        // "도서 제목 : " >> 입력 받음
+        // "도서 장르 (1:인문 / 2:자연과학 / 3:의료 / 4:기타) : " >> 입력 받음 (숫자로)
+        // "도서 저자 : " >> 입력 받음
+        // 매개변수 생성자를 이용하여 위의 초기값을 이용한 BookDTO객체 리턴
+    }
+    public String inputBookTitle() {
+        System.out.println("책 제목을 입력해주세요");
+        Scanner sc = new Scanner(System.in);
+        String title = sc.nextLine();
+        return title;
+    }
+}
+
+
+# 2-1. Chapter12 Collection lecture source
+# 주말에 작성 Write in weekend
+
+# 2-2. Chapter13 Exception
+# 주말에 작성 Write in weekend
