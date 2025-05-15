@@ -1,0 +1,254 @@
+# 오늘 강의 분량
+# Today's lecture progress
+# From Chapter15 Enum To Chapter16 lambda
+
+# 팀스터디를 위한 오늘 강의 복습문제 풀기 : 
+# Made a review test among today's lecture for grouped study
+# (all members of study-group made a test. Than select the best one, solved it.)
+# https://www.notion.so/ohgiraffers/Enum-Lambda-1f4649136c1180e5bd57d19af310d31d?pvs=4
+
+# Problems
+/* Chapter 15. Enum
+1. 다음 상수 열거 패턴을 기반으로 Enum 열거 타입을 만들고 질문에 대한 답을 넣어주세요(서술형) */
+    public interface Idols {
+    	public static final int AESPA = 0;
+    	public static final int GIDLE = 1;
+    	public static final int IVE = 2;
+    	
+    	public static final int TXT = 0;
+    	public static final int EXO = 1;
+    	public static final int ASTRO = 2;
+    }
+
+/* 1-1. 위 코드를 기반으로 Enum 열거타입 작성
+
+1-2. boolean 값 중 하나가 출력되도록 비교를 해주세요
+
+1-2-1. GIDLE과 EXO를 비교해주세요. 
+
+1-2-2. 어떤 결과가 나오나요?
+
+1-2-3. 왜 그런 결과가 나오는 걸까요?
+
+1-3. 다음 빈 칸을 채워주세요
+ Enum 열거형으로 선언된 인스턴스는 ______으로 관리된다.
+이는 ___ _______임을 보장하기에 _______가 가능하다.
+
+
+2. Enum 타입을 생성할 때 기본생성자 사용이 가능하다. (O, X) */
+
+/* Chapter 16. Lambda
+1. 다음 빈 칸을 채워주세요.
+" Java에서는 메소드를 독립적으로 선언하는 것이 불가능하다.
+_____ ________ 내부에서만 선언되기 때문에 메소드를 갖는 ____ ________가 필요하다.
+람다식은 그 중 ______를 활용하는데,
+______ 내부에 하나의 _______가 선언된 _______만 람다식의 타깃이 될 수 있다.
+이러한 ________를 ______ __________라고 한다. "
+
+2. Calculate이라는 이름의 인터페이스를 만들고,
+int 2개를 매개변수로 받는 multiTwoNumber 추상 메소드를 작성해주세요.
+int 2개를 매개변수로 받는 minusTwoNumber 추상 메소드를 작성해주세요.
+
+2-1. ApplicationCal이란 이름의 클래스를 만들고
+Calculate 인터페이스를 활용해 람다식 2개를 만들어 주세요.
+
+2-2.
+숫자1과 숫자2의 곱 : 500
+숫자1과 숫자2의 차 : -20
+가 출력되도록 결과를 출력해주세요. */
+
+# 답안 Answer
+/* Chapter15 Enum    
+    1-1. 위 코드를 기반으로 Enum 열거타입 작성 */    
+    ```java
+    package com.ohgiraffers.reviewTodayLecture0515;
+    public enum Idols2 {
+        AESPA,
+        GIDLE,
+        IVE,
+        TXT,
+        EXO,
+        ASTRO
+    }
+
+    // 1-2. boolean 값 중 하나가 출력되도록 비교를 해주세요
+        System.out.println(Idols2.EXO == Idols2.AESPA); // false
+        System.out.println(Idols.GIDLE == Idols.EXO); // true
+    
+        System.out.println(Idols.AESPA == Idols.TXT); // true
+    
+        // 1-2-1. GIDLE과 EXO를 비교해주세요.
+        System.out.println(Idols2.EXO == Idols2.GIDLE);
+    
+        // 1-2-2. 어떤 결과가 나오나요?  false
+    
+        // 1-2-3. 왜 그런 결과가 나오는 걸까요?
+        /*Interface Idols에서 EXO와 GIDLE은 같은 값을 갖고 있다.
+         하지만 이와 다르게, enum 클래스에 선언된 인스턴스는 각각 다른 값을 갖고 있기 때문에
+         다른 걸 다르다고 표현할 수 있게 된다.*/
+    ```
+    
+    ```java
+    1-3. 다음 빈 칸을 채워주세요
+    /*  Enum 열거형으로 선언된 인스턴스는 싱글톤singleton으로 관리된다.
+    이는 단일 인스턴스임을 보장하기에 ==비교가 가능하다. 
+    
+    2. Enum 타입을 생성할 때 기본생성자 사용이 가능하다. (O) */
+    ```
+
+Chapter 16. Lambda
+/* 1. 다음 빈 칸을 채워주세요.
+”`Java에서는 메소드를 독립적으로 선언하는 것이 불가능하다.`
+`클래스나 인터페이스 내부에서만 선언되기 때문에 메소드를 갖는 클래스나 인터페이스가 필요하다.
+람다식은 그 중 인터페이스를 활용하는데,
+인터페이스 내부에 하나의 추상메소드가 선언된 인터페이스만 람다식의 타깃이 될 수 있다.
+이러한 인터페이스를 함수적 인터페이스functional interface라고 한다. "`
+
+2. Calculate이라는 이름의 인터페이스를 만들고,
+int 2개를 매개변수로 받는 multiTwoNumber 추상 메소드를 작성해주세요.
+int 2개를 매개변수로 받는 minusTwoNumber 추상 메소드를 작성해주세요. */
+
+```java
+package com.ohgiraffers.reviewTodayLecture0515;
+
+public interface Calculate {
+    @FunctionalInterface
+    public interface Minus {
+        public int MinusTwoNumber(int c, int d);
+    }
+
+    @FunctionalInterface
+    public interface Multi {
+        public int MultiTwoNumber (int a, int b);
+    }
+
+}
+```
+
+/* 2-1. ApplicationCal이란 이름의 클래스를 만들고
+Calculate 인터페이스를 활용해 람다식 2개를 만들어 주세요.
+
+2-2.
+숫자1과 숫자2의 곱 : 500
+숫자1과 숫자2의 차 : -20
+가 출력되도록 결과를 출력해주세요. */
+```java
+package com.ohgiraffers.reviewTodayLecture0515;
+
+public class ApllicationCal {
+    public static void main(String[] args) {
+    /*2-1. ApplicationCal이란 이름의 클래스를 만들고
+    Calculate 인터페이스를 활용해 람다식 2개를 만들어 주세요. */
+        Calculate.Minus minus = (x, y) -> x - y;
+        Calculate.Multi multi = (x, y) -> x * y;
+
+    /*2-2. 숫자1과 숫자2의 곱 : 500
+    숫자1과 숫자2의 차 : -20
+    가 출력되도록 결과를 출력해주세요.*/
+        System.out.println("숫자1과 숫자2의 곱 : " + multi.MultiTwoNumber(50, 10));
+        // 숫자1과 숫자2의 곱 : 500
+        System.out.println("숫자1과 숫자2의 차 : " + minus.MinusTwoNumber(10, 30));
+        // 숫자1과 숫자2의 차 : -20
+    }
+}
+```
+
+
+
+# 프로그래머스 코딩 기초 트레이닝 "문자열 섞기"
+# Programmers : Practicing Basic Coding (JAVA) "Shuffle Strings'
+# 문제 : 길이가 같은 두 문자열 str1과 str2가 주어집니다.
+# 두 문자열의 각 문자가 앞에서부터 서로 번갈아가면서 한 번씩 등장하는 문자열을 만들어 return 하는 solution 함수를 완성해 주세요.
+# Q: There are two Stirngs that has same length.
+# Shuffle that String one character by one character to complete the class solution.
+
+# 최종 제출 코드 Final code
+class Solution {
+    public String solution(String str1, String str2) {
+        String answer = ""; // 1. 결과를 저장할 변수 초기화 (공간 확보)
+
+        for (int i = 0; i < str1.length(); i++) {
+            answer += str1.charAt(i);
+            // 2. str1의 문자 answer 공간에 +=를 통해 추가
+            answer += str2.charAt(i);
+            // 3. str2의 문자 answer에 +=로 추가
+        }
+
+        return answer; // 4. 최종 결과 반환
+    }
+}
+
+# Copilot에게 틀린 부분 알려달라고 질문
+# Asked Copilot which part is wrong and why?
+# https://github.com/copilot/share/480b019c-01a0-8080-a043-c2468095080b
+
+# 중요 사항 요약 Summary of answer
+# 1. String answer = 문장 오류
+# String answer = 뒤에 값이 초기화되지 않았습니다. 결과를 저장할 변수를 선언한 후에는 초기화나 값을 대입해야 합니다.
+# 수정: String answer = "";
+
+# 4. 결과를 저장하지 않음 : 현재 코드에서 System.out.println으로 값을 출력하고 있지만,
+# 실제로 answer 변수에 결과를 저장하지 않습니다.
+# answer 변수에 문자열을 누적해야 합니다.
+# 수정: answer += str1.charAt(i);
+
+# Also, 불필요한 If-Else 구문 삭제
+# if-else를 생략한 이유 : if-else를 생략하고 두 개의 answer += 문장을 반복문에 넣으면 동일한 결과를 얻을 수 있습니다:
+for (int i = 0; i < str1.length(); i++) {
+    answer += str1.charAt(i); // str1의 문자 추가
+    answer += str2.charAt(i); // str2의 문자 추가
+}
+# 이 방식이 더 간결하고 읽기 쉽습니다. 반복문이 짝수/홀수를 구분하지 않고도 두 문자열을 번갈아 처리하는 의도를 명확히 드러내기 때문입니다.
+
+# 두 번째 코드 Secocnde try
+class Solution {
+    public String solution(String str1, String str2) {
+        String answer = 
+        for(int i = 0; i <= str1.length(); i++) {
+            if(i % 2 == 0) {
+                System.out.println(str1);
+            } else {
+                System.out.println(str2);
+            }
+        }
+
+        return answer;
+    }
+}
+
+# 첫번째 시도 First try
+class Solution {
+    public String solution(String str1, String str2) {
+        String answer = "";
+        for(int i = 0; i <= str1.length(); i++) {
+            if(i % 2 == 0) {
+                System.out.println(str1.chatAt(i));
+            } else {
+                System.out.println(str2.chatAt(i));
+            }
+        }
+        return str1+str2;
+    }
+}
+/* Reference lecture code : 
+public void no7() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("정수를 입력하세요 : ");
+        int cutLine = sc.nextInt();
+
+        for (int i = 1; i <= cutLine; i++) {
+            if (i % 2 == 1) { // Odd iteration
+                System.out.print("토");
+            } else { // Even iteration
+                System.out.print("마");
+            }
+        }
+    }*/
+    
+# 처음 주어지는 코드 original code
+class Solution {
+    public String solution(String str1, String str2) {
+        String answer = "";
+        return answer;
+    }
+}
