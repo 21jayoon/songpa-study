@@ -1,0 +1,1106 @@
+package com.ohgiraffers.section01.DimArrayPractice0513.ClassComparator;
+
+import com.ohgiraffers.section01.DimArrayPractice0513.ClassDTO;
+
+import java.util.Comparator;
+
+public class AscendingTime implements Comparator<ClassDTO> {
+    // double 시작시간을 오름차순으로 정렬
+    // Comparator는 오버라이딩이 필수
+
+    @Override
+    public int compare(ClassDTO o1, ClassDTO o2) {
+        int result = 0;
+        if(o1.getStartTime() > o2.getStartTime()) {
+            result = 1;
+        } else if (o1.getStartTime() < o2.getStartTime()) {
+            result = -1;
+        } else {
+            result = 0;
+        }
+        return result;
+    }
+}
+
+package com.ohgiraffers.section01.DimArrayPractice0513;
+
+import com.ohgiraffers.section01.list.DTO.BookDTO;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class ArrayPractice250513 {
+    public static void main(String[] args) {
+        //1. ArrayList 새로 불러오기 11:56
+        List<ClassDTO> classList = new ArrayList<>();
+
+        //2. .add()로 className, lectureRoom, startTime, professor 값 넣어주기 12:03
+        classList.add(new ClassDTO("JAVA-101", 'A', 9.0, "홍길동"));
+        classList.add(new ClassDTO("HTML-101", 'B', 10.0, "Sherlock Hommes"));
+        classList.add(new ClassDTO("Chapel", 'Z', 16.0, "Abraham.L"));
+        classList.add(new ClassDTO("Psychology-102", 'P', 11.0, "Conan.O"));
+        classList.add(new ClassDTO("how to start art", 'C', 14.0, "Jane Doe"));
+
+        //3. 향상된 for문으로 classList 출력하기
+        for(ClassDTO list: classList) {
+            System.out.println(list);
+        }
+        /*ClassDTO{className='JAVA-101', lectureRoom=A, startTime=9.0, professor='홍길동'}
+        ClassDTO{className='HTML-101', lectureRoom=B, startTime=10.0, professor='Sherlock Hommes'}
+        ClassDTO{className='Chapel', lectureRoom=Z, startTime=16.0, professor='Abraham.L'}
+        ClassDTO{className='Psychology-102', lectureRoom=P, startTime=11.0, professor='Conan.O'}
+        ClassDTO{className='how to start art', lectureRoom=C, startTime=14.0, professor='Jane Doe'}*/
+
+        //4. className ascending(강의 이름 오름차순 정렬)
+        classList.sort(new Comparator<ClassDTO>() {
+            @Override
+            public int compare(ClassDTO o1, ClassDTO o2) {
+                return o1.getClassName().compareTo(o2.getClassName());
+            }
+        });
+        System.out.println("className 순으로 오름차순 정렬=======");
+        //4-1. 향상된 for문으로 리스트 출력
+        for(ClassDTO nameList1 : classList) {
+            System.out.println(nameList1);
+        }
+        /* className 순으로 오름차순 정렬=======
+        ClassDTO{className='Chapel', lectureRoom=Z, startTime=16.0, professor='Abraham.L'}
+        ClassDTO{className='HTML-101', lectureRoom=B, startTime=10.0, professor='Sherlock Hommes'}
+        ClassDTO{className='JAVA-101', lectureRoom=A, startTime=9.0, professor='홍길동'}
+        ClassDTO{className='Psychology-102', lectureRoom=P, startTime=11.0, professor='Conan.O'}
+        ClassDTO{className='how to start art', lectureRoom=C, startTime=14.0, professor='Jane Doe'}
+        */
+
+        //5. lectureRoom descending(강의실 명 내림차순 정렬)
+        classList.sort(new Comparator<ClassDTO>() {
+            @Override
+            public int compare(ClassDTO o1, ClassDTO o2) {
+                return 0;
+            }
+        });
+        classList.sort((ClassDTO c1, ClassDTO c2) -> c2.getLectureRoom().compareTo(c1.getLectureRoom()));
+
+        System.out.println("책 제목 순으로 내림차순 정렬=======");
+        for(BookDTO book : bookList) {
+            System.out.println(book);
+        }
+    }
+}
+package com.ohgiraffers.section01.DimArrayPractice0513;
+
+public class ClassDTO {
+    // 1. private 캡슐화로 변수 생성
+    private String className;
+    private char lectureRoom;
+    private double startTime;
+    private String professor;
+
+    //2. 기본 생성자 생성
+    public ClassDTO() {}
+
+    //3. ALT+INSERT로 Constructor 생성
+    public ClassDTO(String className, char lectureRoom, double startTime, String professor) {
+        this.className = className;
+        this.lectureRoom = lectureRoom;
+        this.startTime = startTime;
+        this.professor = professor;
+    }
+
+    //4. ALT+INSERT로 getter setter 생성
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public char getLectureRoom() {
+        return lectureRoom;
+    }
+
+    public void setLectureRoom(char lectureRoom) {
+        this.lectureRoom = lectureRoom;
+    }
+
+    public double getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(double startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getProfessor() {
+        return professor;
+    }
+
+    public void setProfessor(String professor) {
+        this.professor = professor;
+    }
+
+    //5. AlT+INSERT로 toString() 생성
+    @Override
+    public String toString() {
+        return "ClassDTO{" +
+                "className='" + className + '\'' +
+                ", lectureRoom=" + lectureRoom +
+                ", startTime=" + startTime +
+                ", professor='" + professor + '\'' +
+                '}';
+    }
+
+    //6. 끝! 5/13 10:20
+}
+package com.ohgiraffers.section01.list.DTO.comparator;
+
+import com.ohgiraffers.section01.list.DTO.BookDTO;
+
+import java.util.Comparator;
+
+public class AscendingPrice implements Comparator<BookDTO> {
+    // Comparator는 오버라이딩이 필수
+
+    @Override
+    public int compare(BookDTO o1, BookDTO o2) {
+
+        int result = 0;
+
+        if(o1.getPrice() > o2.getPrice()){
+            // 순서를 바꿔야하는 경우 양수 반환
+            result =  1;
+        } else if (o1.getPrice() < o2.getPrice()) {
+            // 이미 오름차순 정렬돼서 음수 반환
+            result = -1;
+        }else {
+            // 두 값(가격)이 같을 경우
+            result = 0;
+        }
+        return result;
+    }
+}
+/* 0513 notion 이관으로 글을 쓸 수 없어 여기에 일단 메모 : 일단 개인 노션에는 저장해놓음 18:02
+public int compare(BookDTO o1, BookDTO o2) {
+
+        int result = 0;
+
+        if(o1.getPrice() > o2.getPrice()){
+            // 순서를 바꿔야하는 경우 양수 반환
+            result =  1;
+        } else if (o1.getPrice() < o2.getPrice()) {
+            // 이미 오름차순 정렬돼서 음수 반환
+            result = -1;
+        }else {
+            // 두 값(가격)이 같을 경우
+            result = 0;
+        }
+        return result;
+    }
+이 코드 내가 어떻게 해석해야하는지 알려줄래?
+사용은 이렇게 해.
+List<BookDTO> bookList = new ArrayList<>();
+        bookList.add(new BookDTO(1, "홍길동전", "허균", 50000));
+        bookList.add(new BookDTO(2, "목민심서", "정약용", 30000));
+        bookList.add(new BookDTO(3, "동의보감", "허준", 40000));
+        bookList.add(new BookDTO(4, "삼국사기", "김부식", 46000));
+        bookList.add(new BookDTO(5, "삼국유사", "일연", 58000));
+
+bookList.sort(new AscendingPrice());
+
+        System.out.println("가격 오름차순 정렬=======");
+        for(BookDTO book : bookList) {
+            System.out.println(book);
+        }
+그리고 public int compare(){} 이걸 메소드라고 부를 수 있는지도 알려줘
+
+
+A: ### 코드 해석
+이 코드는 Java에서 `Comparator` 인터페이스를 구현한 클래스의 `compare` 메서드입니다. 이 메서드는 두 개의 `BookDTO` 객체를 비교하여 가격(`price`)을 기준으로 정렬합니다.
+
+#### `compare` 메서드의 동작:
+1. **입력 값**:
+   - `BookDTO` 객체 `o1`과 `o2`.
+   - 각 객체는 책 정보를 담고 있으며, `getPrice()` 메서드를 통해 가격을 가져올 수 있습니다.
+
+2. **비교 로직**:
+   - `o1.getPrice() > o2.getPrice()`:
+     - `o1`의 가격이 `o2`의 가격보다 크다면, 값 `1`을 반환합니다.
+     - 이 반환값은 정렬 알고리즘에 의해 "순서를 바꿔야 한다"는 신호로 작용합니다.
+   - `o1.getPrice() < o2.getPrice()`:
+     - `o1`의 가격이 `o2`의 가격보다 작다면, 값 `-1`을 반환합니다.
+     - 이 반환값은 "현재 순서가 올바르다"는 신호로 작용합니다.
+   - `o1.getPrice() == o2.getPrice()`:
+     - 두 객체의 가격이 같다면, 값 `0`을 반환합니다.
+     - 정렬 알고리즘은 두 객체의 순서를 그대로 유지합니다.
+
+3. **리턴 값**:
+   - `1`: `o1`과 `o2`의 순서를 바꿔야 함.
+   - `-1`: 순서를 바꿀 필요 없음.
+   - `0`: 순서를 유지.
+
+#### 사용
+```java
+List<BookDTO> bookList = new ArrayList<>();
+bookList.add(new BookDTO(1, "홍길동전", "허균", 50000));
+bookList.add(new BookDTO(2, "목민심서", "정약용", 30000));
+bookList.add(new BookDTO(3, "동의보감", "허준", 40000));
+bookList.add(new BookDTO(4, "삼국사기", "김부식", 46000));
+bookList.add(new BookDTO(5, "삼국유사", "일연", 58000));
+
+bookList.sort(new AscendingPrice()); // AscendingPrice는 Comparator 인터페이스를 구현한 클래스
+```
+
+위 코드는 `AscendingPrice`라는 클래스를 이용해 `bookList`를 가격 기준으로 오름차순 정렬합니다.
+
+출력 결과:
+```
+가격 오름차순 정렬=======
+BookDTO{id=2, title='목민심서', author='정약용', price=30000}
+BookDTO{id=3, title='동의보감', author='허준', price=40000}
+BookDTO{id=4, title='삼국사기', author='김부식', price=46000}
+BookDTO{id=1, title='홍길동전', author='허균', price=50000}
+BookDTO{id=5, title='삼국유사', author='일연', price=58000}
+```
+
+---
+
+### `compare`가 메서드인지
+네, `compare`는 **메서드**입니다.
+
+#### 메서드란?
+- **정의**: 클래스 또는 객체의 동작(기능)을 정의하는 코드 블록.
+- **특징**:
+  - 이름을 가짐(`compare`).
+  - 입력 매개변수를 받음(`o1`, `o2`).
+  - 특정 작업을 수행하고 결과를 반환(`int`형 반환).
+
+#### `compare` 메서드의 특징:
+- 이 메서드는 Java의 `Comparator` 인터페이스의 메서드로, 반드시 구현해야 하는 메서드 중 하나입니다.
+- `AscendingPrice` 클래스에서 `compare` 메서드를 구현함으로써 사용자 정의 정렬 기준을 제공한 것입니다.
+
+---
+
+### 요약
+1. **코드 해석**:
+   - `compare` 메서드는 두 `BookDTO` 객체의 가격을 비교하여 오름차순 정렬 기준을 반환합니다.
+   - 반환값 `1`, `-1`, `0`은 각각 "순서 변경", "순서 유지", "같음"을 나타냅니다.
+
+2. **메서드 여부**:
+   - `compare`는 메서드입니다.
+   - `Comparator` 인터페이스에 정의된 메서드를 구현한 것입니다.
+
+3. **사용 결과**:
+   - `bookList.sort(new AscendingPrice())`를 통해 책 리스트가 가격 기준으로 오름차순 정렬됩니다.
+*/
+package com.ohgiraffers.section01.list.DTO;
+
+public class BookDTO {
+    private int number;
+    private String title;
+    private String author;
+    private int price;
+
+    public BookDTO() {}
+
+    public BookDTO(int number, String title, String author, int price) {
+        this.number = number;
+        this.title = title;
+        this.author = author;
+        this.price = price;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "BookDTO{" +
+                "number=" + number +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", price=" + price +
+                '}';
+    }
+}
+package com.ohgiraffers.section01.list.run;
+
+import java.util.*;
+
+public class Application1 {
+    public static void main(String[] args) {
+        /*collection 프레임워크에 대해 이해할 수 있다.
+        * collection 프레임워크는
+        * 데이터를 효율적으로 저장하는 자료구조와
+        * 데이터를 처리하는 알고리즘을 미리 구현해놓은 클래스이다.
+        *
+        *
+        * Collection Framework는 크게 3가지 인터페이스 중 한 가지를 상속받아 구현해놓았다.
+        * 1. List 인터페이스
+        * 2. Set 인터페이스
+        * 3. Map 인터페이스
+        *
+        *
+        * 각 인터페이스 별 특징
+        * 1. List 인터페이스
+        * - 순서 있는 데이터 집합으로 데이터의 중복 저장을 허용한다.
+        * - Vector, ArrayList(가장 자주 사용), LinkedList, Stack, Queue 등이 있다.
+        *
+        * 2. Set 인터페이스
+        * - 순서가 없는 데이터 집합으로 데이터의 중복을 허용하지 않는다.
+        * - HashSet, TreeSet 등이 있다.
+        *
+        * 3. Map 인터페이스
+        * - 키와 값 한 쌍으로 이뤄지는 데이터 집합이다.
+        * - key를 Set 방식으로 관리하기 때문에 데이터의 순서를 관리하지 않고 중복된 key를 허용치 않는다.
+        * - value는 중복된 값을 저장할 수 있다.
+        * - HashMap, TreeMap, HashTable, Properties 등이 있다. */
+
+        /*ArrayList
+        * 가장 많이 사용되는 컬렉션 클래스이다.
+        * 내부적으로 배열을 이용하여 요소를 관리하며, 인덱스를 이용해 배열 요소에 빠르게 접근할 수 있다.
+        *
+        * ArrayList는 배열의 단점을 보완하기 위해 만들어졌다.
+        * 배열은 크기를 한 번 할당하면 변경할 수 없고, 요소의 추가, 삭제, 정렬 등이 복잡하다는 단점이 있다.
+        * ArrayList는 이러한 배열의 단점을 보완하고자
+        * 크기 변경, 요소 추가, 삭제, 정렬 기능들을 미리 메소드로 구현해서 제공하고 있다.
+        * 자동적으로 수행되는 것이지, 속도가 빨라지는 것은 아니다.
+        */
+        ArrayList alist = new ArrayList(); // 내부적으로 10칸짜리가 한 번에 생성됨.
+        // CTRL 누르고 class 이름 누르면 java에서 미리 만들어준 관련 전체 메소드 코드 확인 가능
+
+        List list = new ArrayList();
+
+        Collection clist = new ArrayList<>();
+
+        alist.add("apple");
+        alist.add(123);
+        alist.add(45.34);
+        alist.add(new Date());
+        // List는 저장되는 순서를 유지하고 있다.
+
+        System.out.println(alist); // [apple, 123, 45.34, Mon May 12 13:33:47 KST 2025]
+
+        System.out.println(alist.size()); // 4
+
+
+        // 데이터의 중복 저장을 허용
+        for(int i = 0; i < alist.size(); i++){
+            System.out.println(i + " : " + alist.get(i));
+        }
+        /*0 : apple
+        1 : 123
+        2 : 45.34
+        3 : Mon May 12 13:35:52 KST 2025*/
+
+        alist.add("apple");
+        System.out.println(alist); // [apple, 123, 45.34, Mon May 12 13:37:02 KST 2025, apple]
+
+        alist.add(1, "banana");
+        System.out.println(alist); // [apple, banana, 123, 45.34, Wed May 14 15:16:20 KST 2025, apple]
+
+        // 값을 삭제할 때
+        alist.remove(2); // 2번째 인덱스(123)을 삭제하라
+        System.out.println(alist); // [apple, banana, 45.34, Wed May 14 15:16:20 KST 2025, apple]
+
+        // 값을 수정할 때
+        alist.set(1, Boolean.valueOf(true)); // 1번째 인덱스 값(banana)을 true(boolean)으로 바꾼다
+        System.out.println(alist); // [apple, true, 45.34, Wed May 14 15:16:20 KST 2025, apple]
+
+        List<String> stringList = new ArrayList<>();
+        stringList.add("apple");
+//        stringList.add(123);
+        stringList.add("banana");
+        stringList.add("orange");
+        stringList.add("mango");
+        stringList.add("grape");
+
+        System.out.println(stringList); // [apple, banana, orange, mango, grape]
+
+        // 오름차순 정렬
+        Collections.sort(stringList);
+
+        System.out.println(stringList); // [apple, banana, grape, mango, orange]
+
+        stringList = new LinkedList<>(stringList);
+
+        /*Iterator 반복자 인터페이스를 활용해서 역순으로 정렬한다.
+        LinkedList 타입으로 형변환 후 descendingIterator() 메소드를 사용하면
+        내람차순 정렬된 Iterator 타입의 목록으로 반환을 해 준다.
+
+        Iterator란?
+        Collection 인터페이스의 iterator() 메소드를 이용해서 인스턴스를 생성할 수 있다.
+        컬렉션에서 값을 읽어오는 방식을 통일된 방식으로 제공하기 위해 사용한다.
+        반복자라고 불리며, 반복문을 이용해서 목록을 하나씩 꺼내는 방식으로 사용하기 위함이다.
+        인덱스로 관리되는 컬렉션이 아닌 경우에는 반복문을 사용해서 요소에 하나씩 접근할 수 없기 때문에
+        인덱스를 사용하지 않고도 반복문을 사용하기 위한 목록을 만들어주는 역할이라고 보면 되낟.
+        hasNext() : 다음 요소를 갖고 있는 경우 true, 더 이상 요소가 없는 경우 false 반환
+        next() : 다음 요소를 반환
+        */
+        Iterator<String> dIter = ((LinkedList<String>) stringList).descendingIterator();
+
+//        while (dIter.hasNext()) {
+//            System.out.println(dIter.next());
+//        }
+//        /* orange
+//        mango
+//        grape
+//        banana
+//        apple*/
+
+        List<String> descList = new ArrayList<>();
+        while (dIter.hasNext()) {
+            descList.add(dIter.next());
+        }
+        System.out.println(descList); //[orange, mango, grape, banana, apple]
+    }
+}
+package com.ohgiraffers.section01.list.run;
+
+import com.ohgiraffers.section01.list.DTO.BookDTO;
+import com.ohgiraffers.section01.list.DTO.comparator.AscendingPrice;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class Application2_BookDtoRun {
+    public static void main(String[] args) {
+        /* ArrayList의 정렬 기능을 이용할 수 있다. */
+        List<BookDTO> bookList = new ArrayList<>();
+        // 나중에 프로젝트를 할 때 등에 데이터를 갖고 많이 왔다갔다하기 때문에 List형태로 DTO를 자주 사용하게 될 것.
+
+        bookList.add(new BookDTO(1, "홍길동전", "허균", 50000));
+        bookList.add(new BookDTO(2, "목민심서", "정약용", 30000));
+        bookList.add(new BookDTO(3, "동의보감", "허준", 40000));
+        bookList.add(new BookDTO(4, "삼국사기", "김부식", 46000));
+        bookList.add(new BookDTO(5, "삼국유사", "일연", 58000));
+
+//        Collections.sort(bookLIst);
+
+        for(BookDTO book : bookList){
+            System.out.println(book);
+        }
+        /*BookDTO{number=1, title='홍길동전', author='허균', price=50000}
+        BookDTO{number=2, title='목민심서', author='정약용', price=30000}
+        BookDTO{number=3, title='동의보감', author='허준', price=40000}
+        BookDTO{number=4, title='삼국사기', author='김부식', price=46000}
+        BookDTO{number=5, title='삼국유사', author='일연', price=58000}*/
+
+
+        /* 가격 순으로 오름차순 정렬 */
+        bookList.sort(new AscendingPrice());
+
+        System.out.println("가격 오름차순 정렬=======");
+        for(BookDTO book : bookList) {
+            System.out.println(book);
+        }
+        /* 가격 오름차순 정렬=======
+        BookDTO{number=2, title='목민심서', author='정약용', price=30000}
+        BookDTO{number=3, title='동의보감', author='허준', price=40000}
+        BookDTO{number=4, title='삼국사기', author='김부식', price=46000}
+        BookDTO{number=1, title='홍길동전', author='허균', price=50000}
+        BookDTO{number=5, title='삼국유사', author='일연', price=58000}*/
+
+
+        /* 가격 내림차순 정렬*/
+        bookList.sort(new Comparator<BookDTO>() {
+            @Override
+            public int compare(BookDTO o1, BookDTO o2) { // 익명 클래스(클래스 이름은 없는데 클래스처럼 구현부가 적용됐을 때)
+                // 순서를 바꾸는 경우 양수, 안 바꾸는 셩우 음수 반환
+                return o1.getPrice() >= o2.getPrice()? -1: 1;
+            }
+        });
+
+        System.out.println("가격 내림차순 정렬=======");
+         for(BookDTO book : bookList) {
+             System.out.println(book);
+         }
+         /*가격 내림차순 정렬=======
+         BookDTO{number=5, title='삼국유사', author='일연', price=58000}
+         BookDTO{number=1, title='홍길동전', author='허균', price=50000}
+         BookDTO{number=4, title='삼국사기', author='김부식', price=46000}
+         BookDTO{number=3, title='동의보감', author='허준', price=40000}
+         BookDTO{number=2, title='목민심서', author='정약용', price=30000}*/
+
+
+         /*제목 순 오름차순 정렬*/
+        bookList.sort(new Comparator<BookDTO>() {
+            @Override
+            public int compare(BookDTO o1, BookDTO o2) {
+                // 앞 title(인스턴스) 값이 더 작은 경우 음수 반환
+                // 같으면 0 반환
+                // 앞의 값이 더 큰 경우 양수 반환 (바꿔야되는 경우)
+                return o1.getTitle().compareTo(o2.getTitle());
+            }
+        });
+
+        System.out.println("책 제목 순으로 오름차순 정렬=======");
+        for(BookDTO book : bookList) {
+            System.out.println(book);
+        }
+        /*책 제목 순으로 오름차순 정렬=======
+        BookDTO{number=3, title='동의보감', author='허준', price=40000}
+        BookDTO{number=2, title='목민심서', author='정약용', price=30000}
+        BookDTO{number=4, title='삼국사기', author='김부식', price=46000}
+        BookDTO{number=5, title='삼국유사', author='일연', price=58000}
+        BookDTO{number=1, title='홍길동전', author='허균', price=50000}*/
+
+
+        /*제목 순 내림차순 정렬 */
+        bookList.sort((BookDTO b1, BookDTO b2) -> b2.getTitle().compareTo(b1.getTitle()));
+
+        System.out.println("책 제목 순으로 내림차순 정렬=======");
+        for(BookDTO book : bookList) {
+            System.out.println(book);
+        }
+        /*책 제목 순으로 내림차순 정렬=======
+        BookDTO{number=1, title='홍길동전', author='허균', price=50000}
+        BookDTO{number=5, title='삼국유사', author='일연', price=58000}
+        BookDTO{number=4, title='삼국사기', author='김부식', price=46000}
+        BookDTO{number=2, title='목민심서', author='정약용', price=30000}
+        BookDTO{number=3, title='동의보감', author='허준', price=40000}*/
+
+
+        /* author 오름차순 정렬*/
+        bookList.sort(((BookDTO c1, BookDTO c2) -> c2.getAuthor().compareTo(c1.getAuthor())));
+
+        System.out.println("저자명 순으로 오름차순 정렬========");
+        for(BookDTO authorUp : bookList) {
+            System.out.println(authorUp);
+        }
+        /* 저자명 순으로 오름차순 정렬========
+        BookDTO{number=3, title='동의보감', author='허준', price=40000}
+        BookDTO{number=1, title='홍길동전', author='허균', price=50000}
+        BookDTO{number=2, title='목민심서', author='정약용', price=30000}
+        BookDTO{number=5, title='삼국유사', author='일연', price=58000}
+        BookDTO{number=4, title='삼국사기', author='김부식', price=46000} */
+
+
+        /*author 내림차순 정렬*/
+        bookList.sort(new Comparator<BookDTO>() {
+            @Override
+            public int compare(BookDTO o1, BookDTO o2) {
+                return o1.getAuthor().compareTo(o2.getAuthor());
+            }
+        });
+        System.out.println("저자명 순으로 내림차순 정렬========");
+        for(BookDTO authorDwn : bookList) {
+            System.out.println(authorDwn);
+        }
+        /*저자명 순으로 내림차순 정렬========
+        BookDTO{number=4, title='삼국사기', author='김부식', price=46000}
+        BookDTO{number=5, title='삼국유사', author='일연', price=58000}
+        BookDTO{number=2, title='목민심서', author='정약용', price=30000}
+        BookDTO{number=1, title='홍길동전', author='허균', price=50000}
+        BookDTO{number=3, title='동의보감', author='허준', price=40000}*/
+    }
+}
+package com.ohgiraffers.section01.list.run;
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class Application3 {
+    public static void main(String[] args) {
+        /* comment. LinkedList에 대해 이해하고 사용할 수 있다. */
+        /* LinkedList
+         * ArrayList가 배열을 이용해서 발생할 수 있는 성능적인 단점을 보완하고자 고안되었다.
+         * 내부는 이중 연결리스트로 구현되어 있다.
+         *
+         *
+         * 단일 연결 리스트
+         * : 저장한 요소가 순서를 유지하지 않고 저장되지만 이러한 요소들 사이를 링크로 연결하여 구성하며
+         *   마치 연결된 리스트 형태인 것 처럼 만든 자료구조이다.
+         *   요소의 저장과 삭제 시 다음 요소를 가리키는 참조 링크만 변경하면 되기 때문에
+         *   요소의 저장과 삭제가 빈번히 일어나는 경우 ArrayList보다 성능면에서 우수하다.
+         *   하지만 단일 연결 리스트는 다음 요소만 링크하기 때문에 이전 요소로 접근하기가 어렵다.
+         *   이를 보완하고자 만든 것이 이중 연결 리스트이다.
+         *
+         * 이중 연결 리스트
+         *  : 단일 연결 리스트는 다음 요소만 링크하는 반면 이중 연결 리스트는 이전 요소도 링크하여
+         *    이전 요소로 접근하기 쉽게 고안된 자료구조이다.
+         *
+         *
+         * LinkedList는 이중 연결리스트를 구현한 것이며 역시 List 인터페이스를 상속받아서
+         * ArrayList와 사용하는 방법이 거의 유사하다.
+         * 하지만 내부적으로 요소를 저장하는 방법에 차이가 있는 것이다.
+         * 각 컬렉션 프레임워크 클래스들의 특징을 파악하고 그에 따라 적합한 자료구조를 구현한 클래스를 선택하는 것이 좋다.
+         * */
+        List<String> linkedList = new LinkedList<>();
+
+        linkedList.add("apple");
+        linkedList.add("banana");
+        linkedList.add("orange");
+        linkedList.add("mango");
+        linkedList.add("grape");
+
+        System.out.println(linkedList.size()); // 5
+
+        for(int i = 0; i < linkedList.size(); i++) {
+            System.out.println(i + " : " + linkedList.get(i));
+        }
+
+        linkedList.remove(1);
+        /* 0 : apple
+        1 : banana
+        2 : orange
+        3 : mango
+        4 : grape */
+
+        for(String s : linkedList) {
+            System.out.println(s);
+        }
+        /* apple
+        orange
+        mango
+        grape */
+
+        linkedList.set(0, "fineapple");
+
+        System.out.println(linkedList); // [fineapple, orange, mango, grape]
+
+        System.out.println(linkedList.isEmpty()); // false
+
+        linkedList.clear(); //linkedList 비우기
+
+        System.out.println(linkedList.isEmpty()); // true
+    }
+}
+package com.ohgiraffers.section01.list.run;
+
+import java.util.Stack;
+
+public class Application4 {
+    public static void main(String[] args) {
+        /* comment. Stack에 대해 이해하고 사용할 수 있다. */
+        /* Stack은 리스트 계열 클래스의 Vector 클래스를 상속받아 구현하였다.
+         *  스택 메모리 구조는 선형 메모리 공간에 데이터를 저장하며
+         *  후입선출(LIFO - Last Input First Out)방식의 자료 구조라 불린다.
+         * */
+
+        Stack<Integer> integerStack = new Stack<>();
+
+        //값 넣을 때는 push() 사용
+        integerStack.push(1);
+        integerStack.push(2);
+        integerStack.push(3);
+        integerStack.push(4);
+        integerStack.push(5);
+
+        System.out.println(integerStack); // [1, 2, 3, 4, 5]
+
+        //요소를 찾을 때 search()
+        System.out.println(integerStack.search(5)); // 1
+
+        // peek() : 해당 스택의 가장 마지막에 있는(상담에 있는 요소 변환)
+        // pop() : 해당 스택의 가장 마지막에 있는(상단에 있는) 요소 반환 후 제거
+
+        System.out.println(integerStack.peek()); // 5
+        System.out.println(integerStack); // [1, 2, 3, 4, 5]
+
+        System.out.println(integerStack.pop()); // 5
+        System.out.println(integerStack.pop()); // 4
+        System.out.println(integerStack.pop()); // 3
+        System.out.println(integerStack.pop()); // 2
+        System.out.println(integerStack.pop()); // 1
+//        System.out.println(integerStack.pop());
+        System.out.println(integerStack); // []
+    }
+}
+package com.ohgiraffers.section01.list.run;
+
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class Application5 {
+
+    public static void main(String[] args) {
+
+        /* comment. Queue에 대해 이해하고 사용할 수 있다. */
+        /* Queue는 선형 메모리 공간에 데이터를 저장하는
+         * 선입선출(FIFO - First Input First Out)방식의 자료구조이다.
+         * Queue 인터페이스를 상속받는 하위 인터페이스들은
+         * Deque, BlockingQueue, BlockingDeque, TransferQueue등 다양하지만
+         * 대부분의 큐는 LinkedList를 이용한다.
+         * */
+//        Queue<String> que = new Queue<>(); 잘못된 초기화(?) 방식
+
+        Queue<String> que = new LinkedList<>();
+
+        // 데이터를 넣을 때 offer()
+        que.offer("first");
+        que.offer("second");
+        que.offer("third");
+        que.offer("fourth");
+        que.offer("fifth");
+
+        System.out.println(que); // [first, second, third, fourth, fifth]
+
+        // peek() : 해당 큐의 가장 앞에 있는 요소(먼저 들어온 요소)를 반환한다.
+        // poll() : 해당 큐의 가장 앞에 있는 요소(먼저 들어온 요소)를 반환하고 제거한다.
+
+        System.out.println(que.peek()); // first
+        System.out.println(que.peek()); // first
+
+        System.out.println(que); // [first, second, third, fourth, fifth]
+
+        System.out.println(que.poll()); // first
+        System.out.println(que.poll()); // second
+        // poll은 맨 앞 요소를 반환 후 제거하기 때문에 first가 사라진 후 맨 앞 요소가 된 second를 반환하고 제거하였다
+
+        System.out.println(que); // [third, fourth, fifth]
+    }
+}
+package com.ohgiraffers.section02.set.run;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+public class Application1 {
+
+    public static void main(String[] args) {
+
+        /* comment. Set 자료구조의 특성을 이해하고 HashSet을 이해할 수 있다. */
+        /* Set 인터페이스를 구현한 Set 클래스의 특징
+         *  1. 요소의 저장 순서를 유지하지 않는다.
+         *  2. 같은 요소의 중복 저장을 허용하지 않는다. (null값도 중복하지 않게 하나의 null만 저장한다.)
+         *
+         *
+         * HashSet 클래스
+         * Set 컬렉션 클래스에서 가장 만힝 사용되는 클래스 중 하나이다.
+         * 해시 알고리즘을 사용하여 검색 속도가 빠르다는 장점을 가진다.
+         * */
+
+        HashSet<String> hset = new HashSet<>();
+
+//        Set hset2 = new HashSet();
+//        Collection hset3 = new HashSet<>();
+
+        hset.add("java");
+        hset.add("oracle");
+        hset.add("jdbc");
+        hset.add("html");
+        hset.add("css");
+
+        System.out.println(hset); // [css, java, oracle, jdbc, html]
+
+        hset.add("java");
+
+        System.out.println(hset); // [css, java, oracle, jdbc, html]
+        System.out.println(hset.size()); // 5
+        System.out.println(hset.contains("oracle")); // true
+
+        /* 저장된 객체를 하나씩 꺼내는 기능이 없다.
+         * 반복문을 이용해서 연속처리하는 방법 2가지가 있다. */
+
+        /* 1. toArray()배열로 바꾸고 반복문 사용 */
+        Object[] arr = hset.toArray();
+        for(int i = 0; i < arr.length; i++) {
+            System.out.println(i + " : " + arr[i]);
+        }
+        /* 0 : css
+        1 : java
+        2 : oracle
+        3 : jdbc
+        4 : html */
+
+        /* 2. iterator()로 목록 만들어 연속 처리 */
+        Iterator<String> iter = hset.iterator();
+
+        while (iter.hasNext()) {
+            System.out.println(iter.next());
+        }
+        /* css
+        java
+        oracle
+        jdbc
+        html*/
+
+        hset.clear(); //hset 비우기
+        System.out.println(hset.isEmpty()); // true
+    }
+}
+package com.ohgiraffers.section02.set.run;
+
+import java.util.LinkedHashSet;
+import java.util.TreeSet;
+
+public class Application2 {
+
+    public static void main(String[] args) {
+
+        /* comment. LinkedHashSet에 대해 이해하고 사용할 수 있다. */
+        /* LinkedHashSet 클래스
+         *  HashSet이 가지는 기능을 모두 가지고 있고,
+         *  추가적으로 저장 순서를 유지하는 특징을 가진다.
+         * */
+        LinkedHashSet<String> lhset = new LinkedHashSet<>();
+
+        lhset.add("java");
+        lhset.add("oracle");
+        lhset.add("jdbc");
+        lhset.add("html");
+        lhset.add("css");
+
+        System.out.println(lhset); // [java, oracle, jdbc, html, css]
+
+        TreeSet<String> tset = new TreeSet<>(lhset);
+        System.out.println(tset); // [css, html, java, jdbc, oracle]
+    }
+}
+package com.ohgiraffers.section02.set.run;
+
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class Application3 {
+    public static void main(String[] args) {
+        /*TreeSet에 대해 이해하고 사용할 수 있다.
+        * TreeSet 클래스
+        * 데이터가 정렬된 상태로 저장되는 이진 검색 트리의 형태로 요소를 저장한다.
+        * 이진 검색 트리는 데이터를 추가하거나 제거하는 등의 기본 동작 시간이 매우 빠르다.
+        * Set 인터페이스가 갖는 특징을 그대로 가지지만 정렬된 상태를 유지한다는 것이 다른 점이다.
+        * (자동으로 오름차순 정렬을 해준다)*/
+
+        TreeSet<String> tset = new TreeSet<>();
+
+//        Set<String> tset2 = new TreeSet<>();
+            
+        // 다형성을 이용해서 인스턴스 만들 수 있음
+        tset.add("java");
+        tset.add("oracle");
+        tset.add("jdbc");
+        tset.add("html");
+        tset.add("css");
+
+        System.out.println(tset); // [css, html, java, jdbc, oracle]
+
+        Iterator<String> iter = tset.iterator();;
+        while(iter.hasNext()) {
+            System.out.println(((String) iter.next()).toUpperCase());
+        }
+        /* CSS
+        HTML
+        JAVA
+        JDBC
+        ORACLE*/
+
+        Object[] arr = tset.toArray();
+
+        for (Object obj : arr) {
+            System.out.println(obj);
+        }
+        /* css
+        html
+        java
+        jdbc
+        oracle
+        */
+    }
+}
+package com.ohgiraffers.section03.map.run;
+
+import java.util.*;
+
+public class Application1 {
+    public static void main(String[] args) {
+        /*Map의 자료구조에 대해 이해하고 HashMap을 이용할 수 있다.
+        * Map 인터페이스 특징
+        * Collection 인터페이스와는 다른 저장 방식을 가진다.
+        * 키key와 값value을 하나의 쌍으로 저장하는 방식을 사용한다.
+        *
+        * 키 key란?
+        * 값value을 찾기 위한 역할을 하는 객체object를 의미.
+        * 1. 요소의 저장 순서를 유지하지 않는다.
+        * 2. 키는 중복을 허용하지 않지만, 키가 다르면 중복되는 값은 저장 가능하다.
+        *
+        * HashMap, HashTable, TreeMap 등의 대표적인 클래스가 있다.
+        * HashMap이 가장 많이 사용된다.
+        * 해시 알고리즘을 사용하여 검색 속도가 매우 빠르다. */
+
+        //1. 인스턴스 생성
+        HashMap hmap = new HashMap<>(); // HashMap 인스턴스 형성 방법1
+//        Map hmap2 = new HashMap<>(); // HashMap 인스턴스 형성 방법2
+
+        hmap.put("one", new Date());
+        hmap.put(12, "red apple");
+        hmap.put(33, 123);
+
+        System.out.println(hmap);  // {33=123, one=Tue May 13 11:36:48 KST 2025, 12=red apple}
+
+        hmap.put(12, "yellow banana");
+        System.out.println(hmap); // {33=123, one=Tue May 13 11:37:36 KST 2025, 12=yellow banana}
+        // 12의 키key 값이 덮어씌워졌다. = 키는 중복 저장되지 않음(set의 성질에서 옴), 최근 키로 override됨(덮어씀)
+
+        hmap.put(11, "yellow banana");
+        hmap.put(9, "yellow banana");
+        System.out.println(hmap); //{33=123, one=Tue May 13 11:39:07 KST 2025, 9=yellow banana, 11=yellow banana, 12=yellow banana}
+        // 값value은 중복 저장 가능
+
+        //값 객체의 내용을 가져올 때 get()
+        System.out.println("키 9에 대한 객체 : " + hmap.get(9)); //키 9에 대한 객체 : yellow banana
+
+        //키 값을 갖고 삭제를 처리할 때 remove()
+        hmap.remove(9);
+        System.out.println(hmap); // {33=123, one=Tue May 13 11:40:36 KST 2025, 11=yellow banana, 12=yellow banana}
+
+        //몇 개 저장되었는지 확인하고플 때 .size()
+        System.out.println(hmap.size()); // 4
+
+
+        HashMap<String, String> hmap2 = new HashMap<>();
+
+        hmap2.put("one", "java"); // key, value 각각 객체가 두 개
+        hmap2.put("two", "oracle");
+        hmap2.put("three", "jdbc");
+        hmap2.put("four", "html");
+        hmap2.put("five", "css");
+
+        /*1. keySet()을 이용해서 키만 따로 set으로 만들고,
+        * iterator()로 키에 대한 목록을 만듦*/
+        Iterator<String> keyIter = hmap2.keySet().iterator();
+
+        while (keyIter.hasNext()) {
+            String key = keyIter.next();
+            String value = hmap2.get(key);
+            System.out.println(key + " = " + value);
+        }
+        /*four = html
+        one = java
+        two = oracle
+        three = jdbc
+        five = css*/
+
+        /*2. 저장된 value 객체들만 values()로 Collection만듦*/
+        Collection<String> values = hmap2.values();
+
+        /*2-1. Iterator()로 목록 만들어서 처리*/
+        Iterator<String> valueIter = values.iterator();
+        while (valueIter.hasNext()) {
+            System.out.println(valueIter.next());
+        }
+        /* html
+        java
+        oracle
+        jdbc
+        css */
+
+        /*2-2. 배열로 만들어서 처리*/
+        Object[] valueArr = values.toArray();
+        for(int i = 0; i< valueArr.length; i++) {
+            System.out.println(i + " : " + valueArr[i]);
+        }
+        /* 0 : html
+        1 : java
+        2 : oracle
+        3 : jdbc
+        4 : css*/
+
+        /*3. Map의 내부클래스인 EntrySet을 이용 : entrySet() */
+        Set<Map.Entry<String,String>> set = hmap2.entrySet();
+        //Entry : 키 객체와 값 객체를 쌍으로 묶은 것
+        Iterator<Map.Entry<String, String>> entryIter = set.iterator();
+
+        while(entryIter.hasNext()) {
+            Map.Entry<String, String> entry = entryIter.next();
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+        /* four : html
+        one : java
+        two : oracle
+        three : jdbc
+        five : css*/
+    }
+}
+package com.ohgiraffers.section03.map.run;
+
+import java.io.*;
+import java.util.Properties;
+
+public class Application2 {
+    public static void main(String[] args) {
+        /*Properties에 대해 이해하고 사용할 수 있다.
+        * properties란?
+        * HashMap을 구현하여 사용 용법이 거의 유사하지만
+        * key와 value 모두 문자열만 사용할 수 있는 자료구조이다.
+        * 설정 파일의 값을 읽어서 아플리케이션에 적용할 때 사용한다.
+        * */
+        Properties prop = new Properties();
+
+        // .setProperty로 prop 저장, 값 담기
+        prop.setProperty("driver", "oracle.jdbc.driver.OracleDriver");
+        prop.setProperty("url", "jdbc:oracle:this:@127.0.0.1:1521:xe");
+        prop.setProperty("user", "student");
+        prop.setProperty("password", "student");
+
+        System.out.println(prop); // {password=student, driver=oracle.jdbc.driver.OracleDriver, user=student, url=jdbc:oracle:this:@127.0.0.1:1521:xe}
+
+        // .store() 이용해서 저장
+        try {
+            prop.store(new FileOutputStream("driver.dat"), "jdbc driver"); // 방법1
+            prop.store(new FileWriter("driver.txt"), "jdbc driver"); // 방법2, 기능은 똑같으나 FileOutputStream과 확장자가 다름
+            prop.storeToXML(new FileOutputStream("driver.xml"), "jdbc driver"); // 방법3
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // 저장할 땐 set, 가져올 땐 get으로 갖고 오면서 key와 value를 다 갖고 와야함
+
+        // Propery 개체 하나 더 추가
+        Properties prop2 = new Properties();
+        try {
+            prop2.load(new FileInputStream("driver.dat")); // 방법1
+            prop2.load(new FileReader("driver.txt")); // 방법2
+            prop2.loadFromXML(new FileInputStream("driver.xml")); // 방법3
+
+            prop2.list(System.out);
+            /*-- listing properties --
+            password=student
+            driver=oracle.jdbc.driver.OracleDriver
+            user=student
+            url=jdbc:oracle:this:@127.0.0.1:1521:xe*/
+
+            System.out.println(prop.getProperty("driver")); // oracle.jdbc.driver.OracleDriver
+            System.out.println(prop.getProperty("url")); // jdbc:oracle:this:@127.0.0.1:1521:xe
+            System.out.println(prop.getProperty("user")); // student
+            System.out.println(prop.getProperty("user")); // student
+            System.out.println(prop.getProperty("password")); // student
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }// try&catch는 예외 처리하는 구문
+    }
+}
