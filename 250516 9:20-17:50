@@ -1,0 +1,92 @@
+# 오늘 강의 진도 내용
+# SQL(MYSQL) 들어감 - SELECT, FROM, ORDER BY, ORDER BY DESC;
+/*01.SELECT*/
+/* SELECT 절은 MYSQL의 가장 기본적인 명령어로
+특정 테이블에서 원하는 데이터를 조회해서 가져오는데 사용된다.*/
+
+SELECT MENU_NAME
+  FROM tbl_menu;
+  
+SELECT MENU_CODE,
+	   MENU_NAME,
+	   MENU_PRICE
+  FROM tbl_menu;
+  
+  SELECT * FROM tbl_menu;
+  
+  -- mysql 이용해 숫자 연산도 가능
+  SELECT 6+3;
+  
+  -- 전체 실행 단축키 CTRL+SHIFT+ENTER
+  
+  SELECT NOW();
+  
+  -- 컬럼 별칭
+  select concat('홍', '', 'Gildong') AS name;
+
+
+  /* ORDER BY */
+/*ORDER BY절은 SELECT문과 함께 사용하며 결과 집합을 특정 열이나
+열들의 값에 따라 정렬하는 데 사용한다. */
+SELECT MENU_CODE,
+	   MENU_NAME,
+       MENU_PRICE
+  FROM tbl_menu
+ORDER BY MENU_PRICE ASC;
+-- ORDER BY의 기본 정렬은 ASC
+
+SELECT MENU_CODE,
+	   MENU_NAME,
+       MENU_PRICE
+  FROM tbl_menu
+ORDER BY MENU_PRICE DESC;
+
+SELECT MENU_CODE,
+	   MENU_NAME,
+       MENU_PRICE
+  FROM tbl_menu
+ORDER BY MENU_PRICE DESC,
+		 MENU_NAME ASC;
+         
+SELECT MENU_CODE,
+	   MENU_NAME,
+	   MENU_PRICE * MENU_CODE
+  FROM tbl_menu
+ORDER BY menu_price * menu_code DESC;
+
+SELECT field(ORDERABLE_STATUS, 'Y', 'N')
+  FROM tbl_menu;
+  
+SELECT MENU_NAME,
+	   ORDERABLE_STATUS
+  FROM tbl_menu
+ORDER BY field(ORDERABLE_STATUS, 'N','Y');
+
+-- 오름차순 시 NULL 값을 가장 처음으로
+SELECT CATEGORY_CODE,
+	   category_name,
+	   ref_category_code
+  FROM tbl_category
+ORDER BY ref_category_code;
+
+-- 오름차순 시 NULL 값을 마지막으로
+SELECT CATEGORY_CODE,
+	   category_name,
+	   ref_category_code
+  FROM tbl_category
+ORDER BY ref_category_code IS NULL;
+
+-- 내림차순 시 NULL을 마지막(아래)으로
+SELECT CATEGORY_CODE,
+	   category_name,
+	   ref_category_code
+  FROM tbl_category
+ORDER BY ref_category_code DESC;
+
+-- 내림차순 시 NULL을 처음(가장 위)으로
+SELECT CATEGORY_CODE,
+	   category_name,
+	   ref_category_code
+  FROM tbl_category
+ORDER BY ref_category_code IS NULL DESC, ref_category_code DESC;
+
