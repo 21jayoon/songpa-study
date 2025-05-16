@@ -1,0 +1,794 @@
+package com.ohgiraffers.section01.literal;
+
+public class Application01 {
+    public static void main(String[] args){
+        /* comment. 여러 가지 값의 형태를 출력할 수 있다 */
+
+        /* 1.숫자 형태의 값
+        * 1-1.정수 형태의 값 출력 */
+        System.out.println(123);
+
+        /* 1-2. 실수 형태의 값 출력 */
+        System.out.println(1.23);
+
+        /* 2. 문자형태의 값 출력 */
+//     코드 먼저쓰고 주석달고 싶으면 컨트롤과 / 함께 사용
+        System.out.println('a'); //문자 형태의 값은 홑따옴표(작은따옴표)로 감싸주어야한다.
+//        System.out.println('ab'); 두 개 이상은 문자로 취급않기 때문에 에러 발생함.
+//        System.out.println(''); //아무 문자도 기록하지 않는 경우도 에러 발생
+        System.out.println('1'); //숫자값이지만 작은따옴표로 감싸져있는 경우 문자'1'이라고 판단한다
+
+        /*3.문자열 형태의 값 출력*/
+        System.out.println("안녕하세요");  //문자열=문자 여러 개가 나열된 형태, 쌍따옴표(큰 따옴표)로 감싸주어야 한다.
+        System.out.println("123");  //정수이지만 쌍따옴표로 감싸져있기 때문에 문자열로 보아야 한다.
+        System.out.println((""));   //아무것도 없는 빈 쌍따옴표도 문자열로 취급한다
+        System.out.println("a");    //한 개의 문자도 쌍따옴표로 감싸면 문자열이다. (단일 문자 a(작은따옴표a)와 다르다)
+
+        /*4.논리 형태의 값 출력*/
+        System.out.println(true);
+        System.out.println(false);
+    }
+}
+
+package com.ohgiraffers.section01.literal;
+
+public class Application02 {
+
+    public static void main(String[] args) {
+        /*comment. 값을 직접 연산해 출력할 수 있다.
+        * 이 때 값의 형태에 따라 사용가능한 연산자의 종류와 연산 결과가 달라진다.*/
+
+        /*1.숫자와 숫자의 연산*/
+        /*1-1.정수와 정수의 연산 */
+        System.out.println("=======정수와 정수의 연산=======");
+        System.out.println(123 + 456);
+        System.out.println(123 - 456);
+        System.out.println(123 * 456);
+        System.out.println(123 / 456);
+        System.out.println(123 % 456); //나머지 값을 구하는 연산
+
+        /*1-2.실수와 실수의 연산 */
+        System.out.println("=======실수와 실수의 연산=======");
+        System.out.println(1.23 + 1.23);
+        System.out.println(1.23 - 0.23);
+        System.out.println(1.23 * 10.0);
+        System.out.println(1.23 / 10.0);
+        System.out.println(1.23 % 1.0); //약간 오차가 생긴다
+
+        /*1-3.정수와 실수의 연산 */
+        /*결과는 항상 실수가 나온다*/
+        System.out.println("=======정수와 실수의 연산=======");
+        System.out.println(123 + 1.23);
+        System.out.println(123 - 0.23);
+        System.out.println(123 * 10.0);
+        System.out.println(123 / 10.0);
+        System.out.println(123 % 1.0);
+
+        /*2.문자의 연산 */
+        /*2-1.문자와 문자의 연산*/
+        System.out.println("=======문자와 문자의 연산=======");
+        System.out.println('a' + 'b'); //결과: 195, ASCII 코드에서 소문자 a와 b는 각각 97,98이라서 195가 나오는 것
+        System.out.println('a' - 'b'); //-1(int), 97-98
+        System.out.println('a' * 'b'); //9506 (Integer)
+        /* 문자열 연산인데 숫자가 나오니 얘는 문자열String인지 정수integer인지 궁금했음
+        int result = 'a' * 'b';
+        System.out.println("Result: " + result);
+        System.out.println("Type: " + ((Object)result).getClass().getSimpleName()); */
+        System.out.println('a' / 'b'); //0
+        System.out.println('a' % 'b'); //97
+
+        /*2-2.문자와 정수의 연산 */
+        System.out.println("=======2-2문자와 정수의 연산=======");
+        System.out.println('a' + 1);
+        System.out.println('a' - 1);
+        System.out.println('a' * 1);
+        System.out.println('a' / 1);
+        System.out.println('a' % 1);
+
+        /*2-3.문자와 실수의 연산 */
+        System.out.println("=======문자와 실수의 연산=======");
+        System.out.println('a' + 1.1);
+        System.out.println('a' - 1.1);
+        System.out.println('a' * 1.1);
+        System.out.println('a' / 1.1);
+        System.out.println('a' % 1.1);
+
+        /*3.문자열의 연산 */
+        /* 3-1. 문자열과 문자열의 연산*/
+        /* 문자열과 문자열의 '+' 연산 결과 문자열 합치기(이어 붙이기)가 된다 */
+        System.out.println("=======문자열과 문자열의 연산=======");
+        System.out.println("Hello" + "World");
+        //문자열 계산은 + 외엔 사용불가
+
+        /*3-2.문자열과 다른 형태의 값 연산 */
+        /*3-2-1.문자열과 정수 연산 */
+        System.out.println("===문자열과 정수 연산===");
+        System.out.println("Hello" + 123);
+
+        /*3-2-2.문자열과 실수 연산 */
+        System.out.println("===문자열과 실수 연산===");
+        System.out.println("Hello" + 1.23);
+
+        /*3-2-3.문자열과 문자 연산 */
+        System.out.println("===문자열과 문자 연산===");
+        System.out.println("Hello" + 'a');
+
+        /*3-2-4.문자열과 논리값 연산 */
+        System.out.println("==3-2-4.문자열과 논리값 연산==");
+        System.out.println("Hello" + true); //Hellotrue(string)
+        /*문자열과의 연산은 +만 가능*/
+
+        /*4.논리값 연산 */
+        /*4-1.논리값과 논리값 연산 */
+        /*System.out.println(true + false);
+        System.out.println(true - false);
+        System.out.println(true * false);
+        System.out.println(true / false);
+        System.out.println(true % false);*/
+        //논리값과 논리값 연산은 불가능. 오류 뜬다.
+
+        /*따라서 논리값과 정수, 논리값과 실수, 논리값과 문자 연산은 불가능  */
+
+        //But 4-5.논리값과 문자열 연산은 가능
+        System.out.println("=======논리값과 문자열 연산=======");
+        System.out.println(true + "a");
+        /*System.out.println(true - "a");
+        System.out.println(true * "a");
+        System.out.println(true / "a");
+        System.out.println(true % "a"); */
+        //그러나 논리값문자열연산 역시 +외 다른 연산자는 사용 불가
+
+    }
+}
+package com.ohgiraffers.section01.literal;
+
+public class Application03 {
+    public static void main(String[] args) {
+        /*comment. 문자열 합치기 결과를 예측하고 사용할 수 있다
+        * 1. 두개의 문자열 합치기*/
+        System.out.println("=======두개의 문자열 합치기=======");
+        System.out.println(9 + 9); 
+        System.out.println("9" + 9); //99(문자열)
+        System.out.println(9+"9"); //99(문자열), 숫자9가 문자열"9"를 만나 문자열99로 출력
+        System.out.println("9"+"9");
+    
+        /* 2. 3개의 문자열 합치기*/
+        System.out.println("=======3개의 문자열 합치기=======");
+        System.out.println(9 + 9 + "9"); //9+9=18까지 계산했다가 문자열"9"를 만나 189로 출력
+        //'+' 연산 방향은 왼쪽에서 오른쪽이다.
+        System.out.println(9 + "9" + 9); //999(문자열)
+        System.out.println("9" + 9 + 9); //999(문자열), 문자열을 가장 먼저 만났기 때문에 다음 문자도 모두 문자열로 인식
+        
+        System.out.println("9"+(9+9)); //918(문자열)
+
+        /* 3. 문자열 합치기 응용*/
+        System.out.println(10 + 10);
+        System.out.println(10 - 20);
+        System.out.println(10 * 20);
+        System.out.println(10 / 20);
+        System.out.println(10 % 20);
+
+        System.out.println("=======결과 보기 좋게 출력=======");
+        System.out.println("10과 20의 합 : " + (10+20));
+        System.out.println("10과 20의 차 : " + (10-20));
+        System.out.println("10과 20의 곱 : " + (10*20));
+        System.out.println("10과 20의 나누기 한 몫 : " + (10/20));
+        System.out.println("10과 20의 나누기 한 나머지 : " + (10%20));
+    }
+}
+package com.ohgiraffers.section2.variable;
+
+public class Application1 {
+    public static void main(String[] arge) {
+        /*comment. 변수의 사용 목적에 대해 이해할 수 있다.
+        * 변수의 사용 목적
+        * 1. 값에 의미를 부여하기 위한 목적으로 (의미 전달이 쉬워야 코드 읽기 쉬워지고, 협업 및 유지보수(=코드개선)에 유리하기 때문이다)
+        * 2. 한 번 저장해둔 값을 재사용하기 위한 목적 (값을 변경할 때도 간편히 변경가능)
+        * 3. 시간에 따라 변하는 값을 저장하고 사용할 수 있다. (변하는 값을 저장하기 위한 공간 = 변수) */
+
+
+        /*1. 값에 의미를 부여하기 위한 목적*/
+        System.out.println("보너스를 포함한 급여 : " + (10000 + 2000) + "원");
+        //이렇게 쓰면 뭐가 보너스고 뭐가 급여인지 한 눈에 알 수 없음
+        
+        //java에서는 int에만 정수를 담을 수 있다
+        int salary = 10000;
+        int bonus = 2000;
+
+        System.out.println("보너스를 포함한 급여 : " + (salary+bonus) + "원");
+        System.out.println("급여 : " + salary + "원");
+
+
+        /*2. 값에 의미를 부여하기 위한 목적*/
+        System.out.println("1번 고객에게 포인트를 100포인트 지급하였습니다.");
+        //만약 이걸 변수 값에 저장하지 않고 print하려면 code를 일일히 쳐야함
+
+        int point = 100;
+        int i = 1;
+        for( ; i < 11; i++){
+            System.out.println( i +"번 고객에게 포인트를 " + point +"포인트 지급하였습니다.");
+        }
+        //처음에 System.out.println( i +"번 고객에게 포인트를 " + point +"포인트 지급하였습니다.");를
+        //for문 바깥에 넣었는데 "1 2 ... 10번 고객에게 포인트를 지급하였습니다."라고 출력됨
+        //googling했더니 출력값을 for문 안에 넣으면 원하는 대로 i가 하나씩 증가하며 출력될 것 같아서
+        //for문 안에 넣었더니 "1번 고객에게 포인트를...지급하였습니다."..."10번 고객에게 포인트를...지급하였습니다." 출력됨
+
+        /*3. 값에 의미를 부여하기 위한 목적*/
+        /*변수는 하나의 값을 저장하고 사용하기 위한 공간이기보다,
+        변하는 값을 저장하기 위한 공간이다.*/
+        int sum = 0; //="선언과 동시에 초기화를 했다"
+
+        sum = sum + 10;
+        System.out.println("sum에 10을 더하면 현재 sum의 값은? : " +sum); //sum에 10을 더하면 현재 sum의 값은? : 10
+
+        sum = sum + 10;
+        System.out.println(sum); //20
+        sum = sum + 15;
+        System.out.println(sum); //35
+    }
+}
+package com.ohgiraffers.section2.variable;
+
+public class Application2 {
+    public static void main(String[] args) {
+        /*comment.변수를 선언하고 값을 할당하여 사용가능
+        변수 사용 방법
+        1. 변수를 준비한다 (선언)
+        2. 변수에 값을 대입한다. (값 대입 및 초기화)
+        3. 변수를 사용한다.
+         */
+        
+        /*1-1. 변수 선언 방법 */
+        /*자료형 변수명; */
+        /*자료형이란?
+        다양한 값의 형태별로 어느 정도 크기를 하나의 값으로 취급할 것인지 미리 compiler과 약속한 키워드
+        예) 앞에서 사용한 int 자료형은 정수를 4byte 만큼 읽어서 하나의 값으로 취급하겠다라는 약속이다
+        이러한 자료형은 기본자료형과 참조자료형으로 나뉜다
+        그 중 기본자료형 8가지부터 살펴보자
+        */
+
+        /*1-1-1. 숫자 취급 자료형
+         * 정수를 취급하는 자료형은 4가지 있음 */
+        byte bnum; // 1byte
+        short snum; // 2byte
+        int inum; // 4byte
+        long lnum; // 8byte
+
+        /* 실수를 취급하는 자료형은 2가지가 있다. */
+        float fnum; // 4byte
+        double dnum; // 8byte
+
+        /* 1-1-2. 문자를 취급하는 자료형 */
+        /* 문자를 취급하는 자료형은 1가지가 있다. */
+        char ch;    // 2byte
+        char ch2;
+
+        /* 1-1-3. 논리값을 취급하는 자료형 */
+        boolean isTrue; // 1byte
+        /*이상 8가지를 기본자료형이라고 하며 자료형 이름과 각 자료형이 갖고 있는 byte 수는 외워야 한다*/
+
+        /* 1-1-4. 문자열을 취급하는 자료형 */
+        String str; // 4byte
+
+        /*2. 변수에 값을 대입한다. (변수 값 초기화)
+        /* 2-1. 정수를 취급하는 자료형에 값 대입 */
+        bnum = 1;
+        snum = 2;
+        inum = 4;
+        lnum = 8L;  // 소문자 l을 써도 되지만 대문자로 하는 것이 권장이다.
+
+        /* 2-2. 실수를 취급하는 자료형에 값 대입 */
+        fnum = 4.0f; // 실수 뒤에 'f'를 붙여야한다. 소문자를 사용하는 것이 일반적이다.
+        dnum = 8.0;
+
+        /*2-3. 문자 취급 자료형에 값 대입 */
+        ch = 'a';
+        ch2 =  97; //숫자로도 지정할 수 있다
+
+        /* 2-4. 논리를 취급하는 자료형에 값 대입 */
+        isTrue = true;
+        isTrue = false;
+
+        /* 2-5. 문자열을 취급하는 자료형에 값 대입 */
+        str = "안녕하세요";
+
+        /* comment.
+         *   숫자로 된 형태의 값을 그대로 사용하는 자료형은 byte,short,int,double이다.
+         *   일반적으로 사용하는 값을 독특한 형태가 아닌 일반적인 형태로 사용할 수 있는 자료형을 대표자료형이라고 하며
+         *   정수형은 int, 실수형은 double이 대표 자료형이다.
+         * */
+
+        /* 선언과 동시에 초기화 */
+        int point = 100;
+        int bonus = 10;
+
+        /*3. 변수 사용
+        * 3-1. 변수에 저장된 값 출력*/
+        System.out.println("bnum = " + bnum);
+        System.out.println("snum = " + snum);
+        System.out.println("inum = " + inum);
+        System.out.println("lnum = " + lnum);
+
+        System.out.println("fnum = " + fnum);
+        System.out.println("dnum = " + dnum); // dnum = 8.0
+
+        System.out.println("ch = " + ch);
+        System.out.println("ch2 = " + ch2);
+
+        System.out.println("isTrue = " + isTrue);
+
+        System.out.println("str = " + str);
+
+        /* 3-2. 변수를 이용해서 연산하기 */
+        System.out.println("포인트와 보너스의 합은? : " + (bonus + point));
+
+        /* 3-3. 대입연산자의 왼쪽과 오른쪽 편에 사용하기 */
+        point = point + 100;
+    }
+}
+package com.ohgiraffers.section2.variable;
+
+public class Application3 {
+    public static void main(String[] args) {
+        /* 필기.
+         * 변수의 명명 규칙
+         * 변수의 이름을 지을 때 아무렇게나 짓는 것이 아닌 정해진 규칙이 있다.
+         * ¡실무적으로는 굉장히 중요!하기 때문에 반드시 숙지해야하고,
+         * 또한, 규칙에 맞는 올바른 변수명을 짓는 것이 좋은 프로그래밍을 하는 첫 단추이다.
+         * */
+
+        /* 필기.
+         * 변수의 명명규칙
+         * 1. 컴파일 에러를 발생시키는 규칙
+         *  1-1. 동일한 범위 내에서 동일한 변수명을 가질 수 없다.
+         *  1-2. 예약어는 사용이 불가능하다. (자바에서 미리 사용하겠다고 compiler와 약속한 키워드를 예약어라고 한다.)
+         *  1-3. 변수명은 대/소문자를 구분한다. (자바는 대/소문자를 엄격하게 구분하는 언어이다.)
+         *  1-4. 변수명은 숫자로 시작할 수 없다. (시작만 할 수 없고 숫자를 섞어서 사용하는 것은 가능하다.)
+         *  1-5. 특수기호는 '_'와 '$'만 사용 가능하다. (따라서 공백을 사용할 수 없다.)
+         *
+         * 2. 컴파일 에러를 발생시키지는 않지만 개발자들끼리의 암묵적인 규칙
+         *  2-1. 변수명의 길이 제한은 없다. (하지만 적당히 해야한다.)
+         *  2-2. 변수명이 합성어로 이루어진 경우 첫 단어는 소문자, 두 번째 시작 단어는 대문자로 시작한다. (camel-case)
+         * 예시) studentName
+         *  2-3. 단어와 단어 사이의 연결을 언더스코어(_)로 하지 않는다. student_Name(x)
+         *  2-4. 한글로 변수명을 짓는 것이 가능하지만, 권장하지 않는다. (한글을 취급하는 다양한 방식들이 존재하기 때문에 에러를 유발할 수 있다.)
+         *  2-5. 변수 안에 저장된 값이 어떤 의미를 가지는지 명확하게 표현하도록 한다.
+         *  2-6. 전형적인 변수 이름이 있다면 가급적 사용하도록 한다. sum
+         *  2-7. 명사형으로 작성할 수 있도록 한다.
+         *  2-8. boolean형은 의문문으로 가급적 긍정형태로 네이밍한다.
+         * */
+
+        /*1. 컴파일 에러 발생
+        * 1-1. 동일범위 내 동일변수명 불가 */
+        int age = 20;
+        //int age = 30; //이미 int age에 20이 들어갔는데.. 반복불가
+
+        /* 1-2. 예약어는 사용이 불가능하다. (자바에서 미리 사용하겠다고 compiler와 약속한 키워드를 예약어라고 한다.) */
+        //int true = 1; //true가 이미 예약어로 되어있음. 사용불가
+        //int for =  20; //for는 예약어
+
+        /*1-3. 변수명은 대소문자를 구분한다. (자바는 대소문자 엄격히 구분하는 언어) */
+        //int Age = 20;  //위에서 만든 age와 다른 것으로 취급됨
+        int True = 20;  //예약어 true와 다른 것으로 취급됨
+
+        /*  1-4. 변수명은 숫자로 시작할 수 없다. (시작만 할 수 없고 숫자를 섞어서 사용하는 것은 가능하다.) */
+//        int 1age = 20;
+        int age1 = 20;
+
+        /*  1-5. 특수기호는 '_'와 '$'만 사용 가능하다. (따라서 공백을 사용할 수 없다.) */
+//        int sh@rp = 20; //@사용불가
+        int _age = 20;  // 처음도 가능하고 중간이나 끝에도 가능
+        int $harp = 20; // $도 사용 가능
+
+        /* 2. 컴파일 에러를 발생시키지는 않지만 개발자들끼리의 암묵적인 규칙 */
+        /*  2-1. 변수명의 길이 제한은 없다. (하지만 적당히 해야한다.) */
+        int adjkajldjakldjkljaljewidlskjklajkljdlska;
+
+        /*  2-2. 변수명이 합성어로 이루어진 경우 첫 단어는 소문자, 두 번째 시작 단어는 대문자로 시작한다. (camel-case)
+        * 예시) studentName
+        자바에서는 클래스명만 유일하게 대문자로 시작한다. */
+        int maxAge = 20;
+        int minAge = 10;
+
+        /*  2-3. 단어와 단어 사이의 연결을 언더스코어(_)로 하지 않는다. */
+        String user_name;   // 에러가 발생하지는 않음
+        String userName;    // 이게 올바른 표현이다.
+
+        /*  2-4. 한글로 변수명을 짓는 것이 가능하지만, 권장하지 않는다. (한글을 취급하는 다양한 방식들이 존재하기 때문에 에러를 유발할 수 있다.) */
+        int 나이;
+
+        /*  2-5. 변수 안에 저장된 값이 어떤 의미를 가지는지 명확하게 표현하도록 한다. */
+        String s;
+        String name;
+
+        /*  2-6. 전형적인 변수 이름이 있다면 가급적 사용하도록 한다. */
+        int sum = 0;
+        int max = 10;
+        int min = 0;
+        int count = 1;
+
+        /*  2-7. 명사형으로 작성할 수 있도록 한다. */
+        String goHome;  // 가능하긴 하지만
+        String home;    // 가급적 명사형으로 짓는다.
+
+        /*  2-8. boolean형은 의문문으로 가급적 긍정형태로 네이밍한다. */
+        boolean isAlive = true; //이게 긍정형
+        boolean isDead = false; // 부정형보다는 긍정형이 더 나은 방식이다.
+    }
+}
+package com.ohgiraffers.section03.constant;
+
+public class Application1 {
+    public static void main(String[] args) {
+        /*comment. 상수에 대해 이해하고 사용할 수 있다
+        * 상수(constant)란?
+        * 변수와 동일하게 데이터를 저장할 수 있는 공간이지만
+        * 변수variable는 메모리에 '변경될 값'을 저장하기 위한 공간이고
+        * 상수는 불변하는 값을(항상 고정된 값을) 저장해두기 위한 메모리 상의 공간이다.
+        * (=한 번 메모리에 저장된 데이터를 변경할 수 없다)
+        *
+        * 상수의 사용 목적
+        * 변경되지 않는 고정된 값을 저장할 목적으로 사용한다
+        * 초기화 이후 값 대입 시 컴파일 에러를 발생시켜 값이 수정되지 못하도록 한다.
+        * 예) 수학 공식에 사용되는 수치, 프로그램의 기본적인 환경설정 정보(DB 정보, IP 주소정보 등)
+        *
+        * 사용방법
+        * 1. 상수 선언 (final 키워드 사용)
+        * 2. 값 초기화 (초기화 이후에는 값 변경 불가능)
+        * 3. 필요 위치에 상수 호출해서 사용
+        */
+        final int AGE;
+        AGE=20;
+//        AGE=30; 앞에서 =20;으로 초기화했는데 30으로 새로운 값 대입시키려니 error 발생
+
+        /* 출력 구문에서 사용 */
+        System.out.println(AGE); //20
+
+        /* 대입연산자 시 활용 */
+        int sum = AGE; // 대입 연산자의 오른 편에는 기술 가능함
+//        int AGE = AGE + 10; // 대입 연산자의 왼쪽 편에는 기술 불가능함
+
+    }
+}
+package com.ohgiraffers.section03.constant;
+
+public class Application2 {
+    public static void main(String[] args) {
+         /*comment. 상수의 명명 규칙에 대해 이해할 수 있다
+         * 상수의 명명 규칙은 변수의 명명규칙과 컴파일 에러를 발생시키는 규칙은 동일
+         * 단, 개발자들 사이에서의 암묵적인 규칙에서 일부 차이를 보인다.
+         * 1.모든 문자는 영문자 대문자 혹은 숫자만 사용한다. (중요!)
+         * 2.단어와 단어 연결은 언더스코어_ 사용한다*/
+
+        final int AGE1 = 20;
+        final int AGE2 = 30;
+        final int age3 = 40;    // 소문자로 사용은 가능하지만 변수와 구분하기 힘듦
+
+        final int MAX_AGE = 60;
+        final int MIN_AGE = 20;
+        final int minAge = 30;  // camel-case 사용이 가능하지만 역시 변수와 구분하기 힘들다.
+    }
+}
+package com.ohgiraffers.section5.typecasting;
+
+public class Application1 {
+    public static void main(String[] args) {
+        /* comment. 자동 형변환 규칙 Widening Type Casting에 대해 이해할 수 있다. */
+
+        /* 데이터 형변환이 필요한 이유
+         *  - 자바에서 다른 타입끼리의 연산은 피연산자들이 모두 같은 타입인 경우 실행할 수 있다.
+         *  - 즉, 같은 데이터 타입끼리만 연산을 수행할 수 있다.
+         * */
+
+        /* 형변환 종류와 규칙
+         *  1. 자동형변환 (묵시적 형변환) : 컴파일러가 자동으로 수행해주는 타입 변환
+         *  1-1. 작은 자료형에서 큰 자료형으로는 자동 형변환된다.
+         *  1-2. 정수는 실수로 자동 형변환 된다.
+         *  1-3. 문자형은 int형으로 자동 형변환 된다.
+         *  1-4. 논리형은 형변환 규칙에서 제외된다.
+         *
+         *  2. 강제형변환 (명시적 형변환) : 형변환(cast) 연산자를 이용한 강제적으로 수행하는 형변환
+         *  2-1. 자동형변환이 적용되지 않는 경우 강제형변환이 필요하다.
+         * */
+
+        /* 자동형변환 규칙 테스트 */
+        /* 1-1. 작은 자료형에서 큰 자료형으로 공간만 옮기는 경우 데이터 손실 발생하지 않기 때문에 자동으로 처리해준다. */
+
+        /* 1-1-1. 정수끼리의 자동 형변환 */
+        byte bnum = 1;
+        short snum = bnum;
+        int inum = snum;
+        long lnum = inum;
+
+
+        int num1 = 10;
+        long num2 = 20;
+//        int result1 = num1 + num2;  // 자동으로 큰 쪽 자료형인 long으로 변경 후 계산하기 때문에 int형 변수에 값을 담을 수 없다.
+        long result1 = num1 + num2;
+
+        System.out.println("result1 = " + result1);
+
+        /* 1-1-2. 실수 끼리의 자동 형변환 */
+        float fnum = 4.0f;
+        double dnum = fnum;
+
+        double result2 = fnum + dnum;
+
+        System.out.println("result2 = " + result2);
+
+        /* 1-2. 정수는 실수로 자동 형변환된다
+        * 정수를 실수로 변경할 때 소수점 자리수가 없어도 실수형태로 표현이 가능하다
+        * 이 때 데이터 손실 없기 때문에 자동 형변환이 가능하다*/
+        long eight = 8;
+        float four = eight;
+        System.out.println("four = " + four);
+
+        float result3 = eight + four;
+        System.out.println("result3 = " + result3);
+
+        /* 1-3. 문자형은 int형으로 자동 형변환 된다. */
+        char ch1 = 'a';
+        int charNumber = ch1;
+
+        System.out.println("charNumber = " + charNumber);
+
+        /* 1-4. 논리형은 형변환 규칙에서 제외된다. -> 어느 자료형이든 boolean을 형변환 해서 담을 수 없다. */
+        boolean isTrue = true;
+//        byte b = isTrue;
+//        short s = isTrue; ... 등
+    }
+}
+package com.ohgiraffers.section5.typecasting;
+
+public class Application2 {
+    public static void main(String[] args) {
+        /*comment. 강제 형변환 규칙에 대해 이해할 수 있다
+         * 강제 형변환 Narrowing Type Casting : 바꾸려는 자료형으로 캐스트 연산자를 이용해 형변환한다
+         * 예) (바꿀자료형) 값;
+         *
+         * 자동형변환의 규칙의 반대 상황에서 강제 형변환이 필요하다.
+         * 1. 강제 형변환 규칙
+         * 1-1.큰 자료형에서 작은 자료형으로 변경 시 강제 형변환이 필요하다.
+         * 1-2.실수를 정수로 변경할 때
+         * 1-3.문자형을 int미만 크기의 변수에 저장할 때
+         * 1-4.논리형은 강제 형변환 규칙에서도 제외된다.
+         *
+         * 1-1-1. 정수끼리의 강제 형변환*/
+        long lnum = 8L;
+//        int inum = lnum;  //데이터 손실 가능성을 컴파일러가 알려준다.
+        int inum = (int) lnum; //변경하려는 자료형을 명시하여 강제 형변환을 해야한다.
+
+        short snum = (short) inum;
+        byte bnum = (byte) snum;
+
+        /* 1-1-2. 실수끼리의 강제 형변환*/
+        double dnum = 8.0;
+//        float fnum = dnum; //설명설명 깃허브 복붙
+        float fnum = (float) dnum;
+        System.out.println("fnum = " + fnum);
+
+        /* 1-2. 실수를 정수로 변경할 때*/
+        float fnum2 = 4.0f;
+//        long lnum2 = fnum2; //소수점 자리 이하 데이터 손실 가능성
+        long lnum2 = (long) fnum2;
+
+        /* 1-3. 문자형을 int...*/
+        char ch = 'a';
+        byte bnum2 = (byte) ch;
+        short snum2 = (short) ch;
+
+        int num1 = 97;
+        int num2 = -97;
+
+        char ch2 = (char) num1;
+        char ch3 = (char) num2; //음수도 강제 형변환하면 대입 가능
+
+        System.out.println("ch2 = " + ch2);
+        System.out.println("ch3 = " + ch3);
+
+        /* 1-4. 논리형 강제 형변환 규칙에서도 제외된다. */
+        boolean isTrue = true;
+//        byte b = (byte) isTrue; 등.....
+
+    }
+}
+package com.ohgiraffers.section05.typecasting;
+
+public class Application3 {
+
+    public static void main(String[] args) {
+
+        /* comment. 자동 형변환과 강제 형변환을 이용하여 서로 다른 자료형끼리 연산을 수행할 수 있다. */
+        int inum = 10;
+        long lnum = 100;
+
+        /* 1. 두 수의 연산 결과를 int 형으로 변한 후 int 자료형 변수에 리턴받는다. */
+//        int isum = inum + lnum;
+        int isum = (int) (inum + lnum);
+
+        /* 2. long 형 값을 int 강제 형변환 한다. */
+        int isum2 = inum + (int) lnum;
+
+        /* 3. 결과 값을 long 형 자료형으로 받는다. (자동형변환 이용) */
+        long lsum = inum + lnum;
+
+        /* 주의사항. int미만 연산의 처리 결과는 int형이다. */
+        byte byteNum1 = 1;
+        byte byteNum2 = 2;
+        short shortNum1 = 3;
+        short shortNum2 = 4;
+
+        int result1 = byteNum1 + byteNum2;
+        int result2 = byteNum1 + shortNum1;
+        int result3 = shortNum1 + byteNum1;
+        int result4 = shortNum1 + shortNum2;
+
+        System.out.println("result1 = " + result1);
+        System.out.println("result2 = " + result2);
+        System.out.println("result3 = " + result3);
+        System.out.println("result4 = " + result4);
+    }
+}package com.ohgiraffers.section5.typecasting;
+
+public class Application4 {
+    public static void main(String[] args) {
+        /*comment. 형변환 시 주의할 점을 이해하고 사용할 수 있다.
+
+         * 1.의도치 않은 데이터 손실*/
+        int inum = 290;
+        byte bnum = (byte) inum;
+
+        System.out.println("inum = " + inum); //inum = 290
+        System.out.println("bnum = " + bnum); //bnum = 34, 왠 34?>>데이터 손실 일어난 것
+
+        /* 2.의도한 데이터 손실*/
+        double height = 175.5;
+        int floorHeight = (int) height;
+
+        System.out.println("height = " + height); //height = 175.5
+        System.out.println("floorHeight = " + floorHeight); //175, 소수점 절삭에 이용가능
+    }
+}
+package com.testOrEtc;
+
+public class applying250424TodayLearned {
+    public static void main(String[] args) {
+        /* 모든 내용은 문제를 위한 가상의 설정이고 연습을 위해 상황이 설정되었으니
+        논리적으로 맞지 않아도 throughThrough 해주십쇼
+        Q. 송파구에 새로 가게를 열었습니다!
+        주석처리된 System.out.println(); 자리에
+        300 이하 세 자리 정수 두 개를 곱하여 가게 우편번호를 등록해봅시다
+         */
+        System.out.println("가게 우편번호 : ");
+        System.out.println(150 * 300); //()안의 값은 예시이며 기준에만 맞으면 자유롭게 다른 값도 가능합니다.
+
+        /* Q.왠지 좀 독특하게 가게 이름을 지으면 주목을 받을 수 있을 것 같아요
+        주석처리된 System.out.println(); 자리에
+        소수점 두번째자리까지 떨어지는 실수 두 개를 더하여 가게이름을 정해봅시다
+         */
+        System.out.println(12.34 + 14.39); //()안의 값은 예시이며 기준에만 맞으면 자유롭게 다른 값도 가능합니다.
+
+        /* Q.마수걸이로 절친이 오기로 했어요. 그러고보니 얘 생일이 곧이었던 거 같은데...
+        주석처리된 System.out.println(); 자리에
+        정수 10과 1.x 실수 한 개를 더하여
+        친구 생일을 기억해봅시다
+         */
+        System.out.println("친구 생일은 ");
+        System.out.println(10 + 1.4); //()안의 값은 예시이며 기준에만 맞으면 자유롭게 다른 값도 가능합니다.
+        
+         /* 가게 보안을 책임질 도어락이 와서 설치를 했어요.
+        주석처리된 System.out.println(); 자리에
+        문자 2개(영어 소문자)를 곱하여 비밀번호를 설정해봅시다.
+         */
+        System.out.println("비밀번호는 ");
+        System.out.println('c' + 'd'); //()안의 값은 예시이며 기준에만 맞으면 자유롭게 다른 값도 가능합니다.
+        
+        /* 와! 가게가 생각보다 잘 되네요
+        손님들을 대상으로 이벤트를 하기로 했어요.
+        n번째 손님을 대상으로 하고 싶은데, 
+        주석처리된 System.out.println(); 자리에
+        문자(영어 소문자)와 한 자리 정수를 뺄셈하여
+        몇 번째 결제 손님을 대상으로 이벤트를 할 지 결정해봅시다.
+         */
+        System.out.println("이벤트 당첨!");
+        System.out.println('b'-9); //()안의 값은 예시이며 기준에만 맞으면 자유롭게 다른 값도 가능합니다.
+
+        /* 사업확장을 위해 온라인스토어를 만들기로 했어요
+        환영하는 문구를 Welcome과 OurStore 2개를 이어붙여서 만들어봅시다.
+         */
+        System.out.println("온라인스토어를 열었습니다.");
+        System.out.println("Welcome" + "OurStore"); //()안의 값은 예시이며 기준에만 맞으면 자유롭게 다른 값도 가능합니다.
+
+        /* 그러고보니 업종이 카페라고 얘기를 했던가요?
+        위에서 정한 가게 이름(실수)과 Cafe을 합쳐서 출력해봅시다.
+        !!Cafe는 문자일까요 문자열일까요??*/
+        System.out.println("Cafe "+ 26.73); //"Cafe "도 가능하고 "Cafe"도 가능합니다
+
+        /* Q. 헉. 그러고 보니 메뉴 목록을 안 만들었네요.
+        Latte와 영어 대문자 2가지를 이용해 지금이라도 정해볼까요? */
+        System.out.println("MENU : ");
+        System.out.println("Latte" + 'A');
+        System.out.println("Latte" + 'B');
+
+        /* Q. 장사가 잘 되어서 2호점을 차리기로 했어요
+        * 진짜 커피를 팔겠다는 마인드를 담아 Coffee와 boolean 값(true)을 이용해
+        * 2호점명을 만들어봅시다
+        * Q-2: 두 가지 값을 합쳤을 때 나온 결과는 문자값일까요? */
+        System.out.println("2호점 이름 : ");
+        System.out.println(true + "Coffee");
+    }
+
+}
+package com.testOrEtc;
+
+public class applying250425TodayLearned {
+    public static void main(String[] args) {
+        // 동생과 참거짓참 내기를 하기로 했어요.
+        // 동생은 1.거짓 2.참 3.참 4.거짓을 낸다고 하네요.
+        // 다음과 같은 논리식이 주어질 때
+        int a = 14;
+        int b = 60;
+        int c = 50;
+        int d = 99;
+
+        //동생과 반대값을 내도록 수정
+        System.out.println(a < d && c < b); //true 출력 필요, true출력 확인
+        //a14<d99, c50<b60 모두 참이라 true 출력
+        System.out.println(a == d && a < b); //false 출력 필요, false출력 확인
+        //14==99 false, 14<60 true로 둘 중 하나가 false이기 때문에 false출력
+        System.out.println(a > b || c > d); //false 출력 필요, false
+        //oror은 둘 다 거짓인 경우에만 false를 반환. 14>60 false, 50>99 false이기 떼문에
+        //false 출력
+        System.out.println(d == d || c > d); //true 출력 필요, true 확인
+        // d == d true, c > d false. 둘 중 하나라도 true이기 때문에 true출력
+    }
+}
+package com.testOrEtc;
+
+public class applying250425TodayLearned2 {
+    public static void main(String[] args) {
+        applying250425TodayLearned2 trip = new applying250425TodayLearned2();
+      /* 빨간머리 앤이 어느 날 초록지붕집에서 나와 짧은 여행을 떠났습니다 */
+        System.out.println("여행 시작됨");
+
+        // 1. 첫 번째 갈림길을 마주쳤네요.
+        // 오른쪽 길 나무들이 더 멋있는 느낌이 납니다.
+        // 사용할이름.메소드명();을 사용해 오른쪽 길로 가봅시다.
+
+        // (주석을 삭제하고 이 줄에 코드를 적어주세요)
+    }
+
+    public void roadR() {
+        System.out.println("오른쪽길을 택해봄");
+        /* 2.오른쪽길을 쭉 들어가보니 냇가가 나옵니다.
+        * 돌다리와 나무다리가 나오는데, 아무래도 안전한 나무다리가 낫겠네요.
+        * 메소드명();을 이용해 나무다리를 건너가봅시다.*/
+
+        //(주석을 삭제하고 이 줄에 코드를 적어주세요)
+
+        /* 6. 짧지만 알찬 하루 여행이 끝났습니다.
+        * System.out.println("집 도착");을 선언해봅시다.
+        * 어디에 코드를 넣어야할까요? */
+    }
+
+    public void treeB() {
+        System.out.println("나무다리를 건넜다.");
+
+        /* 3. 어라? 나무다리를 건넜는데 친구 Caroline을 만났어요.
+        * 메소드를 이용해 친구를 불러볼까요 */
+
+        /*5. 버찌가 정말 맛있네요. 먹다보니 아주머니와 아저씨가 그리워졌어요.
+        * System.out.println("집으로 돌아가자");을 이용해 집으로 돌아가봅시다.
+        * 어느 줄에 코드를 넣어야할까요? */
+    }
+
+    public void friendC() {
+        System.out.println("friend Caroline 만남 ");
+        // 친구를 만나서 수다를 떨다보니 Caroline네 집 앞에 가까워졌어요.
+        System.out.println("Caroline 집 도착");
+
+        /* 4. 친구네 가족이 방금 막 땄다며 버찌를 나눠줬어요.
+        * System.out.println("버찌를 받았다");를 이용해
+        * 집으로 가져가 봅시다. 어디에 코드를 달아야할까요? */
+    }
+}
