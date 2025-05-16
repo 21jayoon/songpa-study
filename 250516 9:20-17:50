@@ -90,3 +90,167 @@ SELECT CATEGORY_CODE,
   FROM tbl_category
 ORDER BY ref_category_code IS NULL DESC, ref_category_code DESC;
 
+
+
+# JAVA - Chapter12 Collection 자가 실습 코드 완성
+package com.ohgiraffers.section01.DimArrayPractice0513;
+
+import com.ohgiraffers.section01.list.DTO.BookDTO;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class ArrayPractice250513 {
+    public static void main(String[] args) {
+        //1. ArrayList 새로 불러오기 11:56
+        List<ClassDTO> classList = new ArrayList<>();
+
+        //2. .add()로 className, lectureRoom, startTime, professor 값 넣어주기 12:03
+        classList.add(new ClassDTO("JAVA-101", 'A', 9.0, "홍길동"));
+        classList.add(new ClassDTO("HTML-101", 'B', 10.0, "Sherlock Hommes"));
+        classList.add(new ClassDTO("Chapel", 'Z', 16.0, "Abraham.L"));
+        classList.add(new ClassDTO("Psychology-102", 'P', 11.0, "Conan.O"));
+        classList.add(new ClassDTO("how to start art", 'C', 14.0, "Jane Doe"));
+
+        //3. 향상된 for문으로 classList 출력하기
+        for(ClassDTO list: classList) {
+            System.out.println(list);
+        }
+        /*ClassDTO{className='JAVA-101', lectureRoom=A, startTime=9.0, professor='홍길동'}
+        ClassDTO{className='HTML-101', lectureRoom=B, startTime=10.0, professor='Sherlock Hommes'}
+        ClassDTO{className='Chapel', lectureRoom=Z, startTime=16.0, professor='Abraham.L'}
+        ClassDTO{className='Psychology-102', lectureRoom=P, startTime=11.0, professor='Conan.O'}
+        ClassDTO{className='how to start art', lectureRoom=C, startTime=14.0, professor='Jane Doe'}*/
+
+        //4. className ascending(강의 이름 오름차순 정렬)
+        classList.sort(new Comparator<ClassDTO>() {
+            @Override
+            public int compare(ClassDTO o1, ClassDTO o2) {
+                return o1.getClassName().compareTo(o2.getClassName());
+            }
+        });
+        System.out.println("className 순으로 오름차순 정렬=======");
+        //4-1. 향상된 for문으로 리스트 출력
+        for(ClassDTO nameList1 : classList) {
+            System.out.println(nameList1);
+        }
+        /* className 순으로 오름차순 정렬=======
+        ClassDTO{className='Chapel', lectureRoom=Z, startTime=16.0, professor='Abraham.L'}
+        ClassDTO{className='HTML-101', lectureRoom=B, startTime=10.0, professor='Sherlock Hommes'}
+        ClassDTO{className='JAVA-101', lectureRoom=A, startTime=9.0, professor='홍길동'}
+        ClassDTO{className='Psychology-102', lectureRoom=P, startTime=11.0, professor='Conan.O'}
+        ClassDTO{className='how to start art', lectureRoom=C, startTime=14.0, professor='Jane Doe'}
+        */
+
+        //5. startTime descending(시작시간 내림차순 정렬)
+        classList.sort(new Comparator<ClassDTO>() {
+            @Override
+            public int compare(ClassDTO o1, ClassDTO o2) {
+                return o1.getStartTime() >= o2.getStartTime()? -1: 1;
+            }
+        });
+        System.out.println("시작시간 순으로 내림차순 정렬=======");
+        for(ClassDTO strtTime : classList) {
+            System.out.println(strtTime);
+        }
+        /* 시작시간 순으로 내림차순 정렬=======
+        ClassDTO{className='Chapel', lectureRoom=Z, startTime=16.0, professor='Abraham.L'}
+        ClassDTO{className='how to start art', lectureRoom=C, startTime=14.0, professor='Jane Doe'}
+        ClasDTO{className='Psychology-102', lectureRoom=P, startTime=11.0, professor='Conan.O'}
+        ClasDTO{className='HTML-101', lectureRoom=B, startTime=10.0, professor='Sherlock Hommes'}
+        ClassDTO{className='JAVA-101', lectureRoom=A, startTime=9.0, professor='홍길동'}*/
+    }
+}
+
+package com.ohgiraffers.section01.DimArrayPractice0513;
+
+public class ClassDTO {
+    // 1. private 캡슐화로 변수 생성
+    private String className;
+    private char lectureRoom;
+    private double startTime;
+    private String professor;
+
+    //2. 기본 생성자 생성
+    public ClassDTO() {}
+
+    //3. ALT+INSERT로 Constructor 생성
+    public ClassDTO(String className, char lectureRoom, double startTime, String professor) {
+        this.className = className;
+        this.lectureRoom = lectureRoom;
+        this.startTime = startTime;
+        this.professor = professor;
+    }
+
+    //4. ALT+INSERT로 getter setter 생성
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public char getLectureRoom() {
+        return lectureRoom;
+    }
+
+    public void setLectureRoom(char lectureRoom) {
+        this.lectureRoom = lectureRoom;
+    }
+
+    public double getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(double startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getProfessor() {
+        return professor;
+    }
+
+    public void setProfessor(String professor) {
+        this.professor = professor;
+    }
+
+    //5. AlT+INSERT로 toString() 생성
+    @Override
+    public String toString() {
+        return "ClassDTO{" +
+                "className='" + className + '\'' +
+                ", lectureRoom=" + lectureRoom +
+                ", startTime=" + startTime +
+                ", professor='" + professor + '\'' +
+                '}';
+    }
+
+    //6. 끝! 5/13 10:20
+}
+
+package com.ohgiraffers.section01.DimArrayPractice0513.ClassComparator;
+
+import com.ohgiraffers.section01.DimArrayPractice0513.ClassDTO;
+
+import java.util.Comparator;
+
+public class AscendingTime implements Comparator<ClassDTO> {
+    // double 시작시간을 오름차순으로 정렬
+    // Comparator는 오버라이딩이 필수
+
+    @Override
+    public int compare(ClassDTO o1, ClassDTO o2) {
+        int result = 0;
+        if(o1.getStartTime() > o2.getStartTime()) {
+            result = 1;
+        } else if (o1.getStartTime() < o2.getStartTime()) {
+            result = -1;
+        } else {
+            result = 0;
+        }
+        return result;
+    }
+}
