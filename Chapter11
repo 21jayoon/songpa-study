@@ -1,0 +1,195 @@
+package com.ohgiraffers.section01.generics;
+
+public class Application1 {
+    public static void main(String[] args) {
+        /*generic에 대해 이해할 수 있다.
+        * generic 제네릭
+        * 사전적인 의미 : 일반적인
+        * java에서 제네릭이란 데이터의 타입을 일반화한다는 의미를 가진다.
+        *
+        * 제너릭은 클래스나 메소드에서 사용할 내부 데이터 타입을 컴파일 시에 지정하는 방법을 말한다.
+        * 컴파일 시에 미리 타입 검사를 시행하게 되면 클래스나 메소드 내부에서 사용되는 객체의 타입
+        * 안정성을 높일 수 있으며, 반환값에 대한 타입 변환 및 타입 검사에 들어가는 코드 생략이 가능해진다.
+        *
+        * 제네릭 프로그래밍
+        * 데이터의 형식에 의존하지 않고 하나의 값이 여러 다른 데이터 타입들을 가질 수 있는
+        * 기술에 중점을 두어 재사용성을 높일 수 있는 프로그래밍 방식
+        * */
+
+        GenericTest<Integer> gt1 = new GenericTest<Integer>();
+        // 앞에서 <Integer> 타입으로 만들겠다고 명시해줬기 때문에
+        // 뒤 new GenericTest의 <Integer>는 회색 글씨가 됨 (생략가능)
+        // 원래는 위에 쓴 대로 앞에서도 뒤에서도 다 <Integer>를 붙여줬어야 했는데
+        // jdk7 쯤에서 뒤의 생성자 타입은 생략해도 문제 없도록 업데이트 됨.
+
+        gt1.setValue(Integer.valueOf(10));
+        System.out.println(gt1.getValue()); // 10
+        System.out.println(gt1.getValue() instanceof Integer); // true
+
+
+        GenericTest<String> gt2 = new GenericTest<>();
+
+        gt2.setValue("홍길동");
+        System.out.println(gt2.getValue()); // 홍길동
+        System.out.println(gt2.getValue() instanceof String); //true
+
+
+        GenericTest<Double> gt3 = new GenericTest<>();
+
+        gt3.setValue(0.5);
+        System.out.println(gt3.getValue()); //0.5
+        System.out.println(gt3.getValue() instanceof Double); //true
+    }
+}
+package com.ohgiraffers.section01.generics;
+
+public class GenericTest<T> { // <>다이아몬드 연산자를 클래스 선언부 마지막에 작성. 관례상 T로 많이 작성. 가상으로 존재하는 타입변수
+    private T value;
+    public void setValue(T value) {
+        this.value = value;
+    }
+    public T getValue() {
+        return this.value;
+    }
+}
+package com.ohgiraffers.section02.extend.run;
+
+import com.ohgiraffers.section02.extend.*;
+
+public class Application1 {
+    public static void main(String[] args) {
+        /*extends 키워드를 이용하여 특정 타입만 사용하도록 제네릭 범위를 제한할 수 있다.*/
+//        RabbitFarm<Animal> farm1 = new RabbitFarm();
+//        // Type parameter 'com.ohgiraffers.section02.extend.Animal' is not within its bound; should implement 'com.ohgiraffers.section02.extend.Rabbit'
+//        RabbitFarm<Mammal> farm2 = new RabbitFarm();
+//        // Type parameter 'com.ohgiraffers.section02.extend.Mammal' is not within its bound; ...
+//        RabbitFarm<Snake> farm3 = new RabbitFarm();
+//        //Type parameter 'com.ohgiraffers.section02.extend.Snake' is not within its bound; ...
+
+        RabbitFarm<Rabbit> farm4 = new RabbitFarm<>();
+        RabbitFarm<Bunny> farm5 = new RabbitFarm<>();
+        RabbitFarm<DrunkenBunny> farm6 = new RabbitFarm<>();
+
+//        farm4.setAnimal(new Snake());
+        // 'setAnimal(com.ohgiraffers.section02.extend.Rabbit)' in 'com.ohgiraffers.section02.extend.RabbitFarm' cannot be applied to '(com.ohgiraffers.section02.extend.Snake)'
+
+        farm4.setAnimal(new Rabbit());
+        ((Rabbit) farm4.getAnimal()).cry(); // 토끼가 울음소리를 냅니다. 끽끽!, 방법1
+        (farm4.getAnimal()).cry(); // 토끼가 울음소리를 냅니다. 끽끽!, 방법 2
+
+        farm5.setAnimal(new Bunny());
+        ((Bunny) farm5.getAnimal()).cry(); // 바니바니 바니바니, 방법 1
+        (farm5.getAnimal()).cry(); // 바니바니 바니바니, 방법 2
+
+        farm6.setAnimal(new DrunkenBunny());
+        ((DrunkenBunny) farm6.getAnimal()).cry(); // 봐니봐니봐니봐니*!*#&(!@, 방법 1
+        (farm6.getAnimal()).cry(); // 봐니봐니봐니봐니*!*#&(!@, 방법 2
+    }
+}
+package com.ohgiraffers.section02.extend.run;
+
+import com.ohgiraffers.section02.extend.*;
+
+public class Application2 {
+    public static void main(String[] args) {
+        /*와일드카드에 대해 이해할 수 있다.
+        * 와일드 카드 : 제네릭 클래스 타입 객체를 메소드의 매개변수로 받을 때,
+        * 그 객체의 타입 변수를 제한할 수 있다.
+        <?> : 제한 없음
+        *  <? extends Type> : 와일드카드의 상한 제한
+        *  <? super Type> : 와일카드의 하한 제한 */
+        WildCardFarm wildCardFarm = new WildCardFarm();
+
+//       wildCardFarm.anyType(new RabbitFarm<Mammal>(new Mammal()));
+       // Type parameter 'com.ohgiraffers.section02.extend.Mammal' is not within its bound; should extend 'com.ohgiraffers.section02.extend.Rabbit'
+       // 생성 자체가 불가능한 것으론 쓸 수 없음
+
+        /* wildCardFarm.extendsType(new RabbitFarm<Rabbit>(new Rabbit()));
+        //'extendsType(com.ohgiraffers.section02.extend.RabbitFarm<? extends com.ohgiraffers.section02.extend.Bunny>)' in 'com.ohgiraffers.section02.extend.WildCardFarm' cannot be applied to '(com.ohgiraffers.section02.extend.RabbitFarm<com.ohgiraffers.section02.extend.Rabbit>)' */
+        wildCardFarm.extendsType(new RabbitFarm<Bunny>(new Bunny())); // 바니바니 바니바니
+        wildCardFarm.extendsType(new RabbitFarm<DrunkenBunny>(new DrunkenBunny())); // 봐니봐니봐니봐니*!*#&(!@
+
+        wildCardFarm.superType(new RabbitFarm<Rabbit>(new Rabbit())); // 토끼가 울음소리를 냅니다. 끽끽!
+        wildCardFarm.superType(new RabbitFarm<Bunny>(new Bunny())); // 바니바니 바니바니
+        /* wildCardFarm.superType(new RabbitFarm<DrunkenBunny>(new DrunkenBunny()));
+        //'superType(com.ohgiraffers.section02.extend.RabbitFarm<? super com.ohgiraffers.section02.extend.Bunny>)' in 'com.ohgiraffers.section02.extend.WildCardFarm' cannot be applied to '(com.ohgiraffers.section02.extend.RabbitFarm<com.ohgiraffers.section02.extend.DrunkenBunny>)' */
+    }
+}
+package com.ohgiraffers.section02.extend;
+
+public interface Animal {
+}
+package com.ohgiraffers.section02.extend;
+
+public class Bunny extends Rabbit {
+
+    @Override
+    public void cry() {
+        System.out.println("바니바니 바니바니");
+    }
+}
+package com.ohgiraffers.section02.extend;
+
+public class DrunkenBunny extends Bunny{
+    @Override
+    public void cry() {
+        System.out.println("봐니봐니봐니봐니*!*#&(!@");
+    }
+}
+package com.ohgiraffers.section02.extend;
+
+public class Mammal implements Animal {
+}
+package com.ohgiraffers.section02.extend;
+
+public class Rabbit extends Mammal {
+
+    public void cry() {
+        System.out.println("토끼가 울음소리를 냅니다. 끽끽!");
+    }
+}
+package com.ohgiraffers.section02.extend;
+
+public class RabbitFarm<T extends Rabbit> {
+    // 타입 변수<T>를 이용, Rabbit 타입만 들어올 수 있게 제한 걺 (타입 제한)
+    private T animal;
+    public RabbitFarm() {} //기본 생성자 생성
+    public RabbitFarm(T animal) {
+        this.animal = animal;
+    }
+    public void setAnimal(T animal) {
+        this.animal = animal;
+    }
+    public T getAnimal() {
+        return animal;
+    }
+}
+package com.ohgiraffers.section02.extend;
+
+public class Reptile implements Animal {
+}
+package com.ohgiraffers.section02.extend;
+
+public class Snake extends Reptile {
+}
+package com.ohgiraffers.section02.extend;
+
+public class WildCardFarm {
+    /*매개변수로 전달받는 토끼농장을 구현할 때
+    * 사용한 타입변수에 대해 제한할 수 있다.
+    * */
+    public void anyType(RabbitFarm<?> farm) {
+        farm.getAnimal().cry();
+    }
+
+    /*Bunny이거나 그 후손 타입으로 만들어진 토끼농장만 매개변수로 사용 가능
+    * (Bunny와 그 후손(아래)타입 DrunkenBunny만 가능)*/
+    public void extendsType(RabbitFarm<? extends Bunny> farm) {
+        farm.getAnimal().cry();
+    }
+    /*Bunny이거나 그 부모 타입으로 만들어진 토끼농장만 매개변수로 사용 가능
+    * (Bunny와 그 부모 타입 Rabbit만 가능)*/
+    public void superType(RabbitFarm<? super Bunny> farm) {
+        farm.getAnimal().cry();
+    }
+}
