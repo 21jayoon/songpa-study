@@ -1,0 +1,24 @@
+# Programmers 기초문제 풀기 - "문자형 배열을 문자형으로"
+# Solving 'Programmers' Basic coding training- "Turn String array into the String"
+# given input : ["a","b","c"]
+# destination : "abc"
+# 처음 시도한 코드 First try
+public String solution(String[] arr) {
+  String answer = String.join(",", arr);
+  Return answer;
+}
+# result : a,b,c
+# 왜 이런 결과가 나왔을까? Why this results printed?
+# .join의 첫번째 전달인자가 기존 배열의 '어떤 기호를 기준으로' 붙일 것인가?를 묻는 것이라 생각했음. 하지만 .join 다음에 나오는 첫번째 전달인자는 새로 만들 문자열 사이에 들어갈 구분자를 지정해주는 거였음.
+# I thought the first argument "," is asking what symbol to use as a separator to join the strings from the existing array. In fact, the first argument is used by delimeter in new string.
+
+# String.join 사용하는 법
+# How to use String.join
+# public static String join(CharSequence deli, CharSequence... ele)
+# Reference :  https://www.geeksforgeeks.org/java-string-join-examples/
+
+# 최종답안 Answer
+public String solution(String[] arr) {
+        String answer = String.join("",arr);
+        return answer;
+    }
