@@ -14,7 +14,7 @@
   Use UNION(09.SET_OPERATORS) to extract those employees lists.*/
   
 SELECT EMP_ID,
-	   EMP_NAME,
+       EMP_NAME,
        EMAIL,
        B.DEPT_TITLE,
        HIRE_DATE,
@@ -24,7 +24,7 @@ SELECT EMP_ID,
   WHERE HIRE_DATE BETWEEN 2010-01-01 and 2025-05-20
   UNION
 SELECT EMP_ID,
-	   EMP_NAME,
+       EMP_NAME,
        EMAIL,
        B.DEPT_TITLE,
        HIRE_DATE,
@@ -42,61 +42,74 @@ SELECT EMP_ID,
 
 
 
-# ERD : Entity
-# 엔티티와 속성도출
-# 1. 업무기술서에서 명사를 추출한다
-# 2. 명사들은 엔티티후보풀에 들어간다.
-# 3. 각 명사의 유사어가 있는지 확인하고 있다면 추출한다.
-# 4. 추출한 명사들 중 엔티티 리스트에 들어갈 명사들을 다시 한 번 정리한다.
-# 5. 엔티티 리스트에 들어가지 못한 명사는 엔티티 후보 풀에 들어간다.
-# 6. 엔티티 리스트 안에 있을 수 있는 속성 추출
-# 7. 테이블 간의 관계 도출
-# 8. 물리 모델 추출 및 데이터 타입 정의 MySQL Lecture
-# FROM 09_set_operators TO 14_DATA_TYPES
-
-# MySQL 09_set연산자 자가제작 문제로 복습
-# REVIEW MySQL 09_set_operators with self-made problems
-/*삼숭전자에서 
-  입사년도가 2010년 이후이거나 SALARY가 200만원 이하인 인원을
-  새로운 지부인 남극 지부로 보내려고 한다.
-  UNION(09.SET_OPERATORS)을 이용해 employeedb에서 해당 인원의 목록을 추출하시오
-  Samsuung Electronics are going to send some employees
-  to the new branch, Antarctica.
-  Those employees are going to meet the conditon that
-  hired after 2020 or get paid under 2000000won.
-  Use UNION(09.SET_OPERATORS) to extract those employees lists.*/
-  
-SELECT EMP_ID,
-	   EMP_NAME,
-       EMAIL,
-       B.DEPT_TITLE,
-       HIRE_DATE,
-       SALARY
-  FROM employeedb.employee A
-  JOIN employeedb.department B ON A.DEPT_CODE = B.DEPT_ID
-  WHERE HIRE_DATE BETWEEN 2010-01-01 and 2025-05-20
-  UNION
-SELECT EMP_ID,
-	   EMP_NAME,
-       EMAIL,
-       B.DEPT_TITLE,
-       HIRE_DATE,
-       SALARY
-  FROM employeedb.employee A
-  JOIN employeedb.department B ON A.DEPT_CODE = B.DEPT_ID
-  WHERE SALARY <= 2000000;
-
-# Results
-206	박나라	pack_nr@greedy.com	해외영업1부	2008-04-02	1800000
-210	윤은해	youn_eh@greedy.com	해외영업1부	2001-02-03	2000000
-211	전형돈	jun_hd@greedy.com	기술지원부	2012-12-12	2000000
-214	방명수	bang_ms@greedy.com	인사관리부	2010-04-04	1380000
-219	임시환	im_sh@greedy.com	회계관리부	1999-09-09	1550000
-
-
-# MySQL 실습문제 풀기
+# 강사님이 내준 MySQL 실습문제 풀기
 # Solving MySQL Subquery practice
+-- 1. 부서코드가 노옹철 사원과 같은 소속의 직원 명단 조회하세요.
+SELECT * 
+  FROM employee
+ WHERE DEPT_CODE = (SELECT DEPT_CODE
+		      FROM employee
+		     WHERE EMP_NAME = '노옹철');
+                     
+-- 2. 전 직원의 평균 급여보다 많은 급여를 받고 있는 직원의 사번, 이름, 직급코드, 급여를 조회하세요
+SELECT EMP_ID,
+      EMP_NAME,
+       DEPT_CODE,
+       SALARY
+  FROM employee
+ WHERE SALARY > (SELECT avg(SALARY)
+		   FROM employee);
+                   
+-- 3. 노옹철의 급여보다 많이 받는 직원의 사번, 이름, 부서코드, 직급코드, 급여를 조회하세요
+select EMP_ID,
+       EMP_NAME,
+       DEPT_CODE,
+       JOB_CODE,
+       SALARY
+  FROM employee
+ WHERE SALARY > (SELECT SALARY
+		   FROM employee
+		  WHERE EMP_NAME = '노옹철');
+                  
+-- 4) 가장 적은 급여를 받는 직원의 사번, 이름, 부서코드, 직급코드, 급여, 입사일을 조회하세요
+SELECT EMP_ID,
+       EMP_NAME,
+       DEPT_CODE,
+       JOB_CODE,
+       SALARY,
+       HIRE_DATE
+  FROM employee
+ WHERE SALARY = (select cast(min(SALARY)
+		     as signed integer)
+		   from employee); -- 참고 : 14_DATA_TYPES
+                    
+-- 5) 부서별 최고 급여를 받는 직원의 이름, 직급 코드, 부서코드, 급여 조회
+SELECT EMP_NAME,
+       JOB_CODE,
+       DEPT_CODE,
+       SALARY
+  FROM employee
+ WHERE SALARY
+	IN (select max(SALARY)
+              from employee
+          group by DEPT_CODE)
+ORDER BY DEPT_CODE;
+-- 아래 WHERE (DEPT_CODE, SALARY) IN... 코드로 조회하면
+-- DEPT_CODE가 없는 이오리씨가 누락된다. 위 코드로 조회하면 이오리 씨까지 나옴
 
+/* SELECT EMP_NAME,
+	   JOB_CODE,
+       DEPT_CODE,
+       SALARY
+  FROM employee
+ WHERE (DEPT_CODE, SALARY)  -- DEPT_CODE만 있어도 오류 나고 SALARY만 있어도 오류남. 둘 다 있어야함
+	IN (select DEPT_CODE, 
+		       max(SALARY)
+          from employee
+      group by DEPT_CODE)  -- 14_DATA_TYPES : GROUP BY
+ORDER BY DEPT_CODE; */
+               
+               
 
 # ERD : Entity
 # 엔티티와 속성도출
