@@ -1,0 +1,41 @@
+# MYSQL 강의 진도 MySQL Lecture
+# FROM 09_set_operators TO 14_DATA_TYPES
+
+# MySQL 09_set연산자 자가제작 문제로 복습
+# REVIEW MySQL 09_set_operators with self-made problems
+/*삼숭전자에서 
+  입사년도가 2010년 이후이거나 SALARY가 200만원 이하인 인원을
+  새로운 지부인 남극 지부로 보내려고 한다.
+  UNION(09.SET_OPERATORS)을 이용해 employeedb에서 해당 인원의 목록을 추출하시오
+  Samsuung Electronics are going to send some employees
+  to the new branch, Antarctica.
+  Those employees are going to meet the conditon that
+  hired after 2020 or get paid under 2000000won.
+  Use UNION(09.SET_OPERATORS) to extract those employees lists.*/
+  
+SELECT EMP_ID,
+	   EMP_NAME,
+       EMAIL,
+       B.DEPT_TITLE,
+       HIRE_DATE,
+       SALARY
+  FROM employeedb.employee A
+  JOIN employeedb.department B ON A.DEPT_CODE = B.DEPT_ID
+  WHERE HIRE_DATE BETWEEN 2010-01-01 and 2025-05-20
+  UNION
+SELECT EMP_ID,
+	   EMP_NAME,
+       EMAIL,
+       B.DEPT_TITLE,
+       HIRE_DATE,
+       SALARY
+  FROM employeedb.employee A
+  JOIN employeedb.department B ON A.DEPT_CODE = B.DEPT_ID
+  WHERE SALARY <= 2000000;
+
+# Results
+206	박나라	pack_nr@greedy.com	해외영업1부	2008-04-02	1800000
+210	윤은해	youn_eh@greedy.com	해외영업1부	2001-02-03	2000000
+211	전형돈	jun_hd@greedy.com	기술지원부	2012-12-12	2000000
+214	방명수	bang_ms@greedy.com	인사관리부	2010-04-04	1380000
+219	임시환	im_sh@greedy.com	회계관리부	1999-09-09	1550000
