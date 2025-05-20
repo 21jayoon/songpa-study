@@ -1,0 +1,144 @@
+# Morning review : JAVA method - distinguishing parameters and arguments
+# Asked copilot(in github) to make some quizzes.
+# Requirements
+# Make 10 OX quizzes about java method, all quizzes must about distinguishing method arguments and parameters.
+# Give me the quizzes first, I'll submit the answers. Than mark the answers and explain the correct answers to a wrong question.
+
+# QUIZZES
+Here are 10 OX (True/False) quizzes about distinguishing between method arguments and parameters in Java. Mark each as "O" (True) or "X" (False":
+
+1. In Java, the variables listed in a method declaration are called arguments.
+2. The values you pass into a method when calling it are known as arguments.
+3. Parameters exist only during the execution of a method.
+4. Arguments are sometimes referred to as actual parameters.
+5. In the following code, x and y are parameters: void sum(int x, int y) { }
+6. In the following method call, 3 and 4 are parameters: sum(3, 4);
+7. Parameters are also known as formal parameters.
+8. Arguments are defined within the method signature.
+9. You can have more arguments in a method call than parameters in the method declaration.
+10. Arguments are supplied by the caller of the method, not the method itself.
+
+Please submit your answers (e.g., 1. O, 2. X, 3. O, ...), and I will mark them and explain any wrong answers.
+
+# MY ANSWERS
+1. In Java, the variables listed in a method declaration are called arguments.
+Your answer: X
+Correct! ✅
+Explanation: They are called parameters, not arguments.
+# >>> Related qusetion : In Java, the variables listed in a method declaration are called arguments. Explain this statement while a virtual method example.
+# The variables listed in a method declaration are called parameters. The values passed to the method when it is called are called arguments.
+class Animal {
+    // This is a virtual method (can be overridden)
+    void speak(String sound) { // 'sound' is a parameter, NOT an argument
+        System.out.println(sound);
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    void speak(String sound) { // 'sound' is still a parameter
+        System.out.println("Dog says: " + sound);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Animal myDog = new Dog();
+        myDog.speak("Woof"); // "Woof" is an argument
+    }
+}
+# Explanation
+# In the method declaration void speak(String sound), sound is a parameter (sometimes called a "formal parameter").
+# When calling the method with myDog.speak("Woof");, the value "Woof" is an argument (also called an "actual parameter") that is passed to the method.
+
+
+2. The values you pass into a method when calling it are known as arguments.
+Your answer: X
+Incorrect! ❌
+Explanation: The values passed into a method call are called arguments. The correct answer is O.
+# >>>Related question : The values you pass into a method when calling it are known as arguments. Show the example of this statement with vitual method.
+public class VirtualMethodExample {
+    public static void main(String[] args) {
+        Animal myDog = new Dog();
+        // "Woof" is the argument passed to the speak method
+        myDog.speak("Woof");
+    }
+# When calling myDog.speak("Woof");, the value "Woof" is the argument being passed into the method.
+# The argument can differ each time you call the method.
+
+3. Parameters exist only during the execution of a method.
+Your answer: O -> Incorrect! ❌
+Explanation: Parameters exist as part of the method declaration and are given values when the method is called,
+but the variables themselves exist within the method body during execution.
+The question is a bit ambiguous, but the standard answer is X
+because parameters are defined at compile time
+and exist whenever the method is defined,
+though their values only exist during execution.
+# >>> Related requirement : Show an example method to clarrify this explanation.
+public class ParameterLifetimeExample {
+    // 'int n' is a parameter, defined in the method declaration
+    public void printSquare(int n) {
+        // Inside the method body, 'n' acts as a local variable with a value
+        System.out.println(n * n);
+    }
+
+    public static void main(String[] args) {
+        ParameterLifetimeExample example = new ParameterLifetimeExample();
+        example.printSquare(5); // Here, 5 is the argument, assigned to 'n' during this method call
+        example.printSquare(10); // Now, 10 is the argument, assigned to 'n' in a new execution
+    }
+}
+# The parameter int n exists as part of the method declaration (printSquare(int n)) at all times, even before the method is ever called.
+# When you call printSquare(5), the value 5 (argument) is assigned to the parameter n, and n exists as a variable within the method body for the duration of that method call.
+# After the method finishes, n ceases to exist until the method is called again.
+
+4. Arguments are sometimes referred to as actual parameters.
+Your answer: O
+Correct! ✅
+Explanation: Arguments are also called actual parameters.
+
+5. In the following code, x and y are parameters: void sum(int x, int y) { }
+Your answer: O
+Correct! ✅
+Explanation: x and y are parameters (formal parameters).
+
+6. In the following method call, 3 and 4 are parameters: sum(3, 4);
+Your answer: X
+Correct! ✅
+Explanation: 3 and 4 are arguments, not parameters.
+
+7. Parameters are also known as formal parameters.
+Your answer: X
+Incorrect! ❌
+Explanation: Parameters are indeed called formal parameters. The correct answer is O.
+
+8. Arguments are defined within the method signature.
+Your answer: O
+Incorrect! ❌
+Explanation: Parameters are defined in the method signature, not arguments. The correct answer is X.
+# Related qusetion : Parameters are defined in the method signature, not arguments. Show an example method that explain this statement.
+public class ParameterExample {
+    // 'int a' and 'int b' are parameters defined in the method signature
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    public static void main(String[] args) {
+        ParameterExample example = new ParameterExample();
+        // 5 and 10 are arguments passed to the method when calling it
+        int sum = example.add(5, 10);
+        System.out.println("Sum: " + sum);
+    }
+}
+# In the method declaration `public int add(int a, int b)`, `a` and `b` are **parameters**—they are defined in the method signature.
+# When calling `example.add(5, 10);`, the values `5` and `10` are **arguments**—they are supplied during the method call, not in the signature.
+
+9. You can have more arguments in a method call than parameters in the method declaration.
+Your answer: X
+Correct! ✅
+Explanation: The number of arguments cannot exceed the number of parameters, except for varargs, but in standard cases this is true.
+
+10. Arguments are supplied by the caller of the method, not the method itself.
+Your answer: O
+Correct! ✅
+Explanation: The caller provides the arguments.
