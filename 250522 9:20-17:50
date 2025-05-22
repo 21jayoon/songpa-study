@@ -1,0 +1,526 @@
+# 오늘 나간 진도 Today's lecture
+# JDBC CHAP03_curd-section1(insert)-Application3 To CHAP4_dao
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+   <!-- 직원 전체조회 - v selectAllEmp
+    직원 상세조회 - v selectByIdEmp
+    직원 등록 - v insertEmp
+    직원 수정 - v modifyEmp
+    직원 삭제 - v deleteEmp -->
+    <entry key="selectAllEmp">
+        SELECT *
+          FROM employee A
+    </entry>
+  
+
+    <entry key="selectByIdEmp">
+        SELECT A.EMP_ID,
+               A.EMP_NAME
+        FROM employee A
+    </entry>
+
+    <entry key="insertEmp">
+        INSERT INTO EMPLOYEE
+        (
+         EMP_ID,
+         EMP_NAME,
+         EMP_NO,
+         JOB_CODE,
+         SAL_LEVEL
+        )
+        VALUES
+        (
+        ?,
+        ?,
+        ?,
+        ?,
+        ?
+        )
+    </entry>
+
+    <entry key="modifyEmp">
+        UPDATE EMPLOYEE
+           SET
+            DEPT_CODE = ?,
+            JOB_CODE = ?,
+            SAL_LEVEL= ?
+         WHERE EMP_ID = ?
+
+    </entry>
+
+    <entry key="deleteEmp">
+        DELETE
+          FROM EMPLOYEE
+         WHERE EMP_ID = ?
+    </entry>
+</properties>
+
+package com.ohgiraffers.model.dao;
+
+import com.ohgiraffers.model.dto.EmployeeDTO;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+
+import static com.ohgiraffers.common.JDBCTemplate.close;
+
+public class EmployeeDAO {
+    private Properties prop = new Properties();
+
+    public EmployeeDAO() {
+        try {
+            prop.loadFromXML(new FileInputStream("src/main/java/com/ohgiraffers/mapper/employee-query.xml"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public List<EmployeeDTO> selectAllEmp(Connection con) {
+        Statement stmt = null;
+        ResultSet rset = null;
+
+        List<EmployeeDTO> empList = null;
+
+        String query = prop.getProperty("selectAllEmp");
+
+        try {
+            stmt = con.createStatement();
+            rset = stmt.executeQuery(query);
+
+            empList = new ArrayList<>();
+
+            // 한 줄 이상이니까 if 말고 while문으로
+            while (rset.next()) {
+                EmployeeDTO row = new EmployeeDTO();
+
+                row.setEMP_ID(rset.getString("EMP_ID"));
+                row.setEMP_NAME(rset.getString("EMP_NAME"));
+                row.setEMP_NO(rset.getString("EMP_NO"));
+                row.setEMAIL(rset.getString("EMAIL"));
+                row.setPHONE(rset.getString("PHONE"));
+                row.setDEPT_CODE(rset.getString("DEPT_CODE"));
+                row.setJOB_CODE(rset.getString("JOB_CODE"));
+                row.setSAL_LEVEL(rset.getString("SAL_LEVEL"));
+                row.setSALARY(rset.getInt("SALARY"));
+                row.setBONUS(rset.getDouble("BONUS"));
+                row.setMANAGER_ID(rset.getString("MANAGER_ID"));
+                row.setHIRE_DATE(rset.getDate("HIRE_DATE"));
+                row.setENT_DATE(rset.getDate("ENT_DATE"));
+                row.setENT_YN(rset.getString("ENT_YN"));
+
+                empList.add(row);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return empList;
+    }
+
+    public List<Map<String, String>> selectByID(Connection con) {
+        Statement stmt = null;
+        ResultSet rset = null;
+
+        List<Map<String, String>> idList = null;
+
+        String query = prop.getProperty("selectByIdEmp");
+        idList = new ArrayList<>();
+
+        try {
+            stmt = con.createStatement();
+            rset = stmt.executeQuery(query);
+
+            // list 형태로 나오니까 while문으로
+            while (rset.next()) {
+                Map<String, String> id = new HashMap<>();
+                id.put(rset.getString("EMP_ID"), rset.getString("EMP_NAME"));
+
+                idList.add(id);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return idList;
+    }
+
+//    public int insertNewEmp(Connection con, String empId, String empName, String  empNo, String jobCode,String salLv ) {
+    public int insertNewEmp(Connection con, EmployeeDTO newEmp ) {
+        PreparedStatement pstmt = null;
+
+        int result = 0;
+
+        String query = prop.getProperty("insertEmp");
+
+        try {
+            pstmt = con.prepareStatement(query);
+            pstmt.setString(1, newEmp.getEMP_ID());
+            pstmt.setString(2, newEmp.getEMP_NAME());
+            pstmt.setString(3, newEmp.getEMP_NO());
+            pstmt.setString(4, newEmp.getJOB_CODE());
+            pstmt.setString(5, newEmp.getSAL_LEVEL());
+//            pstmt.setString(1, empId);
+//            pstmt.setString(2,empName );
+//            pstmt.setString(3, empNo);
+//            pstmt.setString(4, jobCode);
+//            pstmt.setString(5, salLv);
+
+            result = pstmt.executeUpdate();
+
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(pstmt); //JDBCTemplate에서 close 만들어야함
+        }
+        return result;
+    }
+
+    public int modifyEmp(Connection con, EmployeeDTO newEmp) {
+        PreparedStatement pstmt = null;
+        int result = 0;
+
+        String query = prop.getProperty("modifyEmp");
+
+        Scanner sc = new Scanner(System.in);
+        System.out.print("변경할 사번을 입력하세요(2XX) :");
+        String empId = sc.nextLine();
+        System.out.print("변경할 부서코드 입력하세요(D1...D9) :");
+        String empDept = sc.nextLine();
+        System.out.println("변경할 직급코드 입력");
+        String empJobCode = sc.nextLine();
+        System.out.print("변경할 급여레벨(S1...S6) : ");
+        String empSalLv = sc.nextLine();
+
+        try {
+            pstmt = con.prepareStatement(query);
+            pstmt.setString(1, empDept);
+            pstmt.setString(2, empJobCode);
+            pstmt.setString(3, empSalLv);
+            pstmt.setString(4, empId);
+
+            result = pstmt.executeUpdate();
+
+            if (result > 0) {
+                System.out.println("수정 성공");
+            } else {
+                System.out.println("수정 실패");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close(pstmt);
+            close(con);
+        }
+
+        return result;
+    }
+
+    public int deleteEmp(Connection con, EmployeeDTO newEmp) {
+        PreparedStatement pstmt = null;
+        int result = 0;
+
+        try {
+        String query = prop.getProperty("deleteEmp");
+        Scanner sc = new Scanner(System.in);
+        System.out.print("삭제예정 사번 입력 : ");
+        int empId = sc.nextInt();
+
+        pstmt = con.prepareStatement(query);
+        pstmt.setInt(1, empId);
+
+        result = pstmt.executeUpdate();
+
+            if(result >0) {
+                System.out.println("삭제 성공");
+            }else{
+                System.out.println("삭제 실패");
+            }
+
+        } catch (SQLException e) {
+        throw new RuntimeException(e);
+        } finally {
+        close(pstmt);
+        close(con);
+        }
+        return result;
+    }
+}
+
+package com.ohgiraffers.model.dto;
+
+import com.ohgiraffers.model.dao.EmployeeDAO;
+
+import java.util.Date;
+
+public class EmployeeDTO {
+    private String EMP_ID;
+    private String EMP_NAME;
+    private String EMP_NO;
+    private String EMAIL;
+    private String PHONE;
+    private String DEPT_CODE;
+    private String JOB_CODE;
+    private String SAL_LEVEL;
+    private int SALARY;
+    private double BONUS;
+    private String MANAGER_ID;
+    private java.util.Date HIRE_DATE;
+    private java.util.Date ENT_DATE;
+    private String ENT_YN;
+
+    public EmployeeDTO() {}
+
+    public EmployeeDTO(String EMP_ID, String EMP_NAME, String EMP_NO, String JOB_CODE, String SAL_LEVEL){
+        this.EMP_ID = EMP_ID;
+        this.EMP_NAME = EMP_NAME;
+        this.EMP_NO = EMP_NO;
+        this.JOB_CODE = JOB_CODE;
+        this.SAL_LEVEL = SAL_LEVEL;
+    }
+
+
+    public EmployeeDTO(String EMP_ID, String EMP_NAME, String EMP_NO, String EMAIL, String PHONE, String DEPT_CODE, String JOB_CODE, String SAL_LEVEL, int SALARY, double BONUS, String MANAGER_ID, Date HIRE_DATE, Date ENT_DATE, String ENT_YN) {
+        this(EMP_ID, EMP_NAME, EMP_NO, JOB_CODE, SAL_LEVEL);
+        this.EMAIL = EMAIL;
+        this.PHONE = PHONE;
+        this.DEPT_CODE = DEPT_CODE;
+        this.SALARY = SALARY;
+        this.BONUS = BONUS;
+        this.MANAGER_ID = MANAGER_ID;
+        this.HIRE_DATE = HIRE_DATE;
+        this.ENT_DATE = ENT_DATE;
+        this.ENT_YN = ENT_YN;
+    }
+
+    public String getEMP_ID() {
+        return EMP_ID;
+    }
+
+    public void setEMP_ID(String EMP_ID) {
+        this.EMP_ID = EMP_ID;
+    }
+
+    public String getEMP_NAME() {
+        return EMP_NAME;
+    }
+
+    public void setEMP_NAME(String EMP_NAME) {
+        this.EMP_NAME = EMP_NAME;
+    }
+
+    public String getEMP_NO() {
+        return EMP_NO;
+    }
+
+    public void setEMP_NO(String EMP_NO) {
+        this.EMP_NO = EMP_NO;
+    }
+
+    public String getEMAIL() {
+        return EMAIL;
+    }
+
+    public void setEMAIL(String EMAIL) {
+        this.EMAIL = EMAIL;
+    }
+
+    public String getPHONE() {
+        return PHONE;
+    }
+
+    public void setPHONE(String PHONE) {
+        this.PHONE = PHONE;
+    }
+
+    public String getDEPT_CODE() {
+        return DEPT_CODE;
+    }
+
+    public void setDEPT_CODE(String DEPT_CODE) {
+        this.DEPT_CODE = DEPT_CODE;
+    }
+
+    public String getJOB_CODE() {
+        return JOB_CODE;
+    }
+
+    public void setJOB_CODE(String JOB_CODE) {
+        this.JOB_CODE = JOB_CODE;
+    }
+
+    public String getSAL_LEVEL() {
+        return SAL_LEVEL;
+    }
+
+    public void setSAL_LEVEL(String SAL_LEVEL) {
+        this.SAL_LEVEL = SAL_LEVEL;
+    }
+
+    public int getSALARY() {
+        return SALARY;
+    }
+
+    public void setSALARY(int SALARY) {
+        this.SALARY = SALARY;
+    }
+
+    public double getBONUS() {
+        return BONUS;
+    }
+
+    public void setBONUS(double BONUS) {
+        this.BONUS = BONUS;
+    }
+
+    public String getMANAGER_ID() {
+        return MANAGER_ID;
+    }
+
+    public void setMANAGER_ID(String MANAGER_ID) {
+        this.MANAGER_ID = MANAGER_ID;
+    }
+
+    public Date getHIRE_DATE() {
+        return HIRE_DATE;
+    }
+
+    public void setHIRE_DATE(Date HIRE_DATE) {
+        this.HIRE_DATE = HIRE_DATE;
+    }
+
+    public Date getENT_DATE() {
+        return ENT_DATE;
+    }
+
+    public void setENT_DATE(Date ENT_DATE) {
+        this.ENT_DATE = ENT_DATE;
+    }
+
+    public String getENT_YN() {
+        return ENT_YN;
+    }
+
+    public void setENT_YN(String ENT_YN) {
+        this.ENT_YN = ENT_YN;
+    }
+
+    @Override
+    public String toString() {
+        return "EmployeeDTO{" +
+                "EMP_ID='" + EMP_ID + '\'' +
+                ", EMP_NAME='" + EMP_NAME + '\'' +
+                ", EMP_NO='" + EMP_NO + '\'' +
+                ", EMAIL='" + EMAIL + '\'' +
+                ", PHONE='" + PHONE + '\'' +
+                ", DEPT_CODE='" + DEPT_CODE + '\'' +
+                ", JOB_CODE='" + JOB_CODE + '\'' +
+                ", SAL_LEVEL='" + SAL_LEVEL + '\'' +
+                ", SALARY=" + SALARY +
+                ", BONUS=" + BONUS +
+                ", MANAGER_ID='" + MANAGER_ID + '\'' +
+                ", HIRE_DATE=" + HIRE_DATE +
+                ", ENT_DATE=" + ENT_DATE +
+                ", ENT_YN=" + ENT_YN +
+                '}';
+    }
+}
+
+package com.ohgiraffers.run;
+
+import com.ohgiraffers.model.dao.EmployeeDAO;
+import com.ohgiraffers.model.dto.EmployeeDTO;
+
+import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+import static com.ohgiraffers.common.JDBCTemplate.getConnection;
+
+public class RunJdbcPractice0522 {
+    public static void main(String[] args) {
+        /*프로젝트 명: jdbc-crud-practice
+        패키지 구조: 수업시간에 다뤘던 것을 참고하여 명확하게 구분
+         2. 사용 기술 : Java  /  MySQL   /  JDBC   /   DAO 패턴 적용 필수
+         >>> 'DAO패턴'이란 게 뭔데??? 이런!! 13:22
+         3. CRUD 요구사항
+        직원 전체조회 - selectAllEmp
+        직원 상세조회 - selectByIdEmp
+        직원 등록 - insertEmp
+        직원 수정 - modifyEmp
+        직원 삭제 - deleteEmp
+        >> 이것들을 DAO 내 메소드로 만들어놓으란 소리겠지? 13:24
+        아니구나 menu-query.xml처럼 일단 xml 파일로 만들어야겠구나 13:26
+        4. 작업 완료 후:   Git에 push &   팀원 간의 코드 리뷰*/
+
+        Connection con = getConnection();
+        EmployeeDAO registDAO = new EmployeeDAO();
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("=====사원 조회를 위한 정보를 입력해주세요=====");
+        System.out.println("1.사원 전체 조회");
+        System.out.println("2.사번과 사원 간단 조회");
+        System.out.println("3.새 사원 추가");
+        System.out.println("4.정보 업데이트");
+        System.out.println("5.정보 삭제");
+        System.out.print("번호 입력 : ");
+        int num = sc.nextInt();
+
+        switch (num) {
+            case 1 :
+                System.out.println("사원 전체 조회");
+                List<EmployeeDTO> empList = registDAO.selectAllEmp(con);
+                for(EmployeeDTO empAll : empList) {
+                    System.out.println(empAll);
+                }
+                break;
+            case 2 :
+                System.out.println("사번과 이름 조회");
+                List<Map<String,String>> idList = registDAO.selectByID(con);
+                for(Map<String, String> idEmp : idList) {
+                    System.out.println(idEmp);
+                }
+                break;
+            case 3:
+                sc.nextLine();
+                System.out.println("새 사원 사번 : ");
+                String empId = sc.nextLine();
+                System.out.println("새 사원 이름 : ");
+                String empName = sc.nextLine();
+                System.out.println("새 사원 주민번호 : ");
+                String empNo = sc.nextLine();
+                System.out.println("새 사원 직급(J1~J7) : ");
+                String jobCode = sc.nextLine();
+                System.out.println("새 사원 급여 단계(S1~S6) : ");
+                String salLv = sc.nextLine();
+                EmployeeDTO newEmployee = new EmployeeDTO(empId, empName, empNo, jobCode, salLv);
+                int result = registDAO.insertNewEmp(con,newEmployee);
+                if (result > 0) {
+                    System.out.println("입력 성공");
+                } else {
+                    System.out.println("입력 실패");
+                }
+                break;
+            /*case 4 :
+                System.out.println("기존 사원 정보 업데이트");
+                /*int update = registDAO.modifyEmp(con);
+                for( updateEmp : idList) {
+                    System.out.println(updateEmp);
+                }*/
+                break;
+            case 5 :
+                System.out.println("사원 정보 삭제");
+                break;*/
+            default :
+                System.out.println("해당 선택지는 선택 불가합니다.");
+                return;
+        }
+
+    }
+}
