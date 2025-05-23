@@ -1,0 +1,465 @@
+# JDBC 실습문제 완성 후 commit
+# JDBC Practice Solved & commit
+https://github.com/21jayoon/JDBCPractice250522to0523.git
+# 위 repository 주말 실습 참고하기!!!
+
+# MyBatis CRUD 실습문제 중 Delete 기능 홀로 실습
+# Coding alone with delete function durint MyBatis CRUD Practice
+package com.ohgiraffers.section1.xmlconfig;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Application {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        MenuController menuController = new MenuController();
+        do {
+            System.out.println("======메뉴 관리=====");
+            System.out.println("1. whole menu 조회");
+            System.out.println("2. 메뉴코드로 메뉴 조회");
+            System.out.println("3. 신규 메뉴 추가");
+            System.out.println("4. 메뉴 수정");
+            System.out.println("5. 메뉴 삭제");
+            System.out.println("9. 관리 프로그램 종료");
+            System.out.print("메뉴 관리 번호를 입력하세요 : ");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1: menuController.selectAllMenu(); break;
+                case 2: menuController.selectMenuByCode(inputMenuCode()); break;
+                case 3: menuController.registMenu(inputMenu());break;
+                case 4: menuController.modifyMenu(inputModifyMenu()); break;
+                case 5: menuController.deleteMenu(deleteMenu());break;
+                case 9: break;
+                default:
+                    System.out.println("잘못된 메뉴를 선택하였습니다.");break;
+            }
+        }while (true);
+    }
+
+
+    private static Map<String, String> inputMenuCode() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("메뉴코드 입력 : ");
+        String code = sc.nextLine();
+
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("code", code);
+
+        return parameter;
+    }
+
+    private static Map<String,String> inputMenu() {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("메뉴 이름 입력 : ");
+        String name = sc.nextLine();
+        System.out.print("메뉴가격 입력 : ");
+        String price = sc.nextLine();
+        System.out.print("카테고리 코드 입력 : ");
+        String categoryCode = sc.nextLine();
+
+        Map<String,String> parameter = new HashMap<>();
+        parameter.put("name", name);
+        parameter.put("price", price);
+        parameter.put("categoryCode", categoryCode);
+
+        return parameter;
+    }
+    private static Map<String, String> inputModifyMenu() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("수정 메뉴 코드 입력 : ");
+        String modiCode = sc.nextLine();
+        System.out.println("수정할 메뉴명 입력 : ");
+        String modiName = sc.nextLine();
+        System.out.println("수정할 가격 입력 : ");
+        String modiPrice = sc.nextLine();
+        System.out.println("수정할 카테고리 입력(1-12) : ");
+        String modiCategory = sc.nextLine();
+
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("modiCode", modiCode);
+        parameter.put("modiName", modiName);
+        parameter.put("modiPrice", modiPrice);
+        parameter.put("modiCategory", modiCategory);
+
+        return parameter;
+    }
+    private static int deleteMenu() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("삭제 예정 메뉴 코드 입력 : ");
+        int code = sc.nextInt();
+        return code;
+    }
+     /*
+     private static deleteMenu() {
+     Scanner sc = new Scanner(System.in);
+
+     System.out.print("삭제 예정 메뉴 코드 입력 : ");
+     String code = sc.nextLine();
+
+     return }
+     */
+}
+
+
+package com.ohgiraffers.section1.xmlconfig;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+public class MenuController {
+    private final PrintResult printResult;
+
+    private  final MenuService menuService;
+
+    public MenuController() {
+        printResult = new PrintResult();
+        menuService = new MenuService();
+    }
+
+    public void selectAllMenu() {
+        List<MenuDTO> menuList = menuService.selectAllMenu(); // 서비스 쪽으로 요청 보냄
+        if(menuList != null) {
+            printResult.printMenuList(menuList);
+        } else {
+            printResult.printErrorMessage("selectList");
+        }
+
+    }
+
+    public void selectMenuByCode(Map<String, String> parameter) {
+        int code = Integer.parseInt(parameter.get("code"));
+
+        MenuDTO menu = menuService.selectMenuByCode(code);
+        if(menu != null) {
+            printResult.printMenu(menu);
+        } else {
+
+            printResult.printErrorMessage("selectOne");
+        }
+    }
+
+    public void registMenu(Map<String, String> parameter) {
+        String name = parameter.get("name");
+        int price = Integer.parseInt(parameter.get("price"));
+        int categoryCode = Integer.parseInt(parameter.get("categoryCode"));
+
+        // 보통 parameter 3개 이상이면 DTO에 뭉쳐서 보낸다.
+        MenuDTO menu = new MenuDTO();
+        menu.setName(name);
+        menu.setPrice(price);
+        menu.setCategoryCode(categoryCode);
+
+        if(menuService.registMenu(menu)) {
+            printResult.printSuccessMsg("insert");
+        } else {
+            printResult.printErrorMessage("insert");
+        }
+    }
+
+    public void modifyMenu(Map<String, String> parameter) {
+        int modifyCode = Integer.parseInt(parameter.get("modiCode"));
+        String name = parameter.get("modiName");
+        int price = Integer.parseInt(parameter.get("modiPrice"));
+        int category = Integer.parseInt(parameter.get("modiCategory"));
+
+        MenuDTO menu = new MenuDTO();
+        menu.setCode(modifyCode);
+        menu.setName(name);
+        menu.setPrice(price);
+        menu.setCategoryCode(category);
+
+        // update 잘 됐거나 안 됐을 경우 알 수 있는 메세지 출력 기능(PrintResult에 있음)
+        if(menuService.modifyMenu(menu)) {
+            printResult.printSuccessMsg("update");
+        } else {
+            printResult.printErrorMessage("update");
+        }
+    }
+
+    public void deleteMenu(int parameter) {
+        int menuCode = Integer.parseInt(String.valueOf(parameter));
+
+        MenuDTO menu = new MenuDTO();
+        menu.setCode(menuCode);
+        if(menuService.deleteMenu(menu)) {
+            printResult.printSuccessMsg("delete");
+        } else {
+            printResult.printErrorMessage("delete");
+        }
+    }
+}
+
+
+package com.ohgiraffers.section1.xmlconfig;
+import org.apache.ibatis.session.SqlSession;
+import java.util.List;
+import static com.ohgiraffers.section1.xmlconfig.Template.getSqlSession;
+
+public class MenuService {
+    private final MenuDAO menuDAO;
+
+    public MenuService () {
+        menuDAO = new MenuDAO();
+    }
+    public List<MenuDTO> selectAllMenu() {
+        SqlSession sqlSession = getSqlSession();
+
+        List<MenuDTO> menuList = menuDAO.selectAllMenu(sqlSession);
+
+        sqlSession.close();
+
+        return menuList;
+    }
+
+    public MenuDTO selectMenuByCode(int code) {
+        SqlSession sqlSession = getSqlSession();
+        MenuDTO menu = menuDAO.selectMenuByCode(sqlSession,code);
+        sqlSession.close();
+        return menu;
+    }
+
+    public boolean registMenu(MenuDTO menu) {
+        // DB 접속
+        SqlSession sqlSession = getSqlSession();
+
+        int result = menuDAO.insertMenu(sqlSession, menu);
+
+        if(result > 0) {
+            sqlSession.commit();
+        } else {
+            sqlSession.rollback();
+        }
+        sqlSession.close();
+        return result > 0? true : false;
+    }
+    public boolean modifyMenu(MenuDTO menu) {
+        SqlSession sqlSession = getSqlSession();
+        int result = menuDAO.updateMenu(sqlSession, menu);
+        if(result>0) {
+            sqlSession.commit();
+        } else {
+            sqlSession.rollback();
+        }
+        sqlSession.close();
+
+        return result > 0? true : false;
+    }
+
+    public boolean deleteMenu(MenuDTO menu) {
+        SqlSession sqlSession = getSqlSession();
+        int result = menuDAO.deleteMenu(sqlSession, menu);
+        if(result>0) {
+            sqlSession.commit();
+        } else {
+            sqlSession.rollback();
+        }
+        sqlSession.close();
+
+        return result > 0? true : false;
+    }
+}
+
+
+package com.ohgiraffers.section1.xmlconfig;
+import org.apache.ibatis.session.SqlSession;
+import java.util.List;
+
+public class MenuDAO {
+    public List<MenuDTO> selectAllMenu(SqlSession sqlSession) {
+        return sqlSession.selectList("MenuMapper.selectAllMenu");
+
+    }
+
+    public MenuDTO selectMenuByCode(SqlSession sqlSession, int code) {
+        return sqlSession.selectOne("MenuMapper.selectMenuByCode", code);
+    }
+
+    public int insertMenu(SqlSession sqlSession, MenuDTO menu) {
+        return sqlSession.insert("MenuMapper.insertMenu", menu);
+    }
+
+    public int updateMenu(SqlSession sqlSession, MenuDTO menu) {
+        return sqlSession.update("MenuMapper.updateMenu", menu);
+        // menu-mapper.xml로 쿼리 작성하러 ㄱㄱ   13:55menu-mapperxml에 query작성 완
+    }
+
+    public int deleteMenu(SqlSession sqlSession, MenuDTO menu) {
+        // menu-mapper와 MenuService를 MenuDAO가 사이에서 연결해줌
+        return sqlSession.delete("MenuMapper.deleteMenu", menu);
+    }
+}
+
+
+package com.ohgiraffers.section1.xmlconfig;
+import java.util.List;
+public class PrintResult {
+  public void printMenuList(List<MenuDTO> menuList) {
+      for(MenuDTO menu: menuList) {
+          System.out.println(menu);
+      }
+  }
+
+  public void printMenu(MenuDTO menu) {
+      System.out.println(menu);
+  }
+
+  public static void printSuccessMsg(String successCode) {
+      String successMsg = "";
+      switch (successCode) {
+          case "insert" : successMsg="신규메뉴 등록 성공";break;
+          case "update" : successMsg ="메뉴 수정 성공";break;
+          case "delete" : successMsg = "삭제 성공"; break;
+      }
+      System.out.println(successMsg);
+  }
+
+  public static void printErrorMessage(String errorCode) {
+      String errorMsg = "";
+      switch (errorCode){
+          case "selectList" : errorMsg = "메뉴 목록 조회를 실패하였습니다"; break;
+          case "selectOne" : errorMsg ="메뉴 상세 조회 실패"; break;
+          case "insert" : errorMsg = "신규메뉴 등록 실패"; break;
+          case "update" : errorMsg = "메뉴수정 실패";break;
+          case "delete" : errorMsg = "삭제 실패"; break;
+      }
+      System.out.println(errorMsg);
+  }
+
+}
+
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MenuMapper">
+    <!-- 조회한 컬럼과 DTO를 매핑시키기 위한 설정-->
+    <resultMap id="menuResultMap" type="com.ohgiraffers.section1.xmlconfig.MenuDTO">
+        <id property="code" column="MENU_CODE"/> <!-- 식별자 컬럼 id 사용-->
+        <result property="name" column="MENU_NAME"/> <!--일반 컬럼 result 사용-->
+        <result property="price" column="MENU_PRICE"/>
+        <result property="categoryCode" column="CATEGORY_CODE"/>
+        <result property="orderableStatus" column="ORDERABLE_STATUS"/>
+
+    </resultMap>
+    <select id="selectAllMenu" resultMap="menuResultMap">
+        SELECT
+              MENU_CODE,
+              MENU_NAME,
+              MENU_PRICE,
+              CATEGORY_CODE,
+              ORDERABLE_STATUS
+          FROM TBL_MENU
+         WHERE ORDERABLE_STATUS = 'Y'
+        ORDER BY MENU_CODE
+    </select>
+
+    <!-- ResultMap 계속 재사용 가능
+        파라미터(매개변수)가 한 개인 경우 바인딩되는 이름은 상관 없으며 지정하지 않아도 된다.
+        - resultMap : 위에서 생성한 resultMap을 리턴 타입으로 이용하는 경우
+        - resultType : 이미 정의되어 있는 타입을 이용하여 리턴 타입으로 이용하는 경우
+        - parameterType : 파라미터로 전달되는 값의 타입을 작성(생략해도 상괍없음)
+        -->
+    <select id="selectMenuByCode" parameterType="_int" resultMap="menuResultMap">
+        SELECT
+                MENU_CODE,
+                MENU_NAME,
+                MENU_PRICE,
+                CATEGORY_CODE,
+                ORDERABLE_STATUS
+            FROM TBL_MENU
+          WHERE ORDERABLE_STATUS = 'Y'
+            AND MENU_CODE = #{code}
+          ORDER BY MENU_CODE
+    </select>
+
+    <!-- insert, update, delete의 경우
+    resultMap, resultType 등을 쓰지 않는다.
+    대신 기본 _int로 수행결과를 반환한다.
+    파라미터로 전달된 DTO의 필드명으로 값을 바인딩해야하며, getter를 이용하므로 getter가 없으면 에러가 발생한다.
+    파라미터 타입도 생략 가능-->
+    <insert id="insertMenu" parameterType="com.ohgiraffers.section1.xmlconfig.MenuDTO">
+        INSERT INTO TBL_MENU
+        (
+         MENU_NAME,
+         MENU_PRICE,
+         CATEGORY_CODE,
+         ORDERABLE_STATUS
+        )
+        VALUES
+        (
+         #{ name },
+         #{ price },
+         #{ categoryCode },
+         'Y'
+        )
+    </insert>
+
+    <update id="updateMenu" parameterType="com.ohgiraffers.section1.xmlconfig.MenuDTO">
+        UPDATE TBL_MENU
+           SET
+               MENU_NAME = #{ name },
+               MENU_PRICE = #{ price },
+               CATEGORY_CODE = #{ categoryCode }
+         WHERE MENU_CODE = # { code }
+    </update>
+
+    <delete id="deleteMenu" parameterType="com.ohgiraffers.section1.xmlconfig.MenuDTO">
+            DELETE
+            FROM TBL_MENU
+            WHERE MENU_CODE = #{ code }
+    </delete>
+</mapper>
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost/menudb"/>
+                <property name="username" value="ohgiraffers"/>
+                <property name="password" value="ohgiraffers"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource= "com/ohgiraffers/section01/xmlconfig/menu-mapper.xml"/>
+    </mappers>
+</configuration>
+
+
+plugins {
+    id 'java'
+}
+
+group = 'com.ohgiraffers'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    implementation("mysql:mysql-connector-java:8.0.33")
+    // https://mvnrepository.com/artifact/org.mybatis/mybatis
+    // mybatis 의존성 추가
+    implementation("org.mybatis:mybatis:3.5.6")
+}
+
+test {
+    useJUnitPlatform()
+}
