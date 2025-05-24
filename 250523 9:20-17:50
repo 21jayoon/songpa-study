@@ -4,7 +4,7 @@ https://github.com/21jayoon/JDBCPractice250522to0523.git
 # 위 repository 주말 실습 참고하기!!!
 
 # MyBatis CRUD 실습문제 중 Delete 기능 홀로 실습
-# Coding alone with delete function durint MyBatis CRUD Practice
+# Write delete function code from scratch during MyBatis CRUD Practice
 package com.ohgiraffers.section1.xmlconfig;
 
 import java.util.HashMap;
