@@ -1,6 +1,44 @@
 # connection-info.properties 생성
+driver=com.mysql.cj.jdbc.Driver
+url=jdbc:mysql://localhost/publisherdb
+user=ohgiraffers
+password=ohgiraffers
+
 
 # mysql connectors download
 # References :
 # https://velog.io/@noah-wilson0/JDBCmysql-%EC%82%AC%EC%9A%A9%EB%B2%952
 # https://wisdom-and-record.tistory.com/61
+
+# https://roopredev.tistory.com/12
+# https://lsjsj92.tistory.com/53
+# https://smin1620.tistory.com/341
+
+
+# Create publisherdb on MySQL and grant privileges to the localhost, 'ohgiraffers'
+# Refer to '250523 9L20-17:50' file in this repository
+
+# Add some line in build.gradle (mysql-connector and mybatis)
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // MySQL 의존성 추가
+    implementation("mysql:mysql-connector-java:8.0.33")
+    // mybatis 의존성 추가
+    implementation("org.mybatis:mybatis:3.5.6")
+}
+
+test {
+    useJUnitPlatform()
+}
