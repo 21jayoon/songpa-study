@@ -42,3 +42,92 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+
+# 단축키 : ALT + 방향키(위, 아래) 누르면 (같은 클래스 내) 다음 메소드로 넘어감. 메소드 길 때, getter setter 만들고 toString() 만들 때 유용
+
+
+# PublisherDTO0524.java
+package com.ohgiraffers.practices.model;
+
+import java.util.Date;
+
+public class PublisherDTO0524 {
+    private String EMP_ID;
+    private String EMP_NAME;
+    private String EMAIL;
+    private String DEPT_CODE;
+    private int SALARY;
+    private java.util.Date HIRE_DATE;
+
+    public PublisherDTO0524() {}
+
+    public PublisherDTO0524(String EMP_ID, String EMP_NAME, String EMAIL, String DEPT_CODE, int SALARY, Date HIRE_DATE) {
+        this.EMP_ID = EMP_ID;
+        this.EMP_NAME = EMP_NAME;
+        this.EMAIL = EMAIL;
+        this.DEPT_CODE = DEPT_CODE;
+        this.SALARY = SALARY;
+        this.HIRE_DATE = HIRE_DATE;
+    }
+
+    public String getEMP_ID() {
+        return EMP_ID;
+    }
+
+    public void setEMP_ID(String EMP_ID) {
+        this.EMP_ID = EMP_ID;
+    }
+
+    public String getEMP_NAME() {
+        return EMP_NAME;
+    }
+
+    public void setEMP_NAME(String EMP_NAME) {
+        this.EMP_NAME = EMP_NAME;
+    }
+
+    public String getEMAIL() {
+        return EMAIL;
+    }
+
+    public void setEMAIL(String EMAIL) {
+        this.EMAIL = EMAIL;
+    }
+
+    public String getDEPT_CODE() {
+        return DEPT_CODE;
+    }
+
+    public void setDEPT_CODE(String DEPT_CODE) {
+        this.DEPT_CODE = DEPT_CODE;
+    }
+
+    public int getSALARY() {
+        return SALARY;
+    }
+
+    public void setSALARY(int SALARY) {
+        this.SALARY = SALARY;
+    }
+
+    public Date getHIRE_DATE() {
+        return HIRE_DATE;
+    }
+
+    public void setHIRE_DATE(Date HIRE_DATE) {
+        this.HIRE_DATE = HIRE_DATE;
+    }
+
+    @Override
+    public String toString() {
+        return "PublisherDTO0524{" +
+                "EMP_ID='" + EMP_ID + '\'' +
+                ", EMP_NAME='" + EMP_NAME + '\'' +
+                ", EMAIL='" + EMAIL + '\'' +
+                ", DEPT_CODE='" + DEPT_CODE + '\'' +
+                ", SALARY=" + SALARY +
+                ", HIRE_DATE=" + HIRE_DATE +
+                '}';
+    }
+}
