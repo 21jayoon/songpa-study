@@ -1,7 +1,517 @@
 # 주말 과제 최종 완성
 # Complete the crud weekend challenge(team-study)
 https://github.com/21jayoon/MybatisCRUDPractice.git
+# 비고 : 2. 부서별 직원 조회를 부서코드 입력(D1...D4) : 말고 부서명으로 입력받아 출력하던가 할 수 있으면 좋을 거 같다.
 
 # 오늘 강의 진도
 # Today's lecture
-# JAVA CRUD to Dynamic sql(동적 쿼리)
+# JAVA CRUD to Dynamic sql(동적 쿼리)- <if>, <choose>, <foreach>
+
+# 데이터 모델링 제 1정규화 실습 문제 2문제 풀기
+# https://www.notion.so/ohgiraffers/2-1-1ff649136c1180279d59d01213eaeafa?pvs=4
+
+# 강의 내용
+# 1. build gradle => dependencies 구역에 MySQL과 Mybatis에 대한 의존성 추가
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // MySQL 의존성 추가
+    implementation("mysql:mysql-connector-java:8.0.33")
+    // mybatis 의존성 추가
+    implementation("org.mybatis:mybatis:3.5.6")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+# 2. Application
+package com.ohgiraffers.section01.xml;
+
+import com.ohgiraffers.common.SearchCriteria;
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.*;
+
+import static com.ohgiraffers.common.Template.getSqlSession;
+
+public class Application {
+    /* 250526 동적 쿼리 실습*/
+    public static void main(String[] args) {
+        SqlSession session = getSqlSession();
+        System.out.println(session);
+
+        Scanner sc = new Scanner(System.in);
+
+        do{
+            System.out.println("마이바티스 동적 SQL (조건문)");
+            System.out.println("1. if 확인");
+            System.out.println("2. choose(when, otherwise) 확인");
+            System.out.println("3. foreach 확인");
+            // System.out.println("4. trim(when, set) 확인"); 아직 기능능 안 만들었음
+            System.out.println("9. 종료");
+            System.out.print("메뉴 선택 : ");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1: ifSubMenu(); break;
+                case 2: chooseSubMenu(); break;
+                case 3: foreachSubMenu(); break;
+                case 4:
+                case 9:
+                    System.out.println("프로그램 종료"); return;
+            }
+        }while (true);
+    }
+
+    private static void ifSubMenu() {
+        Scanner sc = new Scanner(System.in);
+        MenuService menuService = new MenuService();
+        do{
+            System.out.println("=== if 서브 메뉴 ===");
+            System.out.println("1.원하는 금액대에 적합한 추천 메뉴 목록 보여주기");
+            System.out.println("2.메뉴이름 혹은 카테고리명으로 검색해 메뉴 목록 보여주기");
+            System.out.println("9.이전 메뉴로 돌아가기");
+            System.out.print("숫자 입력 : ");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1 : menuService.selectMenuByPrice(inputPrice()); break;
+                case 2 : menuService.searchMenu(inputSearchCriteria()); break;
+                case 9 : return;
+            }
+        }while (true);
+    }
+
+
+    private static int inputPrice() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("검색할 가격의 최대 금액을 입력해주세요 : ");
+        // price에 입력받은 가격 저장
+        int price = sc.nextInt();
+
+        return price;
+    }
+
+
+    private static SearchCriteria inputSearchCriteria() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("검색 기준(name or category)을 입력해주세요 : ");
+        String condition = sc.nextLine();
+        System.out.print("검색어 입력 : ");
+        String value = sc.nextLine();
+
+        return new SearchCriteria(condition, value);
+    }
+
+
+    private static void chooseSubMenu() {
+        Scanner sc = new Scanner(System.in);
+        MenuService menuService = new MenuService();
+        do{
+            System.out.println("===== choose 서브 메뉴 =====");
+            System.out.println("1. SHOW 카테고리 상위 분류별 메뉴");
+            System.out.println("9. 이전 메뉴로");
+            System.out.println("메뉴 입력 :");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1 : menuService.searchMenuBySupCategory(inputSupCategory()); break;
+                case 9 : return;
+            }
+        }while(true);
+    }
+
+    private static SearchCriteria inputSupCategory() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("상위 분류를 입력해주세요(식사, 음료, 디저트) : ");
+        String value = sc.nextLine();
+
+        return new SearchCriteria("category", value);
+    }
+
+    private static void foreachSubMenu() {
+        Scanner sc = new Scanner(System.in);
+        MenuService menuService = new MenuService();
+        do{
+            System.out.println("===== foreach 서브 메뉴 =====");
+            System.out.println("1. 메뉴 5개 무작위 추출");
+            System.out.println("9. 이전 메뉴로");
+            System.out.println("메뉴 입력 :");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1 : menuService.searchMenuByRandomMenuCode(createRandomMenuCodeList()); break;
+                case 9 : return;
+            }
+        }while(true);
+    }
+
+    private static List<Integer> createRandomMenuCodeList() {
+        Set<Integer> set = new HashSet<>();
+        while (set.size() < 5) {
+            int temp = ((int) (Math.random() * 21)) + 1;
+            set.add(temp);
+        }
+        List<Integer> list = new ArrayList<>(set);
+        Collections.sort(list);
+
+        return list;
+    }
+}
+
+
+
+# 3. SearchCriteria ( Controller 역할)
+package com.ohgiraffers.common;
+
+public class SearchCriteria {
+    // 검색을 할 수 있는 기능.
+    private String condition;
+    private String value;
+
+    public SearchCriteria(){}
+
+    public SearchCriteria(String condition, String value) {
+        this.condition = condition;
+        this.value = value;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "SearchCriteria{" +
+                "condition='" + condition + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
+}
+
+
+# 4. Sevice
+package com.ohgiraffers.section01.xml;
+
+import com.ohgiraffers.common.MenuDTO;
+import com.ohgiraffers.common.SearchCriteria;
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.ohgiraffers.common.Template.getSqlSession;
+
+public class MenuService {
+    /*동적 SQL은 기본 자료형을 쓸 수 없다. 그래서 Map이나 HashMap을 사용해줘야 한다*/
+    private DynamicSqlMapper mapper;
+    public void selectMenuByPrice(int price) {
+        SqlSession sqlSession = getSqlSession();
+
+        mapper = sqlSession.getMapper(DynamicSqlMapper.class);
+
+        Map<String, Integer> map = new HashMap<>();
+        map.put("price", price);
+
+        List<MenuDTO> menuList = mapper.selectMenuByPrice(map);
+
+        if(menuList != null && menuList.size()>0) {
+            //List형태로 나올 거기 때문에 for문으로 list 출력
+            for(MenuDTO menu : menuList) {
+                System.out.println(menu);
+            }
+        }else {
+            System.out.println("검색 결과 없음");
+        }
+        sqlSession.close();
+    }
+
+    public void searchMenu(SearchCriteria searchCriteria) {
+        SqlSession sqlSession =  getSqlSession();
+        mapper = sqlSession.getMapper(DynamicSqlMapper.class);
+
+        List<MenuDTO> menuList = mapper.searchMenu(searchCriteria);
+
+        if(menuList != null && menuList.size() > 0) {
+            for(MenuDTO menu : menuList){
+                System.out.println(menu);
+            }
+        }else {
+            System.out.println("검색 결과 없음");
+        }
+    }
+
+    public void searchMenuBySupCategory(SearchCriteria searchCriteria) {
+        SqlSession sqlSession = getSqlSession();
+        mapper = sqlSession.getMapper(DynamicSqlMapper.class);
+
+        List<MenuDTO> menuList = mapper.searchMenuBySupCategory(searchCriteria);
+
+        if(menuList != null && menuList.size() > 0) {
+            for(MenuDTO menu : menuList){
+                System.out.println(menu);
+            }
+        }else {
+            System.out.println("텅--!");
+        }
+        sqlSession.close();
+    }
+
+    public void searchMenuByRandomMenuCode(List<Integer> randomMenuCodeList) {
+        SqlSession sqlSession = getSqlSession();
+        mapper = sqlSession.getMapper(DynamicSqlMapper.class);
+
+        // 동적 SQL에서는 Integer(?)를 직접사용할 수 없다. 그러니 Map이나 List형태에 담아서 사용해야함
+        Map<String, List<Integer>> criteria = new HashMap<>();
+        criteria.put("randomMenuCodeList", randomMenuCodeList);
+        List<MenuDTO> menuDTOList = mapper.searchMenuByRandomMenuCode(criteria);
+
+        if(menuDTOList != null && menuDTOList.size() > 0) {
+            for(MenuDTO menu : menuDTOList){
+                System.out.println(menu);
+            }
+        }else {
+            System.out.println("검색결과 없음");
+        }
+        sqlSession.close();
+    }
+
+# 5. interface DynamicSqlMapper ( DAO 역할)
+package com.ohgiraffers.section01.xml;
+
+import com.ohgiraffers.common.MenuDTO;
+import com.ohgiraffers.common.SearchCriteria;
+
+import java.util.List;
+import java.util.Map;
+
+public interface DynamicSqlMapper {
+
+    // resultType : List<MenuDTO> / Id : selectMenuByPrice
+    List<MenuDTO> selectMenuByPrice(Map<String, Integer> map);
+
+    List<MenuDTO> searchMenu(SearchCriteria searchCriteria);
+
+    List<MenuDTO> searchMenuBySupCategory(SearchCriteria searchCriteria);
+
+    List<MenuDTO> searchMenuByRandomMenuCode(Map<String, List<Integer>> criteria);
+}
+
+
+# 6. Template
+package com.ohgiraffers.common;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+public class Template {
+    private static SqlSessionFactory sqlSessionFactory;
+
+    public static SqlSession getSqlSession() {
+        if(sqlSessionFactory == null){
+            String resource = "config/mybatis-config.xml";
+            try {
+                InputStream inputStream = Resources.getResourceAsStream(resource);
+                sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return sqlSessionFactory.openSession(false);
+    }
+}
+
+
+
+# resources/com/ohgiraffers/section01/xml
+# DynamicSqlMapper.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0??EN"
+        "https://mybatis.org.dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.section01.xml.DynamicSqlMapper">
+    <resultMap id="menuResultMap" type="com.ohgiraffers.common.MenuDTO">
+        <id property="code" column="MENU_CODE"/>
+        <result property="name" column="MENU_NAME"/>
+        <result property="price" column="MENU_PRICE"/>
+        <result property="categoryCode" column="CATEGORY_CODE"/>
+        <result property="orderableStatus" column="ORDERABLE_STATUS"/>
+    </resultMap>
+
+    <!-- <if> 태그를 이용해 test 속성의 조건에 해댱할 때만 엘리먼트 구문을 쿼리에 포함한다.-->
+    <select id="selectMenuByPrice" parameterType="hashmap" resultMap="menuResultMap">
+        SELECT A.MENU_CODE,
+               A.MENU_NAME,
+               A.MENU_PRICE,
+               A.CATEGORY_CODE,
+               A.ORDERABLE_STATUS
+          FROM TBL_MENU A
+         WHERE A.ORDERABLE_STATUS = 'Y'
+
+        <!-- gte : Greater Than Equal 크거나 같다 (반대 lte) -->
+        <if test="price gte 0 and price lte 10000">
+            <![CDATA[
+             AND A.MENU_PRICE < #{ price }
+             ]]>
+        </if>
+
+        <if test="price gte 10000 and price lte 20000">
+            AND A.MENU_PRICE BETWEEN 10000 AND #{ price }
+        </if>
+
+        <if test = "price gte 20000 and price lte 30000">
+            AND A.MENU_PRICE BETWEEN 20000 AND #{ price }
+        </if>
+
+        <if test = "price gte 30000">
+            AND A.MENU_PRICE BETWEEN 30000 AND #{ price }
+        </if>
+        ORDER BY A.MENU_CODE
+    </select>
+
+    <select id="searchMenu" parameterType="SearchCriteria" resultMap="menuResultMap">
+        SELECT A.MENU_CODE,
+               A.MENU_NAME,
+               A.MENU_PRICE,
+               A.CATEGORY_CODE,
+               A.ORDERABLE_STATUS
+          FROM TBL_MENU A
+        <if test="condition == 'category'">
+            JOIN TBL_CATEGORY B USING CATEGORY_CODE
+        </if>
+        WHERE A.ORDERABLE_STATUS = 'Y'
+        <if test="condition == 'name'">
+            AND A.MENU_NAME LIKE CONCAT('%', #{ value }, '%')
+        </if>
+        <if test="condition == 'category'">
+            AND B.CATEGORY_NAME = #{ value }
+        </if>
+        ORDER BY MENU_CODE
+    </select>
+
+<!--    <choose>(when/otherwise) 태그 : java의 switch-case처럼 동작한다.-->
+<!--    <choose>
+              <when test = "(조건)">
+                  query
+              </when>
+              ...
+              <otherwise>
+                  query
+              </otherwise>
+        </choose>
+        <when> 태그 test 속성 조건에 부합하면 <when> 엘리먼트 구문을 쿼리에 포함한다.
+         어떠한 when 조건도 만족하지 못하면 <otherwise> 엘리먼트 구문을 쿼리에 포함한다.-->
+    <select id="searchMenuBySupCategory" parameterType="SearchCriteria" resultMap="menuResultMap">
+        SELECT
+            A.MENU_CODE,
+            A.MENU_NAME,
+            A.MENU_PRICE,
+            A.CATEGORY_CODE,
+            A.ORDERABLE_STATUS
+          FROM TBL_MENU A
+         WHERE A.ORDERABLE_STATUS = 'Y'
+        <choose>
+            <when test="value == '식사' ">
+                AND A.CATEGORY_CODE IN (4,5,6,7)
+            </when>
+            <when test="value == '음료'">
+                AND A.CATEGORY_CODE IN (8,9,10)
+            </when>
+            <otherwise>
+                AND A.CATEGORY_CODE IN (11,12)
+            </otherwise>
+        </choose>
+        ORDER BY A.MENU_CODE
+    </select>
+
+<!-- <foreach> 태그 : java의 for문처럼 역할을 한다.
+                    1. collection 속성 : 반복을 수행할 대상
+                    2. item 속성 : 반복을 수행할 때마다 꺼내올 값의 이름 설정
+                    3. open 속성 : <foreach> 엘리먼트 구문의 가장 앞에 올 문자
+                    4. separator 속성 : 반복이 수행될 때 꺼내온 item 사이에 들어갈 문자
+                    5. close 속성 : <foreach> 엘리먼트 구문의 마지막에 올 문자 -->
+    <select id="searchMenuByRandomMenuCode" parameterType="hashmap" resultMap="menuResultMap">
+        SELECT
+                A.MENU_CODE,
+                A.MENU_NAME,
+                A.MENU_PRICE,
+                A.CATEGORY_CODE,
+                A.ORDERABLE_STATUS
+           FROM TBL_MENU A
+        WHERE 1 = 1 <!-- WHERE 1 = 1  -> ORDERABLE_STATUS 판매 중 'Y'이건 아니건'N' 다 출력 가능 -->
+<!--        메뉴코드 전달받을 list를 in으로 받는다-->
+          AND A.MENU_CODE IN
+        <foreach collection="randomMenuCodeList" item="menuCode" open="(" separator=", " close=")">
+            #{ menuCode }
+<!--            이 foreach 문 안에서 반복할 것은? => #{ menuCode }-->
+        </foreach>
+    </select>
+
+</mapper>
+
+
+# resources/config
+# connection-info.properties
+driver=com.mysql.cj.jdbc.Driver
+url=jdbc:mysql://localhost/menudb
+username=ohgiraffers
+password=ohgiraffers
+
+# mybatis-config.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="config/connection-info.properties"></properties>
+
+    <typeAliases>
+        <typeAlias type="com.ohgiraffers.common.SearchCriteria" alias="SearchCriteria"/>
+<!--        이제 별칭 SearchCriteria로 xml에 접근 가능해짐-->
+    </typeAliases>
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <package name="com.ohgiraffers.section01.xml"/>
+    </mappers>
+</configuration>
+}
