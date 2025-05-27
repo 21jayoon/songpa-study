@@ -1,0 +1,437 @@
+# 오늘자 업무일지 Today's Daily log(work log)
+# https://www.notion.so/Study-Review-1e3fc892a16f80f7bb90c17f255a81ac
+
+# CRUD 프로그램 1차 코드 (오류 수정 후)
+# First try of CRUD using <association> tag (after debugging)
+package com.ohgiraffers.section01.mapper;
+
+import java.util.Scanner;
+
+public class Application {
+    public static void main(String[] args) {
+        /*<association>태그를 이용해 부서코드와 부서명을 묶어라
+        * <set>태그로 부서와 salary를 바꿔라
+        * == 이번 승진 인원은 다음과 같습니다.==
+        * 309, '김민지', 마케팅부에서 영업부로 이동, 월급 4000000원으로 인상
+        * 302, '나분야', 회계관리부에서 인사관리부로 이동, 월급 2800000원으로 인상
+        * 311, 'Summer Pace', 영업부에서 인사관리부로 이동, 월급 3200000원으로 인상*/
+        do {
+            Scanner sc = new Scanner(System.in);
+            System.out.println("===== Clerk Information change =====");
+            System.out.println("1. 연동 조회");
+            System.out.println("2. 사번 받아 정보 수정");
+            System.out.println("9. End the program");
+            System.out.print("Input the number : ");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1:
+                    resultMapSubMenu();break;
+                case 2:
+                    inputElevateInfo();break;
+                case 9:
+                    return;
+                default:
+                    System.out.println("잘못된 입력입니다");
+                    return;
+            }
+        }while (true);
+    }
+
+    private static void inputElevateInfo() {
+        Scanner sc = new Scanner(System.in);
+        TestService testService = new TestService();
+        do{
+            System.out.println("2-  1.사번 받아 정보 수정 : <set> 사용");
+            System.out.println("번호 입력: ");
+            int no = sc.nextInt();
+
+            switch (no) {
+
+            }
+        }while (true);
+    }
+
+    private static void resultMapSubMenu() {
+        Scanner sc = new Scanner(System.in);
+        TestService testService = new TestService();
+        do{
+            System.out.println("1-  1.부서코드-부서명 연결 : <resultMap>-<association> 사용");
+            System.out.println("9. 이전으로 돌아가기");
+            System.out.println("번호 입력 : ");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1: testService.useResultMapAssociation();break;
+                case 9: return;
+            }
+        }while (true);
+    }
+}
+
+
+package com.ohgiraffers.section01.mapper;
+
+import com.ohgiraffers.common.DeptCodeAndDeptNameDTO;
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.List;
+
+import static com.ohgiraffers.common.Template.getSqlSession;
+
+public class TestService {
+    private TestMapper mapper;
+
+    public void useResultMapAssociation() {
+        SqlSession sqlSession = getSqlSession();
+        mapper = sqlSession.getMapper(TestMapper.class);
+
+        List<DeptCodeAndDeptNameDTO> empList = mapper.useResultMapAssociation();
+        for(DeptCodeAndDeptNameDTO employee : empList){
+            System.out.println(employee);
+        }
+        sqlSession.close();
+    }
+}
+
+
+package com.ohgiraffers.section01.mapper;
+
+import com.ohgiraffers.common.DeptCodeAndDeptNameDTO;
+
+import java.util.List;
+
+public interface TestMapper {
+    List<DeptCodeAndDeptNameDTO> useResultMapAssociation();
+}
+
+
+package com.ohgiraffers.common;
+
+import java.util.Date;
+
+public class DeptCodeAndDeptNameDTO {
+    private String empId;
+    private String name;
+    private String email;
+    private DeptDTO deptTitle;
+    private int salary;
+    private Date hiredDate;
+
+    public DeptCodeAndDeptNameDTO() {}
+
+    public DeptCodeAndDeptNameDTO(String empId, String name, String email, DeptDTO deptTitle, int salary, Date hiredDate) {
+        this.empId = empId;
+        this.name = name;
+        this.email = email;
+        this.deptTitle = deptTitle;
+        this.salary = salary;
+        this.hiredDate = hiredDate;
+    }
+
+    public String getEmpId() {
+        return empId;
+    }
+
+    public void setEmpId(String empId) {
+        this.empId = empId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public DeptDTO getDeptTitle() {
+        return deptTitle;
+    }
+
+    public void setDeptTitle(DeptDTO deptTitle) {
+        this.deptTitle = deptTitle;
+    }
+
+    public int getSalary() {
+        return salary;
+    }
+
+    public void setSalary(int salary) {
+        this.salary = salary;
+    }
+
+    public Date getHiredDate() {
+        return hiredDate;
+    }
+
+    public void setHiredDate(Date hiredDate) {
+        this.hiredDate = hiredDate;
+    }
+
+    @Override
+    public String toString() {
+        return "DeptCodeAndDeptNameDTO{" +
+                "empId='" + empId + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", deptTitle=" + deptTitle +
+                ", salary=" + salary +
+                ", hiredDate=" + hiredDate +
+                '}';
+    }
+}
+
+
+package com.ohgiraffers.common;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+public class Template {
+    private static SqlSessionFactory sqlSessionFactory;
+
+    public static SqlSession getSqlSession() {
+        if(sqlSessionFactory == null) {
+            String resource = "config/mybatis-config.xml";
+            InputStream inputStream = null;
+            try {
+                inputStream = Resources.getResourceAsStream(resource);
+                sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+        return sqlSessionFactory.openSession(false);
+    }
+}
+
+
+# resources/com/ohgiraffers/section01/mapper/TestMapper.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0??EN"
+        "https://mybatis.org.dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.section01.mapper.TestMapper">
+    <resultMap id="useResultMapAssociation" type="com.ohgiraffers.common.DeptCodeAndDeptNameDTO">
+        <id property="empId" column="EMP_ID"/>
+        <result property="name" column="EMP_NAME"/>
+        <result property="email" column="EMAIL"/>
+        <result property="salary" column="SALARY"/>
+        <result property="hiredDate" column="HIRE_DATE"/>
+        <association property="deptTitle" resultMap="deptResultMap"/>
+    </resultMap>
+
+    <resultMap id="deptResultMap" type="com.ohgiraffers.common.DeptDTO">
+        <id property="deptId" column="DEPT_ID"/>
+        <result property="deptName" column="DEPT_TITLE"/>
+    </resultMap>
+
+    <select id="useResultMapAssociation" resultMap="useResultMapAssociation">
+        SELECT
+                A.EMP_ID,
+                A.EMP_NAME,
+                A.EMAIL,
+                B.DEPT_ID,
+                B.DEPT_TITLE,
+                A.SALARY,
+                A.HIRE_DATE
+          FROM EMPLOYEE_LIST A
+          JOIN EMPLOYEE_DEPT B ON (A.DEPT_CODE = B.DEPT_ID)
+    </select>
+
+</mapper>
+
+
+# resources/config/mybatis-config.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="config/connection-info.properties"/>
+    
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <package name="com.ohgiraffers.section01.mapper"/>
+    </mappers>
+</configuration>
+
+
+# resources/config/connection-config.properties
+driver=com.mysql.cj.jdbc.Driver
+url=jdbc:mysql://localhost/publisherdb
+username=ohgiraffers
+password=ohgiraffers
+
+
+
+# 실행 결과 Execute results
+# > Task :com.ohgiraffers.section01.mapper.Application.main()
+# ===== Clerk Information change =====
+# 1. 연동 조회
+# 2. 사번 받아 정보 수정
+# 9. End the program
+# Input the number : 1
+# 1-  1.부서코드-부서명 연결 : <resultMap>-<association> 사용
+# 9. 이전으로 돌아가기
+# 번호 입력 : 
+# 1
+# DeptCodeAndDeptNameDTO{empId='300', name='서운해', email='seo@heuimangpub.com', deptTitle=DeptDTO{부서코드='D1', 부서명='인사관리부'}, salary=3000000, hiredDate=Tue Feb 06 00:00:00 KST 1990}
+# DeptCodeAndDeptNameDTO{empId='301', name='최고야', email='gogo@heuimangpub.com', deptTitle=DeptDTO{부서코드='D2', 부서명='회계관리부'}, salary=250000, hiredDate=Sat Mar 06 00:00:00 KST 1999}
+# DeptCodeAndDeptNameDTO{empId='302', name='나분야', email='onlyme@heuimangpub.com', deptTitle=DeptDTO{부서코드='D2', 부서명='회계관리부'}, salary=210000, hiredDate=Thu Dec 07 00:00:00 KST 2000}
+# DeptCodeAndDeptNameDTO{empId='303', name='하참하', email='noway@heuimangpub.com', deptTitle=DeptDTO{부서코드='D3', 부서명='마케팅부'}, salary=230000, hiredDate=Thu Dec 07 00:00:00 KST 2000}
+# DeptCodeAndDeptNameDTO{empId='304', name='김결의', email='kim@heuimangpub.com', deptTitle=DeptDTO{부서코드='D3', 부서명='마케팅부'}, salary=350000, hiredDate=Tue May 15 00:00:00 KST 2001}
+# DeptCodeAndDeptNameDTO{empId='305', name='최저야', email='low@heuimangpub.com', deptTitle=DeptDTO{부서코드='D3', 부서명='마케팅부'}, salary=400000, hiredDate=Fri May 21 00:00:00 KST 2010}
+# DeptCodeAndDeptNameDTO{empId='306', name='사나희', email='meninmen@heuimangpub.com', deptTitle=DeptDTO{부서코드='D4', 부서명='영업부'}, salary=310000, hiredDate=Thu Sep 06 00:00:00 KST 2012}
+# DeptCodeAndDeptNameDTO{empId='307', name='윤기남', email='glowing@heuimangpub.com', deptTitle=DeptDTO{부서코드='D4', 부서명='영업부'}, salary=230000, hiredDate=Mon Oct 06 00:00:00 KST 2003}
+# DeptCodeAndDeptNameDTO{empId='308', name='태사각', email='quitcom@heuimangpub.com', deptTitle=DeptDTO{부서코드='D4', 부서명='영업부'}, salary=2500000, hiredDate=Sun Dec 06 00:00:00 KST 2020}
+# DeptCodeAndDeptNameDTO{empId='309', name='김민지', email='minzy@heuimangpub.com', deptTitle=DeptDTO{부서코드='D3', 부서명='마케팅부'}, salary=300000, hiredDate=Mon Jun 07 00:00:00 KST 2021}
+# DeptCodeAndDeptNameDTO{empId='310', name='박이준', email='jun@heuimangpub.com', deptTitle=DeptDTO{부서코드='D3', 부서명='마케팅부'}, salary=400000, hiredDate=Fri May 02 00:00:00 KST 2008}
+# DeptCodeAndDeptNameDTO{empId='311', name='Summer Pace', email='space@heuimangpub.com', deptTitle=DeptDTO{부서코드='D4', 부서명='영업부'}, salary=2900000, hiredDate=Sat Mar 02 00:00:00 KST 2024}
+# DeptCodeAndDeptNameDTO{empId='312', name='Que Reed', email='qreed@heuimangpub.com', deptTitle=DeptDTO{부서코드='D4', 부서명='영업부'}, salary=2800000, hiredDate=Tue Dec 12 00:00:00 KST 2023}
+# DeptCodeAndDeptNameDTO{empId='313', name='이박김', email='commoname@heuimangpub.com', deptTitle=DeptDTO{부서코드='D4', 부서명='영업부'}, salary=2900000, hiredDate=Wed Mar 29 00:00:00 KST 2006}
+# DeptCodeAndDeptNameDTO{empId='314', name='표주박', email='pyo@heuimangpub.com', deptTitle=DeptDTO{부서코드='D3', 부서명='마케팅부'}, salary=3000000, hiredDate=Wed Aug 29 00:00:00 KST 2007}
+# 1-  1.부서코드-부서명 연결 : <resultMap>-<association> 사용
+# 9. 이전으로 돌아가기
+# 번호 입력 : 
+# 9
+# ===== Clerk Information change =====
+# 1. 연동 조회
+# 2. 사번 받아 정보 수정
+# 9. End the program
+# Input the number : 9
+
+# BUILD SUCCESSFUL in 1m 4s
+# 3 actionable tasks: 2 executed, 1 up-to-date
+# 오후 5:57:04: Execution finished ':com.ohgiraffers.section01.mapper.Application.main()'.
+
+
+# 오류 수정 Debugging the error
+# Error Message : 
+# Exception in thread "main" java.lang.ClassCastException: class com.ohgiraffers.common.DeptCodeAndDeptNameDTO cannot be cast to class com.ohgiraffers.common.EmployeeDTO (com.ohgiraffers.common.DeptCodeAndDeptNameDTO and com.ohgiraffers.common.EmployeeDTO are in unnamed module of loader 'app')
+#	at com.ohgiraffers.section01.mapper.TestService.useResultMapAssociation(TestService.java:18)
+#	at com.ohgiraffers.section01.mapper.Application.resultMapSubMenu(Application.java:62)
+#	at com.ohgiraffers.section01.mapper.Application.main(Application.java:26)
+
+# FAILURE: Build failed with an exception.
+# *What went wrong:
+# Execution failed for task ':com.ohgiraffers.section01.mapper.Application.main()'.
+# > Process 'command 'C:\dev\OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7\jdk-17.0.14+7\bin\java.exe'' finished with non-zero exit value 1
+
+# 코드리뷰 중 TestMapper.xml 내에 있는 query 내용과 TestService, TestMapper에 있는 DTO가 다른 것을 발견함
+# During the code-review, my colleague point it out that I may used different DTO in same method.
+
+# TestMapper.xml과 TestService(class), TestMapper(Interface)에서 DTO를 각각 다르게 사용하는 것을 발견
+# Than I found duplicate DTO among TestMapper.xml, TestService(class), TestMapper(Interface) : DeptCodeAndDeptNameDTO & EmployeeDTO
+# 수정 전 Before editing
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0??EN"
+        "https://mybatis.org.dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.section01.mapper.TestMapper">
+    <resultMap id="useResultMapAssociation" type="com.ohgiraffers.common.DeptCodeAndDeptNameDTO">
+        <id property="empId" column="EMP_ID"/>
+        <result property="name" column="EMP_NAME"/>
+        <result property="email" column="EMAIL"/>
+        <result property="salary" column="SALARY"/>
+        <result property="hiredDate" column="HIRE_DATE"/>
+        <association property="deptTitle" resultMap="deptResultMap"/>
+    </resultMap>
+    ...
+</mapper>
+
+
+package com.ohgiraffers.section01.mapper;
+
+import com.ohgiraffers.common.EmployeeDTO;
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.List;
+
+import static com.ohgiraffers.common.Template.getSqlSession;
+
+public class TestService {
+    private TestMapper mapper;
+
+    public void useResultMapAssociation() {
+        SqlSession sqlSession = getSqlSession();
+        mapper = sqlSession.getMapper(TestMapper.class);
+
+        List<EmployeeDTO> empList = mapper.useResultMapAssociation();
+        for(EmployeeDTO employee : empList){
+            System.out.println(employee);
+        }
+        sqlSession.close();
+    }
+}
+
+
+package com.ohgiraffers.section01.mapper;
+
+import com.ohgiraffers.common.EmployeeDTO;
+
+import java.util.List;
+
+public interface TestMapper {
+    List<EmployeeDTO> useResultMapAssociation();
+}
+
+# 수정 후 After revise
+package com.ohgiraffers.section01.mapper;
+
+import com.ohgiraffers.common.DeptCodeAndDeptNameDTO;
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.List;
+
+import static com.ohgiraffers.common.Template.getSqlSession;
+
+public class TestService {
+    private TestMapper mapper;
+
+    public void useResultMapAssociation() {
+        SqlSession sqlSession = getSqlSession();
+        mapper = sqlSession.getMapper(TestMapper.class);
+
+        List<DeptCodeAndDeptNameDTO> empList = mapper.useResultMapAssociation();
+        for(DeptCodeAndDeptNameDTO employee : empList){
+            System.out.println(employee);
+        }
+        sqlSession.close();
+    }
+}
+
+package com.ohgiraffers.section01.mapper;
+
+import com.ohgiraffers.common.DeptCodeAndDeptNameDTO;
+
+import java.util.List;
+
+public interface TestMapper {
+    List<DeptCodeAndDeptNameDTO> useResultMapAssociation();
+}
