@@ -1,0 +1,519 @@
+# 깃허브 협업 1 : 계산기 기능 만들기
+# Github Collaboration with creating calculator program
+
+# 1. 덧셈, 뺄셈, 곱셈, 나눗셈, 나머지 구하기 5가지 기능 4인(필자 포함)에게 분배
+#    Distribute five parts(sum, minus, mutiply, divde, get remainder) to four team-members including me.
+# 2. 요구사항 파악 : 나눗셈 - 모든 연산은 정수int로, 나누는 수가 0일 경우 IllegalArgumentException이 발생하도록 작성.
+#    Identify requirements : divide - all numbers must be int, and if the dividing number is 0, throw an IllegalArgumentException.
+
+# 수정 후 After fix the code
+package com.ohgiraffers.divide;
+
+public class DivideTest {
+    public void divideTwoNum(int num1, int num2)
+        throws IllegalArgumentException {
+            if (num1 > 0 && num2 > 0) {
+                int divide = num1 / num2;
+                System.out.println(divide);
+            } else{
+                throw new IllegalArgumentException("0은 나눌 수 없습니다.");
+            }
+    }
+}
+
+package com.ohgiraffers.run;
+
+import com.ohgiraffers.divide.DivideTest;
+
+public class Application {
+    public static void main(String[] args) {
+        DivideTest appDivide = new DivideTest();
+        appDivide.divideTwoNum(6,0);
+    }
+}
+
+# Exception message : 
+# Exception in thread "main" java.lang.IllegalArgumentException: 0은 나눌 수 없습니다.
+
+
+package com.ohgiraffers.run;
+
+import com.ohgiraffers.divide.DivideTest;
+
+public class Application {
+    public static void main(String[] args) {
+        DivideTest appDivide = new DivideTest();
+        appDivide.divideTwoNum(0,7);
+    }
+}
+
+# Exception message : 
+# Exception in thread "main" java.lang.IllegalArgumentException: 0은 나눌 수 없습니다.
+
+
+# 수정 전 Before modifying
+package com.ohgiraffers.divide;
+
+public class DivideTest {
+    public void divideTwoNum(int num1, int num2)
+//        Scanner sc = new Scanner(System.in);
+//        System.out.println("나눗셈할 첫 번째 수 입력 : ");
+//        int num1 = sc.nextInt();
+//        System.out.println("나눗셈할 첫 번째 수 입력 : ");
+//        int num2 = sc.nextInt();
+        throws IllegalArgumentException {
+
+            int divide = num1 / num2;
+            if (num1 == 0 || num2 == 0) {
+                throw new IllegalArgumentException("0은 나눌 수 없습니다.");
+            }
+    }
+}
+
+package com.ohgiraffers.run;
+
+import com.ohgiraffers.divide.DivideTest;
+
+public class Application {
+    public static void main(String[] args) {
+        DivideTest appDivide = new DivideTest();
+        appDivide.divideTwoNum(6,0);
+    }
+}
+
+# Exception message : 
+# Exception in thread "main" java.lang.ArithmeticException: / by zero
+# Problem : Exception occurred in ArithmeticException not an IllegalArgumentException
+
+
+# Github Merge 후 pull  After merging and revised the errors at Github, pulled the codes
+# Run 결과  Results of execute
+오후 5:41:05: Executing ':com.ohgiraffers.run.Application.main()'…
+
+> Task :compileJava
+> Task :processResources NO-SOURCE
+> Task :classes
+
+> Task :com.ohgiraffers.run.Application.main()
+첫 번째 숫자를 입력하세요 : 10
+두 번재 숫자를 입력하세요 : 3
+더하기 한 결과는 : 13 입니다.
+빼기 한 결과는 : 7 입니다.
+나누기 한 결과는 : 3 입니다.
+곱셈 한 결과는 : 30 입니다.
+나누기한 나머지 결과는 : 1 입니다.
+
+BUILD SUCCESSFUL in 6s
+2 actionable tasks: 2 executed
+오후 5:41:12: Execution finished ':com.ohgiraffers.run.Application.main()'.
+
+# 1. Application
+package com.ohgiraffers.run;
+
+import com.ohgiraffers.divide.DivideTest;
+import com.ohgiraffers.minus.Subtract;
+import com.ohgiraffers.multiple.Multiple;
+import com.ohgiraffers.left.Left;
+import com.ohgiraffers.sum.Sum;
+
+import java.util.Scanner;
+
+import com.ohgiraffers.divide.DivideTest;
+
+public class Application {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        System.out.print("첫 번째 숫자를 입력하세요 : ");
+        int firstNum = sc.nextInt();
+        System.out.print("두 번재 숫자를 입력하세요 : ");
+        int secondNum = sc.nextInt();
+
+        Sum sum = new Sum();
+        System.out.println("더하기 한 결과는 : " + sum.addNumbers(firstNum, secondNum)+ " 입니다.");
+
+        Subtract subtract = new Subtract();
+        System.out.println("빼기 한 결과는 : " + subtract.subtractNumbers(firstNum, secondNum)+ " 입니다.");
+
+        DivideTest divideTest = new DivideTest();
+        divideTest.divideTwoNum(firstNum, secondNum);
+
+        Multiple multiple = new Multiple();
+        multiple.calMultiple(firstNum, secondNum);
+
+        Left left = new Left();
+        System.out.println("나누기한 나머지 결과는 : " + (left.divisionNumbers(firstNum, secondNum)) + " 입니다.");
+
+    }
+
+}
+
+# 2. sum
+package com.ohgiraffers.sum;
+
+public class Sum {
+
+    public int addNumbers(int num1, int num2) {
+        return num1 + num2;
+
+    }
+}
+
+# 3. minus
+package com.ohgiraffers.minus;
+
+public class Subtract {
+
+    public int subtractNumbers(int num1, int num2) {
+        return num1 - num2;
+    }
+
+}
+
+# 4. multiply
+package com.ohgiraffers.multiple;
+
+public class Multiple {
+
+    public void calMultiple(int fisrNum, int secondNum){
+
+        int result = 0;
+
+        result = fisrNum * secondNum;
+
+        System.out.println("곱셈 한 결과는 : "  + result + " 입니다.");
+    }
+}
+
+# 5. divide
+package com.ohgiraffers.divide;
+
+public class DivideTest {
+    public void divideTwoNum(int num1, int num2)
+            throws IllegalArgumentException {
+        if (num1 > 0 && num2 > 0) {
+            int divide = num1 / num2;
+            System.out.println("나누기 한 결과는 : " + divide + " 입니다.");
+        } else{
+            throw new IllegalArgumentException("0은 나눌 수 없습니다.");
+        }
+    }
+}
+
+# 6. get remainder
+package com.ohgiraffers.left;
+
+public class Left {
+
+    public int divisionNumbers(int a, int b) {
+
+        try {
+            return a % b;
+        } catch (IllegalArgumentException e ) {
+            System.out.println("나눌 수는 0일 수 없습니다...");
+            throw new RuntimeException(e);
+        } catch (ArithmeticException e) {
+            System.out.println("나눌 수는 0일 수 없습니다...");
+            throw new RuntimeException(e);
+        }
+
+    }
+}
+
+# 내일 github 협업(crud 제작) 위해 db 수정
+# Revise the publisherdb into publisherdb2 after datamodeling
+https://www.notion.so/Revise-publisherdb-into-db2-after-datamodeling-201fc892a16f8014a0d3f87206cea1e0?pvs=4
+
+
+# 내일 Github협업 대비를 위해 remix crud 다시 보기
+# Preparing tomorrow's github collaboration, reviewing how to make crud in remixed version
+# 1. Class Application
+package com.ohgiraffers.section03.remix;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Application {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        MenuController menuController = new MenuController();
+        do {
+            System.out.println("======메뉴 관리=====");
+            System.out.println("1. 전체 메뉴 조회");
+            System.out.println("2. 메뉴코드로 메뉴 조회");
+            System.out.println("3. 신규 메뉴 추가");
+            System.out.println("4. 메뉴 수정");
+            System.out.println("5. 메뉴 삭제");
+            System.out.println("9. 관리 프로그램 종료");
+            System.out.print("메뉴 관리 번호를 입력하세요 : ");
+            int no = sc.nextInt();
+
+            switch (no) {
+                case 1: menuController.selectAllMenu(); break;
+                case 2: menuController.selectMenuByCode(inputMenuCode()); break;
+                case 3: menuController.registMenu(inputMenu());break;
+                case 4: menuController.modifyMenu(inputModifyMenu()); break;
+//                case 5: menuController.deleteMenu(deleteMenu());break;
+                case 9: return;
+                default:
+                    System.out.println("잘못된 메뉴를 선택하였습니다.");break;
+            }
+        }while (true);
+    }
+
+
+    private static Map<String, String> inputMenuCode() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("메뉴코드 입력 (1...) : ");
+        String code = sc.nextLine();
+
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("code", code);
+
+        return parameter;
+    }
+
+    private static Map<String,String> inputMenu() {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("메뉴 이름 입력 : ");
+        String name = sc.nextLine();
+        System.out.print("메뉴가격 입력 : ");
+        String price = sc.nextLine();
+        System.out.print("카테고리 코드 입력 : ");
+        String categoryCode = sc.nextLine();
+
+        Map<String,String> parameter = new HashMap<>();
+        parameter.put("name", name);
+        parameter.put("price", price);
+        parameter.put("categoryCode", categoryCode);
+
+        return parameter;
+    }
+    private static Map<String, String> inputModifyMenu() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("수정 메뉴 코드 입력 : ");
+        String modiCode = sc.nextLine();
+        System.out.println("수정할 메뉴명 입력 : ");
+        String modiName = sc.nextLine();
+        System.out.println("수정할 가격 입력 : ");
+        String modiPrice = sc.nextLine();
+        System.out.println("수정할 카테고리 입력(1-12) : ");
+        String modiCategory = sc.nextLine();
+
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("modiCode", modiCode);
+        parameter.put("modiName", modiName);
+        parameter.put("modiPrice", modiPrice);
+        parameter.put("modiCategory", modiCategory);
+
+        return parameter;
+    }
+    private static int deleteMenu() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("삭제 예정 메뉴 코드 입력 : ");
+        int code = sc.nextInt();
+        return code;
+    }
+}
+
+# 2. Class MenuController
+package com.ohgiraffers.section03.remix;
+
+import java.util.List;
+import java.util.Map;
+
+public class MenuController {
+    private final PrintResult printResult;
+
+    private final MenuService menuService;
+
+    public MenuController() {
+        printResult = new PrintResult();
+        menuService = new MenuService();
+    }
+
+    public void selectAllMenu() {
+        List<MenuDTO> menuList = menuService.selectAllMenu(); // 서비스 쪽으로 요청 보냄
+        if(menuList != null) {
+            printResult.printMenuList(menuList);
+        } else {
+            printResult.printErrorMessage("selectList");
+        }
+
+    }
+
+    public void selectMenuByCode(Map<String, String> parameter) {
+        int code = Integer.parseInt(parameter.get("code"));
+
+        MenuDTO menu = menuService.selectMenuByCode(code);
+        if(menu != null) {
+            printResult.printMenu(menu);
+        } else {
+
+            printResult.printErrorMessage("selectOne");
+        }
+    }
+
+    public void registMenu(Map<String, String> parameter) {
+        String name = parameter.get("name");
+        int price = Integer.parseInt(parameter.get("price"));
+        int categoryCode = Integer.parseInt(parameter.get("categoryCode"));
+
+        // 보통 parameter 3개 이상이면 DTO에 뭉쳐서 보낸다.
+        MenuDTO menu = new MenuDTO();
+        menu.setName(name);
+        menu.setPrice(price);
+        menu.setCategoryCode(categoryCode);
+
+        if(menuService.registMenu(menu)) {
+            printResult.printSuccessMsg("insert");
+        } else {
+            printResult.printErrorMessage("insert");
+        }
+    }
+
+    public void modifyMenu(Map<String, String> parameter) {
+        int modifyCode = Integer.parseInt(parameter.get("modiCode"));
+        String name = parameter.get("modiName");
+        int price = Integer.parseInt(parameter.get("modiPrice"));
+        int category = Integer.parseInt(parameter.get("modiCategory"));
+
+        MenuDTO menu = new MenuDTO();
+        menu.setCode(modifyCode);
+        menu.setName(name);
+        menu.setPrice(price);
+        menu.setCategoryCode(category);
+
+        // update 잘 됐거나 안 됐을 경우 알 수 있는 메세지 출력 기능(PrintResult에 있음)
+        if(menuService.modifyMenu(menu)) {
+            printResult.printSuccessMsg("update");
+        } else {
+            printResult.printErrorMessage("update");
+        }
+    }
+
+    public void deleteMenu(int code) {
+        int menuCode = Integer.parseInt(String.valueOf(code));
+
+        MenuDTO menu = new MenuDTO();
+        menu.setCode(menuCode);
+        if(menuService.deleteMenu(code)) {
+            printResult.printSuccessMsg("delete");
+        } else {
+            printResult.printErrorMessage("delete");
+        }
+    }
+}
+
+# 3. MenuService
+package com.ohgiraffers.section03.remix;
+
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.List;
+import java.util.Scanner;
+
+import static com.ohgiraffers.section03.remix.Template.getSqlSession;
+
+public class MenuService {
+    public List<MenuDTO> selectAllMenu() {
+        SqlSession session = getSqlSession();
+
+        MenuMapper menuMapper = session.getMapper(MenuMapper.class);
+        System.out.println(menuMapper); // org.apache.ibatis.binding.MapperProxy@5fcd892a
+
+        List<MenuDTO> menuList = menuMapper.selectAllMenu();
+
+        session.close();
+        return menuList;
+    }
+
+    public MenuDTO selectMenuByCode(int code) {
+        SqlSession sqlSession = getSqlSession();
+
+        MenuMapper menuMapper = sqlSession.getMapper(MenuMapper.class);
+
+        MenuDTO menuDTO = menuMapper.selectMenuByCode(code);
+
+        sqlSession.close();
+        return menuDTO;
+    }
+
+    public boolean registMenu(MenuDTO menu) {
+        SqlSession sqlSession = getSqlSession();
+
+        MenuMapper menuMapper = sqlSession.getMapper(MenuMapper.class);
+
+        int result = menuMapper.registMenu();
+
+        if(result>0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result>0? true : false;
+    }
+
+    public boolean modifyMenu(MenuDTO menu) {
+        SqlSession sqlSession = getSqlSession();
+
+        MenuMapper menuMapper = sqlSession.getMapper(MenuMapper.class);
+
+        int result = menuMapper.registMenu();
+
+        if(result>0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result>0? true : false;
+    }
+
+    public boolean deleteMenu(int code) {
+        SqlSession sqlSession = getSqlSession();
+
+        MenuMapper menuMapper = sqlSession.getMapper(MenuMapper.class);
+
+        int result = menuMapper.deleteMenu();
+
+        if(result>0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result>0? true : false;
+    }
+}
+
+# 4. Interface MenuMapper
+package com.ohgiraffers.section03.remix;
+
+import java.util.List;
+
+/*1. MenuMapper를 인터페이스로 만들어야하고 추상메소드로 작성해야 한다
+* 2. xml과 연결하려는 파일인 본 class의 package com.ohgiraffers.section03.remix; 이 경로와
+*    추후 만들 MenuMapper.xml과 파일 이름, 경로와 위치가 같아야한다.
+*    (section3 != section03, MenuMapper에서 selectAllMenu 못 찾는다고 오류 뜨길래 section3.remix에서
+*     section03.remix로 수정함)
+* 3. 작성한 메소드 이름과 xml쪽에 작성한 id가 일치해야하고, 작성한 리턴타입, resultMap타입과도 일치해야 한다.
+* 4. Template 쪽에 매퍼로 등록해줘야한다. */
+public interface MenuMapper {
+
+    List<MenuDTO> selectAllMenu();
+
+    MenuDTO selectMenuByCode(int code);
+
+    int registMenu();
+
+    int deleteMenu();
+}
