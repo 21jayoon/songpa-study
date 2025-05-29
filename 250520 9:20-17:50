@@ -9,7 +9,7 @@
   UNION(09.SET_OPERATORS)을 이용해 employeedb에서 해당 인원의 목록을 추출하시오
   Samsuung Electronics are going to send some employees
   to the new branch, Antarctica.
-  Those employees are going to meet the conditon that
+  Those employees should meet the conditon that
   hired after 2020 or get paid under 2000000won.
   Use UNION(09.SET_OPERATORS) to extract those employees lists.*/
   
