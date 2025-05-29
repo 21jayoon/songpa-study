@@ -539,3 +539,281 @@ public class AuthorDTOJA {
          WHERE AUTHOR_ID = #{ authorId }
     </delete>
 </mapper>
+
+# 실행 결과 Execute results
+오후 3:23:49: Executing ':com.ohgiraffers.run.ApplicationJA.main()'…
+
+> Task :compileJava
+> Task :processResources
+> Task :classes
+
+> Task :com.ohgiraffers.run.ApplicationJA.main()
+====+ 희망출판사 작가 관리 프로그램 +====
+1. Create : 새 작가 데이터 등록
+2. Read (All) : 전체 작가 목록 조회
+3. Read (One) : 단건 조회 (상세 보기)
+4. Update : 기존 데이터 수정
+5. Delete : 작가 계약 종료(데이터 삭제)
+9. 프로그램 종료
+번호 입력 : 5
+계약 종료된 작가 코드 입력 : 5
+삭제 실패
+
+BUILD SUCCESSFUL in 6s
+3 actionable tasks: 3 executed
+오후 3:23:56: Execution finished ':com.ohgiraffers.run.ApplicationJA.main()'.
+
+
+# Found a typo : deleteMenu
+package com.ohgiraffers.publisher.controller;
+
+import com.ohgiraffers.publisher.model.dto.AuthorDTOJA;
+import com.ohgiraffers.publisher.model.service.AuthorServiceJA;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class AuthorControllerJA {
+    private final AuthorServiceJA authorService;
+    private final PrintResultJA printResult;
+
+    public AuthorControllerJA() {
+        printResult = new PrintResultJA();
+        authorService = new AuthorServiceJA();
+    }
+
+    public void deleteAuthorInfo(int code) {
+        int authorId = Integer.parseInt(String.valueOf(code));
+
+        AuthorDTOJA author = new AuthorDTOJA();
+        author.setAuthorId(authorId);
+        if(authorService.deleteMenu(code)) {
+		//deleteAuthorInfo했어야했는데 deleteMenu 수정 안 함
+            printResult.printSuccessMsg("delete");
+        } else {
+            printResult.printErrorMessage("delete");
+        }
+    }
+}
+
+
+package com.ohgiraffers.publisher.model.service;
+
+import com.ohgiraffers.publisher.model.dao.AuthorMapperJA;
+import com.ohgiraffers.publisher.model.dto.AuthorDTOJA;
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.List;
+
+import static com.ohgiraffers.publisher.common.Template.getSqlSession;
+
+public class AuthorServiceJA {
+    public boolean deleteMenu(int code) {
+        SqlSession sqlSession = getSqlSession();
+
+        AuthorMapperJA menuMapper = sqlSession.getMapper(AuthorMapperJA.class);
+
+        int result = menuMapper.deleteMenu();
+
+        if(result>0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result>0? true : false;
+    }
+}
+
+
+# 수정 후 After editing
+public boolean deleteAuthorInfo(int code) {
+        SqlSession sqlSession = getSqlSession();
+
+        AuthorMapperJA authorMapper = sqlSession.getMapper(AuthorMapperJA.class);
+
+        int result = authorMapper.deleteAuthorInfo();
+
+        if(result>0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result>0? true : false;
+    }
+
+
+package com.ohgiraffers.publisher.model.dao;
+
+import com.ohgiraffers.publisher.model.dto.AuthorDTOJA;
+
+import java.util.List;
+
+public interface AuthorMapperJA {
+    int createNewAuthor(AuthorDTOJA author);
+
+    List<AuthorDTOJA> readAllAuthor();
+
+    AuthorDTOJA readOneAuthorById(int code);
+
+    int modifyAuthor();
+
+    int deleteMenu();
+}
+
+
+# AuthorMapper.xml
+<delete id="deleteMenu" parameterType="_int">
+        DELETE
+          FROM AUTHOR
+         WHERE AUTHOR_ID = #{ authorId }
+    </delete>
+
+# 수정 후
+<delete id="deleteAuthorInfo" parameterType="_int">
+        DELETE
+          FROM AUTHOR
+         WHERE AUTHOR_ID = #{ authorId }
+    </delete>
+
+
+오후 4:13:08: Executing ':com.ohgiraffers.run.ApplicationJA.main()'…
+
+> Task :compileJava UP-TO-DATE
+> Task :processResources
+> Task :classes
+
+> Task :com.ohgiraffers.run.ApplicationJA.main()
+====+ 희망출판사 작가 관리 프로그램 +====
+1. Create : 새 작가 데이터 등록
+2. Read (All) : 전체 작가 목록 조회
+3. Read (One) : 단건 조회 (상세 보기)
+4. Update : 기존 데이터 수정
+5. Delete : 작가 계약 종료(데이터 삭제)
+9. 프로그램 종료
+번호 입력 : 2
+
+Exception in thread "main" java.lang.ClassCastException: class com.ohgiraffers.publisher.model.dto.AuthorDTOJA cannot be cast to class com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA (com.ohgiraffers.publisher.model.dto.AuthorDTOJA and com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA are in unnamed module of loader 'app')
+	at com.ohgiraffers.publisher.controller.PrintResultJA.printAuthorList(PrintResultJA.java:10)
+	at com.ohgiraffers.publisher.controller.AuthorControllerJA.readAllAuthor(AuthorControllerJA.java:43)
+	at com.ohgiraffers.run.ApplicationJA.main(ApplicationJA.java:26)
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':com.ohgiraffers.run.ApplicationJA.main()'.
+> Process 'command 'C:\dev\OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7\jdk-17.0.14+7\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 4s
+> Task :com.ohgiraffers.run.ApplicationJA.main() FAILED
+3 actionable tasks: 2 executed, 1 up-to-date
+오후 4:13:12: Execution finished ':com.ohgiraffers.run.ApplicationJA.main()'.
+
+
+# readAllAuthor와 readOneAuthorById의 resultMap 바꿔줌
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.publisher.model.dao.AuthorMapperJA">
+    <resultMap id="authorResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        <id property="authorId" column="AUTHOR_ID"/> <!-- 식별자 컬럼 id 사용-->
+        <result property="authorName" column="AUTHOR_NAME"/> <!--일반 컬럼 result 사용-->
+        <result property="awarded" column="AWARDED"/>
+        <result property="empId" column="EMP_ID"/>
+    </resultMap>
+    
+    <select id="readAllAuthor" resultMap="authorResultMap">
+        SELECT
+                A.AUTHOR_ID,
+                A.AUTHOR_NAME,
+                A.AWARDED,
+                B.EMP_NAME
+        FROM AUTHOR A
+        LEFT JOIN EMPLOYEE B USING (EMP_ID)
+        ORDER BY AUTHOR_ID
+    </select>
+
+    <select id="readOneAuthorById" resultMap="authorResultMap">
+        SELECT *
+        FROM AUTHOR
+        WHERE AUTHOR_ID = #{ authorId }
+    </select></mapper>
+
+# 수정 후
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.publisher.model.dao.AuthorMapperJA">
+    <resultMap id="authorResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        <id property="authorId" column="AUTHOR_ID"/> <!-- 식별자 컬럼 id 사용-->
+        <result property="authorName" column="AUTHOR_NAME"/> <!--일반 컬럼 result 사용-->
+        <result property="awarded" column="AWARDED"/>
+        <result property="empId" column="EMP_ID"/>
+    </resultMap>
+    <resultMap id="authorAndEmployeeResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA">
+        <id property="authorId" column="AUTHOR_ID"/>
+        <result property="authorName" column="AUTHOR_NAME"/>
+        <result property="awarded" column="AWARDED"/>
+        <result property="empName" column="EMP_NAME"/>
+    </resultMap>
+
+    <insert id="createNewAuthor" parameterType="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        INSERT INTO AUTHOR
+        (
+        AUTHOR_ID,
+        AUTHOR_NAME,
+        AWARDED,
+        EMP_ID
+        )
+        VALUES
+        (
+        #{ authorId },
+        #{ authorName },
+        #{ awarded },
+        #{ empId }
+        )
+    </insert>
+
+    <select id="readAllAuthor" resultMap="authorAndEmployeeResultMap">
+        SELECT
+                A.AUTHOR_ID,
+                A.AUTHOR_NAME,
+                A.AWARDED,
+                B.EMP_NAME
+        FROM AUTHOR A
+        LEFT JOIN EMPLOYEE B USING (EMP_ID)
+        ORDER BY AUTHOR_ID
+    </select>
+
+    <select id="readOneAuthorById" resultMap="authorAndEmployeeResultMap">
+        SELECT *
+        FROM AUTHOR
+        WHERE AUTHOR_ID = #{ authorId }
+    </select>
+
+    <update id="modifyAuthor" parameterType="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        UPDATE AUTHOR
+        SET
+            AWARDED = #{ editAwarded },
+            EMP_ID = #{ editEmpId }
+        WHERE AUTHOR_ID = #{ editAuthorId }
+    </update>
+
+    <delete id="deleteAuthorInfo" parameterType="_int">
+        DELETE
+          FROM AUTHOR
+         WHERE AUTHOR_ID = #{ authorId }
+    </delete>
+</mapper>
