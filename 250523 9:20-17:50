@@ -465,7 +465,8 @@ test {
 }
 
 
-# Share 'publisherdb'** that I made before (I made it in case of needed or emergency)
+# Share 'publisherdb' that I made before 
+# (I made this to prepare for situations where it might be needed.)
 # For weekend JDBC & MyBatis CRUD Practice (team-study)
 # https://www.notion.so/Publisherdb-script-1fc1eb8b52ff809b8a49cae9b8678b19?pvs=4
 /* CREATE DATABASE publisherdb;
