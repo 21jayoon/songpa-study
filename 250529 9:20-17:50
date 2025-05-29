@@ -1,0 +1,541 @@
+package com.ohgiraffers.run;
+
+import com.ohgiraffers.publisher.controller.AuthorControllerJA;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class ApplicationJA {
+    public static void main(String[] args) {
+    Scanner sc = new Scanner(System.in);
+
+    AuthorControllerJA authorController = new AuthorControllerJA();
+    System.out.println("====+ 희망출판사 작가 관리 프로그램 +====");
+    System.out.println("1. Create : 새 작가 데이터 등록");
+    System.out.println("2. Read (All) : 전체 작가 목록 조회");
+    System.out.println("3. Read (One) : 단건 조회 (상세 보기)");
+    System.out.println("4. Update : 기존 데이터 수정");
+    System.out.println("5. Delete : 작가 계약 종료(데이터 삭제)");
+    System.out.println("9. 프로그램 종료");
+    System.out.print("번호 입력 : ");
+    int no = sc.nextInt();
+
+    switch (no) {
+        case 1: authorController.createNewAuthor(inputAuthor());break;
+        case 2: authorController.readAllAuthor(); break;
+        case 3: authorController.readOneAuthorById(inputAuthorId()); break;
+        case 4: authorController.updateAuthorInfo(inputUpdateInfo()); break;
+        case 5: authorController.deleteAuthorInfo(deleteAuthor()); break;
+        case 9:
+            System.out.println("프로그램 종료"); return;
+    }
+    }
+
+    private static Map<String, String> inputAuthor() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("작가코드 입력 (5번부터) : ");
+        String authorId = sc.nextLine();
+        System.out.print("작가이름 입력 : ");
+        String authorName = sc.nextLine();
+        System.out.print("수상내역 여부 (true/false) : ");
+        Boolean awarded = Boolean.valueOf(sc.nextLine());
+        System.out.print("담당 직원 사번 입력(300...) : ");
+        String empId = sc.nextLine();
+
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("authorId", authorId);
+        parameter.put("authorName", authorName);
+        parameter.put("awarded", String.valueOf(awarded));
+        parameter.put("empId", empId);
+
+        return parameter;
+    }
+
+    private static Map<String, String> inputAuthorId() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("작가코드 입력 (1...) : ");
+        String authorId = sc.nextLine();
+
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("authorId", authorId);
+
+        return parameter;
+    }
+
+
+    private static Map<String, String> inputUpdateInfo() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("작가 코드 입력 : ");
+        String editAuthorId = sc.nextLine();
+        System.out.print("수상내역이 추가되었나요? (true/false) : ");
+        String editAwarded = sc.nextLine();
+        System.out.print("담당직원 사번(300-) : ");
+        String editEmpId = sc.nextLine();
+
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("editAuthorId", editAuthorId);
+        parameter.put("editAwarded", editAwarded);
+        parameter.put("editEmpId", editEmpId);
+
+        return parameter;
+    }
+
+
+    private static int deleteAuthor() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("계약 종료된 작가 코드 입력 : ");
+        int authorId = sc.nextInt();
+        return authorId;
+    }
+}
+
+package com.ohgiraffers.publisher.controller;
+
+import com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA;
+import com.ohgiraffers.publisher.model.dto.AuthorDTOJA;
+import com.ohgiraffers.publisher.model.service.AuthorServiceJA;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class AuthorControllerJA {
+    private final AuthorServiceJA authorService;
+    private final PrintResultJA printResult;
+
+    public AuthorControllerJA() {
+        printResult = new PrintResultJA();
+        authorService = new AuthorServiceJA();
+    }
+
+    public void createNewAuthor(Map<String, String> parameter) {
+        String authorName = parameter.get("authorName");
+        boolean awarded = Boolean.parseBoolean(parameter.get("awarded"));
+        int authorId = Integer.parseInt(parameter.get("authorId"));
+        int empId = Integer.parseInt(parameter.get("empId"));
+
+        // 보통 parameter 3개 이상이면 DTO에 뭉쳐서 보낸다.
+        AuthorDTOJA author = new AuthorDTOJA();
+        author.setAuthorName(authorName);
+        author.setAwarded(awarded);
+        author.setAuthorId(authorId);
+        author.setEmpId(empId);
+
+        if (authorService.createNewAuthor(author)) {
+            printResult.printSuccessMsg("insert");
+        } else {
+            printResult.printErrorMessage("insert");
+        }
+    }
+
+    public void readAllAuthor() {
+        List<AuthorAndEmployeeDTOJA> list = authorService.readAllAuthor();
+        if (list != null) {
+            printResult.printAuthorList(list);
+        } else {
+            printResult.printErrorMessage("selectList");
+        }
+    }
+
+    public void readOneAuthorById(Map<String, String> parameter) {
+        int authorId = Integer.parseInt(parameter.get("authorId"));
+
+        AuthorAndEmployeeDTOJA author = authorService.readOneAuthorById(authorId);
+        if (author != null) {
+            printResult.printAuthor(author);
+        } else {
+
+            printResult.printErrorMessage("selectOne");
+        }
+    }
+
+    public void updateAuthorInfo(Map<String, String> parameter) {
+        int modifyingAuthor = Integer.parseInt(parameter.get("editAuthorId"));
+        String editAwarded = parameter.get("editAwarded");
+        int editEmpId = Integer.parseInt(parameter.get("editEmpId"));
+
+        AuthorDTOJA authorUp = new AuthorDTOJA();
+        authorUp.setAuthorId(modifyingAuthor);
+        authorUp.setAwarded(Boolean.valueOf(editAwarded));
+        //OX 받아들이게 수정 (true/false로 하면 괜찮다길래 if(어쩌구.equals('O')...로 안 바꾸고 true/false로 수정)
+        authorUp.setEmpId(editEmpId);
+
+        // update 잘 됐거나 안 됐을 경우 알 수 있는 메세지 출력 기능(PrintResult에 있음)
+        if(authorService.modifyAuthor(authorUp)) {
+            printResult.printSuccessMsg("update");
+        } else {
+            printResult.printErrorMessage("update");
+        }
+    }
+
+    public void deleteAuthorInfo(int code) {
+        int authorId = Integer.parseInt(String.valueOf(code));
+
+        AuthorDTOJA author = new AuthorDTOJA();
+        author.setAuthorId(authorId);
+        if(authorService.deleteAuthorInfo(code)) {
+            printResult.printSuccessMsg("delete");
+        } else {
+            printResult.printErrorMessage("delete");
+        }
+    }
+}
+
+package com.ohgiraffers.publisher.model.service;
+
+import com.ohgiraffers.publisher.model.dao.AuthorMapperJA;
+import com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA;
+import com.ohgiraffers.publisher.model.dto.AuthorDTOJA;
+import org.apache.ibatis.session.SqlSession;
+
+import java.util.List;
+
+import static com.ohgiraffers.publisher.common.TemplateJA.getSqlSession;
+
+public class AuthorServiceJA {
+    public boolean createNewAuthor(AuthorDTOJA author) {
+        SqlSession sqlSession = getSqlSession();
+
+        AuthorMapperJA authorMapper = sqlSession.getMapper(AuthorMapperJA.class);
+
+        int result = authorMapper.createNewAuthor(author);
+
+        if(result > 0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result > 0? true : false;
+    }
+
+    public List<AuthorAndEmployeeDTOJA> readAllAuthor() {
+        SqlSession sqlSession =getSqlSession();
+        AuthorMapperJA authorMapper = sqlSession.getMapper(AuthorMapperJA.class);
+
+        List<AuthorAndEmployeeDTOJA> publisherList = authorMapper.readAllAuthor();
+
+        sqlSession.close();
+        return publisherList;
+    }
+
+    public AuthorAndEmployeeDTOJA readOneAuthorById(int code) {
+        SqlSession sqlSession = getSqlSession();
+
+        AuthorMapperJA authorMapper = sqlSession.getMapper(AuthorMapperJA.class);
+
+        AuthorAndEmployeeDTOJA menuDTO = authorMapper.readOneAuthorById(code);
+
+        sqlSession.close();
+        return menuDTO;
+    }
+
+    public boolean modifyAuthor(AuthorDTOJA authorUp) {
+        SqlSession sqlSession = getSqlSession();
+
+        AuthorMapperJA aMapper = sqlSession.getMapper(AuthorMapperJA.class);
+
+        int result = aMapper.modifyAuthor(authorUp);
+
+        if(result>0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result>0? true : false;
+    }
+
+    public boolean deleteAuthorInfo(int code) {
+        SqlSession sqlSession = getSqlSession();
+
+        AuthorMapperJA authorMapper = sqlSession.getMapper(AuthorMapperJA.class);
+
+        int result = authorMapper.deleteAuthorInfo(code);
+
+        if(result>0) {
+            sqlSession.commit();
+        }else {
+            sqlSession.rollback();
+        }
+
+        sqlSession.close();
+        return result>0? true : false;
+    }
+}
+
+package com.ohgiraffers.publisher.model.dao;
+
+import com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA;
+import com.ohgiraffers.publisher.model.dto.AuthorDTOJA;
+
+import java.util.List;
+
+public interface AuthorMapperJA {
+    int createNewAuthor(AuthorDTOJA author);
+
+    List<AuthorAndEmployeeDTOJA> readAllAuthor();
+
+    AuthorAndEmployeeDTOJA readOneAuthorById(int code);
+
+    int modifyAuthor(AuthorDTOJA authorUp);
+
+    int deleteAuthorInfo(int code);
+}
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.publisher.model.dao.AuthorMapperJA">
+    <resultMap id="authorResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        <id property="authorId" column="AUTHOR_ID"/> <!-- 식별자 컬럼 id 사용-->
+        <result property="authorName" column="AUTHOR_NAME"/> <!--일반 컬럼 result 사용-->
+        <result property="awarded" column="AWARDED"/>
+        <result property="empId" column="EMP_ID"/>
+    </resultMap>
+    <resultMap id="authorAndEmployeeResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA">
+        <id property="authorId" column="AUTHOR_ID"/>
+        <result property="authorName" column="AUTHOR_NAME"/>
+        <result property="awarded" column="AWARDED"/>
+        <result property="empName" column="EMP_NAME"/>
+    </resultMap>
+
+    <insert id="createNewAuthor" parameterType="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        INSERT INTO AUTHOR
+        (
+        AUTHOR_ID,
+        AUTHOR_NAME,
+        AWARDED,
+        EMP_ID
+        )
+        VALUES
+        (
+        #{ authorId },
+        #{ authorName },
+        #{ awarded },
+        #{ empId }
+        )
+    </insert>
+
+    <select id="readAllAuthor" resultMap="authorAndEmployeeResultMap">
+        SELECT
+                A.AUTHOR_ID,
+                A.AUTHOR_NAME,
+                A.AWARDED,
+                B.EMP_NAME
+        FROM AUTHOR A
+        LEFT JOIN EMPLOYEE B USING (EMP_ID)
+        ORDER BY AUTHOR_ID
+    </select>
+
+    <select id="readOneAuthorById" resultMap="authorAndEmployeeResultMap">
+        SELECT *
+        FROM AUTHOR
+        WHERE AUTHOR_ID = #{ authorId }
+    </select>
+
+    <update id="modifyAuthor" parameterType="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        UPDATE AUTHOR
+        SET
+            AWARDED = #{ awarded },
+            EMP_ID = #{ empId }
+        WHERE AUTHOR_ID = #{ authorId }
+    </update>
+
+    <delete id="deleteAuthorInfo" parameterType="_int">
+        DELETE
+          FROM AUTHOR
+         WHERE AUTHOR_ID = #{ authorId }
+    </delete>
+</mapper>
+
+package com.ohgiraffers.publisher.model.dto;
+
+public class AuthorDTOJA {
+    private int authorId;
+    private String authorName;
+    private Boolean awarded;
+    private int empId;
+
+    public AuthorDTOJA() {}
+
+    public AuthorDTOJA(int authorId, String authorName, Boolean awarded, int empId) {
+        this.authorId = authorId;
+        this.authorName = authorName;
+        this.awarded = awarded;
+        this.empId = empId;
+    }
+
+    public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public Boolean getAwarded() {
+        return awarded;
+    }
+
+    public void setAwarded(Boolean awarded) {
+        this.awarded = awarded;
+    }
+
+    public int getEmpId() {
+        return empId;
+    }
+
+    public void setEmpId(int empId) {
+        this.empId = empId;
+    }
+
+    @Override
+    public String toString() {
+        return "PublisherDTO{" +
+                "authorId=" + authorId +
+                ", authorName='" + authorName + '\'' +
+                ", awarded=" + awarded +
+                ", empId=" + empId +
+                '}';
+    }
+}
+
+  package com.ohgiraffers.publisher.model.dto;
+
+   public class AuthorAndEmployeeDTOJA {
+       private int authorId;
+      private String authorName;
+      private Boolean awarded;
+      private String empName;
+
+       public AuthorAndEmployeeDTOJA(){}
+
+        public AuthorAndEmployeeDTOJA(int authorId, String authorName, Boolean awarded, String empName) {
+            this.authorId = authorId;
+            this.authorName = authorName;
+            this.awarded = awarded;
+            this.empName = empName;
+        }
+
+        public int getAuthorId() {
+            return authorId;
+        }
+
+        public void setAuthorId(int authorId) {
+            this.authorId = authorId;
+        }
+
+        public String getAuthorName() {
+            return authorName;
+        }
+
+        public void setAuthorName(String authorName) {
+            this.authorName = authorName;
+        }
+
+        public Boolean getAwarded() {
+            return awarded;
+        }
+
+        public void setAwarded(Boolean awarded) {
+            this.awarded = awarded;
+        }
+
+        public String getEmpName() {
+            return empName;
+        }
+
+        public void setEmpName(String empName) {
+            this.empName = empName;
+        }
+
+        @Override
+        public String toString() {
+            return "AuthorAndEmployeeDTO{" +
+                    "authorId=" + authorId +
+                    ", authorName='" + authorName + '\'' +
+                    ", awarded=" + awarded +
+                    ", empName='" + empName + '\'' +
+                    '}';
+        }
+    }
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.publisher.model.dao.AuthorMapperJA">
+    <resultMap id="authorResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        <id property="authorId" column="AUTHOR_ID"/> <!-- 식별자 컬럼 id 사용-->
+        <result property="authorName" column="AUTHOR_NAME"/> <!--일반 컬럼 result 사용-->
+        <result property="awarded" column="AWARDED"/>
+        <result property="empId" column="EMP_ID"/>
+    </resultMap>
+    <resultMap id="authorAndEmployeeResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA">
+        <id property="authorId" column="AUTHOR_ID"/>
+        <result property="authorName" column="AUTHOR_NAME"/>
+        <result property="awarded" column="AWARDED"/>
+        <result property="empName" column="EMP_NAME"/>
+    </resultMap>
+
+    <insert id="createNewAuthor" parameterType="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        INSERT INTO AUTHOR
+        (
+        AUTHOR_ID,
+        AUTHOR_NAME,
+        AWARDED,
+        EMP_ID
+        )
+        VALUES
+        (
+        #{ authorId },
+        #{ authorName },
+        #{ awarded },
+        #{ empId }
+        )
+    </insert>
+
+    <select id="readAllAuthor" resultMap="authorAndEmployeeResultMap">
+        SELECT
+                A.AUTHOR_ID,
+                A.AUTHOR_NAME,
+                A.AWARDED,
+                B.EMP_NAME
+        FROM AUTHOR A
+        LEFT JOIN EMPLOYEE B USING (EMP_ID)
+        ORDER BY AUTHOR_ID
+    </select>
+
+    <select id="readOneAuthorById" resultMap="authorAndEmployeeResultMap">
+        SELECT *
+        FROM AUTHOR
+        WHERE AUTHOR_ID = #{ authorId }
+    </select>
+
+    <update id="modifyAuthor" parameterType="com.ohgiraffers.publisher.model.dto.AuthorDTOJA">
+        UPDATE AUTHOR
+        SET
+            AWARDED = #{ awarded },
+            EMP_ID = #{ empId }
+        WHERE AUTHOR_ID = #{ authorId }
+    </update>
+
+    <delete id="deleteAuthorInfo" parameterType="_int">
+        DELETE
+          FROM AUTHOR
+         WHERE AUTHOR_ID = #{ authorId }
+    </delete>
+</mapper>
