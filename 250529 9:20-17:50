@@ -484,6 +484,7 @@ public class AuthorDTOJA {
         <result property="awarded" column="AWARDED"/>
         <result property="empId" column="EMP_ID"/>
     </resultMap>
+//resultMap 추가
     <resultMap id="authorAndEmployeeResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA">
         <id property="authorId" column="AUTHOR_ID"/>
         <result property="authorName" column="AUTHOR_NAME"/>
@@ -720,6 +721,7 @@ BUILD FAILED in 4s
 오후 4:13:12: Execution finished ':com.ohgiraffers.run.ApplicationJA.main()'.
 
 
+
 # readAllAuthor와 readOneAuthorById의 resultMap 바꿔줌
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
@@ -762,6 +764,7 @@ BUILD FAILED in 4s
         <result property="awarded" column="AWARDED"/>
         <result property="empId" column="EMP_ID"/>
     </resultMap>
+//resultMap 추가
     <resultMap id="authorAndEmployeeResultMap" type="com.ohgiraffers.publisher.model.dto.AuthorAndEmployeeDTOJA">
         <id property="authorId" column="AUTHOR_ID"/>
         <result property="authorName" column="AUTHOR_NAME"/>
@@ -786,6 +789,7 @@ BUILD FAILED in 4s
         )
     </insert>
 
+// resultMap authorAndEmployeeResultMap로 바꿔줌
     <select id="readAllAuthor" resultMap="authorAndEmployeeResultMap">
         SELECT
                 A.AUTHOR_ID,
