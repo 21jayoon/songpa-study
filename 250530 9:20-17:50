@@ -1,0 +1,517 @@
+# 진도 나간 강의
+# 08.Servlet - Chapter03.parameter to chapter05.response
+
+# 강의 응용
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register New author</title>
+</head>
+<body>
+<h1>====+ 희망출판사 작가 관리 프로그램 +===="</h1>
+<h3>새 작가 데이터 등록</h3>
+<form action="newauthorregist" method="get">
+    <label>작가코드(8번부터) : </label><input type="number" name="code">
+    <br>
+    <label>작가 이름 : </label><input type="text" name="name">
+    <br>
+    <label>수상 내역 : </label>
+    <input type="radio" name="awarded" id="Yes" value="Y"><label for="Yes">있음</label>
+    <input type="radio" name="awarded" id="No" value="N"><label for="No">없음</label>
+    <br>
+    <label> 담당 직원 (1:M 가능) : </label>
+    <input type="checkbox" name="staffincharge" id="306" value="306"><label for="306">사나희</label>
+    <input type="checkbox" name="staffincharge" id="307" value="307"><label for="307">윤기남</label>
+    <input type="checkbox" name="staffincharge" id="311" value="311"><label for="311">Summer Pace</label>
+    <input type="checkbox" name="staffincharge" id="312" value="312"><label for="312">Que Reed</label>
+    <input type="checkbox" name="staffincharge" id="313" value="313"><label for="313">이박김</label>
+    <br>
+    <label> 등록일 : </label><input type="date" name="registeddate">
+    <br>
+    <input type="submit" value="신규 작가 등록(GET요청)">
+</form>
+<br/>
+</body>
+</html>
+
+package com.ohgiraffers.publisherdb2crudfrontend;
+
+import java.io.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/newauthorregist")
+public class NewAuthorRegist extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // getParameter는 String으로 값을 받아오는 method이기 때문에 int로 값을 받는 경우에는 parsing 필요
+        int code = Integer.parseInt(req.getParameter("code"));
+        System.out.println("새 작가 코드 : " + code);
+
+        String name = req.getParameter("name");
+        System.out.println("작가 이름 : "+name);
+
+        //radio값은 둘 중 하나만 고르면 되기에 선택된 값을 꺼내오기만 하면 된다
+        String awarded = req.getParameter("awarded");
+        System.out.println("수상내역 : " + awarded);
+
+        System.out.println("담당직원 : ");
+        // 직원 여러 명이 선택될 수 있기때문에 String array(문자형 배열)로 받는다
+        String[] staffincharge = req.getParameterValues("staffincharge");
+        //배열이니까 for문 사용해서 출력
+        for(String staff : staffincharge){
+            System.out.println(staff);
+        }
+
+        java.sql.Date registeddate = java.sql.Date.valueOf(req.getParameter("registeddate"));
+        System.out.println("등록일 : "+registeddate);
+        
+        /*-Dfile.encoding=UTF-8 안 하면 form에 데이터 넣어줬을 때 intelliJ console에
+        * �� �۰� �ڵ� : 8
+        * �۰� �̸� : ��¯��
+        * ���󳻿� : N
+        * ������� : 
+        * 307
+        * 311
+        * ����� : 2025-05-30
+        * 이렇게 한글은 인코딩 에러가 뜬다*/
+    }
+}
+
+# 참고한 chapter3_parameter(강의코드)
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parameter</title>
+</head>
+<body>
+<h1>Request Parameter</h1>
+<h3>GET방식의 요청</h3>
+<h4>Request get by using form tag</h4>
+<form action="querystring" method="get">
+    <label> 이름 : </label><input type="text" name="name">
+    <br>
+    <label> 나이 : </label><input type="number" name="age">
+    <br>
+    <label> birthday : </label><input type="date" name="birthday">
+    <br>
+    <label> gender : </label>
+    <input type="radio" name="gender" id="male" value="M"><label for="male">남자</label>
+    <input type="radio" name="gender" id="female" value="F"><label for="female">여자</label>
+    <br>
+    <label> nationality : </label>
+    <select name="national">
+        <option value="ko">한국</option>
+        <option value="ch">중국</option>
+        <option value="jp">일본</option>
+        <option value="etc">기타</option>
+    </select>
+    <br>
+    <label>취미 : </label>
+    <input type="checkbox" name="hobbies" id="movie" value="movie"><label for="movie">영화</label>
+    <input type="checkbox" name="hobbies" id="music" value="music"><label for="music">MUSIC</label>
+    <input type="checkbox" name="hobbies" id="sleep" value="sleep"><label for="sleep">SLEEP</label>
+    <br>
+
+    <input type="submit" value="GET요청">
+</form>
+
+    <h4>a 태그의 href 속성에 직접 파라미터를 쿼리스트링 형태로 작성하여 get방식 요청</h4>
+    <a href="querystring?name=김짱아&age=4&birthday=2025-05-30&gender=F&national=jp&hobbies=movie&hobbies=sleep">쿼리스트링을 이용한 값 전달</a>
+
+    <h4>form 태그를 이용한 post방식 요청</h4>
+<form action="formdata" method="post">
+    <label> 이름 : </label><input type="text" name="name">
+    <br>
+    <label> 나이 : </label><input type="number" name="age">
+    <br>
+    <label> birthday : </label><input type="date" name="birthday">
+    <br>
+    <label> gender : </label>
+    <input type="radio" name="gender" id="male2" value="M"><label for="male2">남자</label>
+    <input type="radio" name="gender" id="female2" value="F"><label for="female2">여자</label>
+    <br>
+    <label> nationality : </label>
+    <select name="national">
+        <option value="ko">한국</option>
+        <option value="ch">중국</option>
+        <option value="jp">일본</option>
+        <option value="etc">기타</option>
+    </select>
+    <br>
+    <label>취미 : </label>
+<%-- id="movie" 등은 오류 표시 뜨니까 movie2 등으로 바꿈. (label for="movie"도 바꿈)--%>
+    <input type="checkbox" name="hobbies" id="movie2" value="movie"><label for="movie2">영화</label>
+    <input type="checkbox" name="hobbies" id="music2" value="music"><label for="music2">MUSIC</label>
+    <input type="checkbox" name="hobbies" id="sleep2" value="sleep"><label for="sleep2">SLEEP</label>
+    <br>
+
+    <input type="submit" value="POST요청">
+</form>
+</body>
+</html>
+
+# 2) QueryStringTestServlet
+package com.ohgiraffers.section01.querystring;
+
+import java.io.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/querystring")
+public class QueryStringTestServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        //index.jsp에 있는 name 값들(예시.name="name")를 갖고와야함
+        String name = request.getParameter("name");
+        System.out.println("이름 = "+ name);
+
+        int age = Integer.parseInt(request.getParameter("age"));
+        // getParameter는 String으로 값을 받아오는 method이기 때문에
+        // age처럼 int로 값을 받는 경우에는 parsing 필요
+        System.out.println("나이 = " +age);
+
+        /* java.sql.Date : DB에 사용자가 입력한 날짜를 저장할 때, DB의 날짜 포맷과 맞추기 위한 용도의 클래스 */
+        java.sql.Date bitrhday = java.sql.Date.valueOf(request.getParameter("birthday"));
+        System.out.println("생일 = "+ bitrhday);
+
+        //gender 값은 둘 중 하나만 선택하면 되기 때문에 선택된 값을 꺼내오기만 하면 된다.
+        String gender = request.getParameter("gender");
+        System.out.println("성별 = "+gender);
+
+        String national = request.getParameter("national");
+        System.out.println("국적 = "+national);
+
+        System.out.print("취미 = ");
+        // 여러 개가 넘어올 수 있기 때문에 String "배열"로 받는다
+        String[] hobbies = request.getParameterValues("hobbies");
+        
+        // 배열이니까 for로 출력
+        for(String hobby : hobbies ){
+            System.out.println(hobby);
+        }
+    }
+}
+
+# 3) FormDataTestServlet
+# post방식 사용시 값만 받고 받은 값이 도메인 주소(?)에 출력되지 않는다
+package com.ohgiraffers.section02.formdata;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+@WebServlet("/formdata")
+public class FormDataTestServlet extends HttpServlet {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String name = req.getParameter("name");
+        System.out.println("NAME = " +name);
+        // post 방식으로 값 보내면 주소창에는 보낸 값이 뜨지 않는다.
+
+        Map<String, String[]> requestMap = req.getParameterMap();
+        Set<String> keySet =  requestMap.keySet();
+        Iterator<String> keyIter = keySet.iterator();
+
+        while (keyIter.hasNext()) {
+            String key = keyIter.next();
+            String[] value = requestMap.get(key);
+
+            System.out.println("KEY : " +key);
+            for(int i = 0; i < value.length; i++){
+                System.out.println("VALUE["+i+"] : " + value[i]);
+            }
+        }
+        /*NAME = 김짱아
+        KEY : name
+        VALUE[0] : 김짱아
+        KEY : age
+        VALUE[0] : 4
+        KEY : birthday
+        VALUE[0] : 2025-05-30
+        KEY : gender
+        VALUE[0] : F
+        .....*/
+
+        /*파라미터로 전달된 키 목록만도 확인할 수 있다*/
+        Enumeration<String> names = req.getParameterNames();
+        //  CTRL+클릭해서 확인한 Enumeration<String> getParameterNames();반환형을 똑같이 해야함
+        while (names.hasMoreElements()){
+            System.out.println(names.nextElement());
+        }
+        /*name
+        age
+        birthday
+        gender
+        national
+        hobbies*/
+    }
+}
+
+# chap5.Response 받기 (강의코드)
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Response</title>
+</head>
+<body>
+    <h1>Response</h1>
+    <ul>
+        <li><a href="response">Check the response</a></li>
+        <li><a href="headers">Check the header response</a></li>
+        <li><a href="status">응답 상태 코드 확인하기</a></li>
+    </ul>
+<br/>
+</body>
+</html>
+
+#2) java class ResponseTestServlet
+package com.ohgiraffers.section01.response;
+
+import java.io.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/response")
+public class ResponseTestServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        /*서블릿이 하는 역할(크게 3가지)
+        * 1. 요청 받기 (지금까지 한 request객체에서 꺼내서 처리한 것)
+        *       - HTTP method GET/POST 요청에 따라 parameter로 전달받은 데이터를 꺼내올 수 있다.
+        * 2. 비즈니스 로직 처리 - DB접속과 CRUD에 대한 로직처리
+        * 3. 응답 하기 - 문자열String로 동적인 웹(HTML태그) 페이지 만들고 Stream 이용해 내보낸다.
+        *
+        * 사용자 브라우저에 응답하기 위해선 HttpServletResponse의 getWriter() method로 PrintWriter 인스턴스를 반환받는다.
+        * PrintWriter는 BufferedWriter와 형제격인 클래스이지만
+        * 더 많은 형태의 생성자를 제공하고 있는 범용성으로 인해 더 많이 사용된다.
+        * */
+        PrintWriter out = response.getWriter();
+
+        /*문자열 이용해 사용자에게 내보낼 페이지를 작성한다.*/
+        StringBuilder responseBuilder = new StringBuilder();
+        responseBuilder.append("<!doctype html>\n")
+                .append("<html>\n")
+                .append("<head>\n")
+                .append("</head>\n")
+                .append("<body>\n")
+                .append("<h1>안녕 servlet response</h1>\n")
+                .append("</body>\n")
+                .append("</html>");
+
+        /*응답을 위한 content-type을 text/html로 지정한다.*/
+        response.setContentType("text/html");
+
+        out.print(responseBuilder);
+
+        out.flush(); //String이라 잔류 데이터 남을 수 있으니 잔류 데이터 내보내기
+
+        out.close();
+
+    }
+}
+
+# 3) java class ResponseHeaderPrintServlet
+package com.ohgiraffers.section02.headers;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Iterator;
+
+@WebServlet("/headers")
+public class ResponseHeaderPrintServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8"); //헤더 설정.
+        // 이전에는 charset=UTF-8까지 반드시 작성해야 했지만 지금은 "text/html"까지만 써도 되게끔 업데이트 되었음
+
+        /*response.setHeader("Refresh", "1");
+        // 위 부분 작성 후 크롬에서 Check the header response누르면 1748573027370 이 숫자 말고도 1초마다 새로고침됨.(다른 숫자로 바뀜) */
+
+        PrintWriter out = response.getWriter();
+
+        long currentTime = System.currentTimeMillis();
+
+        out.print("<h1>" + currentTime + "</h1>");  // 1748573027370
+
+        out.close();
+
+        Collection<String> responseHeaders = response.getHeaderNames();
+        Iterator<String> iter = responseHeaders.iterator();
+        while (iter.hasNext()){ //hasNext()로 다음 요소 있는지 확인
+            String headerName = iter.next();
+            System.out.println(headerName + " : " + response.getHeader(headerName));
+        }
+
+    }
+}
+
+# 4) java class StatusCodeTestServlet
+# 오류가 날 시 개발자가 의도한 메세지를 송출한다
+package com.ohgiraffers.section03.status;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/status")
+public class StatusCodeTestServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Error 페이지 mapping해보기
+        // response.sendError(404, "없는 페이지입니다. 경로를 확인해주세요.");
+        response.sendError(500, "서부 내부 오류입니다. 서버 오류는 개발자의 잘못이고, 개발자는 여러분이다.");
+    }
+}
+
+# chap.6 exception handle 하기
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exception handler</title>
+</head>
+<body>
+    <h1>Exception handler</h1>
+    <ul>
+        <li><a href="show404error">404에러확인</a></li>
+        <li><a href="show500error">Check500error</a>  </li>
+    </ul>
+
+</body>
+</html>
+
+# 2) web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+<!--    에러 페이지를 따로 만들고 에러 났을 때 해당 servlet로 불러오게 할 것임.-->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/showErrorPage</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/showErrorPage</location>
+    </error-page>
+</web-app>
+
+# 3) ExceptionHandlerServlet
+package com.ohgiraffers.exception;
+
+import java.io.*;
+import java.util.Enumeration;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/showErrorPage")
+public class ExceptionHandlerServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Enumeration<String> attranme = request.getAttributeNames();
+        while (attranme.hasMoreElements()){
+            System.out.println(attranme.nextElement());
+        }
+
+        Integer statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
+        String message = (String) request.getAttribute("jakarta.servlet.error.message");
+
+        System.out.println("statusCode = "+ statusCode);
+        System.out.println("message = "+ message);
+
+        StringBuilder errorPage = new StringBuilder();
+        errorPage.append("<!doctype html>\n")
+                .append("<html>\n")
+                .append("<head>\n")
+                .append("</head>\n")
+                .append("<body>\n")
+                .append("<h1>")
+                .append(statusCode)
+                .append(" - ")
+                .append(message)
+                .append("</h1>\n")
+                .append("</body>\n")
+                .append("</html>");
+
+        response.setContentType("text/html");
+
+//        stream 이용해 사용자에게 내보내기
+        PrintWriter out = response.getWriter();
+        out.print(errorPage);
+        out.close();
+    }
+}
+
+# 4) Show404Error
+package com.ohgiraffers.exception;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/show404error")
+public class Show404ErrorServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(404,"Page not found");
+    }
+}
+
+
+# 5) Show500Error
+package com.ohgiraffers.exception;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/show500error")
+public class Show500ErrorServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(500,"500은 서버 내부 오류입니다.");
+    }
+}
