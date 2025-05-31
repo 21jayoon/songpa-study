@@ -1,0 +1,212 @@
+# Process and Thread
+
+# PROCESS
+# 현재 실행 중인 프로그램. 프로그램이 실행될 때마다 새로 생성된다.
+# 한 개의 프로세스는 할당 받은 자원과 하나 이상의 스레드로 구성된다.
+# A process is the program that running now,
+# and it's created individually every time when program is runned.
+# A process consists of one or more threads and allocated resources (such as required data and memory) for executing a program.
+
+# THREAD
+# 프로세스 내에서 (할당된 자원을 이용해) 실제 작업을 수행하는 작업 단위.
+# 모든 프로세스는 하나 이상의 스레드를 가지며 각각 독립적인 작업 단위를 가진다.
+# A Thread is the unit of work that performs actual work inside the process(while using allocated resources)
+# All processes have one or more threads, each of threads has an independent unit of work.
+
+# MAIN THREAD
+# 모든 자바 프로그램은 메인 스레드가 main() 메소드를 실행하며 시작되어,
+# main() 메소드의 첫 줄 코드부터 아래로 순차적으로 실행되다가 return을 만나면 종료된다.
+# 필요 시 작업 스레드들을 만들어서 병렬 코드를 실행(= 멀티 스레드를 이용한 멀티 태스킹)할 수 있다.
+# 싱글 스레드는 메인 스레드가 종료되면 프로세스도 종료되지만, 멀티 스레드는 실행 중인 스레드가 하나라도 있다면 프로세스가 종료되지 않는다.
+# All Java programs start when the main thread executing the main() method  :  public static void main(String[] args) {}
+# and are sequentially executed from the first code down in the main() method until they met return; and terminated.
+# It could do multi-tasking by using multi thread when it needed.
+# Single thread makes process ended when main thread ends,
+# but the multi thread couldn't end the process as long as there's at least one thread running.
+
+# 싱글 스레드 : 메인 스레드 하나만 가지고 작업을 처리하며, 한 작업씩 차례대로 처리한다.
+# e.g. 메세지를 보낼 때 사진이 다 보내질 때까지 문자를 못 보내는 경우
+
+# 멀티 스레드 : 메인 스레드 외의 추가적인 스레드를 이용하여 병렬적으로 작업을 처리한다.
+# e.g. sns 채팅에서 동영상을 전송 중인 동시에 사진도 전송하는 경우
+
+# 멀티 스레드의 장점
+#   1. 효율적인 자원 사용 가능
+#   2. 사용자에 대한 응답성 향상
+#   3. 애플리케이션 자체의 응답성 향상
+#   4. 간결한 코드 작성 가능 (작업이 분리되기 때문에)
+#   5. CPU 효율성 향상
+
+# 멀티 스레드의 단점
+#   1. 동기화Synchronization 주의.
+#   2. 교착상태dead-lock가 발생하지 않도록 주의해야 한다.
+#   3. 프로그래밍 시 고려해야 할 사항이 많다.
+
+
+
+# THREAD 구현 방법
+# 1. Thread 클래스를 상속 받아 구현하는 방법package com.ohgiraffers.thread;
+public class Car extends Thread {
+
+    @Override
+    public void run() {
+        for(int i = 0; i < 1000; i++) {
+            System.out.println("Car driving...");
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+}
+
+package com.ohgiraffers.thread;
+
+public class Bicycle extends Thread {
+
+    @Override
+    public void run() {
+        for(int i = 0; i < 1000; i++) {
+            System.out.println("Ring ring...");
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+}
+package com.ohgiraffers.thread;
+
+public class Application {
+
+    public static void main(String[] args) {
+        Car car = new Car();
+        Bicycle bicy = new Bicycle();
+
+        /* Thread 타입의 인스턴스로 변환 */
+      //방법 1
+        Thread t1 = car;
+        Thread t2 = bicy;
+
+      //방법 2
+       /* Thread t1 = new Car();
+       * Thread t2 = new Bicycle(); */
+
+        t1.run();
+        t2.run();
+    }
+}
+
+# 결과 Results
+# Car driving... (printed 1000 times)
+# Ring ring... (printed 1000 times)
+
+# 2. Runnable 인터페이스로 구현하는 방법
+package com.ohgiraffers.thread;
+
+public class Plane implements Runnable {
+
+    @Override
+    public void run() {
+        for(int i = 0; i < 1000; i++) {
+            System.out.println("Plane Flight...");
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+}
+
+
+package com.ohgiraffers.thread;
+
+public class Application {
+
+    public static void main(String[] args) {
+        Plane plane = new Plane();
+
+        /* Thread 타입의 인스턴스로 변환 */
+        Thread t3 = new Thread(plane);
+
+        t3.run();
+    }
+}
+
+# 결과 Results
+# Plane Flight... (x 1000)
+
+
+
+# THREAD 동작 구조 Thread operation structure
+# 1. run() 호출
+package com.ohgiraffers.thread;
+
+public class Application {
+
+    public static void main(String[] args) {
+        Car car = new Car();
+        Bicycle bicy = new Bicycle();
+
+        Thread t1 = new Car();
+        Thread t2 = new Bicycle();
+
+        t1.run();
+        t2.run();
+    }
+}
+
+# 결과 Results
+# class Car의 출력값 Car driving...이 1000번 나오고
+# 그 후에 Bicycle의 출력값 Ring ring...이 1000번 나온다.
+# 이유 : run()은 Main thread 안에서 이미 실행되고 있는 main() method 위로 쌓인다.
+# 그래서 코드 첫 줄부터 차례대로 내려오면서 실행되는 것
+
+# 2. start() 호출
+package com.ohgiraffers.thread;
+
+public class Application {
+
+    public static void main(String[] args) {
+
+        /* comment. 프로세스와 스레드
+        *  프로세스는 실행중인 프로그램이라고 할 수 있다.
+        *  스레드는 프로세스 내에서 실제로 작업을 수행하는 주체를 의미한다.
+        *  모든 프로세스는 한 개 이상의 스레드가 존재하며
+        *  두 개 이상의 스레드를 가지는 프로세스를 멀티스레드라고 한다.
+        *
+        *
+        *  스레드를 생성하는 방법
+        *  1. Thread 클래스를 상속받는 방법
+        *  2. Runnable 인터페이스를 상속받는 방법
+        * */
+
+        Car car = new Car();
+        Bicycle bicy = new Bicycle();
+        Plane plane = new Plane();
+
+        Thread t1 = car;
+        Thread t2 = bicy;
+        Thread t3 = new Thread(plane);
+
+        t1.start();
+        t2.start();
+        t3.start();
+    }
+}
+
+# 결과 Results
+# Car driving...
+# Ring ring...
+# Plane Filght..
+# Car driving...
+# Plane Filght..
+# Ring ring...
+# .....
+# 이유 : main() method에서 start()를 호출하면 start()가 main thread 외 새로운 thread를 생성하고 그 위에 run()메소드가 쌓인다.
