@@ -1,0 +1,1011 @@
+# 오늘 배운 내용 What today learned
+## Servlet 
+# - cookie & session
+# - filter
+# - jsp
+
+# - forward & redirect
+# 면접질문 빈출: forward와 redirect의 차이
+# 1. forward
+# 1-1. 흐름 : 컨테이너 내에서 처음 요청 받은 페이지가 HttpServletRequest, HttpServletResponse와 같은 요청 데이터를 다른 페이지에 전송하여 처리를 요청하고(=처리위임), 자신이 처리한 것처럼 응답한다.
+# 1-2. 특징 : 클라이언트가 요청한 url주소(페이지)가 변경되지 않는다.
+#           (= 서버 내부에서 다른 서블릿에 위임했으나 요청받은 서블릿이 응답하는 것처럼 처리하므로 위임한 경로를 노출하지 않는다. 즉, 처리하는 서블릿이 변경되었어도 url이 변경되지 않는다. 유지보수성이 좋다)
+#           getAttribute와 setAttribute로 servlet 간 데이터 공유 가능
+#           forward의 request와 response의 흐름 상 url(서블렛)을 새로 고침 했을 경우 DB에 데이터 중복저장이 가능하므로, 조회 기능 외에는 사용 않는 것을 권장한다. (조회 외 기능은 redirect 사용 권장)
+# 2. redirect
+# 2-1. 흐름 : 클라이언트 브라우저에게 “(매개변수로 등록한) 페이지를 재요청하라”고 응답한다. (응답 상태 코드 : 301, 302)
+#             encodeRedirectURL은 매개변수(URL)에 Session ID 정보를 추가하여 재요청 처리한다.
+#             클라이언트가 별도로 다른 페이지 요청을 하지 않아도 url주소(페이지)가 변경된다.
+#              (브라우저 요청에 따라 서버가 알아서 해당 페이지를 요청하며, 쿼리스트링으로 별도의 데이터를 전송하지 않으면 요청 데이터가 없다.)
+# 2-2. 특징 : 받아온 값 DB에 중복저장 안 됨
+
+# 서블렛은 무엇인가?
+# https://velog.io/@chaeri93/WEB-Servlet-%EC%84%9C%EB%B8%94%EB%A0%9B%EC%9D%B4%EB%9E%80
+
+# 제3정규형 데이터모델링(ERD) 문제 준비 Preparing Third normal form (3NF) datamodeling practice
+https://www.notion.so/3-3-ERD-206fc892a16f8006aca5dd290e64d636?source=copy_link
+
+# 팀원들에게 강의하기 (chapter9: filter) Teaching team-mates part of today's lecture
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Let's learn about filter</title>
+</head>
+<body>
+<h1>Filter's life cycle</h1>
+<button type="submit" style="height: 50px;"><a href="lifeof/filter">필터사용</a>
+</body>
+</html>
+
+# 2) ServletFilter
+package com.ohgiraffers.habrutafilterservlet0602;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+
+import java.io.IOException;
+
+// 1. 서블릿에 도착하기 이전에 수행되는 ServletFilter 클래스 생성
+// 2. annotation WebFilter를 생성하고 index.jsp에서 생성했던 링크를 받아온다(연결(?)한다)
+    /* 이때, ("/lifeof/*") 형태로 상위 매핑해준다.
+     상위 매핑이란, 클라이언트가 특정 URL(예시 "/lifeof")로 요청했을 때
+     해당 URL이 어떤 서블릿 클래스(e.g. ServletFilter)를 호출하는지 매핑하는 것.
+     앞에가 /lifeof라면 뒤에가 어떤 것이든 servlet 요청 전 ServletFilter 클래스를 동작시키겠다는 의미 */
+@WebFilter("/lifeof/*")
+public class ServletFilter implements Filter {
+    // 3.class 선언문에 implements Filter 작성. 빨간줄 생기니 ALT+ENTER로 관련 method override하기
+    // 4. ServletFilter 기본생성자 생성
+    public ServletFilter(){
+        /*필터는 톰캣(서버)를 start하는 시점부터 인스턴스를 미리 생성한다.*/
+        System.out.println("ServletFilter클래스의 인스턴스 생성!");
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        /*위 init 메소드는 필터 인스턴스가 최초 생성될 때 호출되는 메소드이다.*/
+        System.out.println("Call Filter init method.");
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        /*servlet으로 request가 전달되기 전에 요청을 가로채는 역할을 하는 메소드
+        사용 흐름1. 필터에서 처리할 코드를 작성한다*/
+        System.out.println("요청!! Filter dofilter() method");
+        filterChain.doFilter(servletRequest, servletResponse);
+        // filterChain.doFilter를 이용애 servletReauest와 servletResponse를 다 넘겨준다
+
+        /* 사용 흐름2. 코드를 처리한 뒤 다음 필터 혹은 서블릿의 doGet or doPost를 호출한다.*/
+            // 위에서는 다음 필터가 없으니 index.jsp에서 생성된 링크 "/lifeof/filter"와 관련된
+            // FilterTestServlet의 doGet method를 호출한다. (현재 요청 URL에 매핑된 서블릿이 실행됨)
+            // 서블릿의 doGet/doPost 중 어떤 메소드가 실행될지는 HTTP 요청 방식(GET/POST 등)에 따라 자동으로 결정된다.
+
+        /* 사용 흐름3. servlet에서 처리 후 다시 수행할 내용이 있으면 작성한다.*/
+        System.out.println("Servlet 요청 수행 완료!");
+    }
+
+    @Override
+    public void destroy() {
+        /*필터 인스턴스가 소멸될 때 호출되는 메소드*/
+        System.out.println("Call Filter destroy method");
+    }
+}
+
+# 3) FilterServlet
+package com.ohgiraffers.habrutafilterservlet0602;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/lifeof/filter")
+public class FilterTestServlet extends HttpServlet {
+    /* index.jsp에 있는 <a href="lifeof/filter">는 링크 클릭이야.
+    사용자가 이 링크를 클릭하면, 브라우저는 "GET 방식"으로 /lifeof/filter에 요청을 보내.
+    여기서는 form도 없고, JS로 POST 요청도 안 보내. 오직 링크 클릭(GET)만 있지.*/
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("¡¡¡¡servlet 요청 확인!!!!");
+    }
+}
+
+# 4) ImportanceOfServletMapping (memo)
+package com.ohgiraffers.habrutafilterservlet0602;
+
+public class ImportanceOfServletMapping {
+    /* 서블릿-url 매핑이란?
+    클라이언트가 특정 URL(예시 "/lifeof")로 요청했을 때 해당 URL이 어떤 서블릿 클래스(e.g. ServletFilter)를 호출하는지 매핑하는 것을 의미한다.
+    (=URL과 서블릿 클래스 간의 연결 관계를 정의하는 것과 같다)
+
+    서블릿 매핑의 필요성
+    1. 클래스 이름 노출 방지: 서블릿 클래스의 실제 이름을 URL에 노출하는 것은 보안상 취약점이 될 수 있다.
+                           servlet 매핑을 통해 서블릿 클래스 이름을 숨기고, 별칭이나 패턴을 사용하여 URL을 정의할 수 있다.
+    2. URL 가독성 향상: 복잡한 서블릿 클래스 이름 대신 간결하고 의미 있는 URL을 사용, 웹 애플리케이션의 가독성을 높일 수 있다.
+    3. URL 변경 시 유지보수 용이: URL 매핑을 통해 서블릿 클래스 이름을 변경하더라도 URL에 영향을 주지 않으므로 유지보수 비용을 줄일 수 있다.
+
+    상위 매핑 방법:
+    1) web.xml 파일 (XML 기반): <servlet>과 <servlet-mapping> 태그를 사용하여 URL과 서블릿 클래스를 연결할 수 있다.
+    2) @WebServlet 어노테이션 (자바 기반): @WebServlet 어노테이션을 서블릿 클래스에 추가하여 URL 매핑을 지정할 수 있습니다.
+                                        @WebServlet("/my-servlet") 와 같이 URL 패턴을 지정한다.
+    상위 매핑의 예시:
+    클라이언트가 http://localhost:8080/my-application/login URL로 요청했을 때,
+    LoginServlet 클래스가 호출되도록 매핑할 수 있다.
+    이 경우, 실제 서블릿 클래스 이름은 LoginServlet이지만,
+    클라이언트에게는 my-application/login URL로 노출된다.
+
+    상위 매핑의 장점:
+    1_보안 강화: 서블릿 클래스 이름을 숨김으로써 클라이언트가 서블릿 내부 로직을 짐작하는 것을 방지할 수 있다.
+    2_가독성 향상: URL을 통해 서블릿의 기능을 쉽게 파악할 수 있다.
+    3_유지보수 용이
+    출처 : Google 생성형 AI 정리 결과
+    (이 개요는 AI의 도움을 받아 생성되었습니다. 웹 전반의 정보와 더불어 사람, 장소, 사물에 관한 정보의 모음인 Google 지식 그래프가 사용되었습니다.)*/
+}
+
+
+# chapter7 forward
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FORWARD</title>
+</head>
+<body>
+<h1>forward</h1>
+<form action="forward" method="post">
+    <table>
+        <tr>
+            <td>아이디 : </td>
+            <td><input type="text" name="userId"></td>
+            <td rowspan="2"><button type="submit" style="height: 50px;">login</button></td>
+        </tr>
+        <tr>
+            <td>password :  </td>
+            <td><input type="password" name="password"></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
+
+# 2) ReceiveInformationServlet
+package com.ohgiraffers.forward;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/forward")
+public class ReceiveInformationServlet extends HttpServlet {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+
+        String userId = request.getParameter("userId");
+        String password = request.getParameter("password");
+
+        System.out.println(userId); //kimsemin
+        System.out.println(password); //0123456
+
+        /*어떤 서블릿으로 위임할 것인지 대상 서블릿을 지정하는 인스턴스를 생성하고,
+        * forward() method를 통해 요청과 응답에 대한 정보를 전달하여
+        * 나머지 작업을 수행하도록 위임한다.
+        * !!!!이때 다른 서블릿으로 요청하기 위한 데이터는
+        * request에 serAttrubute로 전달하고, 받는 쪽에서는 getAttribute를 이용해 꺼내서 사용한다. !!!! */
+        request.setAttribute("userId", userId);
+
+        RequestDispatcher rd = request.getRequestDispatcher("print");
+        //Dispatcher라는 메소드로 print(Servlet호출)에 값 공유
+        //서블릿의 방향을 결정해주는 객체RequestDispatcher를 이용해 방향("print"로 가!)을 지정해줘야 한다
+
+        rd.forward(request, response);
+    }
+}
+
+# 3) PrintLoginSuccessServlet
+package com.ohgiraffers.forward;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+@WebServlet("/print")
+public class PrintLoginSuccessServlet extends HttpServlet {
+    /*forward 받은 서블릿에서도 요청방식이 get이면 doGet메소드를, post라면 doPost메소드를 호출한다.
+    * 보내준 서블릿에서 request에 전달정보를 담았으므로 해당 서블릿에서 사용하기 위해 다시 request에서 꺼내온다.
+    *
+    * forward할 때 전달한 request와 response의 모든 정보를 이용해 새로운 request, response를 만들고
+    * 그 정보를 이용해 다시 http 메소드에 맞는 서블릿의 doGet, doPost를 요청하는 방식이다.
+    * 깊은 복사를 통해 값을 그대로 복사했기 때문에 내부에 존재하는 헤더 정보나 인스턴스는 그대로 유지하고 있다.*/
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+       //getAttribute는 객체를 반환하기 때문에 (String)으로 다운캐스트해줘야함
+        String userId = (String) request.getAttribute("userId");
+
+//        System.out.println("print servlet userId = " +userId); //user02
+
+        StringBuilder responseText = new StringBuilder();
+        responseText.append("<!doctype html>\n")
+                .append("<html>\n")
+                .append("<head>\n")
+                .append("</head>\n")
+                .append("<body>\n")
+                .append("<h3 align=\"center\">")
+                .append("WELCOME! ")
+                .append(userId)
+                .append("</body>\n")
+                .append("</html>\n");
+        response.setContentType("text/html");
+
+        PrintWriter out = response.getWriter();
+
+        out.print(responseText);
+        out.close();
+        // forward 방식은 url이 바뀌지 않는다
+        
+        /* 기본적으로 변수의 기본 스코프는 메소드(=해당 페이지, 하나의 페이지)이기 때문에
+        * 다른 페이지(=서블릿)으로 데이터를 공유할 수 없다.
+        * 하지만 forward 방식은 request & response를 포함하여 위임하므로
+        * request에 정보를 저장하여 forward하면
+        * 위임받은 서블릿에서도 위임한 서블릿의 정보를 공유할 수 있다.
+        * forward 받은 서블릿의 존재를 클라이언트가 알 필요가 없기 때문에
+        * url 자체는 변경되지 않는다.
+        * forward 방식의 또다른 특징은 요청 시 서버로 전송한 데이터가 남아있는 상태로
+        * 새로고침(=재요청)하면 동일 요청을 반복하여 "DB에 insert하는 등의 행위 시,
+        * 중복된 행이 삽입될 가능성이 있다."
+        * 그러므로 forward는 보통 데이터를 조회할 때 사용한다.*/
+    }
+}
+
+# CHAPTER8 REDIRECT
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirect</title>
+</head>
+<body>
+    <h1>redirect</h1>
+    <ul>
+        <li><a href="othersite">다른 웹사이트로 redirect 테스트</a></li>
+        <li><a href="otherservlet">다른 servelt으로 redirect 테스트</a></li>
+    </ul>
+</body>
+</html>
+
+# 2) package otherservlet - OtherServletRedirectTest
+package com.ohgiraffers.otherservlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/otherservlet") //redirect servlet 1번
+public class OtherServletRedirectTest extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("get요청 정상수락");
+
+        resp.sendRedirect("redirect");
+    }
+}
+
+# 3) package otherservlet - RidirectServlet
+package com.ohgiraffers.otherservlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+@WebServlet("/redirect") //redirect servlet 2번
+public class RidirectServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("Success redirecting to this servlet");
+
+        StringBuilder redirectText = new StringBuilder();
+        redirectText.append("<!doctype html>\n")
+                .append("<head>\n")
+                .append("</head>\n")
+                .append("<body>\n")
+                .append("<h1>이 서블릿으로 redirect 성공!</h1>\n")
+                .append("</body>\n")
+                .append("</html>");
+        resp.setContentType("text/html");
+        PrintWriter out = resp.getWriter();
+        out.println(redirectText);
+        out.close();
+        /*redirect하면 url이 재작성되어 새로고침할 때 redirect된 페이지에 대한 요청을 반복한다
+        * 즉, 이전 요청에 포함된 정보는 남아있지 않고 url이 변경되는 것이 redirect의 특징이다
+        * http 요청은 요청 시 잠시 connection을 맺고 응답 시에도 잠시 connection을 맺으며
+        * 요청단위 당 request 객체는 한 개만 생성됨
+        * 따라서 첫 요청 시의 request와 현재 redirect된 페이지의 request는 서로 다른 객체.
+        * 그래서 redirect를 쓰면 이전 서블릿의 값을 공유해서 사용할 수 없는 것이다.
+        * ¡¡¡¡¡조회할 때는 forward, 나머지는 redirect!!!!!
+        * (forward 사용시 DB에 중복된 값 입력 가능 그래서 조회에만 forward 사용)*/
+    }
+}
+
+# 4) package othersite - OtherSiteRedirectServlet
+package com.ohgiraffers.othersite;
+
+import java.io.*;
+
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/othersite")
+public class OtherSiteRedirectServlet extends HttpServlet {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.out.println("get으로 요청 후 naver 사이트로 redirect");
+
+        response.sendRedirect("http://www.naver.com"); //http://를 꼭 붙이자!
+        // 면접질문 빈출 !! : forward와 redirect 방식의 차이 - redirect 중복된 열 방지
+        // (e.g. 회원가입 완료 페이지에서 새로고침해도 새로운 회원가입 정보 입력 안 되는 것)
+    }
+}
+
+
+# CHAPTER9 COOKIE
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COOKIE</title>
+</head>
+<body>
+<h1>Cookie handling</h1>
+<form action="cookie" method="post">
+    <table>
+        <tr>
+            <td>firstName : </td>
+            <td><input type="text" name="firstName"></td>
+
+        </tr>
+        <tr>
+            <td>lastName :  </td>
+            <td><input type="text" name="lastName"></td>
+        </tr>
+        <tr>
+            <td rowspan="2"><button type="submit">전송</button></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
+
+# 2) 
+package com.ohgiraffers.cookie;
+
+import java.io.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/cookie")
+public class CookieHandlerServlet extends HttpServlet {
+    //index.jsp에서 post방식으로 넘겼기 때문에
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String firstName = request.getParameter("firstName");
+        String lastName = request.getParameter("lastName");
+
+        System.out.println(firstName); // KIM
+        System.out.println(lastName); // KINGKI
+
+//        request.setAttribute("firstName", firstName);
+//        request.setAttribute("lastName", lastName);
+        /*cookie 사용 방법은 간단, cookie 사용절차는 다음과 같다
+        * 1. cookie 생성
+        * 2. 생성한 cookie의 만료 시간을 설정한다.(적절하게, why? 쿠키는 보안에 취약함)
+        * 3. 응답 헤더에 쿠키를 담는다.
+        * 4. 응답을 보낸다
+        *
+        * cookie의 일부 제약사항
+        * 쿠키 이름은 ASCII 문자만을 사용해야함. 한 번 설정한 쿠키의 이름은 변경 불가
+        * 공백문자와 일부 문자 [] () = , 는 cookie 이름에 사용 불가*/
+        Cookie firstNameCookie = new Cookie("firstName", firstName);
+        Cookie lastNameCookie = new Cookie("lastName", lastName);
+        //1. 쿠키 생성 완료
+
+        firstNameCookie.setMaxAge(60 * 60 * 24);
+        // 만료시간은 초단위 설정. 위 60 * 60 * 24는 하루
+        lastNameCookie.setMaxAge(60 * 60 * 24);
+        //2. 쿠키 만료 시간 설정
+
+        response.addCookie(firstNameCookie);
+        response.addCookie(lastNameCookie);
+        //3. 응답헤더에 addCookie로 생성한 쿠키를 담는다
+
+        response.sendRedirect("redirect");
+    }
+}
+
+# 3) 
+package com.ohgiraffers.cookie;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/redirect")
+public class RedirectServlet extends HttpServlet {
+    //무조건 get 방식을 override 해줘야함
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+        //System.out.println("redirect servlet 요청확인");
+        /*KIM
+        KINGKI
+        Check the response of redirect servlet*/
+
+        //String firstName = (String) request.getAttribute("firstName");
+        //String lastName = (String) request.getAttribute("lastName");
+
+        /*쿠키 사용방법 (생성한 쿠키 사용)
+        * 1. request에서 cookie 목록을 배열 형태로 꺼내온다
+        * 2. 쿠키의 getName과 getValue를 이용해 cookie에 담긴 값을 꺼내온다*/
+        Cookie[] cookies = request.getCookies();
+
+        for(Cookie c: cookies) {
+            System.out.println("cookie = " + c);
+
+            System.out.println("cooke's key = " + c.getName());
+            System.out.println("cooke's value = " + c.getValue());
+        }
+        /*JI
+        KINGKI
+        cookie = jakarta.servlet.http.Cookie@57836e01
+        cooke's key = JSESSIONID
+        cooke's value = 13ACE3223029860DBE32B540A3B58BAB
+        cookie = jakarta.servlet.http.Cookie@fb2da973
+        cooke's key = lastName
+        cooke's value = KINGKI
+        cookie = jakarta.servlet.http.Cookie@f572bfa3
+        cooke's key = firstName
+        cooke's value = JI*/
+
+        /*쿠키는 텍스트파일 형태로 client 컴퓨터에 저장된다.
+        * 그렇기에 공용PC 등 타 사용자와 함께 쓰는 컴퓨터라면 (개인PC는 괜찮음. 상관없음)
+        * 민감한 개인정보를 포함한 경우 보안에 취약하다.
+        * 따라서 민감한 개인 정보를 취급하는 경우에는 쿠키보다는 Session을 이용해야한다.
+        * Session은 cookie와 유사한 형태로 key=value 쌍으로 저장되지만
+        * 서버인 톰캣에서 관리되므로 보안에 더 우수하다는 장점을 가진다.*/
+    }
+}
+
+
+# CHAPTER10 SESSION
+# 1) index.jsp
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Session</title>
+</head>
+<body>
+<h1>Session Object Handling 객체 세션 핸들링</h1>
+<form action="session" method="post">
+    <table>
+        <tr>
+            <td>firstName : </td>
+            <td><input type="text" name="firstName"></td>
+
+        </tr>
+        <tr>
+            <td>lastName : </td>
+            <td><input type="text" name="lastName"></td>
+        </tr>
+        <tr>
+            <td rowspan="2">
+                <button type="submit">전송</button></td>
+        </tr>
+    </table>
+</form>
+
+<hr>  <%--화면에 가로로 된 구분선(가로선)을 그어주는 html <hr>태그--%>
+<ul><li><a href="delete">Delete Session Data</a></li></ul>
+</body>
+</html>
+
+# 2) section01_session - SessionHandlerServlet
+package com.ohgiraffers.section01.session;
+
+import java.io.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/session")
+public class SessionHandlerServlet extends HttpServlet {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String firstName = request.getParameter("firstName");
+        String lastName = request.getParameter("lastName");
+
+        System.out.println(firstName); //KIM
+        System.out.println(lastName); //Waldo
+
+        HttpSession session = request.getSession();
+
+        // 1. 세션 만료 시간 설정 (기본 설정시간 : 30분)
+        System.out.println("session default 유지시간 : "+session.getMaxInactiveInterval());
+//        session default 유지시간 : 1800
+        // 1800초는 30분이다
+
+        // 세션 시간 좀 더 길게 변경하고 싶다!할 때 setMaxInactiveInterval(); 사용
+        session.setMaxInactiveInterval(60 * 10);
+        System.out.println("변경 후 세션 유지시간 : " + session.getMaxInactiveInterval());
+        // 변경 후 세션 유지시간 : 600
+
+        System.out.println("session id : "+session.getId());
+        // sessionId는 브라우저 당 1개씩 갖고 있다.
+        // session id : 81B2898A2F2CF928613D4508DE7B5AC8
+
+        /*
+        KIM
+        Waldo
+        session default 유지시간 : 1800
+        변경 후 세션 유지시간 : 600
+        session id : 81B2898A2F2CF928613D4508DE7B5AC8
+        KIM
+        Waldo
+        session default 유지시간 : 600
+        변경 후 세션 유지시간 : 600
+        session id : 81B2898A2F2CF928613D4508DE7B5AC8 */
+
+        session.setAttribute("firstName", firstName);
+        session.setAttribute("lastName", lastName);
+        response.sendRedirect("redirect");
+    }
+}
+
+# 3) section01_session - RedirectServlet
+package com.ohgiraffers.section01.session;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+
+@WebServlet("/redirect")
+// 얜 /redirect를 받는 서블릿이 된다
+public class RedirectServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        System.out.println("redirect 페이지의 섹션ID는 어떻게 넘어오는가? : "+session.getId());
+        /*session id : 4B275020BBDAF149CFE9BAC091C8302C
+        redirect 페이지의 섹션ID는 어떻게 넘어오는가? : 4B275020BBDAF149CFE9BAC091C8302C*/
+
+        String firstName = (String) session.getAttribute("firstName");
+        String lastName = (String) session.getAttribute("lastName");
+
+        System.out.println("redirect page's firstName : " + firstName);
+        System.out.println("redirect page's lastName : " + lastName);
+        /*redirect page's firstName : KIM
+        redirect page's lastName : Waldo*/
+    }
+}
+
+# 4) section02_deleteSession - DeleteSessionDataServlet
+package com.ohgiraffers.section02.deleteSession;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+import java.util.Enumeration;
+
+@WebServlet("/delete")
+public class DeleteSessionDataServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        Enumeration<String> sessionNames = session.getAttributeNames();
+        while (sessionNames.hasMoreElements()){
+            System.out.println("세션이름.nextElement() : " +sessionNames.nextElement());
+        }
+        /*redirect page's firstName : KIM
+        redirect page's lastName : Waldo
+        세션이름.nextElement() : firstName
+        세션이름.nextElement() : lastName*/
+        /* >>> 세션이 아직 남아있기 때문에
+        * redirect page's firstName : KIM
+        * redirect page's lastName : Waldo 이게 아직 뜸.*/
+        /*session 객체를 다시 반환받아 세션에 담긴 Attribute 목록을 출력해보면
+        * 이전 section01에서 담았던 firstName & lastName이 있는 것을 확인 가능*/
+
+        //session 데이터 지우는 방법
+        // 방법1. 설정한 만료시간 지나면 세션 만료됨
+        // 방법2. removeAttribute()로 delete the session's Attribute
+        // 방법3. invalidate()를 호출하면 세션의 모든 데이터가 제거됨
+
+        session.removeAttribute("firstName");
+        sessionNames = session.getAttributeNames();
+        while (sessionNames.hasMoreElements()) {
+            System.out.println(sessionNames.nextElement());
+        }
+        /*lastName
+         fistname이 removeAttribute로 사라졌기에 더 이상 sessionNames의 element로 나오지 않음*/
+
+        /* invalidate()를 호출하면, 세션 자체를 무효화했기때문에
+        이후 세션을 이용하는 것은 에러 발생.
+        즉, 세션 내 데이터를 지우는 것뿐만 아니라 세션 강제 만료시킴.
+        * 예) 로그아웃 시킬 때 많이 사용*/
+        session.invalidate();
+        sessionNames = session.getAttributeNames();
+        while (sessionNames.hasMoreElements()){
+            System.out.println(sessionNames.nextElement());
+        }
+        /* HTTP 상태 500 – 내부 서버 오류
+        .....
+        getAttributeNames: 세션이 이미 무효화되었습니다.
+        라고 error 500코드를 가진 오류 페이지를 내보냄(세션 자체가 무효화되었음을 알려줌)*/
+
+        /*KIM
+        Waldo
+        session default 유지시간 : 1800
+        변경 후 세션 유지시간 : 600
+        session id : B8C919953887D62C758ADE50C31F8539
+        redirect 페이지의 섹션ID는 어떻게 넘어오는가? : B8C919953887D62C758ADE50C31F8539
+        redirect page's firstName : KIM
+        redirect page's lastName : Waldo
+        세션이름.nextElement() : firstName
+        세션이름.nextElement() : lastName
+        lastName*/
+    }
+}
+
+# CHAPTER11 FILTER
+# 1)
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Filter</title>
+</head>
+<body>
+    <h1>Filter</h1>
+    <h3>Filter' LIFE CYCLE</h3>
+    <ul>
+        <li><a href="first/filter">Use Filter</a>
+        </li>
+    </ul>
+</body>
+</html>
+
+# 2)
+package com.ohgiraffers.filter;
+
+import java.io.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet("/first/filter")
+public class FirstFilterTestServlet extends HttpServlet {
+    // get요청 들어오고 있으니 doGet 사용
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("Confirm servlet require"); //Confirm servlet require
+    }
+}
+
+# 3)
+package com.ohgiraffers.filter;
+
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+
+import java.io.IOException;
+
+@WebFilter("/first/*")
+// 2. /first/* = 상위 매핑 : 앞에가 /first라면 뒤에가 어떤 것이든 servlet 요청 전 FirstFilter를 동작시키겠다.
+public class FirstFilter implements Filter {
+    // 1. 서블릿에 도착하기 이전에 수행되는 FirstFilter 클래스 생성
+
+    // 3. FirstFilter의 기본생성자 생성
+    public FirstFilter(){
+        /*필터는 톰캣(서버)를 start하는 시점부터 인스턴스를 미리 생성한다.*/
+        System.out.println("퍼스트필터 인스턴스 생성!");
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        /*필터 인스턴스가 최초 생성될 때 호출되는 메소드*/
+        System.out.println("Call Filter init method");
+    }
+
+    @Override
+    public void destroy() {
+        /*필터 인스턴스가 소멸될 때 호출되는 메소드*/
+        System.out.println("Call Filter destroy method");
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        /*servlet으로 request가 전달되기 전에 요청을 가로채는 역할을 하는 메소드*/
+        System.out.println("Call Filter dofilter() method");
+
+        /*필터에서 처리할 코드를 작성한다*/
+
+        /*코드를 처리한 뒤 다음 필터 혹은 서블릿의 doGet or doPost를 호출한다.*/
+        filterChain.doFilter(servletRequest, servletResponse);
+        // doFilter를 이용애 servletReauest와 servletResponse를 다 넘겨준다
+        // 위의 doFilter의 경우에는 FirstFilterTestServlet에 있는 doGet를 호출할 것임.
+        // 근데 doFilter가 void로 작성되었기 때문에 doGet 호출 후
+        // doFilter를 다시 호출할 거란 말이지? 그래서 아래에 다시 doFilter를 잘 호출하는지 확인하기 위한 printOut 작성
+
+        /*servlet에서 처리 후 다시 수행할 내용이 있으면 작성한다.*/
+        System.out.println("Servlet 요청 수행 완료!");
+        /* Call Filter dofilter() method - doFilter 첫 출력문 표현
+        Confirm servlet require - 다음필터 없으니 servlet 가서 doGet 실행
+        Servlet 요청 수행 완료! - doGet 메소드 종료 후 doFilter 메소드로 다시 돌아와서*/
+    }
+}
+
+
+# CHAPTER12 JSP
+# 1) index.jsp
+    <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSP</title>
+</head>
+<body>
+<h1>JSP</h1>
+<ul>
+    <li><a href="jsp/1_simpleJspStatus.jsp">JSP Basic Grammar</a></li>
+    <li><a href="jsp/2_pageDirective.jsp">Page 지시자 태그</a></li>
+    <li><a href="jsp/3_includeDirective.jsp">Include 지시자 태그</a></li>
+</ul>
+</body>
+</html>
+
+# 2) webapp_jsp - 1_simpleJspStatus
+<%--
+  Created by IntelliJ IDEA.
+  User: User
+  Date: 2025-06-02
+  Time: 오후 2:01
+  To change this template use File | Settings | File Templates.
+--%>
+<%--page지시자 태그--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>JSP syntax</title>
+</head>
+<body>
+<!-- 2. jsp 주석 태그 -->
+<%--위에 단 <!-- html 주석 -->은 클라이언트에게 노출되지만, jsp 주석은 클라이언트에게 토출되지 않는다.--%>
+
+<!--3. 선언 태그 -->
+<!-- 서블릿으로 변환 시 선언 태그 내에 작성한 내용을 필드로 선언한다.-->
+<%!
+    private String name;
+    private int age;
+%>
+
+<!-- 4. scriptlet 태그 : 태그 내에서 자바처럼 작성 가능 -->
+<%
+    //"간단한" 자바코드를 작성할 수 있는 부분이다.
+    name = "Gildong Hong";
+    age = 20;
+    System.out.println("NAME = "+name+", " +"AGE = "+age);
+    // execute 하고 화면에 뜬  <li>JSP Basic Grammar</li> 클릭 시 콘솔창에
+    // NAME = Gildong Hong, AGE = 20
+    // 라고 뜸
+
+    for(int i = 0; i<name.length(); i++){
+        System.out.println(name.charAt(i));
+    }
+%>
+
+<%--5. expression 태그
+PrintWriter를 이용해 브라우저에 값을 내보내 브라우저에서 보여지게 한다.
+java 코드로 변환 시 out.print(); 괄호 안에
+expression 태그 내에서 작성한 내용이 들어간다.
+정상적으로 출력한 값을 작성하는 경우 out.print(name); 이런 식으로 표현되는데
+expression 태그 내에 세미콜론을 작성하면 our.print(name;);형태가 되므로 compile에러가 발생한다.--%>
+name : <%=name %><br>
+age : <%=age%>
+</body>
+</html>
+
+# 3) webapp_jsp - 2_pageDirective
+<%--
+  Created by IntelliJ IDEA.
+  User: User
+  Date: 2025-06-02
+  Time: 오후 2:16
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java"
+         import="java.util.Date" errorPage="errorPage.jsp" %>
+<html>
+<head>
+    <title>Page 지시자 태그</title>
+</head>
+<body>
+    <!-- 지시자 태그에서 사용가능한 속성들은 여러가지들이 있지만 본 수업에서는 소수의 속성만 다룰 것이다.
+    1. errorPage : 현재 페이지에서 Exception이 발생하면 속성값에 미리 설정해놨던 jsp 경로로 exception을 던진다
+    2. isErrorPage : 현재 페이지가 Exception을 처리할 페이지인 경우 true로 지정한다. (기본값은 false이다)
+    3. import : java.lang 패키지 이외의 클래스를 현 jsp 파일에서 사용할 때 import 속성으로 정의하면
+                java 파일의 import 선언부를 작성하는 것과 같다.
+
+    지시자 태그는 page 지시자 태그, include 지시자 태그, taglib 지시자 태그가 있다
+    - page 지시자 태그 : 현 jsp 페이지에 대한 설정을 하는 지시자 태그
+    - include 지시자 태그 : 다른 jsp 파일을 포함하기 위해 사용하는 지시자 태그
+    - tablib: xml 문법 기반의 라이브러리인 JSTL을 이용하기 위해 선언하는 지시자 태그(이건 본 수업에서 안 볼 것임) -->
+
+    <%
+        Date date = new Date();
+        System.out.println(date);
+    %>
+
+    <%
+        String str = null;
+        System.out.println(str);
+    %>
+</body>
+</html>
+
+# 4) webapp_jsp - 3_includeDirective
+<%--
+  Created by IntelliJ IDEA.
+  User: User
+  Date: 2025-06-02
+  Time: 오후 2:28
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <h1>include directive</h1>
+    <%--include 지시자 태그를 이용, file 속성에 jsp 경로를 지정하면
+    해당 jsp에 작성한 내용을 그대로 포함시켜 현재 jsp 파일을 동작시킨다.
+    그렇기 때문에 동일한 변수 이름을 include 이후에 또 사용하면
+    한 페이지 내에 동일한 변수가 생성되는 것이므로 (동일 클래스, 같은 스코프 내에서의 사용과 비슷)
+    compile 에러가 발생한다--%>
+    <div><%@ include file="today.jsp"%></div>
+    <%--^^^today.jsp호출 --%>
+
+    <%
+//    동일한 변수 이름을 사용했기 떄문에 컴파일 에러가 발생한다.
+    //String output = "";
+    %>
+</body>
+</html>
+
+# 5) webapp_jsp - today
+<%@ page import="java.util.Date" %>
+<%@ page import="java.text.SimpleDateFormat" %><%--  Created by IntelliJ IDEA.
+  User: User
+  Date: 2025-06-02
+  Time: 오후 2:29
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <%
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일 E요일 a hh시 mm분 ss초");
+
+        String output = sdf.format(today);
+    %>
+    <h3><%=output%></h3>
+</body>
+</html>
+
+# 6) webapp_jsp - errorPage
+<%--
+  Created by IntelliJ IDEA.
+  User: User
+  Date: 2025-06-02
+  Time: 오후 2:24
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" isErrorPage="true" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <%
+        String exceptionType = exception.getClass().getName();
+        //isErrorPage="true"로 선언했기 때문에 exception.을 쓸 수 있음
+    %>
+
+    <h1><%= exceptionType %></h1>
+    <h1><%=  %></h1>
+
+</body>
+</html>
+
+# 7) java class (memo)
+package com.ohgiraffers.chap12jsp;
+
+import java.io.*;
+
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
+@WebServlet(name = "helloServlet", value = "/hello-servlet")
+public class HelloServlet extends HttpServlet {
+    /* JSP : Java Server Page
+    서버에서 동적으로 페이지를 만들어줄 때 자바 코드로 만들어준다(는 의미)
+    우리 눈에 보이진 않았지만 jsp container가 그동안
+    jsp를 servlet으로 만들어주고 있었다.(서블릿화=translation)
+    서블릿화된 jsp를 jsp container가 관리하고 있음.
+    servlet은 servlet container가 보관 및 관리함(jsp container 역할과 다름.)
+    servlet contatiner는 총괄관리자와 비슷한 역할
+
+   .java -> .class 로 바꾸는 행위가 'COMPILE'
+
+   이전에  responseText.append("<!doctype html>\n")
+                .append("<html>\n")
+                .append("<head>\n")
+                .append("</head>\n") 이런 식으로
+   일일히 다 쳐서 직접적으로 내보냈어야했던 걸
+   간편히 내보낼 수 있게 해준 것이 JSP이다.
+   (servlet의 한계를 극복하기 위해 나온 문법이 JSP)*/
+
+    /* servlet이 하는 역할(크게 3가지)
+    * 1. 요청받기
+    * 2. 비즈니스 로직 처리
+    * 3. 응답을 잘해주는 servlet => JSP가 여기 속함
+    * */
+}
