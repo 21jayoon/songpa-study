@@ -1,0 +1,309 @@
+# 오늘 배운 내용 Today's lecture
+# Spring
+
+# Spring이란?
+# 자바의 웹 프레임 워크. 자바언어를 기반으로 사용 (자바로 다양한 어플리케이션을 만들기 위한 프로그래밍 툴)
+# Spring 사용하면 중복코드의 사용률을 줄여주고 비지니스 로직을 더 간단하게 하는 것이 가능해진다
+
+# 프레임워크(Frame Work)란?
+# 소프트웨어 개발에 있어서 하나의 뼈대의 역할을 하는 것.(자주 쓰이는 기능을 한 곳에 모아 놓은 클래스들의 집합.)
+# 프레임워크 = 도구상자
+
+# 컨테이너? : 컨테이너는 보통 객체의 생명주기를 관리, 생성된 인스턴스들에게 추가적인 기능을 제공하도록 하는 것
+# 개발자가 아닌 컨테이너가 인스턴스 생명주기(인스턴스 생성~소멸) 관리를 대신 해준다.
+# 객체관리 주체가 프레임워크(Container)가 되기 때문에 개발자는 로직에 집중할 수 있는 장점이 있다.
+
+
+# CHAPTER02 - Dependency Injection (DI)
+# org.section01.xmlconfig - Application
+package org.section01.xmlconfig;
+
+import org.common.Account;
+import org.common.MemberDTO;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+        ApplicationContext context
+                = new GenericXmlApplicationContext("section01/xmlconfig/spring-config.xml");
+
+        MemberDTO member = context.getBean(MemberDTO.class);
+
+        System.out.println(member);
+        //MemberDTO{id=1, name='Gildong', phone='010-3246-2543', email='asfjk@naver.com', accountNumber=org.common.PersonalAccount@5ea434c8}
+        //spring-config.xml에서 2.생성자 주입방식으로 생성된 객체를 갖고 옴
+
+        //MemberDTO{id=1, name='HongGildong', phone='010-123-4567', email='hong123@gmail.com', accountNumber=org.common.PersonalAccount@78dd667e}
+        //spring-config.xml에서 3. 의존성 주입 방식으로 생성된 객체 갖고 옴
+        //accountNumber=org.common.PersonalAccount@78dd667e 이렇게 @hashCode만 자꾸 뜨는 걸 해결하기 위해서
+        //PersonalAccount 마지막에 toString() 넣어줌.
+        //MemberDTO{id=1, name='HongGildong', phone='010-123-4567', email='hong123@gmail.com', accountNumber={accNo='110-234-567890', balance=0}}
+        //xml파일 내 bean 객체에 담긴 계좌번호 잘 불러와지는 것을 확인할 수 있음 (6/4 2:46)
+        
+        Account account = member.getPersonalAccount();
+
+        System.out.println(account.getBalance());
+        System.out.println(account.deposit(10000));
+        System.out.println(account.getBalance());
+        System.out.println(account.withDraw(5000));
+        System.out.println(account.getBalance());
+        /*0
+        true
+        10000
+        true
+        5000
+        2.생성자 주입방식, 3.의존성 주입방식 둘 다 결과값 동일*/
+
+        //면접질문 빈출 : 의존성 주입 뜻이 뭐냐? 의존성 종류에는 뭐가 있냐? 그 중 생성자는 무엇이냐?
+    }
+}
+
+# org.section02.javaconfig - Application
+package org.section02.javaconfig;
+
+import org.common.Account;
+import org.common.MemberDTO;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+        /* AnnotationConfigApplicationContext를 이용해
+         * 자바 설정 클래스를 기반으로 ApplicationContext 생성
+         * ContextConfiguration.class는 @Configuration 어노테이션이 붙은 설정 클래스이다.
+         */
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext(ContextConfiguration.class);
+
+        /* MemberDTO 타입의 Bean을 컨테이너로부터 가져옴 (타입 기준 조회) */
+        MemberDTO member = context.getBean(MemberDTO.class);
+
+        System.out.println(member);
+        // java class 내에서 1. 생성자 주입 방식으로 member value 입력
+        //MemberDTO{id=1, name='gildongHong', phone='010-2345-4356', email='asdjf@gmail.com', accountNumber={accNo='110-234-234891', balance=1000}}
+        /* xml파일에서 <bean id="account" class="org.common.PersonalAccount">
+         *         <constructor-arg index="0" value="110-234-567890"/> </bean>으로 계좌번호 값을 넣어준 것과 달리
+         * java 설정 파일(class ContextConfiguration) 내에서 @Bean으로 어노테이션해준
+         * accountGenerator() 메소드를 이용해 계좌번호값과 기본 잔고 값을 넣어주었다.
+         * public Account accountGenerator(){ return new PersonalAccount("계좌번호", 기본잔고int) }*/
+
+        //2.의존성 주입 방식 setter injection
+        //MemberDTO{id=1, name='John Doe', phone='010-2222-3333', email='234@gmail.com', accountNumber={accNo='110-234-234891', balance=1000}}
+
+        //DTO 내 toString() 수정과 PersonalAccount 내 toString() 추가 전 출력값
+        //MemberDTO{sequence=1, name='John Doe', phone='010-2222-3333', email='234@gmail.com', personalAccount=org.common.PersonalAccount@1817d444}
+
+        /* member 객체 내부의 Account 객체 활용 예제 */
+        Account account = member.getPersonalAccount();
+
+        System.out.println(account.getBalance());
+        System.out.println(account.deposit(10000));
+        System.out.println(account.getBalance());
+        System.out.println(account.withDraw(5000));
+        System.out.println(account.getBalance());
+        /*1000
+        true
+        11000
+        true
+        6000
+        1.생성자 주입, 2.의존성 주입 모두 출력값 동일*/
+    }
+}
+
+# org.section02.javaconfig - ContextConfiguration
+package org.section02.javaconfig;
+
+import org.common.Account;
+import org.common.MemberDTO;
+import org.common.PersonalAccount;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class ContextConfiguration {
+    @Bean
+    public Account accountGenerator(){
+        return new PersonalAccount("110-234-234891", 1000);
+    }
+    /* xml파일에서 <bean id="account" class="org.common.PersonalAccount">
+     *          <constructor-arg index="0" value="110-234-567890"/> </bean>으로 계좌번호 값을 넣어준 것과 달리
+     * java 설정 파일 내에서 @Bean으로 어노테이션해준
+     * accountGenerator() 메소드를 이용해 계좌번호값과 기본 잔고 값을 넣어주었다. */
+
+    @Bean
+    public MemberDTO memberGenerator(){
+        /*1. 생성자 주입*/
+        //return new MemberDTO(1, "gildongHong", "010-2345-4356", "asdjf@gmail.com", accountGenerator());
+
+        /*2. 의존성 주입 방식(Setter Injection 세터 주입)*/
+        MemberDTO member = new MemberDTO();
+
+        member.setSequence(1);
+        member.setName("John Doe");
+        member.setPhone("010-2222-3333");
+        member.setEmail("234@gmail.com");
+        member.setPersonalAccount(accountGenerator());
+
+        return member;
+    }
+}
+
+# org.common - Account
+package org.common;
+
+public interface Account {
+   //interface Account는 chapter01에서 DAO(MemberDAO)가 하던 역할을 대신한다.
+
+   /* 잔액 조회 */
+   String getBalance();
+
+   /* 입금 */
+   boolean deposit(int money);
+
+   /* 출금 */
+   boolean withDraw(int money);
+}
+
+# org.common - PersonalAccount
+package org.common;
+
+/* PersonalAccount 클래스는 개인 계좌 정보를 표현하며,
+ Account 인터페이스를 구현하여 입출금 및 잔액 조회 기능을 제공한다.*/
+        /*인터페이스는 클래스들이 구현해야하는 동작을 지정하는데 사용되는 추상 자료형이다.
+        * 추상 메소드만으로 구성되어 있기 때문에 인터페이스를 구현한 클래스는
+        * 인터페이스에 있던 모든 메소드를 구현(Override)해야한다.
+        * ( 출처 : https://priming.tistory.com/71 )*/
+public class PersonalAccount implements Account {
+    private String accNo; // 계좌 번호
+    private int balance;  // 계좌 잔액
+
+    /* 기본 생성자. Spring과 같은 프레임워크에서 객체 생성 후 setter나 DI를 통해 값을 주입할 수 있도록 한다. */
+    public PersonalAccount() {}
+
+    /* 모든 필드 초기화 생성자 */
+    public PersonalAccount(String accNo, int balance) {
+        this.accNo = accNo;
+        this.balance = balance;
+    }
+
+    /* 현재 잔액을 문자열로 반환한다.
+     * @return 잔액을 문자열로 반환
+     */
+    @Override
+    public String getBalance() {
+        return this.balance + "";
+    }
+
+    /* 전달된 금액을 잔액에 더하여 입금 처리한다.
+     * @param  money 입금할 금액
+     * @return 입금 성공 시 true 반환
+     * @throws IllegalArgumentException 입금 금액이 0인 경우 예외 발생
+     */
+    @Override
+    public boolean deposit(int money) {
+        if (money == 0) {
+            throw new IllegalArgumentException("입금할 금액이 잘못되었습니다.");
+        }
+        this.balance += money;
+        return true;
+    }
+
+    /* 전달된 금액을 잔액에서 차감하여 출금 처리한다.
+     * parameter money : 출금할 금액
+     * return true : 출금 성공 시 true 반환
+     * @throws IllegalArgumentException 출금 금액이 잔액을 초과하는 경우 예외 발생
+     */
+    @Override
+    public boolean withDraw(int money) {
+        if (money > this.balance) {
+            throw new IllegalArgumentException("잔액보다 큰 금액을 출금할 수 없습니다.");
+        }
+        this.balance -= money;
+        return true;
+    }
+
+    //Application에서 System.out.println(member); 실행했을 때
+    //계속 accountNumber=org.common.PersonalAccount@78dd667e
+    //클래스명@해시코드 형태로만 출력되는 문제 해결해주고자
+    //ALT+INSERT로 toString() 넣고 약간 수정(대괄호 앞에 있는 PersonalAccount 삭제)
+    @Override
+    public String toString() {
+        return "{" +
+                "accNo='" + accNo + '\'' +
+                ", balance=" + balance +
+                '}';
+    }
+}
+
+# org.common - MemberDTO
+package org.common;
+
+public class MemberDTO {
+    private int sequence;
+    private String name;
+    private String phone;
+    private String email;
+    private Account personalAccount;
+
+    public MemberDTO(){}
+
+    public MemberDTO(int sequence, String name, String phone, String email, Account personalAccount) {
+        this.sequence = sequence;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.personalAccount = personalAccount;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Account getPersonalAccount() {
+        return personalAccount;
+    }
+
+    public void setPersonalAccount(Account personalAccount) {
+        this.personalAccount = personalAccount;
+    }
+
+    @Override
+    public String toString() {
+        return "MemberDTO{" +
+                "id=" + sequence +
+                ", name='" + name + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", accountNumber=" + personalAccount +
+                '}';
+    }
+}
