@@ -23,26 +23,14 @@
 # 다음 코드에서 IOC container의 역할 : 
 # Spring IoC 컨테이너(ApplicationContext)는
 # Bean(객체)의 생성, 설정, 생명주기 관리 등을 담당합니다.
-# 우리가 직접 new 키워드로 객체를 생성하지 않고,
+# 개발자가 직접 new 키워드로 객체를 생성하지 않고,
 # XML(혹은 어노테이션) 설정에 따라 Spring이 객체를 만들어 관리해줍니다.
 
-# XML 설정과 Bean 생성 과정
-# XML 파일
-# <bean id="member" class="org.common.MemberDTO">
-#    <constructor-arg index="0" value="1"/>
-#    <constructor-arg name="id" value="user01"/>
-#    <constructor-arg index="2"><value>pass01</value></constructor-arg>
-#    <constructor-arg name="name"><value>HongGilDong</value></constructor-arg>
-# </bean>
-# Bean id="member" : 이 객체를 나중에 "member"라는 이름으로 꺼낼 수 있습니다.
-# class="org.common.MemberDTO" : 이 Bean이 어떤 클래스의 인스턴스인지 지정합니다.
-# constructor-arg : 생성자에 넘길 값들을 지정합니다.
-
-# 즉, Java에서 바로 아래 코드로 객체를 생성한 것과 동일하게,
-# new MemberDTO(1, "user01", "pass01", "HongGilDong");
-# XML에서 "member"라는 id로 이 객체를 IoC 컨테이너가 실제로 생성해서 등록해 둡니다.
-# 이후 코드에서 context.getBean("member")로 꺼내 쓸 수 있습니다.
-# 출처 : https://github.com/copilot/share/006a428e-09a0-8422-a942-524e809f0949
+# 전체 동작 흐름 (정리)
+# 1. Spring IoC 컨테이너가 XML을 읽음 : <bean> 태그를 보고 MemberDTO 객체를 생성, 값도 넣어서 준비시킴.
+# 2. IoC 컨테이너 내부에 Bean들을 Map 형태로 저장 : id가 key, 객체가 value.
+# 3. JAVA class 코드에서 context.getBean()으로 Bean 요청 : IoC컨테이너가 준비해 둔 객체(<bean> 태그로 정의된 값이 주입된 MemberDTO 인스턴스)를 반환.
+# 4. Bean은 재사용 가능(싱글톤) : 기본적으로 한 번 만들어진 Bean은 계속 재사용됨.
 
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -62,3 +50,334 @@
            <constructor-arg name="name"><value>HongGilDong</value></constructor-arg>
        </bean>
 </beans>
+
+# XML 설정과 Bean 생성 과정
+# XML 파일
+# <bean id="member" class="org.common.MemberDTO">
+#    <constructor-arg index="0" value="1"/>
+#    <constructor-arg name="id" value="user01"/>
+#    <constructor-arg index="2"><value>pass01</value></constructor-arg>
+#    <constructor-arg name="name"><value>HongGilDong</value></constructor-arg>
+# </bean>
+# Bean id="member" : 이 객체를 나중에 "member"라는 이름으로 꺼낼 수 있습니다.
+# class="org.common.MemberDTO" : 이 Bean이 어떤 클래스의 인스턴스인지 지정합니다.
+# constructor-arg : 생성자에 넘길 값들을 지정합니다.
+
+# 즉, Java에서 바로 아래 코드로 객체를 생성한 것과 동일하게,
+# new MemberDTO(1, "user01", "pass01", "HongGilDong");
+# XML에서 "member"라는 id로 이 객체를 IoC 컨테이너가 실제로 생성해서 등록해 둡니다.
+# 이후 코드에서 context.getBean("member")로 꺼내 쓸 수 있습니다.
+# 출처 : https://github.com/copilot/share/006a428e-09a0-8422-a942-524e809f0949
+
+
+# ApplicationContext 초기화
+# ApplicationContext context = new GenericXmlApplicationContext(
+#        "section01/xmlconfig/spring-context.xml");
+# 위 코드는 XML에 정의된 Bean 설정 정보를 읽어들여 Spring IoC 컨테이너를 초기화한다.
+# 이때 XML에 정의된 Bean들이 생성되어 컨테이너 내부에 보관된다.
+
+# 01_IoC Container - xmlconfig version
+# 1) Application
+package org.section01.xmlconfig;
+
+import org.common.MemberDTO;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
+
+public class Application {
+
+    public static void main(String[] args) {
+        /* GenericXmlApplicationContext는 Spring의 ApplicationContext 구현체 중 하나로,
+         * XML 파일을 통해 스프링 설정 정보를 읽어와 애플리케이션 컨텍스트를 초기화한다.
+         * (xml을 설정했기 때문에 구현체를 이용해 초기화를 해줘야 한다.)
+         * 아래 코드는 classpath 기준으로 "section01/xmlconfig/spring-context.xml"에 정의된
+         * 스프링 Bean 설정 정보를 로드한다. */
+
+        /*GenericXmlApplicationContext class를 사용해 ApplicationContext 생성
+         * 생성자에 xml 설정 메타 정보를 인자로 전달*/
+        ApplicationContext context = new GenericXmlApplicationContext(
+                "section01/xmlconfig/spring-context.xml");
+
+        /* [Bean을 가져오는 3가지 방법]
+         * 1. bean의 id를 이용해 bean을 가져오는 방법
+         * XML 설정 파일(spring-context.xml)에서 정의한 bean id("member")를 사용하여 Bean을 가져온다.
+         * 이 방법에서의 context.getBean은 object객체로 반환하기에 (MemberDTO)로 다운캐스팅이 필수다. */
+        MemberDTO member = (MemberDTO) context.getBean("member");
+                     /*위 코드로 "member"라는 id를 가진 Bean을 꺼낸다.
+                     여기서 이 "member"라는 id를 가진 Bean은 IoC 컨테이너가 XML(spring-context.xml)을 읽어서,
+                     컨테이너 초기화 시점에 미리 생성해둔 Member DTO 인스턴스(객체)이다. */
+
+        System.out.println("member = " + member);   //member = MemberDTO{sequence=1, id='user01', pwd='pass01', name='HongGilDong'}
+        //spring-context.xml에서 constructor-arg로 id가 member인 bean에 넣어준 값이 출력된다.
+
+        /* 2. Bean의 클래스 타입을 이용해 가져오는 방법
+         * 등록된 bean 중 해당 타입이 하나뿐일 경우에만 사용 가능.
+         * 여러 개일 경우 NoUniqueBeanDefinitionException 예외 발생
+         */
+        /* MemberDTO member = context.getBean(MemberDTO.class);
+        System.out.println(member); */
+        // 노트북 IntelliJ에서 한글 '홍길동' 컴파일 에러나길래 영어 이름으로 바꿈
+        //MemberDTO{sequence=1, id='user01', pwd='pass01', name='HongGilDong'}
+
+        /* 3. 빈의 id와 클래스 타입을 함께 전달해 가져오는 방법
+         *   가장 명확하고 안정적인 방식. id와 타입이 모두 일치하는 빈을 반환한다.
+         *    → 명시적이기 때문에 다수의 동일 타입 빈이 존재해도 문제 없음
+         */
+        MemberDTO member = context.getBean("member", MemberDTO.class);
+        System.out.println("member = " + member);
+        //member = MemberDTO{sequence=1, id='user01', pwd='pass01', name='HongGilDong'}
+    }
+}
+
+
+
+# 01_IoC Container - javaconfig version
+# 1) Application
+package org.section02.javaconfig;
+
+import org.common.MemberDTO;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+
+        /* AnnotationConfigApplicationContext
+         * - 자바 기반 설정 클래스(@Configuration를 붙인 자바 클래스)를 사용하여
+         *   스프링 컨테이너를 초기화할 때 사용하는 클래스이다.
+         * - 생성자의 인자로 넘긴 클래스(여기서의 예시 ContextConfiguration.class)는
+         *   어노테이션 @Configuration이 붙은 스프링 설정 클래스여야 한다.
+         * - 이 설정 클래스(예.ContextConfiguration)를 기반으로
+         *   내부에 정의된 @Bean 메소드들이 실행되어 Bean 객체가 등록된다.
+         */
+        ApplicationContext context
+                = new AnnotationConfigApplicationContext(ContextConfiguration.class);
+
+        /* getBean 메서드
+         * - 첫 번째 인자는 Bean 이름("member"), 두 번째 인자는 Bean 타입(MemberDTO.class)을 의미한다.
+         * - 자바 클래스 ContextConfiguration에서 @Bean 어노테이션을 통해 이름이 member로 등록된 객체를 가져온다.
+         *      (ContextConfiguration에서 @Bean(name = "member")으로 등록된 객체를 가져온다) */
+        MemberDTO member = context.getBean("member", MemberDTO.class);
+
+        System.out.println("member = " + member);
+        //member = MemberDTO{sequence=1, id='user01', pwd='pass01', name='GwansunYu'}
+        //아까 xmlconfig.Application의 실행결과와 다르게
+        // ContextConfiguration에서 public MemberDTO getMember() 메소드로 등록된
+        // MemberDTO 타입의 Bean 객체 값이 출력되는 걸 확인할 수 있다.
+    }
+}
+
+
+# 2) ContextConfiguration
+package org.section02.javaconfig;
+
+import org.common.MemberDTO;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+// xml대신 이 클래스를 설정파일로 지정하는 방법
+//configuration annotation을 붙이면 해당 클래스가 설정파일이 되고 빈을 생성하는 클래스임을 표기한다.
+
+/* @Configuration
+ * - 해당 클래스가 스프링의 설정 클래스임을 나타낸다.
+ * - XML 설정 파일을 대체하며, @Bean 어노테이션과 함께 사용된다.
+ * (xml 설정 파일 사용방식은 지금은 안 쓰는 옛날 방식이다) */
+@Configuration
+public class ContextConfiguration {
+
+    /* @Bean
+     * - 해당 메소드의 반환 값을 스프링 컨테이너에 Bean으로 등록한다.
+     * - name 속성을 지정하면 해당 이름으로 등록되고,
+     *   Bean의 name을 따로 지정해주지 않는다면 메소드 이름(예. getMember)이 Bean의 이름이 된다.
+     *   @Bean("member") 또는 @Bean(name = "member") 형식으로 Bean 이름(id)을 설정할 수 있다.
+     */
+    @Bean(name="member")
+    public MemberDTO getMember() {
+        return new MemberDTO(1, "user01", "pass01", "GwansunYu");
+    }   
+        // Bean의 name을 따로 지정해주지 않는다면 method이름이 Bean의 이름이 된다.
+        //section02.javaconfig.Application에서 getBean("member", MemberDTO.class); 대신
+        //MemberDTO member = context.getBean("getmember", MemberDTO.class);
+        //로 불러오고 출력해도 위 return으로 넣어준 값이 나오는 걸 확인할 수 있다
+}
+
+# 01_IoC Container - annotationconfig version
+# 1) Application
+package org.section03.annotationconfig;
+
+import org.common.MemberDAO;
+import org.common.MemberDTO;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+        /* AnnotationConfigApplicationContext
+         * - 자바 기반 설정 클래스(ContextConfiguration)를 통해 스프링 컨테이너를 초기화한다.
+         * - 설정 클래스는 @Configuration 어노테이션을 가지고 있어야 하며,
+         *   내부적으로 @ComponentScan 등을 통해 자동으로 Bean을 등록한다. */
+        ApplicationContext context
+                = new AnnotationConfigApplicationContext(ContextConfiguration.class);
+
+        /* getBeanDefinitionNames()
+         * - 현재 스프링 컨테이너에 등록된 모든 Bean의 이름(ID)을 문자열 배열로 반환한다.
+         * - 이를 통해 어떤 Bean들이 등록되었는지 확인할 수 있다. */
+        String[] beanNames = context.getBeanDefinitionNames();
+        for (String beanName : beanNames) {
+            System.out.println("beanName = " + beanName);
+        }
+
+        /* 스프링 컨테이너에서 memberDAO라는 이름으로 등록된 Bean을 가져온다.
+         * - MemberDAO에 @Component가 붙어있기 때문에
+         *   ContextConfiguration의 @ComponentScan에 의해
+         *   MemberDAO 객체가 Bean으로 자동 등록되었다.
+         */
+        MemberDAO dao = context.getBean("dao", MemberDAO.class);
+
+        // sequence 1번 회원 조회
+        System.out.println(dao.selectMember(1));
+        //MemberDTO{sequence=1, id='user01', pwd='pass01', name='honggildong'}
+
+        // sequence 3번인 새 회원 등록
+        System.out.println(dao.insertMember(new MemberDTO(3, "user03", "pass03", "shinsaimdang")));
+        // true
+
+        // 3번 회원 조회
+        System.out.println(dao.selectMember(3));
+        //MemberDTO{sequence=3, id='user03', pwd='pass03', name='shinsaimdang'}
+    }
+}
+
+# 2) ContextConfiguration
+package org.section03.annotationconfig;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ComponentScan(basePackages="org")
+/* @Configuration
+ * - 이 annotation이 붙은 클래스가 스프링의 설정 클래스임을 나타낸다.
+ * - 자바 기반 설정 방식에서 사용되며, XML 설정을 대체한다.
+ *
+ * @ComponentScan
+ * - basePackage로 설정된 경로(예시. org)의
+ *   모든 하위 패키지(디렉토리)에 있는 class들을 전부 스캔,
+ *   특정 어노테이션을 갖고 있는 class를 인식하여 bean으로 자동 등록한다.
+ *     특정 어노테이션 = @Component(기본 스캔대상), @Service, @Repository, @Controller, @Configuration
+ * - basePackages를 설정하지 않으면 기본적으로
+ *   설정파일(@Configuration, @ComponentScan을 사용한 클래스)과
+ *   동일한 패키지(디렉토리)에 있는 bean만 탐색한다.
+ *
+ * 참고: 스프링은 역할에 따라 다음과 같은 어노테이션을 제공한다.
+ *   - @Component   : 일반적인 컴포넌트 클래스
+ *   - @Controller  : 프레젠테이션 계층 (웹 요청 처리)
+ *   - @Service     : 비즈니스 로직 계층
+ *   - @Repository  : 데이터 접근 계층
+ *   - @Configuration : 설정 클래스
+ */
+public class ContextConfiguration {
+}
+
+
+# org.common - MemberDTO
+package org.common;
+
+public class MemberDTO {
+    private int sequence;
+    private String id;
+    private String pwd;
+    private String name;
+    
+    public MemberDTO() {}
+
+    public MemberDTO(int sequence, String id, String pwd, String name) {
+        this.sequence = sequence;
+        this.id = id;
+        this.pwd = pwd;
+        this.name = name;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setPwd(String pwd) {
+        this.pwd = pwd;
+    }
+
+    public String getname() {
+        return name;
+    }
+
+    public void setname(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "MemberDTO{" +
+                "sequence=" + sequence +
+                ", id='" + id + '\'' +
+                ", pwd='" + pwd + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
+
+# org.common - MemberDAO
+package org.common;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+/* @Component
+ * - 해당 클래스를 스프링의 Bean으로 자동 등록시켜주는 annotation이다.
+ * - @ComponentScan이 설정된 경로에 위치해야 인식된다.
+ * - Bean의 이름은 기본적으로 클래스 이름을 camelCase로 변환한 형태 ("memberDAO")로 등록된다.
+ */
+@Component
+public class MemberDAO {
+    private final Map<Integer, MemberDTO> memberMap;
+
+    //final로 만들었기때문에 반드시 생성자 이용해 초기화해줘야 함 (회원 데이터 초기화)
+    public MemberDAO() {
+        memberMap = new HashMap<>();
+
+        memberMap.put(1, new MemberDTO(1, "user01", "pass01", "honggildong"));
+        memberMap.put(2, new MemberDTO(2, "user02", "pass02", "yugwansun"));
+    }
+
+    /* 전달받은 sequence를 기준으로 회원 정보를 조회한다. */
+    public MemberDTO selectMember(int sequence) {
+        return memberMap.get(sequence);
+    }
+
+    /* 새로운 회원 정보 등록. 기존 데이터 크기와 비교하여 정상적으로 추가되었는지 여부를 반환한다. */
+    public boolean insertMember(MemberDTO newMember) {
+        int before = memberMap.size();
+
+        memberMap.put(newMember.getSequence(), newMember);
+        int after = memberMap.size();
+
+        return after > before;
+    }
+}
