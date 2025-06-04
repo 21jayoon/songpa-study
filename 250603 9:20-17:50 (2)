@@ -88,7 +88,7 @@ public class Application {
          * accountGenerator() 메소드를 이용해 계좌번호값과 기본 잔고 값을 넣어주었다.
          * public Account accountGenerator(){ return new PersonalAccount("계좌번호", 기본잔고int) }*/
 
-        //2.의존성 주입 방식 setter injection
+        //2. 세터 주입 방식 setter injection
         //MemberDTO{id=1, name='John Doe', phone='010-2222-3333', email='234@gmail.com', accountNumber={accNo='110-234-234891', balance=1000}}
 
         //DTO 내 toString() 수정과 PersonalAccount 내 toString() 추가 전 출력값
@@ -136,7 +136,7 @@ public class ContextConfiguration {
         /*1. 생성자 주입*/
         //return new MemberDTO(1, "gildongHong", "010-2345-4356", "asdjf@gmail.com", accountGenerator());
 
-        /*2. 의존성 주입 방식(Setter Injection 세터 주입)*/
+        /*2. Setter Injection 세터 주입*/
         MemberDTO member = new MemberDTO();
 
         member.setSequence(1);
