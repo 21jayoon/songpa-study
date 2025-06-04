@@ -1,0 +1,494 @@
+# Spring
+
+# CHAPTER03-DI-annotation
+# section01_autowired_subsection03_setter - Application
+package com.ohgiraffers.section01.autowired.subsection03.setter;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+        AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext("com.ohgiraffers");
+        //"com.ohgiraffers"하위에 있는 클래스들을 스캔해서 @Bean값을 찾은 후 context에 담아준다.
+        BookService bookService = context.getBean("bookServiceSetter", BookService.class);
+        //context.getBean을 이용해 Bean 이름("bookServiceSetter")과 BookService.class 메타 데이터(?)를 이용해
+        //bookService 변수에 값을 담아준다
+
+        bookService.selectAllBooks().forEach(System.out::println);
+        /* BookDTO{도서 코드=1, isbn=123456, 제목='자바의 정석', 저자='나는야', 출판사='최고출판', 출판일=Wed Jun 04 09:59:53 KST 2025}
+        BookDTO{도서 코드=2, isbn=345678, 제목='NyamNyam', 저자='ohGod', 출판사='PUB', 출판일=Wed Jun 04 09:59:53 KST 2025} */
+    }
+}
+
+# section01_autowired_subsection03_setter - BookService
+package com.ohgiraffers.section01.autowired.subsection03.setter;
+
+import com.ohgiraffers.section01.common.BookDAO;
+import com.ohgiraffers.section01.common.BookDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+//@Service도 컴포넌트 세분화 annotation 중 하나
+//Spring chap01-ioc-container section03.annotationconfig -ContextConfiguration 주석을 참고하시오
+@Service("bookServiceSetter")
+// @Service("bookServiceSetter") = BookService 클래스를 Spring 컨테이너에 'bookServiceSetter'라는 이름의 Service Bean으로 등록한다.
+public class BookService {
+    private BookDAO bookDAO;
+
+    /* BookDAO 타입의 bean 객체를 setter에 자동으로 주입해주는 과정*/
+    @Autowired
+    public void setBookDAO(BookDAO bookDAO){
+        this.bookDAO = bookDAO;
+    }
+    /* 생성자 주입과 비교 : final 불가능.
+    그렇기 때문에 세터 주입도 사용 지양해야 함
+    * 세터 주입은 무조건 기본생성자 작성 필요*/
+
+    // 전체 도서 목록을 조회하여 반환하는 메소드
+    public List<BookDTO> selectAllBooks(){
+        return bookDAO.selectBookList();
+    }
+
+    // sequence(도서번호)로 특정 도서를 조회하여 반환하는 메소드
+    public BookDTO selectBookBySequence(int sequence) {
+        return bookDAO.selectOneBook(sequence);
+    }
+
+    //면접 질문 : 생성자 주입의 장점. 필드 주입과 생성자 주입, 의존성 주입(field/ constructor / setter injection)의 차이 설명 가능해야
+}
+
+
+# section01_common - BookDAO
+package com.ohgiraffers.section01.common;
+import java.util.List;
+
+public interface BookDAO {
+    /*도서 목록 전체 조회*/
+    List<BookDTO> selectBookList();
+
+    /* 도서 번호로 도서 조회*/
+    BookDTO selectOneBook(int sequence);
+}
+
+# section01_common - BookDAOImpl
+package com.ohgiraffers.section01.common;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/* @Repository = 이 클래스가 데이터 액세스 계층(DAO) 역할을 한다는 것을 Spring에게 알림.
+ * - "bookDAO"라는 이름으로 스프링 컨테이너에 Bean으로 등록된다.
+ *    (=IoC 컨테이너에게 관리를 맡기기 위해 @Repository를 통해 컨테이너에 "bookDAO"라는 이름의 bean으로 등록)
+ * - @Repository 어노테이션은 반드시 (인터페이스가 아닌) 구현하는 클래스에 만들어야 한다*/
+@Repository("bookDAO")
+public class BookDAOImpl implements BookDAO {
+    // Interface DAO를 실제 구현한 클래스를 BookDAOImpl에 만든다.
+
+    /* 실제 데이터베이스 대신 도서 정보를 저장할 임시 Map 컬렉션.
+     * Key는 도서 일련번호(sequence), Value는 도서 정보를 담은 BookDTO 객체. */
+    private final Map<Integer, BookDTO> bookList;
+
+    /* 생성자 public BookDAOImpl() {}에서 도서 목록을 초기화한다.
+     * - 실제 DB 연동 없이 하드코딩된 도서 데이터를 저장 */
+    public BookDAOImpl() {
+        bookList = new HashMap<>();
+        bookList.put(1, new BookDTO(1,123456, "자바의 정석", "나는야", "최고출판", new java.util.Date()));
+        bookList.put(2, new BookDTO(2,345678, "NyamNyam", "ohGod", "PUB", new java.util.Date()));
+    }
+
+    // 전체 도서 목록을 조회하여 List 형태로 반환한다.
+    @Override
+    public List<BookDTO> selectBookList() {
+        return new ArrayList<>(bookList.values());
+    }
+
+    //sequence를 기반으로 특정 도서 하나를 조회하여 반환한다.
+    @Override
+    public BookDTO selectOneBook(int sequence) {
+        return bookList.get(sequence);
+    }
+
+    /* [왜 BookDAOImpl 같은 Impl 클래스가 필요한가?]
+     * 1. 역할 분리
+     *    - BookDAO 인터페이스는 '무엇을 할지(기능의 정의)'만 선언하고,
+     *    - BookDAOImpl은 '어떻게 할지(구현)'를 제공한다.
+     *
+     * 2. 유연한 확장과 유지보수
+     *    - 나중에 JDBC, JPA, MyBatis 등 다른 기술로 구현체를 바꿔도
+     *      인터페이스는 그대로 두고 구현체만 교체하면 된다.
+     *      그렇기 때문에 유지보수에 용이하다.
+     *
+     * 3. 테스트 용이성
+     *    - 테스트 환경에서는 BookDAOImpl 대신 가짜(Mock) 구현체를 만들어
+     *      쉽게 단위 테스트를 할 수 있다.
+     *
+     * 4. DI(의존성 주입) 기반 프로그래밍
+     *    - Spring이 인터페이스(BookDAO)를 기준으로 구현체(BookDAOImpl)를 자동 주입해줌으로써
+     *      느슨한 결합을 구현할 수 있다. (=강한 결합을 피할 수 있다)
+     */
+}
+
+# section01_common - BookDTO
+package com.ohgiraffers.section01.common;
+
+import java.util.Date;
+
+public class BookDTO {
+    private int sequence;
+    private int isbn;
+    private String title;
+    private String author;
+    private String publisher;
+    private Date createDate;
+
+    public BookDTO() {}
+
+    public BookDTO(int sequence, int isbn, String title, String author, String publisher, Date createDate) {
+        this.sequence = sequence;
+        this.isbn = isbn;
+        this.title = title;
+        this.author = author;
+        this.publisher = publisher;
+        this.createDate = createDate;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
+
+    public int getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(int isbn) {
+        this.isbn = isbn;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    @Override
+    public String toString() {
+        return "BookDTO{" +
+                "도서 코드=" + sequence +
+                ", isbn=" + isbn +
+                ", 제목='" + title + '\'' +
+                ", 저자='" + author + '\'' +
+                ", 출판사='" + publisher + '\'' +
+                ", 출판일=" + createDate +
+                '}';
+    }
+}
+
+# section02_annotation_subsection01_primary - Application
+package com.ohgiraffers.section02.annotation.subsection01.primary;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext("com.ohgiraffers.section02");
+
+        String[] beanNames = context.getBeanDefinitionNames();
+        for(String beanName : beanNames){
+            System.out.println(beanName);
+        }
+        /* pokemonServicePrimary
+        charmander
+        kkobuk
+        pikachu */
+
+        PokemonService pokemonService = context.getBean("pokemonServicePrimary", PokemonService.class);
+        pokemonService.pokemonAttack(); //피카츄 전기 공격!!!  :  Pikachu class에 @Primary가 붙어있으니 피카츄가 우선순위가 되어 피카츄 출력값이 나온다
+
+    }
+}
+
+# section02_annotation_subsection01_primary - PokemonService
+package com.ohgiraffers.section02.annotation.subsection01.primary;
+
+import com.ohgiraffers.section02.common.Pokemon;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+//서비스 계층이기 때문에 @Service를 이용해 bean으로 등록
+@Service("pokemonServicePrimary")
+public class PokemonService {
+    // 생성자 주입
+    private Pokemon pokemon;
+
+    @Autowired
+    public PokemonService(Pokemon pokemon) {
+        this.pokemon = pokemon;
+    }
+
+    public void pokemonAttack() {
+        pokemon.attack();
+    }
+}
+
+# section02_subsection02_qualifier - Application
+package com.ohgiraffers.section02.annotation.subsection02.qualifier;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+        //아. main 안 넣어줘서 pokemonService.pokemonAttack(); 이게 자꾸 인식 안 됐던 거였음. 하.....
+
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext("com.ohgiraffers.section02");
+
+        PokemonService pokemonService = context.getBean("pokemonServiceQualifier", PokemonService.class);
+        pokemonService.pokemonAttack();
+        //(1. 필드 주입 방식 결과) 꼬부기 물대포 발사!!!
+        //(2. 생성자 주입 방식 결과) 꼬부기 물대포 발사!!!
+        // (@Qualifier가 @Primary보다 우선하므로 Pikachu의 출력값 대신 class Kkobuk의 출력값이 나옴)
+
+    }
+}
+
+# section02_subsection02_qualifier - PokemonService
+package com.ohgiraffers.section02.annotation.subsection02.qualifier;
+
+import com.ohgiraffers.section02.common.Pokemon;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+@Service("pokemonServiceQualifier")
+public class PokemonService {
+    /*1. 필드주입 방식 : 필드에 Qualifier 주입 가능*/
+    //@Qualifier 어노테이션은 여러 개의 bean 객체 중에서 특정 bean 객체(@Qualifier가 붙은 bean)를 이름으로 지정하는 어노테이션이다.
+    //@Primary와 Qualifier이 함께 쓰인 경우, @Qualifier가 우선된다. (아까 primary의 결과와 다르게 @Qualifier가 붙은 꼬북이가 출력되는 걸 볼 수 있음)
+
+    // 면접질문 빈출!! : @Primay & @Qualifier 차이
+    private Pokemon pokemon;
+
+//    @Autowired
+//    @Qualifier("Kkobuk") //필드 주입 방식(권장x), 사용시 @Qualifier 위치 잘 알아둘 것
+//    public void PokemonService(Pokemon pokemon) {
+//        this.pokemon = pokemon;
+//    }
+
+    public void pokemonAttack() {
+        pokemon.attack();
+    }
+
+    /*2. 생성자 주입 방식*/
+    @Autowired
+    public PokemonService(@Qualifier("Kkobuk") Pokemon pokemon){
+        this.pokemon = pokemon;
+    }
+}
+
+
+# section02_subsection03_collection - Application
+package com.ohgiraffers.section02.annotation.subsection03.collection;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+public class Application {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext("com.ohgiraffers.section02");
+
+        PokemonService pokemonService = context.getBean("pokemonServiceCollection", PokemonService.class);
+        pokemonService.pokemonAttack();
+        /*(1.List 타입으로 주입 결과)
+        * 파이리 불꾳 공격!!!!
+        * 꼬부기 물대포 발사!!!
+        * 피카츄 전기 공격!!! */
+
+        /* (2.Map 타입으로 주입 결과)
+        keycharmander
+        ATTACK!
+        파이리 불꾳 공격!!!!
+        keyKkobuk
+        ATTACK!
+        꼬부기 물대포 발사!!!
+        keypikachu
+        ATTACK!
+        피카츄 전기 공격!!! */
+    }
+}
+
+
+# section02_subsection03_collection - PokemonService
+package com.ohgiraffers.section02.annotation.subsection03.collection;
+
+import com.ohgiraffers.section02.common.Pokemon;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service("pokemonServiceCollection")
+public class PokemonService {
+    //1. List타입으로 여러가지 포켓몬 주입
+//    private List<Pokemon> pokemonList;
+//
+//    @Autowired
+//    public PokemonService(List<Pokemon> pokemonList){
+//        this.pokemonList = pokemonList;
+//    }
+//
+//    public void pokemonAttack() {
+//        for(Pokemon pokemon : pokemonList){
+//            pokemon.attack();
+//        }
+//    }
+
+    //2.Map 타입으로 주입
+    private Map<String, Pokemon> pokemonMap;
+
+    @Autowired
+    public PokemonService(Map<String, Pokemon> pokemonMap){
+        this.pokemonMap = pokemonMap;
+    }
+    public void pokemonAttack() {
+        pokemonMap.forEach((k, v)-> {
+            System.out.println("key"+k);
+            System.out.println("ATTACK!");
+            v.attack();
+        });
+    }
+}
+
+
+# section02_common - Interface Pokemon 
+package com.ohgiraffers.section02.common;
+
+public interface Pokemon {
+    void attack();
+}
+
+# section02_common - class Pikachu
+package com.ohgiraffers.section02.common;
+
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+
+@Component
+@Primary
+//세 마리 포켓몬 전부가 bean으로 등록됐기 때문에 Pikachu가 먼저 동작할 수 있게 @Primary 어노테이션 붙여줌
+public class Pikachu implements Pokemon{
+    @Override
+    public void attack() {
+        System.out.println("피카츄 전기 공격!!!");
+    }
+}
+
+
+# section02_common - class Charmander
+package com.ohgiraffers.section02.common;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Charmander implements Pokemon{
+    @Override
+    public void attack() {
+        System.out.println("파이리 불꾳 공격!!!!");
+    }
+}
+
+# section02_commoon - class Kkobuk
+package com.ohgiraffers.section02.common;
+
+import org.springframework.stereotype.Component;
+
+@Component("Kkobuk")
+//@Qualifier("Kkobuk") 써주려면 @Component에도 ("Kkobuk")붙여줘야 한다.
+//자동으로 인식하지 않을까해서 @Component만 적은 상태에서 execute 여러번 해봤는데
+//매번 안 됐음
+public class Kkobuk implements Pokemon {
+    @Override
+    public void attack() {
+        System.out.println("꼬부기 물대포 발사!!!");
+    }
+}
+
+
+# CAHPTER04_bin
+# com.ohgiraffers.common - Product
+package com.ohgiraffers.common;
+
+public abstract class Product {
+    private String name;
+    private int price;
+
+    public Product(){}
+
+    //모든 필드 초기화하는 생성자
+    public Product(String name, int price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return name + " "+ price;
+    }
+}
+
