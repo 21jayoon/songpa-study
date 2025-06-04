@@ -35,7 +35,7 @@ public class Application {
         //spring-config.xml에서 2.생성자 주입방식으로 생성된 객체를 갖고 옴
 
         //MemberDTO{id=1, name='HongGildong', phone='010-123-4567', email='hong123@gmail.com', accountNumber=org.common.PersonalAccount@78dd667e}
-        //spring-config.xml에서 3. 의존성 주입 방식으로 생성된 객체 갖고 옴
+        //spring-config.xml에서 3. 세터 주입 방식으로 생성된 객체 갖고 옴
         //accountNumber=org.common.PersonalAccount@78dd667e 이렇게 @hashCode만 자꾸 뜨는 걸 해결하기 위해서
         //PersonalAccount 마지막에 toString() 넣어줌.
         //MemberDTO{id=1, name='HongGildong', phone='010-123-4567', email='hong123@gmail.com', accountNumber={accNo='110-234-567890', balance=0}}
@@ -53,7 +53,7 @@ public class Application {
         10000
         true
         5000
-        2.생성자 주입방식, 3.의존성 주입방식 둘 다 결과값 동일*/
+        2.생성자 주입방식, 3.세터터 주입방식 둘 다 결과값 동일*/
 
         //면접질문 빈출 : 의존성 주입 뜻이 뭐냐? 의존성 종류에는 뭐가 있냐? 그 중 생성자는 무엇이냐?
     }
