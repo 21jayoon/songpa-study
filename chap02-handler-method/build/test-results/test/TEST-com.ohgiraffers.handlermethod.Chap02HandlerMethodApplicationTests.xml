@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.ohgiraffers.handlermethod.Chap02HandlerMethodApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-06-05T06:30:06.101Z" hostname="DESKTOP-02NHO5P" time="0.539">
+  <properties/>
+  <testcase name="contextLoads()" classname="com.ohgiraffers.handlermethod.Chap02HandlerMethodApplicationTests" time="0.539"/>
+  <system-out><![CDATA[15:30:04.781 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.ohgiraffers.handlermethod.Chap02HandlerMethodApplicationTests]: Chap02HandlerMethodApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+15:30:04.872 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.ohgiraffers.handlermethod.Chap02HandlerMethodApplication for test class com.ohgiraffers.handlermethod.Chap02HandlerMethodApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.0)
+
+2025-06-05T15:30:05.231+09:00  INFO 26504 --- [chap02-handler-method] [    Test worker] .o.h.Chap02HandlerMethodApplicationTests : Starting Chap02HandlerMethodApplicationTests using Java 17.0.14 with PID 26504 (started by User in D:\lecture\10_spring-webmvc\chap02-handler-method)
+2025-06-05T15:30:05.247+09:00  INFO 26504 --- [chap02-handler-method] [    Test worker] .o.h.Chap02HandlerMethodApplicationTests : No active profile set, falling back to 1 default profile: "default"
+2025-06-05T15:30:05.860+09:00  INFO 26504 --- [chap02-handler-method] [    Test worker] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-06-05T15:30:06.091+09:00  INFO 26504 --- [chap02-handler-method] [    Test worker] .o.h.Chap02HandlerMethodApplicationTests : Started Chap02HandlerMethodApplicationTests in 1.085 seconds (process running for 1.947)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
