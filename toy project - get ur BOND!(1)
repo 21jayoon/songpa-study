@@ -1,0 +1,67 @@
+# 기획 의도 : 주변 또래 여성들을 보면 상대적으로 투자에 적극적이지 않고,
+# 투자 자체에 관해서도 긍정적이지 않으며(최수정, 2023)
+# 남성에 비해 전반적으로 더 높은 위험회피 성향을 보였다.(김대환&이봉주, 2023)
+
+# 하지만 최근에는 경제성장률 장기 둔화와
+# 인플레이션 등으로 화폐가치의 감소가 계속해서 떨어지는 중이고, 
+# 개인으로써 이를 최대한 방지하기 위해서는 
+# 월급 같은 지속적인 수입 외에도 투자가 반드시 필요하기에
+# "채권을 소개하고 채권의 각 요소에 대해 설명"하는 서비스를
+# 토이 프로젝트 주제로 잡기로 했다.
+
+# 1. ERD
+# 총 6개의 테이블이 나왔다.
+# 유저 테이블 : 유저코드(PK), 유저닉네임
+# 채권 테이블 : 채권코드(PK), 채권명, 채권타입(FK), 채권금리, 만기일
+# 스크랩 테이블 : 유저코드(PK복합키,FK), 채권코드(PK복합, FK)
+# 채권종류 테이블 : 채권종류코드(PK), 종류이름
+# 채권종류설명 테이블 : 종류코드(PK, FK), 메세지
+# 기준금리 테이블 : 금리결정일(PK), 기관명, 기준금리
+
+# 2. DB Script
+CREATE DATABASE geturBONDdb;
+GRANT ALL PRIVILEGES ON geturBONDdb.* TO 'ohgiraffers'@'%';
+USE geturBONDdb;
+
+/*  1. Delete tables */
+DROP TABLE IF EXISTS tbl_user CASCADE;
+DROP TABLE IF EXISTS tbl_like CASCADE;
+DROP TABLE IF EXISTS tbl_bonds CASCADE;
+DROP TABLE IF EXISTS tbl_bondtype CASCADE;
+DROP TABLE IF EXISTS tbl_baseRate CASCADE;
+
+
+/* 2. Generate the tables */
+CREATE TABLE IF NOT EXISTS tbl_user
+(
+user_id INT AUTO_INCREMENT COMMENT '유저고유번호',
+user_nickname VARCHAR(30) NOT NULL COMMENT '유저닉네임',
+CONSTRAINT pk_user_id PRIMARY KEY (user_id)
+) ENGINE=INNODB COMMENT '유저테이블';
+
+CREATE TABLE IF NOT EXISTS tbl_bonds
+(
+bond_code   INT AUTO_INCREMENT COMMENT '채권코드',
+bond_name   VARCHAR(50) NOT NULL COMMENT '채권이름',
+bond_type   INT NOT NULL COMMENT '채권종류',
+bond_yield  DOUBLE NOT NULL COMMENT '채권 금리',
+bond_duration  DATE NOT NULL COMMENT '만기일',
+CONSTRAINT pk_bond_code PRIMARY KEY (bond_code),
+CONSTRAINT fk_bond_type FOREIGN KEY (bond_type) REFERENCES tbl_bondtype (type_code)
+) ENGINE=INNODB COMMENT '채권테이블';
+
+CREATE TABLE IF NOT EXISTS tbl_bondtype
+(
+type_code   INT AUTO_INCREMENT COMMENT '종류코드',
+type_name   VARCHAR(15) NOT NULL COMMENT '종류이름',
+CONSTRAINT pk_type_code PRIMARY KEY (type_code)
+) ENGINE=INNODB COMMENT '채권종류테이블';
+
+CREATE TABLE IF NOT EXISTS tbl_bondtype_explain
+(
+`TYPE_CODE`    INT NOT NULL COMMENT '종류코드',
+`type_message`    VARCHAR(255) NOT NULL COMMENT '설명메세지',
+PRIMARY KEY ( `TYPE_CODE` ),
+CONSTRAINT fk_TYPE_CODE FOREIGN KEY (TYPE_CODE) REFERENCES tbl_bondtype (type_code)
+)
+COMMENT = '채권타입설명';
