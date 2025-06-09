@@ -35,7 +35,12 @@
 # Model을 사용하여 클라이언트에게 응답을 반환한다. -> View
 
 # @RequestMapping
-# Spring Web MVC에서 요청(Request)을 처리하는 데 사용되는 어노테이션,
+# Spring Web MVC에서 요청Request을 처리하는 데 사용되는 어노테이션
 # 클래스 레벨이나 메소드 레벨에서 사용 가능.
 # 이 annotation를 통해 어떤 URL이 어떤 메소드에서 처리되는지, 어떤 HTTP Method를 처리할지 등을 정할 수 있다.
-# -> DispatcherServlet은 웹 요청을 받으면 @Controller가 달린 컨트롤러 클래스에 처리를 위임한다. 그 과정은 컨트롤러 클래스의 핸들러 메서드에 선언된 다양한 @RequestMapping 설정 내용에 따른다.
+# -> DispatcherServlet은 웹 요청을 받으면 @Controller가 달린 컨트롤러 클래스에 처리를 위임한다.
+# 해당 과정은 컨트롤러 클래스의 핸들러 메서드에 선언된 다양한 @RequestMapping 설정 내용에 따른다.
+
+
+# 오늘 강의 내용
+# View Resolver : 
