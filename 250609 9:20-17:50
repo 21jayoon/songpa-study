@@ -1,0 +1,41 @@
+# 지난주 복습 Review the last week lecture
+# Spring web MVC?
+# Model / View / Controller
+# Spring Framework에서 제공하는 기능 중 하나로, 클라이언트의 요청을 처리하고, 
+# Controller에서 비즈니스 로직을 실행한 뒤, Model 객체를 반환하고 
+# ViewResolver를 통해 View를 찾아 응답을 반환한다.
+# 이를 위해 MVC 2 패턴을 지원하며,
+# Model, View, Controller 사이의 의존 관계를 DI 컨테이너에서 관리하여 
+# 유연한 웹 어플리케이션을 쉽게 구현하고 개발할 수 있다
+
+# Spring Web MVC에서는 Controller, Service, DAO 계층으로 구성된 MVC 패턴을 따른다.
+# Controller 계층 : 클라이언트의 요청을 처리하고, 비즈니스 로직을 실행한 뒤 Model 객체를 반환.
+# Service 계층 (View) : 비즈니스 로직 수행. Controller에서 전달받은 Model 객체를 가공하고, DAO에서 전달받은 데이터를 조합하여 비즈니스 로직을 실행한다.
+# DAO 계층 (Model) :  데이터베이스와의 상호작용 담당. 데이터베이스에 접근하여 데이터 조회/수정하는 등의 작업을 수행한다. 
+#                     이렇게 수행된 결과는 Service 계층으로 전달되어 가공된 후, Controller 계층으로 반환된다.
+
+# Spring MVC Request 처리 과정
+# 1. HTTP Request : 클라이언트의 Request가 DispatcherServlet에 도착한다. (Client --HTTP Request-->Dispatcher Servlet)
+# 2. Handler 조회 : HandlerMapping을 통해 클라이언트의 요청을 매핑할 적절한 Controller를 찾는다. (Dispatcher Servlet --Handler조회-->Handler Mapping)
+# 3. handle(handler) : 핸들러 어댑터 실행. 핸들러 어댑터는 Controller와 DispatcherServlet 간 통신을 중개하며, 
+#                      DispatcherServlet이 Controller를 호출할 때 기능을 제공한다. (Dispatcher Servlet--handle(handler)-->Handler Adaptor)
+# 4. handler 호출 : Controller의 handler method를 호출한다. Controller는 비즈니스 로직을 실행하고 Model 객체를 반환한다. (Handler Adapter--handler 호출-->Handler(Controller))
+# 5. ModelAndView 반환 : 핸들러 어댑터는 핸들러가 반환하는 정보를 ModelAndView로 변환해서 반환한다. (Handler Adapter--ModerAndView반환-->Dispatcher Servlet)
+# 6. View Resolver 호출 : DispatcherServlet은 ViewResolver를 통해 어떤 View를 사용할지 결정한다. (Dispatcher Servlet--view resolver 호출-->View Resolver)
+# 7. View 반환 : 뷰 리졸버는 뷰의 이름을 통해 해당하는 뷰 객체를 반환한다. (View Resolver--view 반환-->Dispathcer Servlet)
+# 8. render(model) : View는 Model을 사용하여 뷰를 렌더링한다. (Dispatcher Servlet--render(model)호출-->View)
+# 9. HTTP Response : 클라이언트에게 응답 반환 (Dispatcher Servlet--HTTP Response-->Client)
+
+# Spring MVC 구성 요소 정리
+# 클라이언트의 요청을 처리하고 HandlerMapping을 사용하여 요청을 적절한 Controller에 매핑한다 -> DispatcherServlet
+# 클라이언트의 요청에 대해 어떤 Controller가 처리할지 결정한다. -> HandlerMapping
+# 비즈니스 로직을 실행하고 Model 객체를 반환한다. -> Controller
+# View에서 사용할 데이터를 저장한다. ->Model
+# Controller가 반환한 Model 객체 및 템플릿 파일을 사용하여 적절한 View를 찾는다. -> ViewResolver
+# Model을 사용하여 클라이언트에게 응답을 반환한다. -> View
+
+# @RequestMapping
+# Spring Web MVC에서 요청(Request)을 처리하는 데 사용되는 어노테이션,
+# 클래스 레벨이나 메소드 레벨에서 사용 가능.
+# 이 annotation를 통해 어떤 URL이 어떤 메소드에서 처리되는지, 어떤 HTTP Method를 처리할지 등을 정할 수 있다.
+# -> DispatcherServlet은 웹 요청을 받으면 @Controller가 달린 컨트롤러 클래스에 처리를 위임한다. 그 과정은 컨트롤러 클래스의 핸들러 메서드에 선언된 다양한 @RequestMapping 설정 내용에 따른다.
