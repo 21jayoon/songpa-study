@@ -43,4 +43,156 @@
 
 
 # 오늘 강의 내용
-# View Resolver : 
+# Spring web MVC - View Resolver, exception handling etc.
+# Exception handling 실습
+https://github.com/BOA-with-elephant/spring-exception-handler.git
+
+# Programmers 입문 코딩테스트 '분수의 덧셈' 재시도
+# Retry the 'Programmers' entry coding test training 'Sum of fraction'
+class Solution {
+    public int[] solution(int numer1, int denom1, int numer2, int denom2) {
+        if (denom1 < denom2) {
+            for (int n = 1; denom1 * n == denom2; n++) {
+                System.out.println(n);
+                
+                }
+        
+        } else {
+            for (int m = 1; denom2 * m == denom1; m++) {
+                System.out.println(m);
+            }
+        }  
+            // (numer1 < numer2)? 
+            // ((numer1*gcd(denom1, denom2)) + numer2) : ((numer2 * denom1) + (numer1*denom2));
+        
+        int j = lcm(denom1, denom2);
+            // (denom1 != denom2)? 
+            // lcm(denom1, denom2) : denom1;
+        
+
+        return int[] solution = {j};
+    }
+    // 구글링으로 구해옴
+    //gcd 최대공약수
+    public static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+    // lcm 최소 공배수
+     public static int lcm(int a, int b) {
+        return (a * b) / gcd(a, b);
+    }
+}
+
+# Before rewrite
+Latest
+class Solution {
+    public int[] solution(int numer1, int denom1, int numer2, int denom2) {
+        int i = (denom1<denom2)?
+                for(int n = 1; denom1 * n == denom2; n++){return n;} : 
+                for(int m = 1; denom2 * m == denom1; m++){return m;};
+
+            // (numer1 < numer2)? 
+            // ((numer1*gcd(denom1, denom2)) + numer2) : ((numer2 * denom1) + (numer1*denom2));
+        
+        int j = lcm(denom1, denom2); // 4 6
+            // (denom1 != denom2)? 
+            // lcm(denom1, denom2) : denom1;
+        
+        int[] answer = {i, j};
+
+        return answer;
+    }
+
+class Solution {
+    public int[] solution(int numer1, int denom1, int numer2, int denom2) {
+        int i =
+            (numer1 < numer2)? 
+            ((numer1*gcd(denom1, denom2)) + numer2) : ((numer2 * denom1) + (numer1*denom2));
+        
+        int j = 
+            (denom1 != denom2)? 
+            lcm(denom1, denom2) : denom1;
+        
+        int[] answer = {i, j};
+
+        return answer;
+    }
+    // 구글링으로 구해옴
+    //gdc 최대공약수
+    public static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+    // lcm 최소 공배수
+     public static int lcm(int a, int b) {
+        return (a * b) / gcd(a, b);
+    }
+}
+
+
+class Solution {
+    public int[] solution(int numer1, int denom1, int numer2, int denom2) {
+        int i =
+            (numer1 < numer2)? 
+            ((numer1*gcd(denom1, denom2)) + numer2) : (numer2* (gcd(denom1, denom2)) +numer1);
+        
+        int j = 
+            (denom1 != denom2)? 
+            lcm(denom1, denom2) : denom1;
+        System.out.println(lcm(numer1,numer2));
+        
+        int[] answer = {i, j};
+
+        return answer;
+    }
+    // 구글링으로 구해옴
+    public static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+    // lcm 최소 공배수
+     public static int lcm(int a, int b) {
+        return (a * b) / gcd(a, b);
+    }
+}
+
+class Solution {
+    public int[] solution(int numer1, int denom1, int numer2, int denom2) {
+        
+        if(denom1 != denom2) {
+            int d = lcm(denom1, denom2);
+            System.out.print(d);
+        }
+        int i=
+            (numer1 < numer2)? 
+            ((numer1*gcd(denom1, denom2)) + numer2) : (numer2* (gcd(denom1, denom2)) +numer1);
+        int[] answer = {d, i};
+
+        return answer;
+    }
+    // 구글링으로 구해옴
+    public static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+     public static int lcm(int a, int b) {
+        return (a * b) / gcd(a, b);
+    }
+}
