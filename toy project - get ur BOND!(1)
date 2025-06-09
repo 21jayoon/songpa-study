@@ -65,3 +65,6 @@ PRIMARY KEY ( `TYPE_CODE` ),
 CONSTRAINT fk_TYPE_CODE FOREIGN KEY (TYPE_CODE) REFERENCES tbl_bondtype (type_code)
 )
 COMMENT = '채권타입설명';
+
+# 새 레포지토리 생성 Create new repository
+# https://github.com/21jayoon/toy-project_get-ur-BOND.git
