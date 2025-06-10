@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MAIN</title>
+</head>
+<body>
+<!--1. main.html create-->
+  <h1>파일 업로드하기</h1>
+  <h3>single file 업로드 하기</h3>
+<!--file은 get 방식(parameter를 통해 url로 전달)으로 전송 불가
+why? 1. url이 담을 수 있는 크기보다 file 용량이 더 크다
+ - HTTP/URL 스펙상 GET 요청의 URL에는 길이 제한 有 (브라우저 및 서버마다 다르지만 일반적으로 2~8KB 수준).
+ - 파일은 이보다 훨씬 클 수 있으므로, GET 방식으로 파일 데이터를 전달하는 것은 불가능하다.
+2. 파일데이터를 인코딩해서 전달해야 깨지지 않게 서버에서 해석을 하는데,
+url에 인코딩하는 방식(get 방식)으로는 파일을 인코딩할 수 없다.
+Asked more deeply : https://github.com/copilot/share/080b039e-40a0-8420-9851-500fa0554949 -->
+
+  <form action="single-file" method="post" enctype="multipart/form-data">
+<!-- method="POST" & enctype="multipart/form-data"를 통해 ^^ form 안의 데이터를 인코딩 하는 방식으로 file 업로드-->
+    FILE : <input type="file" name="singleFile"><br>
+    FILE ILLUSTRATE : <input type="text" name="singleFileDescription"><br>
+    <input type="submit">
+  </form>
+
+  <h3>multi file 업로드하기</h3>
+    <form action="multi-file" method="post" enctype="multipart/form-data">
+        FILE : <input type="file" name="multiFile" multiple><br>
+        FILE DESCRIBE : <input type="text" name="multiFileDescription"><br>
+        <input type="submit">
+    </form>
+
+</body>
+</html>
