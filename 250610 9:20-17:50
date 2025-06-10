@@ -1,0 +1,88 @@
+# 프로그래머스 입문 문제 Programmers: entry level coding training
+# 분수의 덧셈 sum of fraction
+class Solution {
+  // 구글링으로 구해옴 1.gcd 최대공약수
+  public static int gcd(int a, int b) {
+      while (b != 0) {
+          int temp = b;
+          b = a % b;
+          a = temp;
+      }
+      return a;
+  }
+  // 2. Lcm 최소 공배수
+   public static int lcm(int a, int b) {
+      return (a * b) / gcd(a, b);
+  }
+  public int[] solution(int numer1, int denom1, int numer2, int denom2) {
+      if (denom1 < denom2) {
+          for (int n = 1; denom1 * n == denom2; n++) {
+              return n;
+              }
+          int i = numer1 * n;
+          return i;
+      } else if(denom1 == denom2 ){
+          int j = numer1 + numer2;
+          return j;    
+      } else {
+          for (int m = 1; denom2 * m == denom1; m++) {
+              int k = numer2 * m;
+              return k;
+          }
+      }
+      return int[] solution = {(i+n+k), lcm(denom1,denom2)};    
+}
+
+# 코파일럿에게 코드 고쳐달라고 요청 Request to the Copilot(github) revise the codes
+# 문제점 problem
+# 1. for문 안에서 return이나 변수 선언이 잘못되었습니다.
+# 2. if문에서 n, i, k 등 지역 변수 스코프가 맞지 않습니다.
+# 3. return 타입이 int[]인데, int 하나만 return하거나, 여러 군데서 return이 혼재되어 있습니다.
+# 4. lcm, gcd 함수가 클래스 내부에 있지만, 메서드 밖에 위치해야 합니다.
+# 5. 두 분수의 합을 구하는 로직이 복잡하게 되어 있는데, if문으로 분리하지 않고, 최소공배수를 이용해 계산하면 더 깔끔합니다.
+
+# 수정 주안점 Modification point
+# if문을 살렸지만, for문을 쓸 필요는 없습니다. 최소공배수를 구해서 분수의 합을 구하면 됩니다.
+# 분모가 같으면 그냥 더하고, 다르면 최소공배수(lcm)로 통분해서 더합니다.
+# 마지막에 최대공약수(gcd)로 기약분수로 만듭니다.
+# lcm, gcd 메서드는 클래스 내부에 있어야 합니다.
+class Solution {
+    // 최대공약수
+    public static int gcd(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+    // 최소공배수
+    public static int lcm(int a, int b) {
+        return (a * b) / gcd(a, b);
+    }
+
+    public int[] solution(int numer1, int denom1, int numer2, int denom2) {
+        int resultNumer = 0;
+        int resultDenom = 0;
+
+        // 분모가 같을 때
+        if (denom1 == denom2) {
+            resultDenom = denom1;
+            resultNumer = numer1 + numer2;
+        }
+        // 분모가 다를 때
+        else {
+            int commonDenom = lcm(denom1, denom2); // 최소공배수
+            int numer1New = numer1 * (commonDenom / denom1);
+            int numer2New = numer2 * (commonDenom / denom2);
+            resultNumer = numer1New + numer2New;
+            resultDenom = commonDenom;
+        }
+
+        // 기약분수로 만들기
+        int commonGcd = gcd(resultNumer, resultDenom);
+        resultNumer /= commonGcd;
+        resultDenom /= commonGcd;
+        return new int[]{resultNumer, resultDenom};
+    }
+}
