@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ETC</title>
+</head>
+<body>
+    <h1 align="center">ETC</h1>
+    <h2>th:with  지역 변수를 지정해서 쓸 수 있는 태그</h2>
+<!-- 여러 페이지 있는 경우 맨 아래에 ◀ 1 2 3 4 5 ▶ 이런 식으로 페이지 넘어갈 수 있게 만든 거 있었잖아? 그거 구현하는 코드임.-->
+    <th:block th:with="start = ${ selectCriteria.startPage }, last = ${ selectCriteria.endPage }">
+      <th:block th:each="p : ${ #numbers.sequence(start, last)}">
+        <th:block th:if="${ selectCriteria.pageNo eq p }">
+          <button th:text="${ p }" disabled></button>
+        </th:block>
+
+        <th:block th:if="${ selectCriteria.pageNo ne p}">
+          <button th:text="${ p }"></button>
+        </th:block>
+      </th:block>
+    </th:block>
+
+</body>
+</html>

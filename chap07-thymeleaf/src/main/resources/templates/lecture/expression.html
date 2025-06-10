@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EXPRESSION</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/common.css}"/>
+</head>
+<body>
+    <h1>타임리프 표현식</h1>
+    <h2>타임리프 주석</h2>
+    <!--주석의 종류
+      parser-level 주석
+      : parser-level 주석은 정적인 페이지에서는 주석으로 있다가 thymeleaf가 처리될 때
+        제거되어 클라이언트에게 노출되지 않는다는 장점이 있다.
+      prototype-level 주석
+      : prototype-level 주석은 정적인 페이지에서 주석으로 있다가 thymeleaf 처리 후에는
+      화면에서 보이게 되는 주석-->
+    <ul>
+      <li>parser-level</li>
+      <!--/*이 주석 내용은 안 보여. 메롱!*/-->
+      <li>prototype-leve</li>
+      <!--/*/이 주석은 보이니까 조심!/*/-->
+    </ul>
+
+    <h2>타임리프 표현식1 - 변수 표현식 ${...} </h2>
+<!--파리미터로 넘어오는 title이라는 키를 꺼내보자  (title -> index.html 참고)-->
+    <p th:text="${ param.title }"></p>
+    <p th:text="${ param.no[0] }"></p>
+    <p th:text="${ param.no[1] }"></p>
+<!--파리미터로 선언(?)해주지 않은 (예)<p th:text="${ param.no[2] }"></p>) 키를 불러오면
+오류가 날 수 있다. 주의!-->
+
+    <h2>타임리프 표현식2 - 메세지 표현식 #{...} </h2>
+    <p th:text="#{ message.value }"></p>
+<!--처음에 view에서 ??message ko??어쩌구 뜨길래 왜 안 되지 싶었음.
+html 파일 맨 위에 있는 <html lang="en">를 <html lang="ko">로 바꾼 후
+Chap07Application.java 실행하니까
+messages.properties에서 값 넣어줬던 대로 hello thymeleaf 출력됨.
+이후 <html lang="en">로 다시 바꾸고 재실행해줘도
+hello thymeleaf 출력됨-->
+
+    <h2>타임리프 표현식3 - link 표현식 @{...} </h2>
+    <a th:href="@{/}">메인으로</a>
+<!--    css 파일에 스타일을 적용하고 그 스타일을(스타일이 적용된 css파일을) 갖고 오고 싶을 때 <title></title>아래에
+    <link rel="stylesheet" type="text/css" th:href="@{/css/common.css}"/>
+    적어주기.  이렇게 h2{color:red;}적용된 css 파일이 잘 갖고 와졌다면 실행했을 때 화면에 보이는 것처럼
+    expression.html에서 h2로 적어준 모든 String이 빨간 글씨로 변한 걸 볼 수 있다-->
+
+    <h2>타임리프 표현식4 - 선택 변수 표현식 *{...} </h2>
+    <p th:text="${ member.name }"></p>
+    <div th:object="${ member }">
+        <p th:text="*{age}"></p>
+        <p th:text="*{gender}"></p>
+        <p th:text="*{address}"></p>
+    </div>
+
+    <h2>타임리프 표현식5 - 선택 변수 표현식 *{...} </h2>
+    <ul>
+        <li th:text="${ hello }"></li>   <!--/*text : 태그를 문자열로 인식하냐?*/-->
+        <li th:utext="${ hello }"></li>  <!--/*utext : 태그를 문법으로 인식하냐?의 차이*/-->
+        <li><input type="text" th:value="타임리프"></li>
+    </ul>
+
+    <h2>리터럴 치환||</h2>
+    <h3>'+'를 쓰지 않고 문자열 합치기</h3>
+    <p th:object="${ member }" th:text="|name = '*{ name }'|"></p>
+    <p th:object="${ member }" th:text="|age = '*{ age }'|"></p>
+    <p th:object="${ member }" th:text="|gender = '*{ gender }'|"></p>
+    <p th:object="${ member }" th:text="|address = '*{ address }'|"></p>
+
+    <h2>th:block</h2>
+    <h3>범위를 지정하고 싶을 때 사용한다. (51-55번째 div 태그 사용한 것처럼) 불필요한 div 태그를 사용하지 않아도 된다. <br>
+        th:block를 통해 해당 범위에 변수나 객체를 적용하거나 <br>
+        조건에 해당되는지에 따라 해당 범위를 보여주거나 보여주지 않을 때 사용할 수 있다.
+    </h3>
+    <th:block th:object="${ member }">
+        <p th:text="*{ age }"></p>
+    </th:block>
+</body>
+</html>
