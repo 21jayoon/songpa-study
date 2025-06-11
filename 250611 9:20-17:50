@@ -1,0 +1,42 @@
+# 오늘 배운 내용 Today's lecture
+# thymeleaf crud 만들기
+# How to make crud with thymeleaf grammar
+
+# 할 일
+# query 작성 문법 다시 공부하기
+# categoryCode로 조회 코드 완성하기 ✅ 19:02
+
+# crud 주요 사항
+# html body 안에 전체조회 목록 넣어주고 싶을 때
+    <tbody th:replace="menu/list.html">
+# 를 해당 기능(C/R/U/D) 페이지 안에 넣고
+# MenuController에 페이지를 매핑할 때
+@GetMapping("/modify")
+    public String modifyPage(Model model) {
+        List<MenuDTO> menuList = menuService.findAllMenu();
+        model.addAttribute("menuList", menuList);
+        return "menu/modify";
+    }
+# 매개변수에 Model 넣어준다
+# List<MenuDTO>...findAllMenu 넣어준다
+# model에 addAttribute 이용해서 menuList 넘겨준다
+# 위 세 가지 코드를 작성해주면 전체조회 목록이
+# 기능 구현할 form 아래에 뜬다
+
+# delete.html, modify.html, regist.html 아래에 
+    <a th:href="@{/}">Go back to the main page</a>
+# 넣어줌으로써 메인 페이지로 돌아갈 수 있도록 만들었다.
+
+# 순서 (예시: 'CatergoryCode 선택 조회' 버튼 클릭 시)
+# Index.html 
+# >> Category_input.html(MenuController showCategoryInputForm method 실행>> 화면에서 카테고리 번호 작성 후 'submit'버튼 클릭)
+# >> MenuController 내 showMenuByCategoryCode에서 @RequestParam 매개변수 통해 화면에서 넣은 숫자(ex. 4)를 "code"로 인식
+# >> method 흐름에 따라 showMenuByCategoryCode 메소드 내부에 작성된
+# List<MenuDTO> menuCategoryList = menuService.findMenuByCategoryCode(code); 를 통해
+# >> MenuService의 findMenuByCategoryCode method로 code(숫자 4)가 이동
+# return menuMapper.selectMenuByCategoryCode(code);를 통해
+# >> MenuMapper(interface)로 이동. List<MenuDTO> selectMenuByCategoryCode(@Param("code") int code);
+# >> selectMenuByCategoryCode를 MenuMapper.xml에 
+# <select id="selectMenuByCategoryCode" parameterType="int" ...>로 적어주어 매핑(?)함.
+# MenuMapper.xml에 적힌 query에 따라
+# >> category_list.html 동작
