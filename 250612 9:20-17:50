@@ -1,0 +1,85 @@
+# 오늘 배운 내용 Today's lecture
+# Rest API, Postman 
+
+# 브라우저(크롬 등) 사용 외에 http 결과물 확인하는 방법
+# 1. Postman(API 플랫폼) 설치 후 사용 - 매번 크롬(브라우저) 이용해서 확인하는 방법 외에 http 결과물을 확인할 수 있는 API 플랫폼
+# 2. IntelliJ 내에서 확인하는 방법 - 프로젝트 아래에 http directory 만들고, 아래에 HTTP Request 파일을 만든다.
+#     example URL 대신 결과물 보길 원하는 URL을 넣는다. Run with: ... 옆에 있는 삼각형 2개 겹쳐진 run 버튼 누르면 입력한 코드 전체가 execute 된다.
+
+# rest api 사용시 추가해야할 의존성
+# Spring web
+# Spring HATEOAS
+# Validation
+
+# Rest로 응답받는 방법 How to get a response with Rest(API)
+@RestController
+@RequestMapping("/response")
+public class ResponseRestController {
+    /*1. 문자열 응답*/
+    @GetMapping("/hello")
+    public String helloworld() {
+        return "hello world";
+    }
+
+    /*2. 기본자료형 응답*/
+    @GetMapping("/random")
+    public int getRandomNumber(){
+        return (int) (Math.random()*10) +1;
+    }
+
+    /*3. Object 응답 - 객체 형식이기 때문에 http에 json 형식으로 넘어가게 된다.*/
+    @GetMapping("/message")
+    public Message getmessage(){
+        return new Message(200, "===Return Message===");
+    }
+
+    /*4. List 응답*/
+    @GetMapping("/list")
+    public List<String> getList(){
+        return List.of(new String[] {"TTeokbokii", "Tenpura", "Kimbab"});
+    }
+
+    /*5. Map response - Content-Type: application/json
+                        Transfer-Encoding: chunked
+                        Date: Thu, 12 Jun 2025 01:10:34 GMT
+    */
+    @GetMapping("/map")
+    public Map<Integer, String> getMap(){
+        Map<Integer, String> messageMap = new HashMap<>();
+        messageMap.put(200, "normal response");
+        messageMap.put(404, "Cannot find a page");
+        messageMap.put(500, "Internal server error");
+
+        return messageMap;
+    }
+
+    /*6. Response to the image file*/
+    /*produces 설정을 안 해주면 text/plain이 응답하므로
+    * 이미지가 텍스트 형태로 전송된다.
+    * produces는 response header의 content-type 설정이다.*/
+    @GetMapping(value = "/image", produces = MediaType.IMAGE_PNG_VALUE)
+    //if you not write
+    // produces = MediaType.IMAGE_PNG_VALUE
+    // the image printed as Content-Type: application/octet-stream
+                            //Content-Length: 21008
+                            //Date: Thu, 12 Jun 2025 01:25:10 GMT
+    //Not an image.
+    public byte[] getImage(){
+        try {
+            return getClass().getResourceAsStream("/images/sample.PNG").readAllBytes();
+            //getResourceAsStream : resources 폴더 아래에 있는 파일을 경로를 통해 읽어오는 메소드
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*7. Use ResponseEntity to response*/
+    @GetMapping("/entity")
+    public ResponseEntity<Message> getEntity(){
+        return ResponseEntity.ok(new Message(123,"hello Rest!"));
+        /*HTTP/1.1 200  <- .ok를 보냈기 때문에 200으로 제어됨.
+        Content-Type: application/json  <- json으로 출력됨
+        Transfer-Encoding: chunked
+        Date: Thu, 12 Jun 2025 01:33:15 GMT*/
+    }
+}
