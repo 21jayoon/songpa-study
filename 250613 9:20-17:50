@@ -1,2 +1,158 @@
-restAPI
-openAPI how to use
+# 오늘 강의 Today's lecture
+# restAPI - how to use openAPI
+# Swagger 사용 방법 how to use Swagger
+
+# Thymeleaf 이용, CRUD 팀 프로젝트 완료
+# Complete and presenting Thymeleaf CRUD team-project : conlog
+https://github.com/BOA-with-elephant/thymeleaf-conlog.git
+
+# 담당 테이블(엔티티) = 회원(member)
+# Take a charge of member table(entity)
+
+# 특별히 신경 쓴 부분
+# part that specially written
+
+1. src/main/rescources/templates/member/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/review.css}"/>
+</head>
+<body>
+# Here vvv
+<a th:href="@{/}">
+    <div th:replace="common/header.html"/>
+</a>
+#      ^^^
+<h1 align="center">Conlog 회원관리</h1>
+<div align="center">
+    <button onclick="location.href='/member/member-list'">전체 회원 조회</button>
+    <button onclick="location.href='/member/email-input'">Email 선택 조회</button>
+    <button onclick="location.href='/member/create'">Create New member</button>
+</div>
+</body>
+</html>
+
+<a th:href="@{/}">
+    <div th:replace="common/header.html"/>
+</a>
+#header.html에 메인으로 돌아갈 수 있는 a 태그를 넣었다.(thymeleaf 문법 사용)
+# put an a tag that can make back to the main index.html page surrounding header.html
+
+2. src/main/resources/templates/member/member-list.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MEMBER LIST</title>
+  <link rel="stylesheet" th:href="@{/css/review.css}"/>
+    <script>
+        const updateSuccess = `[[${updateSuccess}]]`;
+        if(updateSuccess) alert(updateSuccess);
+        const deleteSuccess = `[[${deleteSuccess}]]`;
+        if(deleteSuccess) alert(deleteSuccess);
+        const successMessage = `[[${successMessage}]]`;
+        if(successMessage) alert(successMessage);
+    </script>
+</head>
+<body>
+<!--header.html파일을 따로 만들어서 header 부분을 대체replace한다-->
+<a th:href="@{/member/index}">
+    <div th:replace="common/header.html"/>
+</a>
+# ^^^ 멤버 인덱스 페이지로 돌아갈 수 있도록 <a>태그에 thymeleaf 문법 사용
+# put an a tag that help go back to the member/index page
+<table align="center" border="1">
+    <tr>
+        <th>memberNo</th>
+        <th>memberName</th>
+        <th>nickname</th>
+        <th>id</th>
+        <th>pw</th>
+        <th>email</th>
+        <th>phone</th>
+    </tr>
+    <tr th:each="member: ${memberList}">
+<!--MemberController에서 List<MemberDTO> memberList로 불러온 값을 memberList변수를 ${}안에 넣어 가져온다.-->
+        <td th:text="${member.memberNo}"></td>
+        <td th:text="${member.memberName}"></td>
+        <td th:text="${member.nickname}"></td>
+        <td th:text="${member.id}"></td>
+        <td th:text="${member.pw}"></td>
+        <td th:text="${member.email}"></td>
+        <td th:text="${member.phone}"></td>
+<!-- ${member. ___} __안에 들어갈 값을 윗 라인의 컬럼명(제목열)과 일치시킨다.
+     제목열<th>___</th> 안에 들어갈 거는 MemberDTO의 필드명과 일치시킨다.-->
+    </tr>
+</table>
+<!--13:12 put the hyperlink to make returning to the main page easier-->
+<div align="right">
+    <button onclick="location.href='/member/update'">Update member</button>
+    <button onclick="location.href='/member/delete'">Delete member</button>
+</div>
+# 멤버 수정 버튼과 삭제 버튼을 멤버 전체 조회 페이지 하단에 달았음
+# Put an Update button and Delete button bottom right of the all-member-list page
+# => 피드백! 전체 조회 페이지에선 수정/삭제 버튼보단 추가 기능(버튼) 가능하도록
+#    Feedback! Better put Create member feature(button) in the all-reading-member page than update and delete button
+</body>
+</html>
+
+# 3. src/main/resources/templates/member/email-input.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EMAIL_INPUT FORM</title>
+    <link rel="stylesheet" th:href="@{/css/review.css}"/>
+    <style>
+        .validation-icon {
+            font-size: 1.2em;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+# 멤버의 이메일을 참조할 수 있도록 이메일 입력 폼 위에 전체 회원 목록이 뜰 수 있게 만듦
+# vvv put a whole member-list top of the email-input form to referring member's email.
+<tbody th:replace="member/member-list.html"></tbody>
+# ^^^
+<div style="text-align: center;">
+<form action="/member/email-list" method="post" autocomplete="off">
+<!-- 2.<form action="email_input"으로 되어있어서 submit해도 input페이지로만 돌아가길래
+        <form action="/member/email-list">로 바꿈-->
+<!--1.<form action="email_input"으로 되어있는데 새로 바꾼 URL은 email-input이라서 오류가 났다-->
+    <label>Email : </label>
+    <input type="text" name="email" id="emailInput" autocomplete="off">
+    <span id="emailValidation" class="validation-icon"></span>
+    <input type="submit" value="SUBMIT">
+</form>
+</div>
+<script>
+    // Regular expression for basic email validation
+    function isValidEmail(email) {
+        // Simple standard email regex
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    const emailInput = document.getElementById('emailInput');
+    const emailValidation = document.getElementById('emailValidation');
+
+    emailInput.addEventListener('input', function () {
+        const email = emailInput.value.trim();
+        if (email === "") {
+            emailValidation.textContent = "";
+            return;
+        }
+        if (isValidEmail(email)) {
+            emailValidation.textContent = "✅";
+        } else {
+            emailValidation.textContent = "❌이메일 형식을 갖춰주세요";
+        }
+    });
+    //2) go to the controller to mapping the /email_input
+</script>
+</body>
+</html>
