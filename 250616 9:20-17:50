@@ -25,3 +25,172 @@ public class newClass {
     // newpackage.newClass
     // 본 클래스와 같이 자동으로 패키지와 클래스가 같이 추가된다.
 }
+
+# 오늘 배운 강의 Today's lecture
+# Spring-security
+# 1. sessionsecurity/common/UserRole.enum
+package com.ohgiraffers.sessionsecurity.common;
+
+public enum UserRole {
+    //열거타입 enum = 상수의 집합
+    //관련 상수들을 집합으로 갖고 있는 것이 enum type
+
+    // user와 사용자의 권한에 대한 값을 여기서 상수로 받아줄 것임
+    USER("USER"),
+    ADMIN("ADMIN");
+
+    private String role;
+    UserRole(String role) {
+        // 생성자. UserRole() 앞에 public이 생략되어있음
+        this.role=role;
+    }
+
+    public String getRole() {
+        return role;
+    } //내(?)가 갖고 있는 role 정보를 getRole로 꺼내온다
+
+    @Override
+    public String toString() {
+        return "UserRole{" +
+                "role='" + role + '\'' +
+                '}';
+    }
+}
+
+# 2. sessionsecurity/auth/controller/AuthController
+package com.ohgiraffers.sessionsecurity.auth.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+@RequestMapping("/auth")
+public class AuthController {
+    //login.html 요청을 받아줄 controller 클래스
+
+    @GetMapping("/login")
+    public void login(){
+
+    }
+
+    //로그인 실패시 핸들해줄 핸들러 메소드 작성
+    @GetMapping("/fail")
+    public ModelAndView loginFail(ModelAndView mv,
+                                  @RequestParam(value = "msg"
+                                          , defaultValue = "login failed") String msg){
+        //@RequestParam을 통해 어떤 실패가 일어난 건지 메시지 받는다.
+        mv.addObject("msg", msg);
+        mv.setViewName("/auth/fail");
+        return mv;
+    }
+    //spring-security-architecture에서 실제 인증이 일어난다
+}
+
+# 3. sessionsecurity/auth/controller/MainController
+package com.ohgiraffers.sessionsecurity.auth.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+public class MainController {
+
+    @GetMapping(value = {"/", "/main"})
+    public String main(){
+        return "main";
+    }
+    //security를 이용(?)했기에 @PostMapping("/login") 없는 게 맞음.
+
+    @GetMapping("/admin/page")
+    public String adminPage(){
+        return "/admin/admin";
+    }
+
+    @GetMapping("/user/page")
+    public String userPage(){
+        return "/user/user";
+    }
+}
+
+# 4. package com.ohgiraffers.sessionsecurity.config;
+
+import com.ohgiraffers.sessionsecurity.common.UserRole;
+import com.ohgiraffers.sessionsecurity.config.handler.AuthFailHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfiguration {
+    @Autowired
+    private AuthFailHandler authFailHandler;
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();  //pwd 암호화에 가장 많이 사용되는 알고리즘, BCryptPasswordEncoder
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return web -> web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+        //static이란 정적인 resources에 대해서만 web.ignoring (무시)해라.
+    }
+
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        /* 요청에 대한 권한Authority 체크 */
+        http.authorizeHttpRequests( auth -> {
+            auth.requestMatchers("/auth/login", "/user/signup", "/auth/fail", "/", "/main").permitAll();
+            // auth/login 등 위의 5가지 페이지는 권한이 없어도 볼 수 있다는 공통점이 있다.
+            // 그렇기 때문에 '권한이 없어도 모든 사용자들이 접근 가능합니다'를 함의해주는
+            // .permitAll()을 넣어준다. (=모든 사용자가 접근하게 허용해주겠다)
+            auth.requestMatchers("/admin/*").hasAnyAuthority(UserRole.ADMIN.getRole());
+            auth.requestMatchers("/user/*").hasAnyAuthority(UserRole.USER.getRole());
+            auth.anyRequest().authenticated();
+
+        }).formLogin( login -> {
+            login.loginPage("/auth/login");
+            // login.loginPage => login Page로 등록해주는 코드
+            login.usernameParameter("user");
+            login.passwordParameter("pass");
+            login.defaultSuccessUrl("/", true);
+            login.failureHandler(authFailHandler);
+            // .failureHandler : 로그인 실패했을 때 어떻게 할 것인지 경로 설정.
+            // (여기선 아까 만든 authFailHandler로 이동시키겠다고 해줌)
+
+        }).logout( logout -> {
+            logout.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"));
+            // Ant... : 특정 URL로 이동시킬 것이다
+            logout.deleteCookies("JSESSIONID");
+            // sessionId를 갖고 있기 때문에 deleteCookies라는 method로 JSESSIONID 삭제
+            logout.invalidateHttpSession(true);
+            // logout 시 세션 소멸되도록
+            logout.logoutSuccessUrl("/");
+            // logout 시 메인 페에지로 돌아가도록
+
+        }).sessionManagement( session -> {
+            session.maximumSessions(1);
+            session.invalidSessionUrl("/");
+
+        }).csrf( csrf -> csrf.disable());
+        //CrossSignRequestFolder :csrf = 내가(서버가?) 보낸 것처럼 악의적으로 위조해서 보내는 요청
+        // 원래 csrf.disable()을 거는 게 권장되진 않으나 개발단계에선 문제가 발생할 수 있으므로 .disable로
+        // 잠깐 기능을 닫아(?)놓는다.
+
+        return http.build();
+    }
+}
