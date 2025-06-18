@@ -31,6 +31,38 @@ Step 3: Find Again
 [EntityManager] ----> [Menu (menuCode: 11, menuPrice: 10000)]  // secondMenu (managed)
                       [Menu (menuCode: 11, menuPrice: 1000)]   // foundMenu (detached)
 
+# 강의 메모 short memo of lecture
+JPA는 자바의 ORM 표준 interface
+(자바의 ORM기술을 쉽게 구현하도록 도와주는 API)
+
+ORM: Obejct Relational Mapping
+객체 관계 매핑 : "자바 객체"와 "DB 테이블" 간의 관계를 기반으로 해서 mapping 해준다.
+
+가장 보편적으로 쓰는 구현체 : Hibernate
+(실질적으로 library를 추가할 때는 build.gradle에 hibernate를 추가한다)
+
+JPA 사용의 장점 
+유지보수성 증가
+생산성 증가 : query(SQL문)를 작성하거나 수정하지 않아도 됨. 
+DB의 dialect 알아서 수정함 :  MySQL 쓰다가 Oracle 써도 되고, 다른 DBMS 써도 됨. 알아서 수정해주니까
+영속성 컨택스트에서 cashing을 사용해준다. : 영속성 컨택스트에 관리된 객체를 바로 반환해줄 수 있다.(cashing이 되기 때문에 바로 사용할 수 있다.)
+
+JPA 사용의 단점
+복잡한 SQL문을 사용해야하는 경우 JPA에는 한계가 있기 때문에 MyBatis등의 다른 library를 사용해야 한다
+
+https://ccomccomhan.tistory.com/131
+
+
+
+MyBatis와 JPA의 비교
+영속성 프레임워크 JPA(O) MyBatis(O)
+JPA -> ORM
+MyBatis -> SQL
+
+MySQL 사용 => GenerationType.IDENTITY
+e.g.  @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+
 # 강의 응용 Application problem with the lecture source
 package com.ohgiraffers.jpa02mapping_pracitce.entity;
 
