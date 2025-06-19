@@ -1,0 +1,281 @@
+# 어제 강의 내용 복습 Yesterdays review
+
+# EntityManager와 EntityManagerFactory, Persistence Context 간의 관계 정리
+https://github.com/copilot/share/0263400e-4080-8c80-a840-d20fa0976919
+
+# 내용 요약 summary
+Step 1: Find
+[Database]
+   v
+[EntityManager] ----> [Menu (menuCode: 11, menuPrice: 10000)]
+                      (Managed, tracked by EntityManager)
+
+
+Step 2: After Detach (also change the detached entity's price)
+[Database]
+   |
+   v
+[EntityManager]    [Menu (menuCode: 11, menuPrice: 10000 -> 1000)]
+   |                      ^
+   |                      |
+   |                (Detached, not tracked) : You can still change the value with foundMenu.setMenuPrice(1000), but the EntityManager (teacher) does not see or care about this change.
+   v
+[No connection to Menu in memory anymore]
+
+
+Step 3: Find Again
+[Database] (menuPrice: 10000)
+   |
+   v
+[EntityManager] ----> [Menu (menuCode: 11, menuPrice: 10000)]  // secondMenu (managed)
+                      [Menu (menuCode: 11, menuPrice: 1000)]   // foundMenu (detached)
+
+# 강의 메모 short memo of lecture
+JPA는 자바의 ORM 표준 interface
+(자바의 ORM기술을 쉽게 구현하도록 도와주는 API)
+
+ORM: Obejct Relational Mapping
+객체 관계 매핑 : "자바 객체"와 "DB 테이블" 간의 관계를 기반으로 해서 mapping 해준다.
+
+가장 보편적으로 쓰는 구현체 : Hibernate
+(실질적으로 library를 추가할 때는 build.gradle에 hibernate를 추가한다)
+
+JPA 사용의 장점 
+유지보수성 증가
+생산성 증가 : query(SQL문)를 작성하거나 수정하지 않아도 됨. 
+DB의 dialect 알아서 수정함 :  MySQL 쓰다가 Oracle 써도 되고, 다른 DBMS 써도 됨. 알아서 수정해주니까
+영속성 컨택스트에서 cashing을 사용해준다. : 영속성 컨택스트에 관리된 객체를 바로 반환해줄 수 있다.(cashing이 되기 때문에 바로 사용할 수 있다.)
+
+JPA 사용의 단점
+복잡한 SQL문을 사용해야하는 경우 JPA에는 한계가 있기 때문에 MyBatis등의 다른 library를 사용해야 한다
+
+https://ccomccomhan.tistory.com/131
+
+MyBatis와 JPA의 비교
+영속성 프레임워크 JPA(O) MyBatis(O)
+JPA -> ORM
+MyBatis -> SQL
+MySQL 사용 => GenerationType.IDENTITY
+e.g.  @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+
+# 오늘 배운 내용 Today's lecture
+package com.ohgiraffers.jpa02mapping.section01.entity;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+
+//@Repository = DB에 접근하는 클래스들이 Bean으로 등록되어야 할 때(?) 달아주는 어노테이션
+@Repository //bean registered
+public class MemberRepository {
+...
+    // 20250619 9:30 vvv
+    public String findNameById(String memberId){
+        // Use JPQL
+        String jpql = "SELECT m.memberName FROM entityMember m WHERE m.memberId = '" + memberId + "'";
+        // JPQL 특징 : FROM에 들어가는 것이 엔티티 이름(e.g. entityMember)이 됨. (Not a table name) 
+        // Also, alias(별칭) is essential. (e.g. entityMember "m" in upper code) 
+        return entityManager.createQuery(jpql, String.class).getSingleResult();
+    }
+}
+
+package com.ohgiraffers.jpa02mapping.section01.entity;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.LocalDateTime;
+import java.util.stream.Stream;
+
+@SpringBootTest
+class MemberRegistApplicationTests {
+   ...
+
+    @DisplayName("Test property access")
+    @ParameterizedTest
+    @MethodSource("getMember")
+    void testAccessProperty(
+            String memberId, String memberPwd,
+            String memberName, String phone, String address,
+            LocalDateTime enrollDate, MemberRole memberRole, String status
+    ) {
+       //1. Direct access(default) : approach to the field directly
+        // -> difficult with verify etc. (another code neede)
+        //2. property access : approach with property and getter method.
+        // -> easier to verify etc., compared to direct accessing.
+        // >> go to the Member class
+
+        //given
+        MemberRegistDTO newMember = new MemberRegistDTO(
+                memberId,
+                memberPwd,
+                memberName,
+                phone,
+                address,
+                enrollDate,
+                memberRole,
+                status
+        );
+        
+         //when
+        String registeredName = memberRegistService.registMemberAndFindName(newMember);
+
+        //then
+        assertEquals(memberName+"님", registeredName);
+  }
+}
+
+package com.ohgiraffers.jpa02mapping.section01.entity;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+//Entity class로 할 거니까 annotation달기 =>DB와 mapping될 것임을 미리 알려줌
+@Entity(name = "entityMember")
+@Table(name = "tbl_member")   //tbl_member라는 테이블이 생성되도록
+@Access(AccessType.FIELD) //@Access(AccessType.FIELD)는 클래스 레벨에 설정 가능, 모든 필드를 대상으로 적용하겠다는 의미
+public class Member {
+    //entity 등록할 때는 PK가 필수이다.
+    // PK를 만들거나 @Id를 통해 불러와주지 않으면 method이름 아래에 계속 빨간 줄이 나온다
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_no")
+    private int memberNo;
+
+    @Access(AccessType.FIELD)
+    @Column(
+            name = "member_id", unique = true,
+            nullable = false, columnDefinition = "varchar(10)"
+    )
+    private String memberId;
+
+    @Column(name = "member_pwd", nullable = false)
+    private String memberPwd;
+
+    @Access(AccessType.PROPERTY)
+    @Column(name = "member_name")
+    private String memberName;
+
+...
+
+    @Column(name = "status", columnDefinition = "char(1) default 'Y'")
+    private String status;
+
+    //기본생성자 필수 작성
+    protected Member(){}
+
+    public Member(String memberId, String memberPwd, String memberName, String phone, String address, LocalDateTime enrollDate, MemberRole memberRole, String status) {
+        this.memberId = memberId;
+        this.memberPwd = memberPwd;
+        this.memberName = memberName;
+        this.phone = phone;
+        this.address = address;
+        this.enrollDate = enrollDate;
+        this.memberRole = memberRole;
+        this.status = status;
+    }
+    
+    @Access(AccessType.PROPERTY)
+    public String getMemberName(){
+        System.out.println("Check the access through getMemberName method");
+        return memberName + "님";
+    } //프로퍼티 방식으로 getter 메소드에 접근하는 걸 확인하기 위한 메소드
+    
+    public void setMemberName(String memberName){
+        this.memberName = memberName;
+    } 
+
+    ...
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                " memberId='" + memberId + '\'' +
+                ", memberPwd='" + memberPwd + '\'' +
+                ", memberName='" + memberName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                ", enrollDate=" + enrollDate +
+                ", memberRole=" + memberRole +
+                ", status='" + status + '\'' +
+                '}';
+    }
+}
+
+# section02 - embedded
+package com.ohgiraffers.jpa02mapping.section02.embedded;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "tbl_book")
+public class Book {
+    @Id
+    @Column(name = "book_no")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int bookNo;
+    
+    ...
+    
+    @Column(name = "published_date")
+    private LocalDate publishedDate;
+
+    @Embedded
+    private Price price;
+    // Price라는 클래스를 만들고 여러 entity에서 embedded(내장된) class로 활용하겠다
+
+    protected Book() {
+    }
+
+    public Book(
+            String bookTitle, String author, String publisher,
+            LocalDate publishedDate, Price price
+    ) {
+        this.bookTitle = bookTitle;
+       ...
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "bookNo=" + bookNo +
+                ...
+                ", price=" + price +
+                '}';
+    }
+}
+
+package com.ohgiraffers.jpa02mapping.section02.embedded;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
+@Embeddable
+public class Price {
+    ...
+    }
+}
+
+package com.ohgiraffers.jpa02mapping.section02.embedded;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class BookRegistService {
+    private BookRepository bookRepository;
+
+    //생성자 주입으로 (Book)Repository에 의존성 주입
+    public BookRegistService(BookRepository bookRepository){
+        this.bookRepository = bookRepository;
+    }
+}
