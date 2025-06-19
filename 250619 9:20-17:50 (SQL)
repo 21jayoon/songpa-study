@@ -1,0 +1,34 @@
+# Programmers SQL 연습 : SQL 고득점 Kit
+# https://school.programmers.co.kr/learn/courses/30/lessons/164673
+
+SELECT B.TITLE,
+       B.BOARD_ID,
+       R.REPLY_ID,
+       R.WRITER_ID,
+       R.CONTENTS,
+       R.CREATED_DATE
+  FROM USED_GOODS_REPLY R
+  JOIN USED_GOODS_BOARD B ON B.BOARD_ID = R.BOARD_ID
+ WHERE DATE_FORMAT(B.CREATED_DATE, '%Y-%m') = '2022-10'
+-- WHERE B.CREATED_DATE BETWEEN '2022-10-01' AND '2023-10-31'
+-- WHERE YEAR(B.CREATED_DATE) = 2023 AND MONTH(B.CREATED_DATE) = 10
+ ORDER BY R.CREATED_DATE ASC, B.TITLE ASC;
+
+# 뭘해도 2022-10-02 00:00:00 이런 식으로 시간 분 초가 계속 나오는데 해결방법을 도저히 모르겠어서
+# (주석으로 넣은 여러 표현식 다 해봤고 
+# WHERE DATE_FORMAT(B.CREATED_DATE, '%Y-%m') = '2022-10' IN(SELECT SUBSTRING(datetime_column, 1, 8))
+# 도 해봤는데 그대로 00:00:00나오더라)
+# GPT에게 물어봤더니 
+SELECT B.TITLE,
+       B.BOARD_ID,
+       R.REPLY_ID,
+       R.WRITER_ID,
+       R.CONTENTS,
+       DATE_FORMAT(R.CREATED_DATE, '%Y-%m-%d') AS CREATED_DATE
+  FROM USED_GOODS_REPLY R
+  JOIN USED_GOODS_BOARD B ON B.BOARD_ID = R.BOARD_ID
+ WHERE DATE_FORMAT(B.CREATED_DATE, '%Y-%m') = '2022-10'
+ ORDER BY R.CREATED_DATE ASC, B.TITLE ASC;
+# 이렇게 넣어줬다. 이 때 DATE_FORMAT(B.CREATED_DATE, '%Y-%m') 
+# B.CREATED_DATE 얘 테이블을 R로 넣어줘야하나 했는데 JOIN을 해놔서 그런건지
+# R로 해도 B로 해도 결과 값은 YYYY-MM-DD 동일했다 >>>B.CREATED_DATE로 채점 결과 "통과"
