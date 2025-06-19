@@ -1,5 +1,4 @@
 # 어제 강의 내용 복습 Yesterdays review
-
 # EntityManager와 EntityManagerFactory, Persistence Context 간의 관계 정리
 https://github.com/copilot/share/0263400e-4080-8c80-a840-d20fa0976919
 
@@ -57,6 +56,27 @@ JPA -> ORM
 MyBatis -> SQL
 MySQL 사용 => GenerationType.IDENTITY
 e.g.  @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+# 오늘 배운 내용 정리 Solve the question of today's lecture with copilot
+# Q: I think the concept of beans in Spring and 
+# the use of @Embeddable and @Embedded in JPA are similar,
+# as both involve using a class or method like a library. Is that correct?
+# A: ...... Both concepts involve using a class inside another class, and both help with code reusability and modularity.
+# But Spring beans are for managing objects (services, components, etc.) at runtime in the application context.
+# JPA embeddables are for mapping value objects in the database schema.
+# So, while both use classes to organize code, their purpose and how they work are very different.
+
+# Analogy :
+# - Spring beans are like ingredients 
+# prepared and managed by a chef (the Spring container) in a kitchen.
+# - JPA embeddables are like ingredients that always go into a specific recipe (entity) 
+# and are stored in the same container (database table) as the main dish.
+
+# Summary:
+# You are correct that both use classes to organize and reuse code, 
+# but their real purpose and mechanisms are quite different. 
+# Spring beans are about object management in your app, 
+# while JPA embeddables are about database structure.
 
 
 # 오늘 배운 내용 Today's lecture
@@ -411,3 +431,587 @@ spring:
         #'org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy' is one of the naming strategies built into 'Hibernate'.
         # This strategy converts entity and column names written in camel case to underscores.
         # For example, "myColumnName" is converted to "my_column_name".
+
+# ManyToOneServiceTests 1
+package com.ohgiraffers.associationmapping.section01.manytoone;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+public class ManyToOneServiceTests {
+    @Autowired
+    private ManyToOneService manyToOneService; //field injection
+
+    @DisplayName("Test N:1 연관관계 조회")
+    @Test
+    void manyToOneFindTest(){
+        //given
+        int menuCode = 10;
+
+        //when
+        Menu foundMenu = manyToOneService.findMenu(menuCode);
+
+        //then
+        Category category = foundMenu.getCategory();
+        assertNotNull(category);
+    }
+}
+
+# 결과 Results
+Hibernate: 
+    select
+        m1_0.menu_code,
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    left join    -- >> category tbl을 기준으로 tbl_menu를 JOIN. (tbl_category이 우선, tbl_menu의 category_code에서 tbl_category(category_code)에 없는 내용은 걸러짐(무시됨))
+        tbl_category c1_0 
+            on c1_0.category_code=m1_0.category_code 
+    where
+        m1_0.menu_code=?
+
+# ManyToOneServiceTests 2
+package com.ohgiraffers.associationmapping.section01.manytoone;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+public class ManyToOneServiceTests {
+    @Autowired
+    private ManyToOneService manyToOneService; //field injection
+
+    @DisplayName("Test N:1 연관관계 JPQL(객체 지향 쿼리)을 이용한 조회")
+    @Test
+    void manyToOneJpqlFindTest(){
+        //given
+        int menuCode = 10;
+
+        // when
+        String  categoryName = manyToOneService.findCategoryNameByJpql(menuCode);
+
+        // then
+        assertNotNull(categoryName);
+        System.out.println("CategoryName : "+ categoryName);
+    }
+}
+
+# 결과 Results
+Hibernate: 
+    select
+        c1_0.category_name 
+    from
+        tbl_menu m1_0 
+    join
+        tbl_category c1_0 
+            on c1_0.category_code=m1_0.category_code 
+    where
+        m1_0.menu_code=?
+CategoryName : 서양
+
+package com.ohgiraffers.associationmapping.section01.manytoone;
+
+import jakarta.persistence.Table;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class ManyToOneService {
+...
+    @Transactional
+    public void registMenu(MenuDTO menuInfo){
+        Menu menu = new Menu(
+                menuInfo.getMenuCode(),
+                menuInfo.getMenuName(),
+                menuInfo.getMenuPrice(),
+                new Category(
+                        menuInfo.getCategory().getCategoryCode(),
+                        menuInfo.getCategory().getCategoryName(),
+                        menuInfo.getCategory().getRefCategoryCode()
+                ),
+                menuInfo.getOrderableStatus()
+        );
+        manyToOneRepository.regist(menu);
+    }
+}
+
+# 
+package com.ohgiraffers.associationmapping.section01.manytoone;
+
+import jakarta.persistence.*;
+
+@Entity(name="menu_and_category")
+@Table(name="tbl_menu")
+public class Menu {
+    @Id
+    private int menuCode;
+    private String menuName;
+    private int menuPrice;
+
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    // .PERSIST : 영속성 전이
+    // (cascade = CascadeType.PERSIST) 이걸 넣어야
+    // "category도 같이 영속화할게요(=카테고리도 같이 추가할게요)"가 됨.
+
+    @JoinColumn(name = "categoryCode") //@JoinColumn의 이름은 FK 이름으로 적어야 한다
+    private Category category;
+    //연관관계 매핑을 보고 싶기 때문에 categoryCode라고 안 적고 category라고 적은 후
+    //Category entity class에서 연관관계 매핑 사용하는 방법을 알아본다.
+...
+    }
+}
+
+private static Stream<Arguments> getMenuInfo(){
+        return Stream.of(
+                Arguments.of(124, "meatball bibimbap", 15000, 13, "퓨전분식", "Y")
+        );
+    }
+
+@SpringBootTest
+public class ManyToOneServiceTests {
+    @Autowired
+    private ManyToOneService manyToOneService; //field injection
+
+    @DisplayName("Test N:1 연관관계 객체 삽입 테스트")
+    @ParameterizedTest
+    @MethodSource("getMenuInfo")
+    void manyToOneInsertTest(int menuCode, String menuName, int menuPrice,
+                             int categoryCode, String categoryName,
+                             String orderableStatus){
+        //given
+        //입력 받은 걸 DTO로 만들어주는 과정이 필요함
+        MenuDTO menuInfo =  new MenuDTO(
+                menuCode,
+                menuName,
+                menuPrice,
+                new CategoryDTO(
+                        categoryCode,
+                        categoryName,
+                        null
+                ),
+                orderableStatus
+        );
+        //when
+
+        //then
+        //registMenu(menuInfo)가 예외 던지지 않는지 확인
+        assertDoesNotThrow(
+                () -> manyToOneService.registMenu(menuInfo)
+        );
+    }
+}
+
+# Results : insert가 tbl_category와 tbl_menu에 각각 한 번씩 총 두 번 나온다.
+Hibernate: 
+    insert 
+    into
+        tbl_category
+        (category_name, ref_category_code, category_code) 
+    values
+        (?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        tbl_menu
+        (category_code, menu_name, menu_price, orderable_status, menu_code) 
+    values
+        (?, ?, ?, ?, ?)
+
+
+# section02
+package com.ohgiraffers.associationmapping.section02.onetomany;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity(name="Section02Menu")
+@Table(name="tbl_menu")
+public class Menu {
+    @Id
+    private int menuCode;
+
+    private String menuName;
+    private int menuPrice;
+    private int categoryCode;
+    private String orderableStatus;
+    //섹션1에서 메뉴 테이블에서 카테고리 테이블을 참조하는 걸 봤다면,
+    // 이번엔 카테고리 테이블에서 메뉴 테이블을 참조하는 걸 보는 것이 목표이다.
+
+    public Menu(){}
+
+    public Menu(int menuCode, String menuName, int menuPrice, int categoryCode, String orderableStatus) {
+        this.menuCode = menuCode;
+        this.menuName = menuName;
+        this.menuPrice = menuPrice;
+        this.categoryCode = categoryCode;
+        this.orderableStatus = orderableStatus;
+    }
+
+    public int getMenuCode() {
+        return menuCode;
+    }
+   ...
+    public void setOrderableStatus(String orderableStatus) {
+        this.orderableStatus = orderableStatus;
+    }
+
+    @Override
+    public String toString() {
+        return "Menu{" +
+                "menuCode=" + menuCode +
+                ", menuName='" + menuName + '\'' +
+                ", menuPrice=" + menuPrice +
+                ", categoryCode=" + categoryCode +
+                ", orderableStatus='" + orderableStatus + '\'' +
+                '}';
+    }
+}
+
+package com.ohgiraffers.associationmapping.section02.onetomany;
+
+import jakarta.persistence.*;
+
+import java.util.List;
+
+@Entity(name = "category_and_menu")
+@Table(name = "tbl_category")
+public class Category {
+    @Id
+    private int categoryCode;
+
+    private String  categoryName;
+    private Integer refCategoryCode;
+
+    @OneToMany
+    @JoinColumn(name = "categoryCode")
+    //@JoinColumn해줄 때 두 tbl이 각 key 이름이 다르다면
+    //PK에 해당하는 key속성의 이름 말고
+    //***FK에 해당하는 key 속성의 이름***을 적어줘야한다.
+    private List<Menu> menuList;
+
+    public Category(){}
+
+    public Category(int categoryCode, String categoryName, Integer refCategoryCode, List<Menu> menuList) {
+        ...
+    }
+
+    public int getCategoryCode() {
+        return categoryCode;
+    }
+...
+    public void setMenuList(List<Menu> menuList) {
+        this.menuList = menuList;
+    }
+
+    @Override
+    public String toString() {
+        ...
+    }
+}
+
+package com.ohgiraffers.associationmapping.section02.onetomany;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class OneToManyService {
+    //Service는 Repository를 불러오는 역할을 하기 때문에 생성자 방식으로 의존성을 주입해준다.
+    private OnetoManyRepository onetoManyRepository;
+
+    public OneToManyService(OnetoManyRepository onetoManyRepository){
+        this.onetoManyRepository = onetoManyRepository;
+    }
+
+    @Transactional
+    public Category findCategory(int categoryCode){
+        Category category = onetoManyRepository.find(categoryCode);
+        System.out.println("Category : " +category);
+        return category;
+    }
+}
+
+package com.ohgiraffers.associationmapping.section02;
+
+import com.ohgiraffers.associationmapping.section02.onetomany.Category;
+import com.ohgiraffers.associationmapping.section02.onetomany.OneToManyService;
+import jakarta.persistence.Table;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+public class OneToManyServiceTests {
+    //field injection with @Autowired
+    @Autowired
+    private OneToManyService oneToManyService;
+
+    @DisplayName("test searching 1:N relation")
+    @Test
+    void OneToManyFindTest(){
+        //given
+        int categoryCode = 4;
+
+        //when
+        Category category = oneToManyService.findCategory(categoryCode);
+
+        //then
+        assertNotNull(category);
+    }
+}
+
+# 결과 Results : OneToManyservice에  System.out.println("Category : " +category); 없으면 
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code 
+    from
+        tbl_category c1_0 
+    where
+        c1_0.category_code=? 
+# 이것만 뜸
+
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code 
+    from
+        tbl_category c1_0 
+    where
+        c1_0.category_code=?
+Hibernate: 
+    select
+        ml1_0.category_code,
+        ml1_0.menu_code,
+        ml1_0.menu_name,
+        ml1_0.menu_price,
+        ml1_0.orderable_status 
+    from
+        tbl_menu ml1_0 
+    where
+        ml1_0.category_code=?
+Category{categoryCode=4, categoryName='한식', refCategoryCode=1, menuList=[Menu{menuCode=5, menuName='앙버터김치찜', menuPrice=13000, categoryCode=4, orderableStatus='N'}, Menu{menuCode=6, menuName='생마늘샐러드', menuPrice=12000, categoryCode=4, orderableStatus='Y'}, Menu{menuCode=7, menuName='민트미역국', menuPrice=15000, categoryCode=4, orderableStatus='Y'}, Menu{menuCode=8, menuName='한우딸기국밥', menuPrice=20000, categoryCode=4, orderableStatus='Y'}]}
+
+
+# section01 - Menu.java에서
+    // FetchType.EAGER = 즉시 로딩
+    // FetchType.LAZY = 지연 로딩
+    // @ManyToOne일 때는 EAGER(즉시 로딩)가 Default
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+# 로 바꾸면, Result = 
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_code=?
+
+# 다시 ...로 바꾸면
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+# Result
+   select
+        m1_0.menu_code,
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    left join
+        tbl_category c1_0 
+            on c1_0.category_code=m1_0.category_code 
+    where
+        m1_0.menu_code=?
+
+
+# OneToMany의 Default = FetchType.LAZY (지연로딩)
+# 만약 section02 - Category에서
+    @OneToMany(fetch = FetchType.EAGER)
+# 로 바뀐다면 
+# Result
+select
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code,
+        ml1_0.category_code,
+        ml1_0.menu_code,
+        ml1_0.menu_name,
+        ml1_0.menu_price,
+        ml1_0.orderable_status 
+    from
+        tbl_category c1_0 
+    left join
+        tbl_menu ml1_0 
+            on c1_0.category_code=ml1_0.category_code 
+    where
+        c1_0.category_code=?
+Category : Category{categoryCode=4, categoryName='한식', refCategoryCode=1 ...... Menu{menuCode=8, menuName='한우딸기국밥', menuPrice=20000, categoryCode=4, orderableStatus='Y'}]}
+
+package com.ohgiraffers.associationmapping.section02;
+
+import com.ohgiraffers.associationmapping.section02.onetomany.Category;
+import com.ohgiraffers.associationmapping.section02.onetomany.CategoryDTO;
+import com.ohgiraffers.associationmapping.section02.onetomany.MenuDTO;
+import com.ohgiraffers.associationmapping.section02.onetomany.OneToManyService;
+import jakarta.persistence.Table;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+public class OneToManyServiceTests {
+    //field injection with @Autowired
+    @Autowired
+    private OneToManyService oneToManyService;
+
+    private static Stream<Arguments> getMenuInfo() {
+        return Stream.of(
+                Arguments.of(321, "스파게티 돈가스", 30000, 321, "분식퓨전", "Y")
+        );
+    }
+    @DisplayName("1:N 연관관계 객체 삽입 테스트")
+    @ParameterizedTest
+    @MethodSource("getMenuInfo")
+    void oneToManyInsertTest(
+            int menuCode, String menuName, int menuPrice,
+            int categoryCode, String categoryName, String orderableStatus
+    ) {
+        //given
+        CategoryDTO categoryInfo = new CategoryDTO(
+                categoryCode, categoryName, null, null
+        );
+        List<MenuDTO> menuList = new ArrayList<>();
+        MenuDTO menuInfo = new MenuDTO(
+                menuCode, menuName, menuPrice,categoryCode, orderableStatus
+        );
+        menuList.add(menuInfo);
+        categoryInfo.setMenuList(menuList);
+        //when
+        //then
+        Assertions.assertDoesNotThrow(
+                () -> oneToManyService.registCategory(categoryInfo)
+        );
+    }
+}
+
+# Result 1 
+Hibernate: 
+    insert 
+    into
+        tbl_category
+        (category_name, ref_category_code, category_code) 
+    values
+        (?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        tbl_menu
+        (category_code, menu_name, menu_price, orderable_status, menu_code) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    update
+        tbl_menu 
+    set
+        category_code=? 
+    where
+        menu_code=?
+
+# Result 2 : tbl_menu, tbl_category 추가 완료 확인
+# tbl_menu
+# 321,스파게티 돈가스,30000,321,Y
+# tbl_category
+# 321,분식퓨전, <null>
+
+
+package com.ohgiraffers.associationmapping.section01.manytoone;
+
+import jakarta.persistence.*;
+
+@Entity(name="menu_and_category")
+@Table(name="tbl_menu")
+public class Menu {
+    @Id
+    private int menuCode;
+    private String menuName;
+    private int menuPrice;
+
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    // .PERSIST : 영속성 전이
+    // (cascade = CascadeType.PERSIST) 이걸 넣어야
+    // "category도 같이 영속화할게요(=카테고리도 같이 추가할게요)"가 됨.
+
+    /* 영속성 전이
+     * 특정 엔티티를 영속화 할 때 연관 된 엔티티도 함께 영속화 한다는 의미이다.*/
+    /* 기본적으로는 즉시 로딩되지만 필요에 따라 지연 로딩으로 변경할 수 있다. */
+
+    // FetchType.EAGER = 즉시 로딩
+    // FetchType.LAZY = 지연 로딩
+    // @ManyToOne일 때는 EAGER 즉시 로딩이 Default
+    @JoinColumn(name = "categoryCode") //@JoinColumn의 이름은 FK 이름으로 적어야 한다
+    private Category category;
+    //연관관계 매핑을 보고 싶기 때문에 categoryCode라고 안 적고 category라고 적은 후
+    //Category entity class에서 연관관계 매핑 사용하는 방법을 알아본다.
+
+    private String orderableStatus;
+
+    public Menu(){}
+
+    public Menu(int menuCode, String menuName, int menuPrice, Category category, String orderableStatus) {
+        this.menuCode = menuCode;
+        ...
+        this.orderableStatus = orderableStatus;
+    }
+
+    public int getMenuCode() {
+        return menuCode;
+    }
+...
+    public void setOrderableStatus(String orderableStatus) {
+        this.orderableStatus = orderableStatus;
+    }
+
+    @Override
+    public String toString() {
+       ...
+    }
+}
