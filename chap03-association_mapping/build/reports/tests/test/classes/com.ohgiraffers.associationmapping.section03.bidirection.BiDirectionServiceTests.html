@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - BiDirectionServiceTests</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>BiDirectionServiceTests</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/com.ohgiraffers.associationmapping.section03.bidirection.html">com.ohgiraffers.associationmapping.section03.bidirection</a> &gt; BiDirectionServiceTests</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">1</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">1</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.423s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox failures" id="successRate">
+<div class="percent">0%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Failed tests</a>
+</li>
+<li>
+<a href="#">Tests</a>
+</li>
+<li>
+<a href="#">Standard output</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Failed tests</h2>
+<div class="test">
+<a name="biDirectionFindTest2()"></a>
+<h3 class="failures">양방향 연관관계 매핑 조회(연관관계 주인 아닌 경우)</h3>
+<span class="code">
+<pre>org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: com.ohgiraffers.associationmapping.section03.bidirection.Category.menuList: could not initialize proxy - no Session
+	at app//org.hibernate.collection.spi.AbstractPersistentCollection.throwLazyInitializationException(AbstractPersistentCollection.java:635)
+	at app//org.hibernate.collection.spi.AbstractPersistentCollection.withTemporarySessionIfNeeded(AbstractPersistentCollection.java:219)
+	at app//org.hibernate.collection.spi.AbstractPersistentCollection.initialize(AbstractPersistentCollection.java:614)
+	at app//org.hibernate.collection.spi.AbstractPersistentCollection.read(AbstractPersistentCollection.java:138)
+	at app//org.hibernate.collection.spi.PersistentBag.toString(PersistentBag.java:587)
+	at java.base@17.0.14/java.lang.String.valueOf(String.java:4220)
+	at java.base@17.0.14/java.io.PrintStream.print(PrintStream.java:877)
+	at org.gradle.internal.io.LinePerThreadBufferingOutputStream.println(LinePerThreadBufferingOutputStream.java:229)
+	at app//com.ohgiraffers.associationmapping.section03.bidirection.BiDirectionService.findCategory(BiDirectionService.java:22)
+	at app//com.ohgiraffers.associationmapping.section03.bidirection.BiDirectionServiceTests.biDirectionFindTest2(BiDirectionServiceTests.java:35)
+	at java.base@17.0.14/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base@17.0.14/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base@17.0.14/java.util.ArrayList.forEach(ArrayList.java:1511)
+</pre>
+</span>
+</div>
+</div>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="failures">양방향 연관관계 매핑 조회(연관관계 주인 아닌 경우)</td>
+<td class="failures">biDirectionFindTest2()</td>
+<td class="failures">0.423s</td>
+<td class="failures">failed</td>
+</tr>
+</table>
+</div>
+<div class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>10:09:17.350 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.ohgiraffers.associationmapping.section03.bidirection.BiDirectionServiceTests]: BiDirectionServiceTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+10:09:17.460 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.ohgiraffers.associationmapping.Chap03AssociationMappingApplication for test class com.ohgiraffers.associationmapping.section03.bidirection.BiDirectionServiceTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.0)
+
+2025-06-20T10:09:17.826+09:00  INFO 3760 --- [    Test worker] c.o.a.s.b.BiDirectionServiceTests        : Starting BiDirectionServiceTests using Java 17.0.14 with PID 3760 (started by User in D:\lecture\12_jpa\chap03-association_mapping)
+2025-06-20T10:09:17.826+09:00  INFO 3760 --- [    Test worker] c.o.a.s.b.BiDirectionServiceTests        : No active profile set, falling back to 1 default profile: &quot;default&quot;
+2025-06-20T10:09:18.150+09:00  INFO 3760 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-20T10:09:18.177+09:00  INFO 3760 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 12 ms. Found 0 JPA repository interfaces.
+2025-06-20T10:09:18.452+09:00  INFO 3760 --- [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-20T10:09:18.491+09:00  INFO 3760 --- [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.15.Final
+2025-06-20T10:09:18.525+09:00  INFO 3760 --- [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-06-20T10:09:18.728+09:00  INFO 3760 --- [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-20T10:09:18.760+09:00  INFO 3760 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-06-20T10:09:18.982+09:00  INFO 3760 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2fb48970
+2025-06-20T10:09:18.982+09:00  INFO 3760 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-06-20T10:09:19.013+09:00  WARN 3760 --- [    Test worker] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-20T10:09:19.044+09:00  INFO 3760 --- [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.4.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-06-20T10:09:19.712+09:00  INFO 3760 --- [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-20T10:09:19.712+09:00  INFO 3760 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-20T10:09:19.910+09:00  INFO 3760 --- [    Test worker] c.o.a.s.b.BiDirectionServiceTests        : Started BiDirectionServiceTests in 2.35 seconds (process running for 3.197)
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code 
+    from
+        tbl_category c1_0 
+    where
+        c1_0.category_code=?
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 8.14.2</a> at 2025. 6. 20. 오전 10:09:20</p>
+</div>
+</div>
+</body>
+</html>

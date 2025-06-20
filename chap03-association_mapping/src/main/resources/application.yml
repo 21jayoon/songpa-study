@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/menudb
+    username: ohgiraffers
+    password: ohgiraffers
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        # developers now can mapping the column name without using @Column(name = "menu_code") on the field in the entity class
+    properties:
+      hibernate:
+        format_sql: true
+        # 'physical_naming_strategy' is a property(sok-sung) that specifies the physical naming strategy of 'Hibernate'.
+        # By setting this property, developers can directly define the naming rules for database tables and columns.
+        #'org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy' is one of the naming strategies built into 'Hibernate'.
+        # This strategy converts entity and column names written in camel case to underscores.
+        # For example, "myColumnName" is converted to "my_column_name".
