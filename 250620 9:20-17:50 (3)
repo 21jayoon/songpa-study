@@ -1,0 +1,133 @@
+# SECTION02 - PARAMETER
+# 1. Menu
+package com.ohgiraffers.jpql.section02.parameter;
+...
+
+@Entity(name = "Section02Menu")
+@Table(name = "tbl_menu")
+public class Menu {
+    @Id
+    private int menuCode;
+    private String menuName;
+    private int menuPrice;
+    private int categoryCode;
+    private String orderableStatus;
+
+    public Menu(){}
+
+    public Menu(int menuCode, String menuName, int menuPrice, int categoryCode, String orderableStatus) {
+        this.menuCode = menuCode;
+        this.menuName = menuName;
+        this.menuPrice = menuPrice;
+        this.categoryCode = categoryCode;
+        this.orderableStatus = orderableStatus;
+    }
+
+    public int getMenuCode() {
+        return menuCode;
+    }
+...
+    }
+}
+
+# 2. parameterbindingRepository
+package com.ohgiraffers.jpql.section02.parameter;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class ParameterBindingRepository {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<Menu> selectMenuByBindingName (String menuName){
+        String jpql ="SELECT m FROM Section02Menu m WHERE m.menuName = :menuName";
+        // parameter (String menuName) does not same with :manuName in sql queries.
+        // so it need .setParameter to linked parameter and :menuName by 'menuName' word.
+        List<Menu> resultMenuList = entityManager.createQuery(jpql, Menu.class)
+                                                 .setParameter("menuName", menuName)
+                                                 .getResultList();
+        return resultMenuList;
+    }
+
+    public List<Menu> selectMenuByBindingPosition (String menuName){
+        String jpql ="SELECT m FROM Section02Menu m WHERE m.menuName = ?1";
+        List<Menu> resultMenuList = entityManager.createQuery(jpql, Menu.class)
+                                                .setParameter(1, menuName)
+                                                .getResultList();
+        return resultMenuList;
+    }
+}
+
+# 3. TESTS
+package com.ohgiraffers.jpql.section02.parameter;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@SpringBootTest
+public class MenuBindingRepositoryTests {
+    @Autowired
+    private ParameterBindingRepository parameterBindingRepository;
+
+    @DisplayName("이름 기준 파라미터 바인딩 테스트")
+    @Test
+    void testParameterBindingByName(){
+        String menuName = "민트미역국";
+        List<Menu> menuList = parameterBindingRepository.selectMenuByBindingName(menuName);
+        System.out.println(menuList);
+        assertEquals(menuName, menuList.get(0).getMenuName());
+        // assertEquals(...) =
+        // menuName "민트미역국"과 출력할 menuList의 1번째 인덱스(어차피 하나 출력하는 거긴 하지만)에서
+        // 해당 인덱스의 이름이 같은지 확인한다
+    }
+
+    @DisplayName("위치 기준 파라미터 바인딩 테스트")
+    @Test
+    void testParameterBindingByPosition(){
+        //given
+        String menuName = "붕어빵초밥";
+        //when
+        List<Menu> menuList = parameterBindingRepository.selectMenuByBindingPosition(menuName);
+        //then
+        System.out.println(menuList);
+        assertEquals(menuName, menuList.get(0).getMenuName());
+    }
+}
+
+# 4. RESULTS
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_name=?
+[Menu{menuCode=7, menuName='민트미역국', menuPrice=15000, categoryCode=4, orderableStatus='Y'}]
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_name=?
+[Menu{menuCode=18, menuName='붕어빵초밥', menuPrice=35000, categoryCode=6, orderableStatus='Y'}]
