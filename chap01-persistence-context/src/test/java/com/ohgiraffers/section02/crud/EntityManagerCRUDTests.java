@@ -1,5 +1,6 @@
 package com.ohgiraffers.section02.crud;
 
+import org.hibernate.annotations.CollectionIdMutability;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
 
@@ -73,5 +75,16 @@ public class EntityManagerCRUDTests {
 
         //then
         assertEquals(menuName, modifiedMenu.getMenuName());
+    }
+
+    @DisplayName("Test Delete menu")
+    @ParameterizedTest
+    @ValueSource(ints = {29})
+    void testRemoveMenu(int menuCode){
+        //when
+        Long count = crud.removeAndReturnAllCount(menuCode);
+
+        //them
+        assertEquals(20, count);
     }
 }
