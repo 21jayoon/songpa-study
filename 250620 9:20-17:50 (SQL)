@@ -1,0 +1,149 @@
+# https://school.programmers.co.kr/learn/challenges?tab=sql_practice_kit
+
+-- 코드를 입력하세요
+-- 식당 ID, 식당 이름, 음식 종류, 즐겨찾기수, 주소, 리뷰 평균 점수
+SELECT I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS,
+       ROUND(AVG(R.REVIEW_SCORE), 2) AS SCORE
+  FROM REST_INFO I
+  JOIN REST_REVIEW R USING (REST_ID) 
+ORDER BY SCORE DESC, FAVORITES DESC 
+# 이렇게 하면 실행결과에 은돼지 식당 한 줄만 뜸.
+
+
+-- 코드를 입력하세요
+-- 식당 ID, 식당 이름, 음식 종류, 즐겨찾기수, 주소, 리뷰 평균 점수
+SELECT I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS,
+       R.REVIEW_SCORE AS SCORE
+     --  AVG(R.REVIEW_SCORE) AS SCORE
+  FROM REST_INFO I
+  JOIN REST_REVIEW R USING (REST_ID) 
+ORDER BY SCORE DESC, FAVORITES DESC 
+# 이렇게 했더니
+REST_ID	REST_NAME	FOOD_TYPE	FAVORITES	ADDRESS	SCORE
+00001	은돼지식당	한식	734	서울특별시 중구 다산로 149	5
+00001	은돼지식당	한식	734	서울특별시 중구 다산로 149	5
+......
+00013	은성보쌈	한식	10	경기도 부천시 부광로7번길 17	4
+00018	가나안	분식	51	경기도 수원시 팔달구 갓매산로71번길 15	3
+# 목록으로 잘 뜸.
+# 왜 AVG만 붙이면 한 줄만 뜨게 돼지?
+
+
+# SQL AVG 사용법 알아봄
+https://velog.io/@estell/SQL-%EB%AC%B8%EB%B2%95-GROUP-BY-%EA%B7%B8%EB%A3%B9-%EB%AC%B6%EC%96%B4%EC%A3%BC%EA%B8%B0-%EC%A7%91%EA%B3%84-%ED%95%A8%EC%88%98-SUM-AVG-MIN-MAX-COUNTDISTINCT-%EC%A1%B0%EA%B1%B4%EC%A0%88-HAVING
+
+-- 코드를 입력하세요
+-- 식당 ID, 식당 이름, 음식 종류, 즐겨찾기수, 주소, 리뷰 평균 점수
+SELECT I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS,
+       SCORE = SELECT AVG(R.REVIEW_SCORE)
+                 FROM REST_REVIEW R
+               GROUP BY I.REST_ID
+       -- ROUND(AVG(R.REVIEW_SCORE), 2) AS SCORE
+  FROM REST_INFO I
+  JOIN REST_REVIEW R USING (REST_ID) 
+ WHERE SCORE IN 
+ORDER BY SCORE DESC, FAVORITES DESC 
+
+# ERROR OCURR
+SQL 실행 중 오류가 발생하였습니다.
+You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELECT AVG(R.REVIEW_SCORE)
+                 FROM REST_REVIEW R
+               GR' at line 8
+
+
+
+-- 코드를 입력하세요
+-- 식당 ID, 식당 이름, 음식 종류, 즐겨찾기수, 주소, 리뷰 평균 점수
+SELECT I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS,
+       SCORE 
+       -- ROUND(AVG(R.REVIEW_SCORE), 2) AS SCORE
+  FROM REST_INFO I
+  JOIN REST_REVIEW R USING (REST_ID) 
+ WHERE SCORE IN (SELECT AVG(R.REVIEW_SCORE)
+                   FROM REST_REVIEW R
+               GROUP BY I.REST_ID)
+ORDER BY SCORE DESC, FAVORITES DESC;
+
+# Unknown column 'SCORE' in 'field list'
+
+
+
+-- 코드를 입력하세요
+-- 식당 ID, 식당 이름, 음식 종류, 즐겨찾기수, 주소, 리뷰 평균 점수
+SELECT I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS,
+       ROUND(AVG(R.REVIEW_SCORE), 2) AS SCORE
+  FROM REST_INFO I
+  JOIN REST_REVIEW R USING (REST_ID) 
+-- WHERE I.REST_NAME like '삼촌식당'
+GROUP BY I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS
+ORDER BY SCORE DESC, FAVORITES DESC ;
+
+# 목록들이 나오긴 함. 근데 정답이 아니래. 왜?
+
+# 전체 레스토랑 중 리뷰가 없는 레스토랑도 있었음. 이 목록들이 안 떠서 그런가 싶어
+SELECT I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS,
+       ROUND(AVG(R.REVIEW_SCORE), 2) AS SCORE
+  FROM REST_INFO I
+ LEFT JOIN REST_REVIEW R USING (REST_ID) 
+GROUP BY I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS
+ORDER BY SCORE DESC, FAVORITES DESC ;
+# INNER JOIN에서 LEFT JOIN으로 바꿨지만 이것도 정답이 아니었음.
+# 질문하기에서 보다가 누가 WHERE ri.address LIKE '서울%' 해놓은 걸 보고
+# 문제 조건 중 '서울에 위치한 식당들'이 있었음을 기억해냄
+
+-- 코드를 입력하세요
+-- 식당 ID, 식당 이름, 음식 종류, 즐겨찾기수, 주소, 리뷰 평균 점수
+SELECT I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS,
+       ROUND(AVG(R.REVIEW_SCORE), 2) AS SCORE
+  FROM REST_INFO I
+  JOIN REST_REVIEW R USING (REST_ID) 
+ WHERE I.ADDRESS LIKE '서울%'
+GROUP BY I.REST_ID,
+       I.REST_NAME,
+       I.FOOD_TYPE,
+       I.FAVORITES,
+       I.ADDRESS
+ORDER BY SCORE DESC, FAVORITES DESC ;
+# 이렇게 바꿨더니 
+# REST_ID	REST_NAME	FOOD_TYPE	FAVORITES	ADDRESS	SCORE
+# 00001	은돼지식당	한식	734	서울특별시 중구 다산로 149	5.00
+# 00002	하이가쯔네	일식	112	서울시 중구 신당동 375-21	4.50
+# 00004	스시사카우스	일식	230	서울시 강남구 신사동 627-27	4.29
+# 00003	따띠따띠뜨	양식	102	서울시 강남구 신사동 627-3 1F	4.00
+# 나오고 제출했더니 정답이라고 뜸. 17:56
