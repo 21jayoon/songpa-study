@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/menudb
+    username: ohgiraffers
+    password: ohgiraffers
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        # developers now can mapping the column name without using @Column(name = "menu_code") on the field in the entity class
+        # 'physical_naming_strategy' is a property(sok-sung) that specifies the physical naming strategy of 'Hibernate'.
+        # By setting this property, developers can directly define the naming rules for database tables and columns.
+    properties:
+      hibernate:
+        format_sql: true
