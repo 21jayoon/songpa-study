@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/publisherdb
+    username: ohgiraffers
+    password: ohgiraffers
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+#  The 'hibernate.ddl-auto' property allows 'Hibernate'
+#  to automatically create, modify, and delete tables associated with 'Entity classes'.
+#  If set to the create value, the table is created when the program is executed,
+#  and if set to the update value, the existing table is updated.
+#  If set to the 'validate' value, only the 'Entity class' and the table are verified to match,
+#  and if set to the 'createdrop' value, the table is deleted when the program ends.
+#  Set the 'create option' to proceed while creating a table that does not exist for today's lecture.
