@@ -1,1 +1,65 @@
+# 12_jpa - chap04_jpql - section04_paging Repository
+package com.ohgiraffers.jpql.section04.paging;
+...
+import java.util.List;
 
+@Repository
+public class PagingRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<Menu> usingPagingAPI(int offset, int limit){
+        String jpql = "SELECT m FROM Section04Menu m ORDER BY m.menuCode DESC";
+        //너무 많은 개수의 결과물을 출력할 경우 이걸 잘라서 보여주는 걸 '페이징처리'한다고 한다
+        List<Menu> pagingMenuList = entityManager.createQuery(jpql, Menu.class)
+                .setFirstResult(offset)  //조회를 어디에서부터 시작할 것이냐 지정해주는 메소드 (조회시작할 위치는 0부터 시작 가능)
+                //offset
+                .setMaxResults(limit)  // 조회하고자 하는 데이터의 개수
+                // limit
+                .getResultList();
+        return pagingMenuList;
+    }
+}
+
+
+# section04 paging Tests
+package com.ohgiraffers.jpql.section04.paging;
+...
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@SpringBootTest
+public class PagingRepositoryTests {
+    @Autowired
+    private PagingRepository pagingRepository;
+
+    @DisplayName("페이징 api를 이용한 조회 테스트")
+    @Test
+    void testUsingPagingAPI(){
+        int offset = 10;
+        int limit = 5;
+
+        List<Menu> menuList = pagingRepository.usingPagingAPI(offset, limit);
+        assertTrue(menuList.size() > 0 && menuList.size() < 6);
+        menuList.forEach(System.out::println);
+    }
+}
+
+# Tests Results
+Hibernate:
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status
+    from
+        tbl_menu m1_0
+    order by
+        m1_0.menu_code desc
+    limit
+        ?, ?
+Menu{menuCode=13, menuName='직화구이젤라또', menuPrice=8000, categoryCode=12, orderableStatus='Y'}
+Menu{menuCode=12, menuName='날치알스크류바', menuPrice=2000, categoryCode=10, orderableStatus='Y'}
+Menu{menuCode=11, menuName='정어리빙수', menuPrice=10000, categoryCode=10, orderableStatus='Y'}
+Menu{menuCode=10, menuName='코다리마늘빵', menuPrice=7000, categoryCode=12, orderableStatus='N'}
+Menu{menuCode=9, menuName='홍어마카롱', menuPrice=9000, categoryCode=12, orderableStatus='Y'}
