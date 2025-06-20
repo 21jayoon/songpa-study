@@ -262,3 +262,765 @@ Category{categoryCode=10, categoryName='기타', refCategoryCode=2}
      만약 @Transactional이 없으면 서비스 메서드 실행 후 영속성 컨텍스트가 닫혀있어
      menuList를 조회할 때 LazyInitializationException이 발생함.  (카테고리를 조회 했을 때 지연로딩이라서 메뉴 조회가 안 됨.)
      즉, @Transactional이 있어야 category와 menuList 모두 정상적으로 조회 가능함.*/
+
+
+# JPQL은 Java Persistence Query Language의 약자로, 
+# 엔터티 객체를 중심으로 개발할 수 있는 객체 지향 쿼리이다.
+# SQL보다 간결하며 특정 DBMS(MySQL, Oracle 등)에 의존하지 않는다. 방언을 통해 해당 DBMS에 맞는 SQL을 실행하게 된다
+# find() 메소드를 통한 조회와 다르게 JPQL은 항상 데이터베이스에 SQL을 실행해서 결과를 조회한다.
+# (find() 메소드는 1,2차 캐시 공간을 거쳐서 SQL을 실행한다)
+
+
+
+# New project
+# chap04 - jpql
+package com.ohgiraffers.jpql.section01.simple;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class SimpleJPQLRepository {
+    //now you can learn how to write jpql
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public String selectSingleMenuByTypedQuery(){
+        String jpql = "SELECT m.menuName FROM Section01Menu as m WHERE m.menuCode - 8";
+        // you can ignore(?) as in Section01Menu as m (FROM Section01Menu m is also OK)
+        TypedQuery<String> query = entityManager.createQuery(jpql, String.class);
+        //entityManager..createQuery(1, 2) 1: 수행하고자 하는 jpql 문법(SQL구문), 2: 반환받을 자료형 타입
+        //TypedQuery<String> : String TypedQuery로 반환 받겠다.
+        String resultMenuName = query.getSingleResult();
+        /* .getSingleResult() 행 하나 조회할 때 사용
+        * .getResultList() 행 여러 개 조회할 때 사용 */
+        return resultMenuName;
+    }
+}
+
+package com.ohgiraffers.jpql.section01.simple;
+...
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@SpringBootTest
+class SimpleJPQlRepositoryTests {
+
+    //autowired로 필드주입
+    @Autowired
+    private SimpleJPQLRepository simpleJPQlRepository;
+
+    @DisplayName("TypedQuery를 이용한 단일행, 단일컬럼 조회 테스트")
+    @Test
+    void testSelectSingleMenuByTypedQuery() {
+        String menuName = simpleJPQlRepository.selectSingleMenuByTypedQuery();
+        assertEquals("한우딸기국밥", menuName);
+    }
+}
+
+# Results
+Hibernate: 
+    select
+        m1_0.menu_name 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_code=8
+
+package com.ohgiraffers.jpql.section01.simple;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+class SimpleJPQlRepositoryTests {
+
+    //autowired로 필드주입
+    @Autowired
+    private SimpleJPQLRepository simpleJPQlRepository;
+
+    @DisplayName("TypedQuery를 이용한 다중행 조회 테스트")
+    @Test
+    public void testSelectResultListByTypedQuery(){
+        List<Menu> menuList = simpleJPQlRepository.selectMultiRowByTypedQuery();
+        // 행 하나 값이 아닌 여러 행으로 결과가 출력될 것이기 떄문에 .selectMultiRowByTypedQuery()를 사용한다
+        System.out.println(menuList);
+        assertNotNull(menuList);
+    }
+}
+
+# Result
+Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.4.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+...
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0
+[Menu{menuCode=1, menuName='changed name', menuPrice=4500, categoryCode=8, orderableStatus='Y'},......  Menu{menuCode=321, menuName='스파게티 돈가스', menuPrice=30000, categoryCode=321, orderableStatus='Y'}]
+
+
+package com.ohgiraffers.jpql.section01.simple;
+
+...
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+class SimpleJPQlRepositoryTests {
+
+    //autowired로 필드주입
+    @Autowired
+    private SimpleJPQLRepository simpleJPQlRepository;
+
+    @DisplayName("DISTINCT 연산자 사용 조회 테스트")
+    @Test
+    public void testSelectUsingDistinct(){
+        List<Integer> categoryList = simpleJPQlRepository.selectUsingDistinct();
+        System.out.println(categoryList);
+        assertNotNull(categoryList);
+    }
+}
+
+# Result
+Hibernate: 
+    select
+        distinct m1_0.category_code 
+    from
+        tbl_menu m1_0
+[3, 4, 5, 6, 8, 9, 10, 12, 13, 321]
+
+
+# Practice!
+# 1. selectUsingIn error solving
+# referrered: https://www.w3schools.com/sql/sql_in.asp
+# There is no Integer but keeps showing this error.
+# Specified result type [com.ohgiraffers.jpql.section01.simple.Menu] did not match Query selection type [java.lang.Integer] - multiple selections: use Tuple or array
+# org.springframework.orm.jpa.JpaSystemException: Specified result type [com.ohgiraffers.jpql.section01.simple.Menu] did not match Query selection type [java.lang.Integer] - multiple selections: use Tuple or array
+# at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:348)
+
+package com.ohgiraffers.jpql.section01.simple;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class SimpleJPQLRepository {
+    //now you can learn how to write jpql
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /*11, 12 카테고리 코드를 가진 메뉴목록 조회*/
+    public List<Menu> selectUsingIn(){
+        String jpql = "SELECT m.categoryCode FROM Section01Menu m WHERE m.menuCode IN (11, 12)";
+        TypedQuery<Menu> query = entityManager.createQuery(jpql, Menu.class);
+        List<Menu> specificCategoryList = query.getResultList();
+        return specificCategoryList;
+    }
+
+package com.ohgiraffers.jpql.section01.simple;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+import java.util.SortedMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+class SimpleJPQlRepositoryTests {
+
+    //autowired로 필드주입
+    @Autowired
+    private SimpleJPQLRepository simpleJPQlRepository;
+
+    @DisplayName("Test categorlyCode 11, 12 is exeucte well")
+    @Test
+    public void testSelectUsingIn(){
+        List<Menu> specificCategoryList = simpleJPQlRepository.selectUsingIn();
+        System.out.println(specificCategoryList);
+        assertNotNull(specificCategoryList);
+    }
+}
+
+# Change the code
+# From Lisg<Menu> to List<Integer>
+ public List<Integer> selectUsingIn(){
+        String jpql = "SELECT m.categoryCode FROM Section01Menu m WHERE m.menuCode IN (11, 12)";
+        TypedQuery<Integer> query = entityManager.createQuery(jpql, Integer.class);
+        List<Integer> specificCategoryList = query.getResultList();
+        return specificCategoryList;
+    }
+# because categoryCode is interger, not a menu type.
+
+# Result
+Hibernate: 
+    select
+        m1_0.category_code 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_code in (11, 12)
+[10, 10]
+
+# Something wrong...
+# change repository code again
+/*11, 12 카테고리 코드를 가진 메뉴목록 조회*/
+    public List<Menu> selectUsingIn(){
+        String jpql = "SELECT m.menuName FROM Section01Menu m WHERE m.categoryCode IN (11, 12)";
+        TypedQuery<Menu> query = entityManager.createQuery(jpql, Menu.class);
+        List<Menu> specificCategoryList = query.getResultList();
+        return specificCategoryList;
+    }
+
+@DisplayName("Test categoryCode 11, 12 is exeucte well")
+    @Test
+    public void testSelectUsingIn(){
+        List<Menu> specificCategoryList = simpleJPQlRepository.selectUsingIn();
+        System.out.println(specificCategoryList);
+        assertNotNull(specificCategoryList);
+    }
+# Result
+Specified result type [com.ohgiraffers.jpql.section01.simple.Menu] did not match Query selection type [java.lang.String] - multiple selections: use Tuple or array
+org.springframework.orm.jpa.JpaSystemException: Specified result type [com.ohgiraffers.jpql.section01.simple.Menu] did not match Query selection type [java.lang.String] - multiple selections: use Tuple or array
+
+# change
+# SimpleJPQLRepository
+ public List<String> selectUsingIn(){
+        String jpql = "SELECT m.menuName FROM Section01Menu m WHERE m.categoryCode IN (11, 12)";
+        TypedQuery<String> query = entityManager.createQuery(jpql, String.class);
+        List<String> specificCategoryList = query.getResultList();
+        return specificCategoryList;
+    }
+
+# SimpleJPQlRepositoryTests
+@DisplayName("Test categoryCode 11, 12 is exeucte well")
+    @Test
+    public void testSelectUsingIn(){
+        List<String> specificCategoryList = simpleJPQlRepository.selectUsingIn();
+        System.out.println(specificCategoryList);
+        assertNotNull(specificCategoryList);
+    }
+
+# Result
+Hibernate: 
+    select
+        m1_0.menu_name 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.category_code in (11, 12)
+[홍어마카롱, 코다리마늘빵, 직화구이젤라또]
+
+
+# Answer
+# JPQL Repository
+//실습 11:08-
+    /*11, 12 카테고리 코드를 가진 메뉴목록 조회*/
+    public List<Menu> selectUsingIn(){
+        String jpql = "SELECT m FROM Section01Menu m WHERE m.categoryCode IN (11, 12)";
+        TypedQuery<Menu> query = entityManager.createQuery(jpql, Menu.class);
+        List<Menu> specificCategoryList = query.getResultList();
+        return specificCategoryList;
+    }
+
+# Tests
+ @DisplayName("Test categoryCode 11, 12 is exeucte well")
+    @Test
+    public void testSelectUsingIn(){
+        List<Menu> specificCategoryList = simpleJPQlRepository.selectUsingIn();
+        System.out.println(specificCategoryList);
+        assertNotNull(specificCategoryList);
+    }
+
+# Results
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.category_code in (11, 12)
+[Menu{menuCode=9, menuName='홍어마카롱', menuPrice=9000, categoryCode=12, orderableStatus='Y'}, Menu{menuCode=10, menuName='코다리마늘빵', menuPrice=7000, categoryCode=12, orderableStatus='N'}, Menu{menuCode=13, menuName='직화구이젤라또', menuPrice=8000, categoryCode=12, orderableStatus='Y'}]
+
+# 2. selectUsingLike error fix
+# Repository
+/*"마늘"이란 문자열이 메뉴명에 포함되는 메뉴 목록 조회*/
+    public List<Menu> selectUsingLike(){
+        String jpql = "SELECT m FROM Section01Menu m WHERE m.menuName LIKE '마늘'";
+        TypedQuery<Menu> query = entityManager.createQuery(jpql, Menu.class);
+        List<Menu> specificMenuList = query.getResultList();
+        return specificMenuList;
+    }
+
+# Tests
+@DisplayName("Test the list print include '마늘' in menu name")
+    @Test
+    public void testSelectUsingLike(){
+        List<Menu> specificMenuList = simpleJPQlRepository.selectUsingLike();
+        System.out.println(specificMenuList);
+        assertNotNull(specificMenuList);
+    }
+
+# Results
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_name like '마늘' escape ''
+[]
+
+# Edit and run again
+# Referring: https://www.w3schools.com/sql/sql_like.asp
+# There are two wildcards often used in conjunction with the LIKE operator:
+# The percent sign % represents zero, one, or multiple characters
+
+# Repository
+public List<Menu> selectUsingLike(){
+        String jpql = "SELECT m FROM Section01Menu m WHERE m.menuName LIKE '%마늘%'";
+        TypedQuery<Menu> query = entityManager.createQuery(jpql, Menu.class);
+        List<Menu> specificMenuList = query.getResultList();
+        return specificMenuList;
+    }
+# Tests
+@DisplayName("Test the list print include '마늘' in menu name")
+    @Test
+    public void testSelectUsingLike(){
+        List<Menu> specificMenuList = simpleJPQlRepository.selectUsingLike();
+        System.out.println(specificMenuList);
+        assertNotNull(specificMenuList);
+    }
+# Test Results
+> Task :compileJava
+> Task :processResources UP-TO-DATE
+> Task :classes
+> Task :compileTestJava
+> Task :processTestResources NO-SOURCE
+> Task :testClasses
+ :: Spring Boot ::                (v3.5.2)
+...
+2025-06-20T11:45:10.932+09:00  INFO 20964 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-06-20T11:45:11.133+09:00  INFO 20964 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4a336377
+2025-06-20T11:45:11.135+09:00  INFO 20964 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-06-20T11:45:11.181+09:00  WARN 20964 --- [    Test worker] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-20T11:45:11.203+09:00  INFO 20964 --- [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.4.5
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-06-20T11:45:11.794+09:00  INFO 20964 --- [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-20T11:45:11.799+09:00  INFO 20964 --- [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-20T11:45:11.968+09:00  INFO 20964 --- [    Test worker] c.o.j.s.s.SimpleJPQlRepositoryTests      : Started SimpleJPQlRepositoryTests in 2.159 seconds (process running for 2.988)
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_name like '%마늘%' escape ''
+[Menu{menuCode=6, menuName='생마늘샐러드', menuPrice=12000, categoryCode=4, orderableStatus='Y'}, Menu{menuCode=10, menuName='코다리마늘빵', menuPrice=7000, categoryCode=12, orderableStatus='N'}, Menu{menuCode=16, menuName='흑마늘아메리카노', menuPrice=9000, categoryCode=8, orderableStatus='Y'}]
+
+
+
+# SECTION02 - PARAMETER
+# 1. Menu
+package com.ohgiraffers.jpql.section02.parameter;
+...
+
+@Entity(name = "Section02Menu")
+@Table(name = "tbl_menu")
+public class Menu {
+    @Id
+    private int menuCode;
+    private String menuName;
+    private int menuPrice;
+    private int categoryCode;
+    private String orderableStatus;
+
+    public Menu(){}
+
+    public Menu(int menuCode, String menuName, int menuPrice, int categoryCode, String orderableStatus) {
+        this.menuCode = menuCode;
+        this.menuName = menuName;
+        this.menuPrice = menuPrice;
+        this.categoryCode = categoryCode;
+        this.orderableStatus = orderableStatus;
+    }
+
+    public int getMenuCode() {
+        return menuCode;
+    }
+...
+    }
+}
+
+# 2. parameterbindingRepository
+package com.ohgiraffers.jpql.section02.parameter;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class ParameterBindingRepository {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<Menu> selectMenuByBindingName (String menuName){
+        String jpql ="SELECT m FROM Section02Menu m WHERE m.menuName = :menuName";
+        // parameter (String menuName) does not same with :manuName in sql queries.
+        // so it need .setParameter to linked parameter and :menuName by 'menuName' word.
+        List<Menu> resultMenuList = entityManager.createQuery(jpql, Menu.class)
+                                                 .setParameter("menuName", menuName)
+                                                 .getResultList();
+        return resultMenuList;
+    }
+
+    public List<Menu> selectMenuByBindingPosition (String menuName){
+        String jpql ="SELECT m FROM Section02Menu m WHERE m.menuName = ?1";
+        List<Menu> resultMenuList = entityManager.createQuery(jpql, Menu.class)
+                                                .setParameter(1, menuName)
+                                                .getResultList();
+        return resultMenuList;
+    }
+}
+
+# 3. TESTS
+package com.ohgiraffers.jpql.section02.parameter;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@SpringBootTest
+public class MenuBindingRepositoryTests {
+    @Autowired
+    private ParameterBindingRepository parameterBindingRepository;
+
+    @DisplayName("이름 기준 파라미터 바인딩 테스트")
+    @Test
+    void testParameterBindingByName(){
+        String menuName = "민트미역국";
+        List<Menu> menuList = parameterBindingRepository.selectMenuByBindingName(menuName);
+        System.out.println(menuList);
+        assertEquals(menuName, menuList.get(0).getMenuName());
+        // assertEquals(...) =
+        // menuName "민트미역국"과 출력할 menuList의 1번째 인덱스(어차피 하나 출력하는 거긴 하지만)에서
+        // 해당 인덱스의 이름이 같은지 확인한다
+    }
+
+    @DisplayName("위치 기준 파라미터 바인딩 테스트")
+    @Test
+    void testParameterBindingByPosition(){
+        //given
+        String menuName = "붕어빵초밥";
+        //when
+        List<Menu> menuList = parameterBindingRepository.selectMenuByBindingPosition(menuName);
+        //then
+        System.out.println(menuList);
+        assertEquals(menuName, menuList.get(0).getMenuName());
+    }
+}
+
+# 4. RESULTS
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_name=?
+[Menu{menuCode=7, menuName='민트미역국', menuPrice=15000, categoryCode=4, orderableStatus='Y'}]
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    where
+        m1_0.menu_name=?
+[Menu{menuCode=18, menuName='붕어빵초밥', menuPrice=35000, categoryCode=6, orderableStatus='Y'}]
+
+# SECTION03 - PROJECTION
+# 1. Repository
+package com.ohgiraffers.jpql.section03.projection;
+...
+
+@Repository
+public class ProjectionRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /*SELECT 절에 조회할 대상을 지정하는 것을 프로젝션이라고 한다.
+    (SELECT {프로젝션 대상} FROM)
+
+    프로젝션 대상은 4가지 방식이 있다.
+    1. 엔터티 프로젝션 : 원하는 객체를 바로 조회할 수 있다. 조회된 엔티티는 영속성 컨텍스트가 관리한다.
+    2. 임베디드 타입 프로젝션 : 조회의 시작점이 될 수 없다. (from 절 사용 불가)
+                            임베디드 타입은 영속성 컨텍스트에서 관리되지 않는다.
+    3. 스칼라 타입 프로젝션 : 숫자, 문자, 날짜 같은 기본 데이터 타입이다.
+                           스칼라 타입은 영속성 컨텍스트에서 관리되지 않는다.
+    4. new 명령어를 활용한 프로젝션 : 다양한 종류의 단순 값들을 DTO로 바로 조회하는 방식.
+                        'new 패키지명.DTO명'을 쓰면 해당 DTO로 바로 반환받을 수 있다.
+                         new 명령어를 사용한 클래스의 객체는 엔티티가 아니므로 영속성 컨텍스트에서 관리되지 않는다.
+     */
+
+    public List<Menu> singleEntityProjection() {
+        String jpql = "SELECT m FROM Section03Menu m";
+        //entity projection 했을 때 영속성 컨텍스트에 관리가 되는가 확인하기 위한 코드
+        //-> 엔티티 프로젝션은 영속성 컨택스트에서 관리가 된다
+                List<Menu> menuList
+                = entityManager.createQuery(jpql, Menu.class).getResultList();
+        return menuList;
+    }
+}
+
+# 2. Service
+package com.ohgiraffers.jpql.section03.projection;
+...
+
+@Service
+public class ProjectionService {
+    private ProjectionRepository projectionRepository;
+
+    public ProjectionService(ProjectionRepository projectionRepository){
+        this.projectionRepository = projectionRepository;
+    }
+
+    @Transactional
+    public List<Menu> singleEntityProjection() {
+        List<Menu> menuList = projectionRepository.singleEntityProjection();
+
+        // 엔티티 프로젝션은 영속성 컨텍스트에서 관리하는 객체가 된다.
+        menuList.get(1).setMenuName("Good Bingsu");
+        return menuList;
+    }
+}
+
+# 3. TESTS
+package com.ohgiraffers.jpql.section03.projection;
+...
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+public class ProjectionServiceTests {
+    // Repository -> (Service) -> Tests
+    // Service class is not necessary
+
+    @Autowired
+    private ProjectionService projectionService;
+
+    @Autowired
+    private ProjectionRepository projectionRepository;
+
+    @DisplayName("단일 엔티티 projection")
+    @Test
+    void testSingleEntityProjection(){
+        List<Menu> menuList = projectionService.singleEntityProjection();
+        System.out.println(menuList);
+        assertNotNull(menuList);
+    }
+}
+
+# 4. RESULTS
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0
+[Menu{menuCode=1, menuName='changed name', menuPrice=4500, categoryCode=8, orderableStatus='Y'}, Menu{menuCode=2, menuName='Good Bingsu', menuPrice=5000, categoryCode=10, orderableStatus='Y'}, ...... Menu{menuCode=321, menuName='스파게티 돈가스', menuPrice=30000, categoryCode=321, orderableStatus='Y'}]
+
+
+# SCALAR PROJECTION
+# 1. Category
+package com.ohgiraffers.jpql.section03.projection;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity(name = "Section03Category")
+@Table(name = "tbl_category")
+public class Category {
+    @Id
+    private int categoryCode;
+    private String categoryName;
+    private Integer refCategoryCode;
+
+    public Category(){}
+...
+}
+
+# 2. Repository
+package com.ohgiraffers.jpql.section03.projection;
+...import java.util.List;
+
+@Repository
+public class ProjectionRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<Object[]> scalarTypeProjection(){
+        String jpql = "SELECT c.categoryCode, c.categoryName FROM Section03Category c";
+        return entityManager.createQuery(jpql).getResultList();
+    }
+}
+
+# 3. TESTS
+package com.ohgiraffers.jpql.section03.projection;
+...
+
+@SpringBootTest
+public class ProjectionServiceTests {
+    // Repository -> (Service) -> Tests
+    // Service class is not necessary
+
+    @Autowired
+    private ProjectionService projectionService;
+
+    @Autowired
+    private ProjectionRepository projectionRepository;
+
+    @DisplayName("Scalar스칼라 type projection")
+    @Test
+    void testScalarTypeProjection(){
+        List<Object[]> categoryList = projectionRepository.scalarTypeProjection();
+        assertNotNull(categoryList);
+        categoryList.forEach(
+              row -> {
+                  for(Object column : row){
+                      System.out.println(column+ " ");
+                  }
+                  System.out.println();
+              }
+        ); //foreach 돌리기 위해 object[]배열을 꺼내옴
+    }
+}
+
+# Results
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name 
+    from
+        tbl_category c1_0
+1 
+식사 
+
+2 
+음료 
+...
+321 
+분식퓨전 
+
+# Tests
+package com.ohgiraffers.jpql.section04.paging;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@SpringBootTest
+public class PagingRepositoryTests {
+    @Autowired
+    private PagingRepository pagingRepository;
+
+    @DisplayName("페이징 api를 이용한 조회 테스트")
+    @Test
+    void testUsingPagingAPI(){
+        int offset = 10;
+        int limit = 5;
+
+        List<Menu> menuList = pagingRepository.usingPagingAPI(offset, limit);
+        assertTrue(menuList.size() > 0 && menuList.size() < 6);
+        menuList.forEach(System.out::println);
+    }
+}
+
+# Tests
+Hibernate:
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status
+    from
+        tbl_menu m1_0
+    order by
+        m1_0.menu_code desc
+    limit
+        ?, ?
+Menu{menuCode=13, menuName='직화구이젤라또', menuPrice=8000, categoryCode=12, orderableStatus='Y'}
+Menu{menuCode=12, menuName='날치알스크류바', menuPrice=2000, categoryCode=10, orderableStatus='Y'}
+Menu{menuCode=11, menuName='정어리빙수', menuPrice=10000, categoryCode=10, orderableStatus='Y'}
+Menu{menuCode=10, menuName='코다리마늘빵', menuPrice=7000, categoryCode=12, orderableStatus='N'}
+Menu{menuCode=9, menuName='홍어마카롱', menuPrice=9000, categoryCode=12, orderableStatus='Y'}
