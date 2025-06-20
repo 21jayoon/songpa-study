@@ -1,0 +1,264 @@
+# 오늘 배운 내용 Today's lecture
+# chapter03 - section03 bidirection
+# bidirecction = N:M 다대다 관계
+package com.ohgiraffers.associationmapping.section03.bidirection;
+
+import jakarta.persistence.*;
+
+@Entity(name="bidirection_menu")
+// 250620 9:31 entity name이 구분될 수 있도록 바꾸어줌
+@Table(name="tbl_menu")
+public class Menu {
+    //When you want to make a bidirection relationship with JPA,
+    // it's not enough to use simultaniously both onetomany and manytoone.
+    // Instead, you have to find "Real relation" and "fake relation".
+    // The "Real" relation must be the entity that has a fk from another entity.
+    @Id
+    private int menuCode;
+    private String menuName;
+    private int menuPrice;
+
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    // .PERSIST : 영속성 전이
+    // (cascade = CascadeType.PERSIST) 이걸 넣어야
+    // "category도 같이 영속화할게요(=카테고리도 같이 추가할게요)"가 됨.
+
+    /* 영속성 전이
+     * 특정 엔티티를 영속화 할 때 연관 된 엔티티도 함께 영속화 한다는 의미이다.*/
+    /* 기본적으로는 즉시 로딩되지만 필요에 따라 지연 로딩으로 변경할 수 있다. */
+
+    // FetchType.EAGER = 즉시 로딩
+    // FetchType.LAZY = 지연 로딩
+    // @ManyToOne일 때는 EAGER 즉시 로딩이 Default
+    @JoinColumn(name = "categoryCode") //@JoinColumn의 이름은 FK 이름으로 적어야 한다
+    private Category category;
+    //연관관계 매핑을 보고 싶기 때문에 categoryCode라고 안 적고 category라고 적은 후
+    //Category entity class에서 연관관계 매핑 사용하는 방법을 알아본다.
+
+    private String orderableStatus;
+
+    public Menu(){}
+...
+    }
+}
+
+package com.ohgiraffers.associationmapping.section03.bidirection;
+...
+import jakarta.persistence.Table;
+
+import java.util.List;
+
+@Entity(name = "bidirection_category")
+// 250620 9:31 entity name이 구분될 수 있도록 바꾸어줌
+@Table(name = "tbl_category")
+public class Category {
+    //category table과 매핑할 entity class
+
+    // write a field
+    @Id
+    private int categoryCode;
+    private String categoryName;
+    private Integer refCategoryCode;
+
+    @OneToMany(mappedBy = "category")
+    private List<Menu> menuList;
+    // I noted in menu.java that "Real" relation is the entity that have a FK.
+    // so the fake relation, category entity needs an annotation @OneToMay
+    // with (mappedBy = ).
+    // Also, the mapped value must be tha FK of the entity which has a "Real" relationship
+    // Referred by    private Category category;   from the menu entity,
+    // (mappedBy = "category") is the right answer.
+
+    public Category(){}
+...   
+    }
+}
+
+
+package com.ohgiraffers.associationmapping.section03.bidirection;
+...
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class BiDirectionRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public Menu findMenu(int menuCode){
+        return entityManager.find(Menu.class, menuCode);
+    }
+
+    public Category findCategory(int categoryCode){
+        return entityManager.find(Category.class, categoryCode);
+    }
+}
+
+package com.ohgiraffers.associationmapping.section03.bidirection;
+import org.springframework.stereotype.Service;
+
+@Service
+public class BiDirectionService {
+    // constructor dependency injection
+    private BiDirectionRepository biDirectionRepository;
+
+    public BiDirectionService(BiDirectionRepository biDirectionRepository){
+        this.biDirectionRepository = biDirectionRepository;
+    }
+
+    public Menu findMenu(int menuCode){
+        return biDirectionRepository.findMenu(menuCode);
+    }
+
+    public Category findCategory(int categoryCode){
+        Category category = biDirectionRepository.findCategory(categoryCode);
+        return category;
+    }
+}
+
+
+package com.ohgiraffers.associationmapping.section03.bidirection;
+...
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@SpringBootTest
+public class BiDirectionServiceTests {
+    @Autowired
+    private BiDirectionService biDirectionService;
+
+    @DisplayName("양방향 연관관계 매핑 조회(연관관계의 주인)")
+    @Test
+    void biDirectionFindTest1(){
+        //given
+        int menuCode = 11;
+
+        //when
+        Menu foundMenu = biDirectionService.findMenu(menuCode);
+
+        //then
+        assertEquals(menuCode, foundMenu.getMenuCode());
+    }
+
+    @DisplayName("양방향 연관관계 매핑 조회(연관관계 주인 아닌 경우)")
+    @Test
+    void biDirectionFindTest2(){
+        //given
+        int menuCode = 11;
+
+        //when
+        Category foundCategory = biDirectionService.findCategory(menuCode);
+
+        //then
+        assertEquals(menuCode, foundCategory.getCategoryCode());
+    }
+}
+
+# BiDirectionServiceTests 결과 Results of BiDirectionServiceTests
+Hibernate: 
+    select
+        m1_0.menu_code,
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0 
+    left join
+        tbl_category c1_0 
+            on c1_0.category_code=m1_0.category_code 
+    where
+        m1_0.menu_code=?
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code 
+    from
+        tbl_category c1_0 
+    where
+        c1_0.category_code=?
+
+# Change BiDirectionService and rerun the test
+package com.ohgiraffers.associationmapping.section03.bidirection;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class BiDirectionService {
+    ...
+    @Transactional // @Transactional을 안 붙여줬더니 Lazy initialiaztion이 안 된다며 test execute 오류 뜸.
+    public Category findCategory(int categoryCode){
+        Category category = biDirectionRepository.findCategory(categoryCode);
+        System.out.println(category.getMenuList());
+        System.out.println(category.getMenuList().get(0).getCategory());
+        return category;
+    }
+}
+
+package com.ohgiraffers.associationmapping.section03.bidirection;
+...
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@SpringBootTest
+public class BiDirectionServiceTests {
+    
+    @DisplayName("양방향 연관관계 매핑 조회(연관관계 주인 아닌 경우)")
+    @Test
+    void biDirectionFindTest2(){
+        //given
+        int categoryCode = 10;
+
+        //when
+        Category foundCategory = biDirectionService.findCategory(categoryCode);
+
+        //then
+        assertEquals(categoryCode, foundCategory.getCategoryCode());
+    }
+    // Using OneToMany or ManyToOne instead using BiDirection.
+    // BiDirection is not recommended
+}
+
+# 결과 Result
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name,
+        c1_0.ref_category_code 
+    from
+        tbl_category c1_0 
+    where
+        c1_0.category_code=?
+Hibernate: 
+    select
+        ml1_0.category_code,
+        ml1_0.menu_code,
+        ml1_0.menu_name,
+        ml1_0.menu_price,
+        ml1_0.orderable_status 
+    from
+        tbl_menu ml1_0 
+    where
+        ml1_0.category_code=?
+[Menu{menuCode=2, menuName='우럭스무디', menuPrice=5000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=3, menuName='생갈치쉐이크', menuPrice=6000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=4, menuName='naym', menuPrice=7000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='N'}, Menu{menuCode=11, menuName='정어리빙수', menuPrice=10000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=12, menuName='날치알스크류바', menuPrice=2000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=17, menuName='아이스가리비관자육수', menuPrice=6000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}]
+Category{categoryCode=10, categoryName='기타', refCategoryCode=2}
+
+
+@Transactional
+    public Category findCategory(int categoryCode){
+        Category category = biDirectionRepository.findCategory(categoryCode);
+        System.out.println(category.getMenuList());
+        System.out.println(category.getMenuList().get(0).getCategory());
+        return category;
+    }
+    /* findCategory는 Category 엔티티를 조회하는 메서드로,
+     Category의 menuList 필드는 LAZY(지연로딩)로 설정되어 있음.   (원래 카테고리를 찾아오는 것 자체는 lazy로딩이 일어나는 건데, (카테고리가 지연로딩을 갖고 있음))
+     따라서 category만 조회할 땐 menuList가 실제로 DB에서 조회되지 않고, menuList에 접근하는 시점에 쿼리가 실행됨.
+     menuList를 조회할 때 영속성 컨텍스트가 열려 있어야 지연로딩이 동작해서 쿼리가 수행됨.
+     만약 @Transactional이 없으면 서비스 메서드 실행 후 영속성 컨텍스트가 닫혀있어
+     menuList를 조회할 때 LazyInitializationException이 발생함.  (카테고리를 조회 했을 때 지연로딩이라서 메뉴 조회가 안 됨.)
+     즉, @Transactional이 있어야 category와 menuList 모두 정상적으로 조회 가능함.*/
