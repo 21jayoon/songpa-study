@@ -183,8 +183,7 @@ Hibernate:
 
 # Change BiDirectionService and rerun the test
 package com.ohgiraffers.associationmapping.section03.bidirection;
-
-import org.springframework.stereotype.Service;
+...
 
 @Service
 public class BiDirectionService {
@@ -200,8 +199,6 @@ public class BiDirectionService {
 
 package com.ohgiraffers.associationmapping.section03.bidirection;
 ...
-import org.springframework.boot.test.context.SpringBootTest;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -211,7 +208,7 @@ public class BiDirectionServiceTests {
     @Test
     void biDirectionFindTest2(){
         //given
-        int categoryCode = 10;
+        int categoryCode = 10;  //Index 0 out of bounds for length 0 오류 떠서 11에서 10으로 바꿔줌줌
 
         //when
         Category foundCategory = biDirectionService.findCategory(categoryCode);
@@ -244,7 +241,7 @@ Hibernate:
         tbl_menu ml1_0 
     where
         ml1_0.category_code=?
-[Menu{menuCode=2, menuName='우럭스무디', menuPrice=5000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=3, menuName='생갈치쉐이크', menuPrice=6000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=4, menuName='naym', menuPrice=7000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='N'}, Menu{menuCode=11, menuName='정어리빙수', menuPrice=10000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=12, menuName='날치알스크류바', menuPrice=2000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=17, menuName='아이스가리비관자육수', menuPrice=6000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}]
+[Menu{menuCode=2, menuName='Good Bingsu', menuPrice=5000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=3, menuName='생갈치쉐이크', menuPrice=6000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=4, menuName='naym', menuPrice=7000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='N'}, Menu{menuCode=11, menuName='정어리빙수', menuPrice=10000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=12, menuName='날치알스크류바', menuPrice=2000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}, Menu{menuCode=17, menuName='아이스가리비관자육수', menuPrice=6000, category=Category{categoryCode=10, categoryName='기타', refCategoryCode=2}, orderableStatus='Y'}]
 Category{categoryCode=10, categoryName='기타', refCategoryCode=2}
 
 
