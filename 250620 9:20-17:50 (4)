@@ -1,0 +1,241 @@
+# SECTION03 - PROJECTION
+# 1. Repository
+package com.ohgiraffers.jpql.section03.projection;
+...
+
+@Repository
+public class ProjectionRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /*SELECT 절에 조회할 대상을 지정하는 것을 프로젝션이라고 한다.
+    (SELECT {프로젝션 대상} FROM)
+
+    프로젝션 대상은 4가지 방식이 있다.
+    1. 엔터티 프로젝션 : 원하는 객체를 바로 조회할 수 있다. 조회된 엔티티는 영속성 컨텍스트가 관리한다.
+    2. 임베디드 타입 프로젝션 : 조회의 시작점이 될 수 없다. (from 절 사용 불가)
+                            임베디드 타입은 영속성 컨텍스트에서 관리되지 않는다.
+    3. 스칼라 타입 프로젝션 : 숫자, 문자, 날짜 같은 기본 데이터 타입이다.
+                           스칼라 타입은 영속성 컨텍스트에서 관리되지 않는다.
+    4. new 명령어를 활용한 프로젝션 : 다양한 종류의 단순 값들을 DTO로 바로 조회하는 방식.
+                        'new 패키지명.DTO명'을 쓰면 해당 DTO로 바로 반환받을 수 있다.
+                         new 명령어를 사용한 클래스의 객체는 엔티티가 아니므로 영속성 컨텍스트에서 관리되지 않는다.
+     */
+
+    public List<Menu> singleEntityProjection() {
+        String jpql = "SELECT m FROM Section03Menu m";
+        //entity projection 했을 때 영속성 컨텍스트에 관리가 되는가 확인하기 위한 코드
+        //-> 엔티티 프로젝션은 영속성 컨택스트에서 관리가 된다
+                List<Menu> menuList
+                = entityManager.createQuery(jpql, Menu.class).getResultList();
+        return menuList;
+    }
+}
+
+# 2. Service
+package com.ohgiraffers.jpql.section03.projection;
+...
+
+@Service
+public class ProjectionService {
+    private ProjectionRepository projectionRepository;
+
+    public ProjectionService(ProjectionRepository projectionRepository){
+        this.projectionRepository = projectionRepository;
+    }
+
+    @Transactional
+    public List<Menu> singleEntityProjection() {
+        List<Menu> menuList = projectionRepository.singleEntityProjection();
+
+        // 엔티티 프로젝션은 영속성 컨텍스트에서 관리하는 객체가 된다.
+        menuList.get(1).setMenuName("Good Bingsu");
+        return menuList;
+    }
+}
+
+# 3. TESTS
+package com.ohgiraffers.jpql.section03.projection;
+...
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+public class ProjectionServiceTests {
+    // Repository -> (Service) -> Tests
+    // Service class is not necessary
+
+    @Autowired
+    private ProjectionService projectionService;
+
+    @Autowired
+    private ProjectionRepository projectionRepository;
+
+    @DisplayName("단일 엔티티 projection")
+    @Test
+    void testSingleEntityProjection(){
+        List<Menu> menuList = projectionService.singleEntityProjection();
+        System.out.println(menuList);
+        assertNotNull(menuList);
+    }
+}
+
+# 4. RESULTS
+Hibernate: 
+    select
+        m1_0.menu_code,
+        m1_0.category_code,
+        m1_0.menu_name,
+        m1_0.menu_price,
+        m1_0.orderable_status 
+    from
+        tbl_menu m1_0
+[Menu{menuCode=1, menuName='changed name', menuPrice=4500, categoryCode=8, orderableStatus='Y'}, Menu{menuCode=2, menuName='Good Bingsu', menuPrice=5000, categoryCode=10, orderableStatus='Y'}, ...... Menu{menuCode=321, menuName='스파게티 돈가스', menuPrice=30000, categoryCode=321, orderableStatus='Y'}]
+
+
+# SCALAR PROJECTION
+# 1. Category
+package com.ohgiraffers.jpql.section03.projection;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity(name = "Section03Category")
+@Table(name = "tbl_category")
+public class Category {
+    @Id
+    private int categoryCode;
+    private String categoryName;
+    private Integer refCategoryCode;
+
+    public Category(){}
+...
+}
+
+# 2. Repository
+package com.ohgiraffers.jpql.section03.projection;
+...import java.util.List;
+
+@Repository
+public class ProjectionRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<Object[]> scalarTypeProjection(){
+        String jpql = "SELECT c.categoryCode, c.categoryName FROM Section03Category c";
+        return entityManager.createQuery(jpql).getResultList();
+    }
+}
+
+# 3. TESTS
+package com.ohgiraffers.jpql.section03.projection;
+...
+
+@SpringBootTest
+public class ProjectionServiceTests {
+    // Repository -> (Service) -> Tests
+    // Service class is not necessary
+
+    @Autowired
+    private ProjectionService projectionService;
+
+    @Autowired
+    private ProjectionRepository projectionRepository;
+
+    @DisplayName("Scalar스칼라 type projection")
+    @Test
+    void testScalarTypeProjection(){
+        List<Object[]> categoryList = projectionRepository.scalarTypeProjection();
+        assertNotNull(categoryList);
+        categoryList.forEach(
+              row -> {
+                  for(Object column : row){
+                      System.out.println(column+ " ");
+                  }
+                  System.out.println();
+              }
+        ); //foreach 돌리기 위해 object[]배열을 꺼내옴
+    }
+}
+
+# Results
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name 
+    from
+        tbl_category c1_0
+1 
+식사 
+
+2 
+음료 
+...
+321 
+분식퓨전 
+
+
+# NEWCOMMANDPROJECTION 
+package com.ohgiraffers.jpql.section03.projection;
+...
+
+@Repository
+public class ProjectionRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<CategoryInfo> newCommandProjection(){
+        //com.ohgiraffers.jpql.sectio03.projection.CategoryInfo = 생성자 호출
+        String jpql = "SELECT new com.ohgiraffers.jpql.section03.projection.CategoryInfo(c.categoryCode, c.categoryName)" +
+                "FROM Section03Category c";  // 이 부분에 sectio03, v.categoryCode 오타 있어갖고 Tests가 안 됐다. section03, c.categoryCode로 고침
+        List<CategoryInfo> resultList = entityManager.createQuery(jpql, CategoryInfo.class).getResultList();
+        return resultList;
+    }
+}
+
+package com.ohgiraffers.jpql.section03.projection;
+...
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@SpringBootTest
+public class ProjectionServiceTests {
+    // Repository -> (Service) -> Tests
+    // Service class is not necessary
+
+    @Autowired
+    private ProjectionService projectionService;
+
+    @Autowired
+    private ProjectionRepository projectionRepository;
+
+  
+    @DisplayName("new명령어를 활용한 projection")
+    @Test
+    void testNewCommandProjection(){
+        List<CategoryInfo> categoryInfoList = projectionRepository.newCommandProjection();
+        assertNotNull(categoryInfoList);
+        categoryInfoList.forEach(System.out::println);
+    }
+}
+
+# Results of newCommandProjection in PjRepository
+Hibernate: 
+    select
+        c1_0.category_code,
+        c1_0.category_name 
+    from
+        tbl_category c1_0
+CategoryInfo{categoryCode=1, categoryName='식사'}
+CategoryInfo{categoryCode=2, categoryName='음료'}
+CategoryInfo{categoryCode=3, categoryName='디저트'}
+CategoryInfo{categoryCode=4, categoryName='한식'}
+CategoryInfo{categoryCode=5, categoryName='중식'}
+CategoryInfo{categoryCode=6, categoryName='일식'}
+CategoryInfo{categoryCode=7, categoryName='퓨전'}
+CategoryInfo{categoryCode=8, categoryName='커피'}
+CategoryInfo{categoryCode=9, categoryName='쥬스'}
+CategoryInfo{categoryCode=10, categoryName='기타'}
+CategoryInfo{categoryCode=11, categoryName='동양'}
+CategoryInfo{categoryCode=12, categoryName='서양'}
+CategoryInfo{categoryCode=13, categoryName='퓨전분식'}
+CategoryInfo{categoryCode=321, categoryName='분식퓨전'}
