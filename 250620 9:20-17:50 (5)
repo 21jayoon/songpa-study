@@ -1,4 +1,7 @@
 # 12_jpa - chap04_jpql - section04_paging Repository
+# 페이징 처리용 SQL은 DBMS에 따라 각각 문법이 다른 문제점을 안고 있다.
+# JPA는 이러한 페이징을 API를 통해 추상화해서 간단하게 처리할 수 있도록 제공해준다.
+
 package com.ohgiraffers.jpql.section04.paging;
 ...
 import java.util.List;
