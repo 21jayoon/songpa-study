@@ -1,0 +1,10 @@
+# Condition - use JPA
+# What is JPA? 
+
+# TO DO
+# 1. join tbl_user and tbl_bonds in tbl_like
+# 2. make crud (with jpa) with tbl_bonds
+# (later) 1. make crud with tbl_bondtype
+#         2. make crud with tbl_user
+
+# 2. tbl_bonds crud
