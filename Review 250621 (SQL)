@@ -63,4 +63,5 @@ SELECT ROUND(AVG(DAILY_FEE), 0) AS AVERAGE_FEE
 # CORRECT ANSWER
 
 
+# Go to weekend project
 # https://github.com/21jayoon/toy-project_get-ur-BOND.git
