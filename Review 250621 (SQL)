@@ -1,0 +1,15 @@
+# https://school.programmers.co.kr/learn/challenges?tab=sql_practice_kit
+# Practice select
+# https://school.programmers.co.kr/learn/courses/30/lessons/133025
+-- 코드를 입력하세요
+-- 아이스크림의 맛(FLAVOR)
+-- 상반기 아이스크림 총주문량(TOTQL_ORDER) 3000이상, 주 성분 과일(INGRIDIENT_TYPE LIKE 'fruit_based')
+-- ORDER BY 총 주문량 큰 순서대로 (큰 게 가장 위 = 내림차순 = DESC)
+SELECT H.FLAVOR
+  FROM FIRST_HALF H 
+  JOIN ICECREAM_INFO I USING (FLAVOR)
+ WHERE I.INGREDIENT_TYPE LIKE 'fruit_based' AND H.TOTAL_ORDER >=3000
+ORDER BY H.TOTAL_ORDER DESC; 
+
+
+# https://school.programmers.co.kr/learn/courses/30/lessons/151136
