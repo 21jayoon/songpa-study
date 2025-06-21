@@ -12,4 +12,55 @@ SELECT H.FLAVOR
 ORDER BY H.TOTAL_ORDER DESC; 
 
 
+
 # https://school.programmers.co.kr/learn/courses/30/lessons/151136
+-- 코드를 입력하세요
+-- 평균 일일 대여 요금
+-- 자동차 종류 LIKE 'SUV', 소수점 첫 번째 자리에서 반올림(ROUND(x, 0)), 컬럼명 AVERAGE_FEE
+SELECT AVERAGE_FEE       
+  FROM CAR_RENTAL_COMPANY_CAR;
+ WHERE AVERAGE_FEE IN (SELECT ROUND(AVG(DAILY_FEE)
+                         FROM CAR_RENTAL_COMPANY_CAR
+                       GROUP BY CAR_TYPE LIKE 'SUV');
+
+# Error message : Unknown column 'AVERAGE_FEE' in 'field list'
+
+
+-- 코드를 입력하세요
+-- 평균 일일 대여 요금
+-- 자동차 종류 LIKE 'SUV', 소수점 첫 번째 자리에서 반올림(ROUND(x, 0)), 컬럼명 AVERAGE_FEE
+SELECT AVERAGE_FEE AS DAILY_FEE    
+  FROM CAR_RENTAL_COMPANY_CAR;
+ WHERE DAILY_FEE IN (SELECT ROUND(AVG(DAILY_FEE)
+                         FROM CAR_RENTAL_COMPANY_CAR
+                       GROUP BY CAR_TYPE LIKE 'SUV');
+
+# same erroe message : Unknown column 'AVERAGE_FEE' in 'field list'
+
+
+-- 코드를 입력하세요
+-- 평균 일일 대여 요금
+-- 자동차 종류 LIKE 'SUV', 소수점 첫 번째 자리에서 반올림(ROUND(x, 0)), 컬럼명 AVERAGE_FEE
+SELECT ROUND(AVG(DAILY_FEE)) AS AVERAGE_FEE
+  FROM CAR_RENTAL_COMPANY_CAR
+GROUP BY CAR_TYPE LIKE 'SUV';
+
+# AVERAGE_FEE
+# 146842
+# 93727
+# WRONG ANSWER
+
+
+-- 코드를 입력하세요
+-- 평균 일일 대여 요금
+-- 자동차 종류 LIKE 'SUV', 소수점 첫 번째 자리에서 반올림(ROUND(x, 0)), 컬럼명 AVERAGE_FEE
+SELECT ROUND(AVG(DAILY_FEE), 0) AS AVERAGE_FEE
+  FROM CAR_RENTAL_COMPANY_CAR
+ WHERE CAR_TYPE LIKE 'SUV';
+
+# AVERAGE_FEE
+# 93727
+# CORRECT ANSWER
+
+
+# https://github.com/21jayoon/toy-project_get-ur-BOND.git
