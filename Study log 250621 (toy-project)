@@ -7,4 +7,106 @@
 # (later) 1. make crud with tbl_bondtype
 #         2. make crud with tbl_user
 
-# 2. tbl_bonds crud
+# 2. tbl_bonds crud with JPA - Read : All & ByBondType
+#   1. Write a Bonds class with @Entity annotation to make this class as a entity class in JPA
+package org.getyourbond.crud;
+
+import jakarta.persistence.*;
+
+@Entity(name = "CrudBonds")
+@Table(name = "tbl_bonds")
+public class Bonds {
+    // make bondCode PK with @Id annotation
+    @Id
+    //since connected with MySQL, write a @GeneratedValue(... Type.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int bondCode;
+
+    private String bondName;
+    private int bondType;
+    private double bondYield;
+    private String bondDuration;
+
+    protected Bonds(){}
+
+    public Bonds(int bondCode, String bondName, int bondType, double bondYield, String bondDuration) {
+        this.bondCode = bondCode;
+        this.bondName = bondName;
+        this.bondType = bondType;
+        this.bondYield = bondYield;
+        this.bondDuration = bondDuration;
+    }
+
+    public int getBondCode() {
+        return bondCode;
+    }
+
+    public void setBondCode(int bondCode) {
+        this.bondCode = bondCode;
+    }
+
+    public String getBondName() {
+        return bondName;
+    }
+
+    public void setBondName(String bondName) {
+        this.bondName = bondName;
+    }
+
+    public int getBondType() {
+        return bondType;
+    }
+
+    public void setBondType(int bondType) {
+        this.bondType = bondType;
+    }
+
+    public double getBondYield() {
+        return bondYield;
+    }
+
+    public void setBondYield(double bondYield) {
+        this.bondYield = bondYield;
+    }
+
+    public String getBondDuration() {
+        return bondDuration;
+    }
+
+    public void setBondDuration(String bondDuration) {
+        this.bondDuration = bondDuration;
+    }
+
+    @Override
+    public String toString() {
+        return "Bonds{" +
+                "bondCode=" + bondCode +
+                ", bondName='" + bondName + '\'' +
+                ", bondType=" + bondType +
+                ", bondYield=" + bondYield +
+                ", bondDuration='" + bondDuration + '\'' +
+                '}';
+    }
+}
+
+# 2. Create EntityCRUD
+package org.getyourbond.crud;
+
+import jakarta.persistence.EntityManager;
+
+public class EntityManagerCRUD {
+    private EntityManager entityManager;
+
+    /* 1. Read : All */
+
+
+    /* 2. Read : By BondType*/
+
+    /* 3. Read : Count the number of bonds in the list */
+
+    /* 4. Create */
+
+    /* 5. Update */
+
+    /* 6. Delete */
+}
