@@ -1,0 +1,76 @@
+# https://github.com/copilot/share/002b419c-0184-8ca4-b110-400fa49f0848
+
+1. The Big Picture
+You have two classes:
+  EntityManagerFactoryGenerator: "Makes and manage"s a single "EntityManagerFactory".
+  EntityManagerGenerator: Gets a "new EntityManager" whenever you need one.
+Both are part of the 'org.getyourbond.entity' package 
+and work together to help your app talk to the database in a clean, efficient way using JPA (Jakarta Persistence API).
+
+
+2. EntityManager"FactoryGenerator" Code Recap
+```java
+public class EntityManagerFactoryGenerator {
+    private static EntityManagerFactory factory
+        = Persistence.createEntityManagerFactory("jpa");
+    private EntityManagerFactoryGenerator(){}
+
+    public static EntityManagerFactory getInstance(){
+        return factory;
+    }
+}
+```
+  What does it do?  
+    Creates a single, "shared EntityManagerFactory" when the application starts.
+    Prevents anyone from making more than one EntityManagerFactoryGenerator (private constructor).
+    Provides access to the factory through the static method getInstance().
+  Why is this important?
+    Building an EntityManagerFactory everytime is expensive (resource-heavy).
+    Sharing one factory is efficient.
+
+
+3. Entity"ManagerGenerator" Code
+```Java
+public class EntityManagerGenerator {
+    public static EntityManager getInstance(){
+        EntityManagerFactory factory
+            = EntityManagerFactoryGenerator.getInstance();
+        return factory.createEntityManager();
+    }
+}
+```
+  What does it do?
+    Provides a static method getInstance() that:
+      Fetches the shared EntityManagerFactory "from EntityManagerFactoryGenerator".
+      Creates a new EntityManager using that factory instance.*
+      Returns the new EntityManager to whoever called the method.
+  Why do we need a new EntityManager each time?
+    An EntityManager represents a session with the database.
+    It is not thread-safe -> each user/request/operation should get its own.
+
+
+4. How Does This All Work Together?
+  App needs to talk to the database → calls EntityManagerGenerator.getInstance().
+  EntityManagerGenerator asks EntityManagerFactoryGenerator for the factory.
+  The factory (already created and shared) makes a fresh EntityManager.
+  The app uses the EntityManager to do database work.
+
+This approach:
+  Keeps resource use low (one factory).
+  Ensures safety and correctness (fresh EntityManager per operation).
+
+✅ Must-Know List
+  1. What is an EntityManagerFactory?
+      A heavyweight object that creates multi-"EntityManager"(=EntityManagers); should only be made once and shared.
+  2. What is an EntityManager?
+      A lightweight object representing a session with the database; get a new one for each operation.
+  3. Singleton Pattern
+      Used in EntityManagerFactoryGenerator to make sure only one factory exists.
+  4. Static Methods
+      Used for easy, global access without making class instances.
+  5. Thread Safety
+      EntityManagerFactory is thread-safe (shareable), but EntityManager is not (never share!).
+  6. Why not create a new factory every time?
+      It’s expensive and unnecessary; one is enough.
+  7. How do you get an EntityManager?
+      Call EntityManagerGenerator.getInstance().
