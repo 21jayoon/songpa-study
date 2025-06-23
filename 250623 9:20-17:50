@@ -1,4 +1,7 @@
+# 오늘 강의 내용 Today's lecture
 # JPQL
+# Native Query
+# Spring data-jpa
 package com.ohgiraffers.jpql.section05.group;
 
 import jakarta.persistence.EntityManager;
@@ -159,14 +162,14 @@ public class GroupRepositoryTests {
         m1_0.category_code=?
     60000*/
     
-//    @DisplayName("COUNT 외의 다른 그룹함수 조회 결과가 없는 경우2")
-//    @Test
-//    void testOtherWithNoResult2(){
-//        int categoryCode =77; //없는 카테고리 코드 조회
-//        Long sumOfMenu = groupFunctionRepository.otherWithNoResult(categoryCode);
-//        assertNotEquals(sumOfMenu, ); GITHUB참조
-//        System.out.println(sumOfMenu);
-//    }
+    @DisplayName("COUNT 외의 다른 그룹함수 조회 결과가 없는 경우2")
+    @Test
+    void testOtherWithNoResult2(){
+        int categoryCode =77; //없는 카테고리 코드 조회
+        Long sumOfMenu = groupFunctionRepository.otherWithNoResult(categoryCode);
+        assertNotEquals(sumOfMenu, ); GITHUB참조
+        System.out.println(sumOfMenu);
+    }
 
     @DisplayName("HAVING절 조회 테스트")
     @Test
