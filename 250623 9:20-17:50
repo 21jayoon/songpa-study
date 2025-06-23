@@ -1,0 +1,194 @@
+# JPQL
+package com.ohgiraffers.jpql.section05.group;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Objects;
+
+@Repository
+public class GroupFunctionRepository {
+    /*JPQL의 그룹함수는 COUNT, MAX, MIN, SUM, AVG로 SQL의 그룹함수와 차이가 없다.
+    단 몇 가지 주의사항이 있다.
+    1. 그룹함수의 반환 타입은 결과 값이 정수면 Long, 실수면 Double로 반환된다.
+    2. 값이 없는 상태에서 count를 제외한 그룹 함수는 null이 되고 count만 0이 된다.
+        따라서 반환 값을 담기 위해 선언하는 변수 타입을 기본자료형으로 하게 되면,
+        조회 결과를 언박싱 할때 NPE(NullPointException) 발생한다.
+    3. 그룹 함수의 반환 자료형은 Long 또는 Double 형이기 때문에
+        Having 절에서 그룹 함수 결과값과 비교하기 위한
+        파라미터 타입은 Long or Double로 해야한다. ->쌤 왈 : 업데이트가 되었는지, int도 반환값으로 가능해졌다.
+    테스트를 위한 Menu 엔터티는 1-1. 기본 문법에서 사용했던 구조를 따르되 Entity name만 변경한다.*/
+
+    //entitymanager 의존성 받아와주는 @PersistenceContext annotation
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public long countMenuOfCategory(int categoryCode){
+        String jpql =
+                "SELECT COUNT(m.menuCode) FROM Section05Menu m WHERE m.categoryCode = :categoryCode";
+        long countOfMenu = entityManager.createQuery(jpql, Long.class)
+                                        .setParameter("categoryCode", categoryCode)
+                                        .getSingleResult();
+        return countOfMenu;
+    }
+
+    public long otherWithNoResult(int categoryCode) {
+        String jpql = "SELECT SUM(m.menuPrice) FROM Section05Menu m WHERE m.categoryCode = :categoryCode";
+        /*COUNT 외의 다른 그룹함수는 결과 값이 없을 경우 Null이 반환되기 때문에 기본 자료형으로 다룰 경우 문제가 생긴다
+        * Long과 같이 Wrapper 클래스 자료형으로 다뤄줘야 한다.*/
+        long sumOfMenu = entityManager.createQuery(jpql, Long.class)
+                .setParameter("categoryCode", categoryCode)
+                .getSingleResult();
+        return sumOfMenu;
+    }
+
+    public List<Object[]> selectByGroupByHaving(long minPrice){
+        String jpql = "SELECT m.categoryCode, SUM(m.menuPrice) FROM Section05Menu m "+
+                "GROUP BY m.categoryCode HAVING SUM(m.menuPrice) >= :minPrice";
+
+        List<Object[]> sumPriceOfCategoryList
+                = entityManager.createQuery(jpql)
+                .setParameter("minPrice", minPrice)
+                .getResultList();
+        return sumPriceOfCategoryList;
+    }
+}
+
+package com.ohgiraffers.jpql.section05.group;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity(name = "Section05Menu")
+@Table(name = "tbl_menu")
+public class Menu {
+    @Id
+    private int menuCode;
+    private String menuName;
+    private int menuPrice;
+    private int categoryCode;
+    private String orderableStatus;
+
+    public Menu(){}
+
+    public Menu(int menuCode, String menuName, int menuPrice, int categoryCode, String orderableStatus) {
+        this.menuCode = menuCode;
+        this.menuName = menuName;
+        this.menuPrice = menuPrice;
+        this.categoryCode = categoryCode;
+        this.orderableStatus = orderableStatus;
+    }
+
+    public int getMenuCode() {
+        return menuCode;
+    }
+......
+    public void setOrderableStatus(String orderableStatus) {
+        this.orderableStatus = orderableStatus;
+    }
+
+    @Override
+    public String toString() {
+        return "Menu{" +
+                "menuCode=" + menuCode +
+                ", menuName='" + menuName + '\'' +
+                ", menuPrice=" + menuPrice +
+                ", categoryCode=" + categoryCode +
+                ", orderableStatus='" + orderableStatus + '\'' +
+                '}';
+    }
+}
+
+package com.ohgiraffers.jpql.section05.groupfunction;
+
+import com.ohgiraffers.jpql.section05.group.GroupFunctionRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+public class GroupRepositoryTests {
+    //field injection
+    @Autowired
+    private GroupFunctionRepository groupFunctionRepository;
+
+    @DisplayName("특정 카테고리에 등록된 메뉴 수 조회")
+    @Test
+    void testCountMenuOfCategory(){
+        //given
+        int categoryCode = 4;
+
+        //when
+        long countOfMenu = groupFunctionRepository.countMenuOfCategory(categoryCode);
+
+        //then
+        assertTrue(countOfMenu > 0);
+        System.out.println("countOfMenu : "+countOfMenu);
+    }
+    /* Hibernate:
+    select
+        count(m1_0.menu_code)
+    from
+        tbl_menu m1_0
+    where
+        m1_0.category_code=?
+    countOfMenu : 4 */
+
+    @DisplayName("COUNT 외의 다른 그룹함수 조회 결과가 없는 경우")
+    @Test
+    void testOtherWithNoResult(){
+        int categoryCode =4;
+        long sumOfMenu = groupFunctionRepository.otherWithNoResult(categoryCode);
+        assertTrue(sumOfMenu > 0);
+        System.out.println(sumOfMenu);
+    }
+    /*Hibernate:
+    select
+        sum(m1_0.menu_price)
+    from
+        tbl_menu m1_0
+    where
+        m1_0.category_code=?
+    60000*/
+    
+//    @DisplayName("COUNT 외의 다른 그룹함수 조회 결과가 없는 경우2")
+//    @Test
+//    void testOtherWithNoResult2(){
+//        int categoryCode =77; //없는 카테고리 코드 조회
+//        Long sumOfMenu = groupFunctionRepository.otherWithNoResult(categoryCode);
+//        assertNotEquals(sumOfMenu, ); GITHUB참조
+//        System.out.println(sumOfMenu);
+//    }
+
+    @DisplayName("HAVING절 조회 테스트")
+    @Test
+    public void testSelectByGroupByHaving() {
+        //given
+        long minPrice = 50000L;
+
+        //when
+        List<Object[]> sumPriceOfCategoryList
+                = groupFunctionRepository.selectByGroupByHaving(minPrice);
+
+        //then
+        assertNotNull(sumPriceOfCategoryList);
+    }
+    /* Hibernate:
+    select
+        m1_0.category_code,
+        sum(m1_0.menu_price)
+    from
+        tbl_menu m1_0
+    group by
+        m1_0.category_code
+    having
+        sum(m1_0.menu_price)>=? */
+}
