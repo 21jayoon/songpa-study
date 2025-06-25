@@ -1,0 +1,533 @@
+# 오늘 배운 강의 내용 Today's lecture
+# REACT
+React가 나오기 전, 예전에는 웹사이트를 만들 때 JQuery라는 도구를 많이 썼다.
+
+JQuery는 웹페이지 안에서 보여지는 내용(=DOM)을 직접 골라서 바꿔주는(직접 업데이트하는) 역할을 했는데,
+이것이 매우 효율적으로 여겨졌기에 당시에는 JQuery가 거의 표준처럼 쓰였다.
+
+하지만 JQuery를 통한 DOM 조작은 매우 번거롭고 코드도 번잡할 수 있다는 단점이 있었다.
+
+시간이 지나면서 Backbone이나 AngularJS 같은 새로운 도구들이 나왔고,
+이 도구들은 "SPA(Single Page Application)"라는 새로운 방식을 소개했다. (Single Page에서 개발하는 프론트엔드 환경을 제시)
+SPA는 한 번 웹페이지를 불러오면, 그 안에서 필요한 부분만 바꿔가면서 보여주는 방식이다.
+그래서 페이지를 새로고침하지 않고도 다양한 화면을 보여줄 수 있게 되었다.
+하지만  AngularJS도 네트워크 요청이나 DOM 조작이 쉽지 않다는 단점이 있었다.
+
+React는 가상 돔(Virtual DOM)과 상태 값이 있는 컴포넌트Component개념을 활용하여 
+효율적인 웹 및 모바일 애플리케이션 개발을 위해 2011년 Facebook에서 소프트웨어 엔지니어인 Jordan Walke에 의해 개발되었다.
+
+JavaScript 라이브러리로 처음에는 Facebook에서 내부적으로 사용하기 위해 개발했지만 
+2013년부터는 공개적으로 발표되어(오픈소스) 현재 많은 개발자들이 사용하는 프론트엔드 개발 도구가 되었다.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_chap01</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body>
+    <!-- 1. root라는 id가진 div 태그 생성  9:51-->
+    <div id="root"></div>
+
+    <script>
+        // 2. JavaScript 구현 위해 <script> tag 붙이고 시작
+    //  3. 엘리먼트 생성 방법
+    // 3-1. 어떤 태그를 만들것인지 ("h1")
+    const greeting = React.createElement("h1", {className:"greeting"}, "Hello, React!!");
+    //React.createElement('엘리먼트', '어트리뷰트', '문자열(텍스트노드)')
+    const textElement = React.createElement('h3', {id: 'name'}, '안녕하세요. 홍길동입니다.');
+
+    //위 엘리먼트를 <div></div> 사이에 끼워넣어 랜더링해야 화면에 나타날 수 있음->ReactDOM 사용
+    ReactDOM.createRoot(document.getElementById("root")).render([greeting, textElement]);    
+    //document.getElementById("root") : Id가 root인 요소노드를 취득해와라
+    //virtual DOM을 실제 DOM으로 바꿔주기 위해선 .render()가 필요함
+    //greeting이란 리액트 엘리먼트를 랜더링하기 위해 내보낸다.
+    //.render() 안에 [] 배열로 render할 수도 있다다
+    
+
+    /*수업자료 내용 :
+    * DOM 노드가 될 div 엘리먼트를 선택하고 컴포넌트를 표시할 root DOM 노드로 설정한다. 
+        const domContainer = document.querySelector('#root');
+        const root = ReactDOM.createRoot(domContainer);
+    * 앞서 만든 엘리먼트들을 root DOM에 그려준다.(렌더링) 
+        root.render([greetingElement, textElement]);  */
+
+    /*HTML(chrome) 개발자 F12 Elements 확인 :
+    <div id="root">
+        <h1 class="greeting">Hello, React!!</h1>
+    </div>
+    이렇게 <h1>태그가 redering을 통해 <div> 태그 안에 들어가있는 걸 볼 수 있음 */
+
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_chap02_component</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        /*1. class형 컴포넌트. 컴포넌트의 앞 글자는 반드시 대문자로 시작*/
+        class TitleClass extends React.Component{
+            //반드시 render() function 구현해야함
+            render(){
+                return React.createElement(
+                    "h1", 
+                    {className: "classComponent"}, 
+                    "CLASS형 컴포넌트입니다."
+                )
+            }
+        }
+        /*ReactDOM.createRoot(document.getElementById('root')).render(<TitleClass/>);
+        // Error : 02_component.html:25 Uncaught SyntaxError: Unexpected token '<' */
+
+        //방법 1.  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(TitleClass));
+
+        /*방법 2. 오류해결하기 위해 babel 문법 적용.
+        /1.head에 <script src="https://unpkg.com/@babel/standalone/babel.min.js"><|/script>
+        2. body에 <script>였던 것 <script type="text/babel">로 변경*/
+        
+        //ReactDOM.createRoot(document.getElementById('root')).render(<TitleClass/>);
+
+        /*2. 함수형 컴포넌트*/
+        function TitleFunction(){
+            return React.createElement("h1", {id : "test", classname: "functionComponent"}, "This is function style component")
+        }    
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<TitleFunction/>);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_jsx_01createElementAndJsx</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Babel 적용 방법(CDN)
+     1. 바벨 CDN 구문을 추가한다
+     2. script 태그 내 type 속성에 text/babel 속성값을 추가한다-->
+    <script type="text/babel">
+        function CreateElementComponentByFunction(){
+            return React.createElement(
+                "div",
+                null,
+                React.createElement("h1", {className:"greeting"}, "Hello"),
+                React.createElement("h3", null, "Redering without JSX")
+            );
+        }
+
+        //ReactDOM.createRoot(document.getElementById('root')).render(<CreateElementComponentByFunction/>);
+        //JSX is non-official tool of Javascript. so it must be transfiling with babel. 
+
+        /*JSX 방식*/
+        function JSXComponent(){
+            return(
+                <div>
+                    <h1 className="greeting"  id="greeting">Hello, JSX!</h1>
+                    <h3 id="name">Redering with using JSX</h3>
+                </div>    //this is JSX syntax
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<JSXComponent/>);
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_jsx_02JSX</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const user = {
+            firstName: 'Panda',
+            lastName: 'Kwon',
+            phone: '010-1234-5678'
+        };
+
+        const style = {
+            // 속성명 작성 방식= camelCase  -> backgroundColor (O) backgroundcolor(X)
+            backgroundColor: 'black',
+            color: 'white',
+            padding: '10px', 
+            //단위 추가 명세 없을 시 기본 값 px. 이 땐 padding: 10으로만 써줘도 된다. 
+            // 만일 px을 명시적으로 작성하고 싶다면 padding: '10px' 이렇게 '' 안에 전체 속성값 작성해야함
+            cursor: 'pointer'
+        }
+
+        const handleClick =()=>{
+            alert('Event is well connected!');
+        }
+
+        const formatName = (user) => `${user.lastName} ${user.firstName}`
+
+        const element = (
+            /*최상위 엘리먼트가 2개이면 빨간 줄 뜨고 오류가 남 이를 방지하기 위해 BeanElement(?) <> </> 안에 <h2><h3>태그 둘 다 넣어줌*/
+            <>
+                <h2>Hello JSX</h2>
+                {/*JSX 표현식 사용. JSX 내에서 {} 중괄호 안에 JavaScript 문법, JS 표현식을 사용할 수 있다.*/}
+                <h3> NAME : {formatName(user)} </h3>
+
+                {/* How to give attribute(속성) and event*/}
+                <h4 id="title" className="highlight" onClick={handleClick}>
+                    {/*handleClick() 넣으면 크롬 실행과 동시에 alert창이 뜨게 되므로 {} 안에 handleClick만 작성해야항*/}
+                    Send alert when cliked(class → className, onclick → onClick)
+                </h4>
+                {/* Inline style, HTML에서 style은 문자열이지만, JSX에서는 객체로 사용한다. */}
+                <p style={style}>This is the text that inline-style applied. </p>
+            </>    
+        )
+        ReactDOM.createRoot(document.getElementById('root')).render(element);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_rendering</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        // 1. 기본 정적 렌더링
+        //SPA Single Page Application : page는 하나만 있고 해당 페이지를 계속 변경해가며 view를 보여주는 방식
+        function BasicRender(){
+            //function Component 작성
+            return(
+                //return문 안에서 element 반환
+                <div style={{border: '1px solid gray', padding: '10px'}}>
+                    <h2>Static Rendering 정적 렌더링</h2>
+                    <h3>It's {new Date().toLocaleTimeString()} now.</h3>
+                </div>
+            )
+        }
+        //ReactDOM.createRoot(document.getElementById('root')).render(<BasicRender/>);
+
+        //2. element update (예. 시간의 흐름에 따라 자동으로 view에서 51, 52, 53.. 이렇게 바뀜(1초마다 rerendering))
+        // virtual DOM(가상돔) 예제(체험)
+        function LiveClock() {
+            const [time, setTime] = React.useState(new Date());
+            //useState : REACT에서 가장 자주 사용하는 hook 중 하나
+
+            React.useEffect(()=> {
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                //=I'm gonna refresh setTime(new Date()) repeatedly every 1000ms(1s).
+                return () => clearInterval(timer);
+            }, []);
+
+            return (
+                <>
+                    <h2>실시간 시계</h2>
+                    <h3>현재 시간 : {time.toLocaleTimeString()}</h3>
+                </>
+            );
+        }
+        //ReactDOM.createRoot(document.getElementById('root')).render(<LiveClock/>);
+
+        // 조건부 렌더링
+        function ConditionalMessage(){
+            const answer = parseInt(prompt('Are you having fun with learning REACT? \n1.Yes It is fun \n2. No It is difficult'));
+            //prompt로 받아오는 1과 2는 String이기 때문에 parseInt로 integer로 변경해준다.
+
+            //답변 번호에 따라 element 달라짐 (삼항 연산자)
+            //parseInt로 문자열을 숫자로 바꿔줬기 떄문에 answer===1이 가능해짐
+            const element = answer === 1
+            ? <h3> It will be more fun as the time gone </h3>
+            : <h3> Review REACT constantly.. </h3>
+
+            return (
+                <>
+                    <h2>조건부 렌더링</h2>
+                    {answer ? element : <h4> Writing an answer to the question...</h4>}
+                </>
+            )
+        }
+        //ReactDOM.createRoot(document.getElementById('root')).render(<ConditionalMessage/>);
+
+        //component 합성
+        //위에서 만들었던 3가지 component 전부 불러온다. 그리고 해당 컴포넌트들이 불러와진 function인 App을 rendering 해준다.
+        function App(){
+            return(
+                <>
+                    <BasicRender/>
+                    <LiveClock/>
+                    <ConditionalMessage/>
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_03props_01propsBasic</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <!-- What is props?
+        An abberiviationof properties. Component의 속성을 설정할 때 사용하는 요소이다.
+        props 값은 해당 컴포넌트를 사용하는 부모 컴포넌트에서 설정할 수 있다.
+        props는 읽기 전용 객체이기 때문에 수정해선 안 된다. -->
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const name1 = 'Lee Pace';
+        const name2 = 'Margot Robee'
+
+        function Title(props){
+            console.log(props)
+            return <h1> Hello {props.name}, nice to meet you</h1>
+        }
+
+        //ReactDOM.createRoot(document.getElementById('root')).render(<Title name={name1}/>);
+
+        Title.defaultProps = {
+            name: 'User'
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            [
+                <Title name={name1}/>,
+                <Title name={name2}/>,
+                //literally하게 이름을 전달해서 출력하는 것도 가능!
+                <Title name='Dua Lipa'/>,
+                //아무것도 전달하지 않는다면 이름은 나오지 않을 것임. -> Hello , nice to meet you
+                <Title/>
+                //이런 경우를 대비해서 <script>안에 Title.defaultProps ={}라는 속성 설정으로 기본 출력값을 정해줄 수 있음.  250625 13:26
+                //Title.defaultProps 지정해 준 뒤 <Title/>의 결과 -> Hello User, nice to meet you  13:28    
+            ]);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_03props_02childrenProps</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function ChildNodePrinter(props){
+            console.log(props);
+            return (
+                <>
+                    <h1>What value does the Child Node has?</h1>
+                    <h3>children:{props.children}</h3>
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            [
+                //기호 2개 안에서 열고 닫는 것<element/> 뿐만 아니라 <> 2개로도 태그(?)를 열고 닫을 수 있다
+                <ChildNodePrinter>TEXT NODE</ChildNodePrinter>,
+                <ChildNodePrinter><div>Text Node</div></ChildNodePrinter>
+            ]
+        );
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_03props_03propsDestructingAssignment</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        /*1.전달받은 props 인자를 내부에서 구조 분해 할당*/
+        function PropsPrinter(props) {
+            //객체 구조분해 할당 사용
+            const {name, children} = props;
+
+            return (
+                <>
+                    <h1>My name is {name}.</h1>
+                    <h3>The children that I have is {children}.</h3>
+                </>
+            )
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <PropsPrinter name='Harry'>Text node</PropsPrinter>
+        );
+
+        /*매개변수 자체에서 구조분해 할당이 된 걸 사용한다면*/
+        function PropsPrinter2({name, children}) {
+
+            return (
+                <>
+                    <h1>My name is {name}.</h1>
+                    <h3>The children that I have is {children}.</h3>
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <PropsPrinter2 name='Selly'>Text_node</PropsPrinter2>
+        );
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>react_03props_04propsPractice</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        
+        const user1 = {
+            name : '홍길동',
+            age : 20,
+            phone : '010-1234-5678',
+            email : 'hong123@gmail.com'
+        };
+
+        const user2 = {
+            name : '판다',
+            age : 16,
+            phone : '010-9876-5432',
+            email : 'panda@gmail.com'
+        };
+
+        const user3 = {
+            name : '코알라',
+            age : 5,
+            phone : '010-5555-3333',
+            email : 'koala@gmail.com'
+        };
+
+        //구조분해 할당 형식으로 꺼내쓰고 있다.
+        function NameCard({name}){
+            return <h2>{name}</h2>
+        }
+
+        function AgeCard({age}){
+            return<h3>{age}</h3>
+        }
+
+        function PhoneCard({phone}){
+            return<h4>{phone}</h4>
+        }
+
+        function EmailCard({email}){
+            return <h4>{email}</h4>
+        }
+        /*function NameCard(props){
+            return <h2>{props.name}</h2>
+        }
+
+        function AgeCard(props){
+            return<h3>{props.age}</h3>
+        }
+
+        function PhoneCard(props){
+            return<h4>{props.phone}</h4>
+        }
+
+        function EmailCard(props){
+            return <h4>{props.email}</h4>
+        }*/
+        
+        //props로 (상위에서) 하위로 내려준다.
+        function UserInfo({user}) {
+            return ( // 이 아래 코드 5줄(사실은 return 뒤에 붙는 괄호도)에서 갈피를 못잡음.
+            //넘어온 props를 구조분해 할당해서 합성한다.
+                <>
+                    <NameCard name={user.name}/>
+                    <AgeCard age={user.age}/>
+                    <PhoneCard phone={user.phone}/>
+                    <EmailCard email={user.email}/>
+                </>
+            )    
+        }
+    
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            [ // 이 아래 부분 코드 3줄 어려웠음
+                <UserInfo user={user1}/>,
+                <UserInfo user={user2}/>,
+                <UserInfo user={user3}/>
+            ]
+        );
+    </script>
+    
+</body>
+</html>
