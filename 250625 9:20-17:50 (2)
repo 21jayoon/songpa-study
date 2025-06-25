@@ -1,0 +1,66 @@
+# Spring security 복습 Review Spring security
+# DEBUGING_LOG.md
+# Debugging Log
+
+## Repeatedly login failed
+https://github.com/copilot/share/c263128c-0084-8422-8810-c04ea4d52859
+
+You have a login problem because your Spring Security config and your login form do not match in the parameter names for username and password.
+
+Let's break it down:
+
+#### 1. Your Spring Security Config expects:
+    class SecurityConfiguration
+    login.usernameParameter("user");
+    login.passwordParameter("pass");
+   Username field: user <br>
+   Password field: pass
+#### 2. Your Login Form uses:
+    HTML
+    ID: input type="text" name="userId"> <br>
+    PWD: input type="password" name="userPass"><br>
+   Username field: userId <br>
+   Password field: userPass
+
+#### 3. What Happens:
+   Spring Security looks for user, pass in the form data, but your form sends userId, userPass. <br>
+   So, Spring Security never receives the username or password.
+   
+   Authentication always fails with: "아이디가 없거나 비밀번호가 일치하지 않습니다".
+
+### How to Fix
+##### Option 1: Change your Security Config to match your form
+    Java
+    login.usernameParameter("userId");
+    login.passwordParameter("userPass");
+
+##### Option 2: Change your form to match your Security Config
+    HTML
+    ID: <input type="text" name="user"><br>
+    PWD: <input type="password" name="pass"><br>
+You only need to do one of these!
+
+##### I changed SecurityConfiguration from
+    login.usernameParameter("user");
+    login.passwordParameter("pass");
+##### to
+    login.usernameParameter("userId");
+    login.passwordParameter("userPass");
+
+### 와!!! 됐다!!!! 이제 로그인 제대로 됨. 250625 13:39
+
+
+## 화이트레벨 페이지 error exception handling  14:54
+* admin으로 로그인했을 때 유저페이지 접근하면 화이트레벨 페이지 뜸
+* user로 로그인했을 때 관리자 페이지 접근하면 화이트레벨 페이지 뜸
+### -> 오류 메세지는 동일, 지정되는 URL은 다름
+Whitelabel Error Page
+
+This application has no explicit mapping for /error, so you are seeing this as a fallback.
+
+Wed Jun 25 14:49:35 KST 2025
+There was an unexpected error (type=Forbidden, status=403).
+Forbidden
+
+http://localhost:8080/admin/page (유저 로그인, 관리자페이지 접근 시 URL)
+혹은 http://localhost:8080/user/page (관리자 로그인, 유저페이지 접근 시 URL)
