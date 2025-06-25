@@ -19,6 +19,24 @@ React는 가상 돔(Virtual DOM)과 상태 값이 있는 컴포넌트Component�
 JavaScript 라이브러리로 처음에는 Facebook에서 내부적으로 사용하기 위해 개발했지만 
 2013년부터는 공개적으로 발표되어(오픈소스) 현재 많은 개발자들이 사용하는 프론트엔드 개발 도구가 되었다.
 
+
+ServerSideRendering SSR
+실제 현직에선 Client Side Rendering CSR을 더 자주 함
+
+2. 컴포넌트(Component)
+엘리먼트를 반환하는 개념을 가진 화면의 구성 단위 : 클래스형 컴포넌트, 함수형 컴포넌트
+react 16 이후부터는 함수 기반의 컴포넌트 생성 방법이 주를 이루고 있다.
+
+react 
+reactDOM (library)
+
+*** react library 추가
+https://ko.legacy.reactjs.org/docs/cdn-links.html
+에서 CDN링크를 html <head>안에 넣음
+
+리액트는 메모리 상에 만들어져있는 가상 돔을 실제 돔보다 먼저 사용한다.
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
