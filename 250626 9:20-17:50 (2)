@@ -1,0 +1,15 @@
+# Rendering
+# rendering-element
+# ReactDOM에서 관리하며 React의 엘리먼트들이 렌더링 될 하나의 DOM을 Root DOM Node라고 한다.
+# React Element를 루트 DOM에 렌더링 하기 위해
+# ReactDOM.createRoot(루트 DOM 노드).render(렌더링 할 엘리먼트)로 전달하면 된다.
+ReactDOM.createRoot(document.getElementById('root')).render(element);
+
+#  rendered-element-update
+# React에서 엘리먼트를 바꿀 때는 엘리먼트 단위로 변경해야 한다.(불변객체, immutable)
+# 엘리먼트는 특정 시점의 UI를 의미한다.
+# React의 컨셉은 변화가 있는 엘리먼트를 찾아서(diffing) 어떻게 바꿀 것인지를 고민하는 것이 아닌 기존
+# 가상 돔의 엘리먼트를 지우고 새롭게 엘리먼트를 생성하는 방식으로 고안되었다.
+# 기존의 가상 돔과 새로운 변화로 생성된 가상 돔(Render Tree를 기반으로 생성 된)을 통해 
+# 변화가 있는 부분만 변경이 일어난다.
+
