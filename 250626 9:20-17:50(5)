@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_iteration-01key</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+    <!--
+    배열의 문법
+    arr.map(callback);
+    - callback 함수의 파라미터로 전달된 배열 내 각 요소를
+    원하는 규칙에 따라 변환 후
+    그 결과로 새로운 배열 반환
+
+    callback: 새로운 배열 요소를 생성하는 규칙을 담은 함수로
+    3가지 파라미터를 가질 수 있다.
+    - currentValue: 현재 처리하고 있는 요소
+    - index: 현재 처리하고 있는 요소의 index  rkqt
+    - array: 현재 처리하고 있는 원본 배열
+    -->
+
+    <script type="text/babel">
+        // map method 연습 250626 13:08
+        //1. 배열 하나 생성
+        const numbers = [1,2,3,4,5]
+        const results = numbers.map(num => num * num)
+        // num이라는 이름으로 새로운 배열을 만들어 안에 num*num한 값을 넣는다. num 배열을 results라는 새로운 배열에 넣겠다.
+        console.log(results);
+
+        //2. String array
+        const fruit = ['🥝', '🍎', '🍌']
+        fruit.map((currentValue, index, array) => {
+            //여러 개를 한 번에 map으로 보내는(?) 경우 ()괄호로 묶어서 작성
+            //(currentValue, index, array)
+            console.log(currentValue);
+            console.log(index);
+            console.log(array);
+        })
+
+        //3. function type component
+        function Items({names}){
+            //{name} -> props   이 값의 설정은 부모 props에서 설정될 것임
+            return(
+                <ul>
+                    {names.map(name => <li> {name}</li>)}
+                </ul> 
+            )         
+        }
+
+        const names = ['Panda', 'Koala', 'Monkey']
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<Items names={names}/>);
+        //<Items names={names}/> : names라는 키로 props를 내려주며 구조분해 할당으로 사용함
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_iteration-02renderingList</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        //아까 한 01.key.html 내용과 달리 list에 key 값을 넣어본다  250626 13:24
+        const fruits = ['🥝', '🍎', '🍌', '🍑']
+
+        // 1. Make function type component 
+        function FruitList(){
+            return(
+                <div style={{border: '1px solid gray', padding: '10px'}}>
+                    <ul>
+                        {/*key: React가 리스트를 랜더링할 때 각 항목을 구분할 수 있게 도와주는 고유한 값*/}
+                        {fruits.map((fruit, index) => (
+                            <li key={index}>{fruit}</li>
+                        ))}
+                    </ul>  
+                </div>   
+            )
+        }
+
+        //2. Make another function type component
+        //2-1. 객체 배열 선언
+        const users = [
+            {id: 1, name: 'Apple'},
+            {id: 2, name: 'Lemon'},
+            {id: 3, name: 'Orange'}
+        ]
+
+        function UserList(){
+            return(
+                <>
+                    <h2>List of users</h2>
+                    <ul>
+                        {users.map(user => (
+                            <li key={user.id}>
+                                {user.name}
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )
+        }
+
+        function App(){
+            return (
+                <>
+                    <FruitList/>
+                    <UserList/>
+                </>
+            )
+        }
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_iteration-03listAddRemove</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const {useState} = React;
+
+        //함수형 컴포넌트 생성
+        function NameList(){
+            const [inputValue, setInputValue] = useState('');
+            const[names, setNames] = useState([{id: 1, text: 'Panda'}]);
+            const [nextId, setNextId] = useState(2);
+
+            const handleChange = (e) => setInputValue(e.target.value)
+
+            //동작했을 때를 대비한 이벤트 함수 정의
+            const handleAdd = () => {
+                if(inputValue.trim() === '') return;
+                const newName = {id: nextId, text: inputValue};
+                
+                //이렇게 만들어진 새로운 배열을 Names에 다시 넣는다.
+                setNames([...names, newName]);
+                setNextId(nextId +1);
+
+                //inputValue 초기화
+                setInputValue('');
+            }
+
+            return (
+                <>
+                    <input type="text" value={inputValue} onChange={handleChange} placeholder="Write a name"/>
+                    <button onClick={handleAdd}>Add</button>
+
+                    <ul>
+                        {names.map(name  => (
+                            <li key={name.text}>{name.text}</li>
+                            //객체 안에 있는 text를 출력해야하기 때문에 {name}말고 {name.text}  13:54
+                        ))} 
+                    </ul>
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<NameList/>);
+    </script>
+    
+</body>
+</html>
