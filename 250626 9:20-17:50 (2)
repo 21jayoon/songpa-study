@@ -13,3 +13,21 @@ ReactDOM.createRoot(document.getElementById('root')).render(element);
 # 기존의 가상 돔과 새로운 변화로 생성된 가상 돔(Render Tree를 기반으로 생성 된)을 통해 
 # 변화가 있는 부분만 변경이 일어난다.
 
+# conditional-rendering
+# 엘리먼트 생성 시점 혹은 렌더링 시점에 
+# 조건부를 활용하여 조건에 따라 다른 엘리먼트가 렌더링 될 수 있도록 작성할 수 있다.
+# 엘리먼트 생성 시
+const element = (answer === '배부름') ? (
+	<h1>소화제가 어딨더라~?</h1>
+): (
+	<h1>뭐 시켜 먹지~?</h1>
+);
+# 렌더링 시
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+const full = <h1>소화제가 어딨더라~?</h1>
+const hungry = <h1>뭐 시켜 먹지~?</h1>
+
+root.render(
+  (answer === '배부름'? full : hungry
+);
