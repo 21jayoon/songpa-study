@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_state-01stateBasic</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        //1. make Class type component
+        class Counter extends React.Component{
+            /*fix the error: React.component (X) -> React.Component(O)  9:50
+            plz remind Capitalizing */
+            //counstructor function 생성자 함수 형성
+            constructor(props){
+                //부모생성자의 props를 호출하는 구문을 쓰면 됨
+                super(props);
+
+                this.state={
+                    number: 3  //초기값 설정
+                }
+            }
+            //class component에선 render()를 반드시 사용해야함
+            render() {
+                const number = this.state.number;
+                //지금은 아예 다 꺼내서 number란 state 값으로 쓰고 있지만
+                //위 렌더를 구조분해 할당으로 사용한다면?
+                //const {number} = this.state;
+                return(
+                    <>
+                        <h2>Class type component</h2>
+                        <h3>Latest number: { number }</h3>
+                        <button onClick ={()=> this.setState({number: number -1})}>-1</button>
+                        <button onClick ={()=>this.setState({number: number +1})}>+1</button>
+                        {/*setState 이용, 버튼에 onClick 이벤트 화살표 함수로 넣어줌 9:46*/}
+
+                        <button onClick={() =>{
+                            this.setState({number: number +1})
+                            this.setState({number: number +1})
+                        }}>+2</button>
+
+                        <button onClick={()=>{
+                            // prevState활용, 첫 번째 인자로 '이전 상태'가 전달된다.
+                            this.setState(prev=> {return {number: prev.number + 1}})
+                            this.setState(prev => ({number: prev.number +1}))
+                            this.setState(prev => ({number: prev.number +1}))
+                            //아래 줄로 복사하려면 CTRL+ALT+↓아래 방향키 (intelliJ CTRL+D랑 다름)
+                        }}>+3</button>
+                    </>
+                    /* setState를 사용하는 방식은 "비동기 방식"이다. 그래서 같은 구절 
+                     this.setState({number: number +1}) 을 2번 이상 사용한다고 해도
+                     +1+1 = +2가 되는 것이 아니라 마지막에 쓰인
+                     this.setState({number: number +1})만 사용된다. 
+                     이를 해결하려면 (의도대로 +1을 2번 사용해서 +2로 만들어주고 싶다면)
+                     prevStage(abbv.prev)를 사용한다.
+                     prev = 이전 상태를 전달한다
+                     prev.number+1 = 이전 상태에 1을 더한다*/
+                )
+            }
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<Counter />);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_state-02useState</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        //console.log(React);
+
+        const {useState} = React;
+
+        //1. make function type component  10:05
+        function Say(){
+            console.log('Is the value of state changed?');
+            /*message라는 상태state와 setter메소드를 배열 구조분해할당으로 각각의 변수에 넣어줌*/
+            const [message, setMessage]= useState('Default State');
+            // useState 사용하면 두 칸짜리 배열을 반환함.
+            // "구조분해할당"으로 [message(함수1), setMessage(message값을 set(변경)해줄 수 있는 상태변경함수2)] 
+            // 'Default State'로 State 초기값 설정해줌
+
+            /*Add another state  10:29*/
+            const [color, setColor] = useState('black');
+            const [backgroundColor, setBackgroundColor] = useState('white');
+
+            // Define onClick function seperately this time  10:12
+            const onClickEnter = () => setMessage('Hello!');
+            const onClickExit = () => setMessage('Goodbye');
+            /*구조분해할당을 하지 않았다면 message style은 이렇게 적용되었을 것  10:36
+            style = {{ color = 'black', backgroundColor : 'white' }} */
+
+            return (
+                <>
+                    <h2>function type component (useState)</h2>
+                    {/*Style must be utilize to set various colors in the message 10:35*/}
+                    <h3 style={{color, backgroundColor}}>{message}</h3>
+                    <button onClick={onClickEnter}>Enter</button>
+                    <button onClick={onClickExit}>Exit</button>
+                    {/*insert another buttons about color as the state expanded  10:30*/}
+                    <div>
+                        <button onClick={()=> setColor('red')}>Red text</button>
+                        <button onClick={()=> setColor('green')}>Green text</button>
+                    </div>
+                    <div>
+                        <button onClick={()=>setBackgroundColor('white')}>Default backgroundColor</button>
+                        <button onClick={()=>setBackgroundColor('black')}>Contrast backgroundColor</button>
+                    </div>    
+                </>
+            )
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<Say/>);
+    </script>
+    
+</body>
+</html>
