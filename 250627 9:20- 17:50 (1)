@@ -355,3 +355,150 @@ ReactDOM.createRoot(document.getElementById('root')).render(<todolist/>); 로 �
     </script>
 </body>
 </html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TITLE</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+    <!--props로 내려야 하는 것도 있음-->
+
+    <!--todo list 추가하기
+          todo list 앞에 네모칸 체크 구현하기
+          네모칸 체크되면 중간에 취소선 그이도록 구현하기
+          삭제 버튼은 ⛔ 사용
+          input box는 todo list 박스 하단에 위치  -->
+
+    <script type="text/babel">
+        const {useState} = React;
+
+        // 3.체크박스 생성을 위한 Checkbox 함수형 컴포넌트 생성
+        // https://www.daleseo.com/react-checkboxes/
+        function Checkbox({ children, disabled, checked, onChange}) {
+            return(
+                <label>
+                    <input
+                        type="checkbox"
+                        disabled={disabled}
+                        checked={checked}
+                        onChange={({ target: {checked}}) => onChange(checked)}
+                    />
+                    {children}
+                </label>    
+            )
+        }
+
+        //1. 함수형 컴포넌트 생성  250627  9:50
+        // Fix error : make todolist() in to uppper case Todolist  10:32
+        function Todolist(){
+            const [inputValue, setInputValue] = useState('');
+            const [todos, setTodos] = useState([
+                {
+                    id: 1, 
+                    text: '할일 목록을 추가할 것',
+                    checked: false,
+                }
+            ]);
+            const [nextId, setNextId] = useState(2);
+
+            const [useCheckbox, setUseCheckbox] = useState(false);
+            const [checked, setChecked] = useState(false);
+            
+            const handleChange = (e) => setInputValue(e.target.value)
+
+
+            //동작했을 때를 대비한 input 이벤트 함수 정의
+            const handleAdd = () => {
+                if(inputValue.trim() === '')return;
+                const newList = {id: nextId, text: inputValue, check: false};
+
+                //이렇게 만들어진 새로운 배열을 Names에 다시 넣는다.
+                setTodos([...todos, newList]);
+                setNextId(nextId+1);
+
+                //inputvalue 초기화
+                setInputValue('');
+            }
+
+
+            const handleRemove= (id) => {
+                const updated = todos.filter(todo => todo.id != id);
+                //filter를 통해 반환할 값 걸러서 내보내기 : id랑 일치하지 않는, 불일치true한 값만 반환하기 
+                // (id 불일치 값만 렌더링해서 다시 보여주기 때문에 id 일치 값이 삭제되는 것처럼 보임) 
+                /*filter 조건을 todo.id == id로 했더니 내가 원하는 삭제 요소가 삭제되지 않고
+                만약 두 개가 있으면 둘 중 삭제가 아닌 다른 값이 삭제 됨. 10:53*/
+
+                //setTodos에 updated 담아서 반환한다.
+                setTodos(updated);
+            }
+
+
+            const handleCheckboxChange = (id) => {
+                /*화살표 함수에 매개변수를 넣어줌 const handleCheckboxChange =()=>에서
+                 const handleCheckboxChange =(id)=> 변경  17:45 */
+                // 이 funcion type componenet를 만들기 위해 Todolist 선언부 하단에
+                // const [checked, setChecked] = useState(false); 넣는다.   11:09
+                /*하나의 체크박스에 체크하는데 모든 todolist에 줄 그어짐.  수정 필요 17:50*/
+                setChecked(!checked);
+                // onToggle과 item(부모 컴포넌트에 변경사항 전달하기 위한 변수)을 
+                // 사용하기 위해 function Todolist()를  function Todolist({ item, onToggle })로 고친다  11:12
+            }
+
+
+            //2. return을 먼저 작성한다
+             return (
+                    <>                
+                        <div>
+                            {/*todos.map으로 배열 생성*/}
+                            {todos.map(todo => 
+                                <div key={todo.id}>
+                                    {/*{todo.text}를 {todo.id}로 바꿈  17:42*/}
+                                    <input type="checkbox"
+                                               checked={todo.checked}
+                                               onChange={() => handleCheckboxChange(todo.id)} 
+                                    />  {/*<input ......checked={checked}를 check={todo.checked}로 바꿈 17: 37*/}
+                                    {/*체크박스 체크 여부 확인 기능은 넣었고 이제 삼항연산자로
+                                        체크박스 true/false 여부에 따라 취소선 그이게 만드는 기능 넣는다.  11:16*/}
+                                    <span style={{ textDecoration: checked? 'line-through' : 'none '}}>
+                                    {todo.text}
+                                    </span>
+                                    {/*line-througt로 오타가 나서 취소선 적용이 안 되었던 거였음. line-through로 바꾸니 취소선 그임
+                                        남은 할 일: todo list 2개 이상일 시 체크박스와 취소선이 
+                                        모든 todolist에 동시에 적용됨. 해결 필요  11:22*/}
+                                    {/*남은 할 일 -> 체크박스 체크 시 {todo.text}에 취소선 그이게 만들기
+                                        : checked 여부를 구분하기 위해 const handleCheckboxChange를 만들고
+                                        <input type="checkbox"/>를 수정한다   11:05 */}
+                                <label onClick={() => handleRemove(todo.id)}>⛔</label>
+                                {/*<div onClick>을 <label onClick></click>로 바꿨더니 
+                                    빨간delete버튼이 개행되어 들어가지 않음(todo-list와 한 줄에 같이 들어감)  11:58 */}
+                                {/*handleRemove 함수형 컴포넌트 return 위에 만들기   10:42 */}
+                                </div>
+                            )}
+                         </div>
+                         {/*<ul> <li> tag 대신 div 태그 이용함 줄머리 기호 사라짐
+                            남은 수정할 내용 : 삭제 버튼 todolist와 동일 선상에 들어가도록 만들기 
+                            (삭제 버튼만 자꾸 아래에 내려가 있음)  10:50 */}    
+                        
+                    {/*사진 조건에 따라 input box 체크리스트 하단에 추가  11:07*/}
+                        <input type="text" value={inputValue} onChange={handleChange} placeholder="Write things to do"/>
+                        <button onClick={handleAdd}>추가하기</button>
+                    </>
+                    /*<label htmlFor
+
+<input onKeyDown={(e) => {
+	if(e.key === 'Enter') 핸들러함수호출;		*/
+                )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<Todolist/>);
+    </script>
+</body>
+</html>
