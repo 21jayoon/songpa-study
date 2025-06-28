@@ -1,0 +1,176 @@
+# 250622 Sturylog- JPA : Entity Manager
+# https://github.com/copilot/share/002b419c-0184-8ca4-b110-400fa49f0848
+
+1. The Big Picture
+You have two classes:
+  EntityManagerFactoryGenerator: "Makes and manage"s a single "EntityManagerFactory".
+  EntityManagerGenerator: Gets a "new EntityManager" whenever you need one.
+Both are part of the 'org.getyourbond.entity' package 
+and work together to help your app talk to the database in a clean, efficient way using JPA (Jakarta Persistence API).
+
+
+2. EntityManager"FactoryGenerator" Code Recap
+```java
+public class EntityManagerFactoryGenerator {
+    private static EntityManagerFactory factory
+        = Persistence.createEntityManagerFactory("jpa");
+    private EntityManagerFactoryGenerator(){}
+
+    public static EntityManagerFactory getInstance(){
+        return factory;
+    }
+}
+```
+  What does it do?  
+    Creates a single, "shared EntityManagerFactory" when the application starts.
+    Prevents anyone from making more than one EntityManagerFactoryGenerator (private constructor).
+    Provides access to the factory through the static method getInstance().
+  Why is this important?
+    Building an EntityManagerFactory everytime is expensive (resource-heavy).
+    Sharing one factory is efficient.
+
+
+3. Entity"ManagerGenerator" Code
+```Java
+public class EntityManagerGenerator {
+    public static EntityManager getInstance(){
+        EntityManagerFactory factory
+            = EntityManagerFactoryGenerator.getInstance();
+        return factory.createEntityManager();
+    }
+}
+```
+  What does it do?
+    Provides a static method getInstance() that:
+      Fetches the shared EntityManagerFactory "from EntityManagerFactoryGenerator".
+      Creates a new EntityManager using that factory instance.*
+      Returns the new EntityManager to whoever called the method.
+  Why do we need a new EntityManager each time?
+    An EntityManager represents a session with the database.
+    It is not thread-safe -> each user/request/operation should get its own.
+
+
+4. How Does This All Work Together?
+  App needs to talk to the database → calls EntityManagerGenerator.getInstance().
+  EntityManagerGenerator asks EntityManagerFactoryGenerator for the factory.
+  The factory (already created and shared) makes a fresh EntityManager.
+  The app uses the EntityManager to do database work.
+
+This approach:
+  Keeps resource use low (one factory).
+  Ensures safety and correctness (fresh EntityManager per operation).
+
+✅ Must-Know List
+  1. What is an EntityManagerFactory?
+      A heavyweight object that creates multi-"EntityManager"(=EntityManagers); should only be made once and shared.
+  2. What is an EntityManager?
+      A lightweight object representing a session with the database; get a new one for each operation.
+  3. Singleton Pattern
+      Used in EntityManagerFactoryGenerator to make sure only one factory exists.
+  4. Static Methods
+      Used for easy, global access without making class instances.
+  5. Thread Safety
+      EntityManagerFactory is thread-safe (shareable), but EntityManager is not (never share!).
+  6. Why not create a new factory every time?
+      It’s expensive and unnecessary; one is enough.
+  7. How do you get an EntityManager?
+      Call EntityManagerGenerator.getInstance().
+
+# Studylog 250621 JPA: Apply toy project
+# Condition - use JPA
+# What is JPA? 
+# JPA는 자바의 ORM(Object Relational Mapping) 기술을 쉽게 구현하도록 도와주는 API이다.
+ 
+JpaRepository를 상속하는 인터페이스에 메서드 이름만 적어놓으면
+알아서 다 처리(구현체 생성, 쿼리문 구현 등)해주는 좋은 ORM이다.
+ 
+메소드 이름은 findby(필드명), deleteby(필드명)처럼 메소드 명칭만 적어주면
+개발자는 SQL을 작성하지 않아도 쿼리문을 만들어준다.
+ 
+이때 엔티티라는 클래스를 이용하는데 객체를 이용하여 매핑을 처리하는 것이다.
+어렵다면 엔티티 == 테이블 or 레코드라고 생각해 보자!
+출처: https://ccomccomhan.tistory.com/131 [[꼼꼼한 개발자] 꼼코더:티스토리]
+
+ORM : ‘ORM(Object Relational Mapping)’은 ‘객체로 연결을 해준다’는 의미로, 
+어플리케이션과 데이터베이스 연결 시 SQL언어가 아닌 
+어플리케이션 개발언어로 데이터베이스를 접근할 수 있게 해주는 툴
+출처: https://jalynne-kim.medium.com/데이터베이스-백엔드-orm-object-relational-mapping-의-개념과-종류-활용방안-c43b69028957
+
+# TO DO
+# 1. join tbl_user and tbl_bonds in tbl_like
+# 2. make crud (with jpa) with tbl_bonds
+# (later) 1. make crud with tbl_bondtype
+#         2. make crud with tbl_user
+
+# 2. tbl_bonds crud with JPA - Read : All & ByBondType
+#   1. Write a Bonds class with @Entity annotation to make this class as a entity class in JPA
+package org.getyourbond.crud;
+
+import jakarta.persistence.*;
+
+@Entity(name = "CrudBonds")
+@Table(name = "tbl_bonds")
+public class Bonds {
+    // make bondCode PK with @Id annotation
+    @Id
+    //since connected with MySQL, write a @GeneratedValue(... Type.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int bondCode;
+
+    private String bondName;
+    private int bondType;
+    private double bondYield;
+    private String bondDuration;
+
+    protected Bonds(){}
+
+    public Bonds(int bondCode, String bondName, int bondType, double bondYield, String bondDuration) {
+        this.bondCode = bondCode;
+        this.bondName = bondName;
+        this.bondType = bondType;
+        this.bondYield = bondYield;
+        this.bondDuration = bondDuration;
+    }
+
+    public int getBondCode() {
+        return bondCode;
+    }
+
+    ......
+    public void setBondDuration(String bondDuration) {
+        this.bondDuration = bondDuration;
+    }
+
+    @Override
+    public String toString() {
+        return "Bonds{" +
+                "bondCode=" + bondCode +
+                ", bondName='" + bondName + '\'' +
+                ", bondType=" + bondType +
+                ", bondYield=" + bondYield +
+                ", bondDuration='" + bondDuration + '\'' +
+                '}';
+    }
+}
+
+# 2. Create EntityCRUD
+package org.getyourbond.crud;
+
+import jakarta.persistence.EntityManager;
+
+public class EntityManagerCRUD {
+    private EntityManager entityManager;
+
+    /* 1. Read : All */
+
+
+    /* 2. Read : By BondType*/
+
+    /* 3. Read : Count the number of bonds in the list */
+
+    /* 4. Create */
+
+    /* 5. Update */
+
+    /* 6. Delete */
+}
