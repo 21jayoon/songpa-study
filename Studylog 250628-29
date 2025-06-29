@@ -1,3 +1,66 @@
+# 250629 JPA concept study
+# JPA
+## JPA란?
+JPA는 java진영의 Object Relational Mapping, ORM 기술 표준으로, 
+ORM 기술을 사용하기 위한 표준 인터페이스의 모음이다.
+
+ORM은 자바 객체와 DB테이블을 매핑하고 
+자바 객체 간의 관계를 토대로 SQL을 생성 및 실행할 수 있다.
+보통 ORM을 얘기하는 경우, 대부분 사람들은 
+ORM 기술을 실행하는 library를 "ORM"이라고 얘기하며
+대중적인 언어에는 대부분 ORM 기술이 존재한다.
+캡슐화와 관련이 있다.
+(참조 : stackoverflow.com/questions/1279613/what-is-an-orm-how-does-it-work-and-how-should-i-use-one#1279678)
+
+## JPA 특징
+* 영속성 컨택스트persistence context가 
+엔티티를 lifecycle생명주기를 통해 관리한다.
+* native SQL을 사용할 수 있다.
+이를 통해 직접 SQL을 쓰려는 DB에 맞게 작성할 수도 있다.
+* DBMS 별로 dialect를 제공한다. 
+(JPA를 사용하면 MySQL의 SQL문법, Oracle의 SQL문법, H2의 SQL문법에 상관없이 SQL 사용 가능)
+
+## 장점
+* 객체 지향Object Oriented과 관계지향Relational 이라는
+서로 다른 패러다임 불일치를 해소해주며 
+SQL 중심이 아닌 객체지향 패러다임 중심 개발이 가능하다.
+* 개발자가 따로 SQL을 작성하지 않아도 SQL문을 작성해주므로 생산성이 향상된다.
+* SQL을 수정할 필요가 없으므로 설정 및 필드 변경 시 SQL이 자동 수정되어 유지보수성이 향상된다.
+* 개발자 대신 JPA가 해당 DB에 맞는 SQL를 작성해준다.(DB 종류에 따라 SQL문에 있어 다소 차이 있음)
+* cache를 활용한 성능 최적화로 인해 transaction을 처리하는 시가닝 굉장히 많이 단축된다.
+
+## 단점
+* 복잡한 SQL을 작성하기엔 적합치 않다. -> 동적 SQL(복잡) 같은 경우 순수 JPA만으론 부족해 추가 library를 활용해야할 경우가 생길 수 있다.
+* JPA를 제대로 이해하지 못하고 작성 시 성능 저하가 발생할 수 있다.
+* 객체지향 패러다임Object-Oriented Paradigm과 관계형 DB 패러다임(Relational DB Paradigm)에 대한 이해가 없는 상태로는 제대로된 이해가 어렵다.
+
+## MyBatis와 JPA
+MyBatis는 SQL Mapper로, SQL Mapping을 사용하는 영속성(DB저장) 프레임워크이다.
+개발자가 직접 SQL코드를 작성하고 객체에 대해 mapping을 위한 설정을 모두 직접 처리해야한다.
+또한, 수정이 이뤄질 시 SQL 뿐만 아니라 mapping될 객체까지 같이 수정해야하는 번거로움이 있다.
+* JPA와 MyBatis는 분류상 서로 다르다. JPA는 "ORM 기술"이고, MyBatis는 "SQL Mapper"의 한 종류이다.
+* JPA가 무조건 좋은 것은 아니며 어플리케이션이 고도화되면 JPA를 사용해 손이 많이 가는 것보다 MyBatis를 사용하는 것이 답이 될 수 있다.
+
+## JPA 원리
+Java 애플리케이션과 JDBC 사이에서 동작하며 내부적으로 JDBC API를 활용한다.
+[JAVA Application  
+    ["JPA"  
+        [JDBC API]   ---SQL---> [Database]
+                  ]  <-Result-
+                    ] 
+JPA는 엔티티를 저장하는 환경인 영속성 컨택스트 Persistence Context를 통해 엔티티를 보관하고 관리한다.
+
+### 영속성 컨택스트persistence context에서의 엔티티 생명주기
+* Entity Manager가 엔티티를 저장하는 공간으로 엔티티를 보관하고 관리한다
+* Entity Manager가 생성될 때 하나의 영속성 컨택스타Persistence Context가 만들어진다.
+* 엔티티의 생명 주기:
+  상태                 설명
+  비영속(new/transient) 엔티티가 영속성 컨택스트persistence context와 전혀 관계 없는 상태
+  영속(managed)         엔티티가 영속성 컨택스트에 저장된 상태 
+  준영속(detached)      영속성 컨택스트에 저장되었다가 분리된 상태
+  삭제(removed)         엔티티가 삭제된 상태
+  병합(merge)           준영속 상태인 엔티티가 다시 영속상태로 변경된 상태
+
 # 250622 Sturylog- JPA : Entity Manager
 # https://github.com/copilot/share/002b419c-0184-8ca4-b110-400fa49f0848
 
@@ -22,7 +85,7 @@ public class EntityManagerFactoryGenerator {
 }
 ```
   What does it do?  
-    Creates a single, "shared EntityManagerFactory" when the application starts.
+    Creates a "single", "shared EntityManagerFactory" when the application starts.
     Prevents anyone from making more than one EntityManagerFactoryGenerator (private constructor).
     Provides access to the factory through the static method getInstance().
   Why is this important?
@@ -62,11 +125,11 @@ This approach:
 
 ✅ Must-Know List
   1. What is an EntityManagerFactory?
-      A heavyweight object that creates multi-"EntityManager"(=EntityManagers); should only be made once and shared.
+      A heavyweight object that creates "multi-EntityManager"(=EntityManagers); should only be "made once and shared".
   2. What is an EntityManager?
       A lightweight object representing a session with the database; get a new one for each operation.
   3. Singleton Pattern
-      Used in EntityManagerFactoryGenerator to make sure only one factory exists.
+      Used in EntityManagerFactoryGenerator to make sure "only one factory exists".
   4. Static Methods
       Used for easy, global access without making class instances.
   5. Thread Safety
@@ -135,7 +198,6 @@ public class Bonds {
     public int getBondCode() {
         return bondCode;
     }
-
     ......
     public void setBondDuration(String bondDuration) {
         this.bondDuration = bondDuration;
@@ -162,7 +224,6 @@ public class EntityManagerCRUD {
     private EntityManager entityManager;
 
     /* 1. Read : All */
-
 
     /* 2. Read : By BondType*/
 
