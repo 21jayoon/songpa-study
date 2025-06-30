@@ -1,0 +1,803 @@
+# REACT
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03_Hooks-01_useEffect-02</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        //react에서부터 구조분해할당 해온다.  9:37
+        const {useState, useEffect} = React;
+
+        //make functional component  250630 9:35
+        function TimePrinter() {
+            //State 값 선언 9: 38
+            const [time, setTime] = useState(new Date().toLocaleTimeString());
+            //.toLocaleTimeString() : 현재의 시간이 나타날 수 있도록 초기값을 세팅해줌
+
+            console.log('Rendering...')
+
+            //랜더링 이후에 수행할 useEffect 사용. 
+            // 렌더링(화면에 그려진 후) 이후에 실행할 코드를 등록할 때 useEffect를 사용한다. 9:44
+            useEffect(() => {
+                console.log('useEffect 동작')},  //console.log('useEffect 동작') => 수행할 동작 (=콜백 함수) 9:46
+                //mount 시점에만 동작할 의존성 배열 [] 추가. 
+                // console.log까지만 {}로 묶어주고 두 번째 인자 []는 () 안에 넣어지도록 만든다.9:47
+                []
+                // update 시점에는 useEffect가 호출되지(동작하지) 않는다. 9:50
+                /* 크롬 F12 개발자 도구 console :
+                Rendering...
+                useEffect 동작  Inline Babel script:16
+                Rendering..      Inline Babel script:11 */
+                /*의존성 배열을 []빈 배열로 설정하면 업데이트 시점에는 useEffect가 동작하지 않는다.
+                의존성 배열에 전달된 값이 update 되어야 콜백 함수를 호출한다  9:52*/
+            )
+
+            return(
+                <>
+                    {/*버튼에다가 onClick event 걸어줌 9:39*/}
+                    <button onClick={() => setTime(new Date().toLocaleTimeString())}>Check the current time</button>
+                    <h1>{time}</h1>
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<TimePrinter/>);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03_Hooks-01_useEffect-03</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        //useState와 useEffect를 사용하기 위해 React로부터 꺼내온다.  9:54
+        const {useState, useEffect} = React;
+
+        //test를 위해 함수형 컴포넌트 하나 생성  9:53
+        function LoginForm() {
+            const [user, setUser] = useState({
+                username: '',
+                password: ''
+            });
+            
+            //onChange에 걸어줄 함수 하나 작성 9:58
+            const onChangeHandler = (e) => {
+                setUser({
+                    ...user,
+                    [e.target.name]: e.target.value
+                });
+            }
+
+            /*두번째 인자인 의존성 배열에 전달하는 값이 업데이트될 때만 동작한다.
+            단, 최초 마운트 동작 시점에도 동작한다.  10:07*/
+            useEffect(
+                () => {console.log('username update')},  // 내가 수행할 콜백 함수를 전달한다.  10:01
+                [user.username]  //의존성 배열 전달 10:02
+                // [user.username] : user.username이라는 값이 전달될 때에만 업데이트를 하겠다는 뜻. 10:02
+
+                //username 칸에 무언갈 작성했을 땐 숫자가 올라가지만 password를 작성했을 땐 콘솔창에 
+                // 아무것도 뜨지 않는다. 패스워드에도 콜백함수를 호출해주려면? 10:04  
+            );
+
+             useEffect(
+                () => {console.log('password update')},
+                [user.password]
+            );
+
+
+            return(
+                <>
+                    <label>username : </label>
+                    <input 
+                        type="text"
+                        name="username"
+                        value={user.username}
+                        onChange={onChangeHandler}
+                    /><br/>
+                    <label>password : </label>
+                    <input
+                        type="password"
+                        name="password"
+                        value={user.password}
+                        onChange={onChangeHandler}
+                    />
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<LoginForm/>);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TITLE</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        //React로부터 useState와 useEffect 꺼내온다. 10:23
+            const{useState, useEffect} = React;
+
+        function Counter() {
+            const [count, setCount] = useState(0);
+            // count 안에 초기값을 0으로 넣어줬다.  10:25
+
+            useEffect(() => {
+                console.log('useEffect working');
+                //useEffect에 반환하는 함수를 지정해줄 수도 있음(=return문 작성 가능) 10:27
+
+                /*반환하는 함수가 정리함수로 기능한다 -> componentWillUnmount 역할과 동일 10:50*/
+                return () => {
+                    console.log('clean-up')
+                } // componentWillUnmounts와 똑같은 기능을 수행하는 clean-up  10:28
+                //Reacts는 SinglePageApplication(SPA)을 만들어씀. 기존에는 response로 HTML 값을 받아왔지만 React에선 JSON을 받아온다.
+                // 또한 React는 전부 비동기 통신을 한다. 받아온 값이 setState되면서 다시 랜더링 해온다. 10:55
+            })
+
+            return(
+                <>
+                    <h1>count: {count}</h1>
+                    <button onClick={() => setCount(count+1)}>+1</button>
+                    {/*State 값 변경이 계속 일어나는 rerendering이 일어난다.  10:26*/}
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<Counter/>);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03_Hooks-01_useEffect-05</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        //React로부터 useState, useEffect withdraw 10:32
+        const {useState, useEffect} = React;
+        
+        function Timer() {
+            useEffect(
+                () => {
+                    console.log('Timer Starts..');
+                    const timer = setInterval(() => {
+                        console.log(new Date().toLocaleTimeString());
+                    }, 1000);
+
+                    //정리함수 적용 방법 = 반환하는 함수 만든다.  10:45
+                    return () => {
+                        //timer 동작 중지(동작 완료)를 위해 clearInterval 사용  10:42
+                        clearInterval(timer);
+                        console.log('Timer ended.');
+                    }
+                },
+                []
+            )
+            return(
+                <>
+                    <h1>Start the Timer</h1>
+                    <h3>Plz look at the F12 console to check how the timer works</h3>
+                </>
+            )
+        }
+
+        function App() {
+            // 버튼 누르기 전에 Timer를 보여주느냐 보여주지 않느냐에 대한 초기값 입력  10:34
+            const [isTrue, setIsTrue] = useState(false);
+
+            return(
+                <>
+                    <button onClick={() => setIsTrue(!isTrue)}>Timer toggle</button>
+                    { isTrue && <Timer/> }  {/*{ isTrue && <Timer/> } 조건부 랜더링 값 설정  10:36*/}
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-01_intro-01</title>
+
+</head>
+<body>
+    <script>
+        //React 안 썼고, 첫 글자 대문자 아니기 때문에 
+        // 얘는 (함수형) 컴포넌트 아니고 그냥 함수  11:03
+        function sayHello(){
+            console.log('Hello World!');
+        }
+
+        //상황1  11:04  순차적으로 함수가 불러와짐 1. sayHello(); -> 2. console.log('end');
+        // = "동기적으로 이루어진다."
+        sayHello();
+        console.log('end');
+
+        //상황 2  11:05
+        setTimeout(sayHello, 3000);
+        console.log('end');
+        /*console.log('end')가 먼저 나오고 그 후에 (3초 뒤에) sayHello 함수가 실행된다.
+        => 비동기 작업,  "비동기적인 작업을 실행한다." 
+        setTimeout(sayHello, 3000)에서 sayHello는 callback 함수다.  11:09*/
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-01_intro-02callbackHELL</title>
+</head>
+<body>
+    <script>
+        function increase(number, callback){
+            setTimeout(() => {
+                const result = number +10;
+
+                if(callback){
+                    callback(result);
+                }
+            }, 1000);
+        }
+
+        increase(0, result => console.log(result));
+        /*10이라는 값이 만들어졌을 때 10이 callback 값에 들어가, 
+        increase로 넘어간 다음에 의도에 따라 10, 20, 30, 40... 
+        이렇게 10씩 늘어날 수 있는지 확인한다. 11:29*/
+
+        console.log('start');
+        increase(0, result => {
+            console.log(result);
+            //이 안에서 다시 result를 전달받아 increase 넣는다 11:30
+            increase(result, result => {
+                console.log(result);
+                //누적된 result를 다시 increase에 넣는다.(increase 중첩 실행) 11:32
+                increase(result, result => {
+                    console.log(result);
+                    increase(result, result => {
+                        console.log(result);
+                        increase(result, result => {
+                            console.log(result);
+                            increase(result, result =>{
+                                console.log(result);
+                                console.log('end');
+                            })
+                        })
+                    })
+                })
+            })
+        })
+        // 위 increase 중첩 사용은 대표적인 callback hell(콜백 지옥)으로, 안 좋은 예시이다.  11:35
+
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-01_intro-03promise</title>
+</head>
+<body>
+    <script>
+        function increase(number){
+            //1. make promise  11:44
+            // deliver function into the promise 11:45
+            const promise = new Promise((resolve, reject) => {      
+                //2. move setTimeout into the const promise    11:47      
+                setTimeout(() => {
+                    const result = number +10;
+    
+                    if(result > 50) {
+                        const e = new Error('NumberTooBig');
+
+                        return reject (e);
+                        //실패했을 시 reject를 통해 e를 호출한다. (실패 시 reject 호출)  11:49
+                    }
+                    resolve(result);
+                    // 성공한다면 result를 넣은 resolve 함수를 호출한다.  11:50
+
+                    //콜백이 있으면 콜백을 또 호출합니다 부분 삭제 if(callback){callback(result);}  11:48
+                }, 1000);
+            });
+            //최종적으로 increase라는 함수 안에서 promise라는 객체를 반환한다.  11:51
+            return promise;
+        }
+        console.log(increase(0));
+
+        /*Promise
+        [[Prototype]]:  Promise
+        [[PromiseState]]: "fulfilled"
+        [[PromiseResult]]: 10
+        chrome f12 console에서 [[Prototype]], [[PromiseState]], [[PromiseResult]]는 
+        대괄호 두 개로 둘러싸여 있고 연한 회색으로 되어있는데, 
+        이 부분은 개발자가 직접적으로 접근할 수 없다.  11:55*/
+
+        increase(0)
+            .then(number => {
+                console.log(number);
+
+                return increase(number);
+            })
+            .then(number => {
+                console.log(number);
+
+                return increase(number);
+            })
+            .then(number => {
+                console.log(number);
+
+                return increase(number);
+            })
+            .then(number => {
+                console.log(number);
+
+                return increase(number);
+            })
+            .then(number => {
+                console.log(number);
+
+                return increase(number);
+            })
+            //실패시 나오는 error 캐치 구문 작성  12:06
+            /*reject에 들어간 error 객체를 콜백함수의 인수로 넣어준다. 12:07*/
+            .catch(e => {
+                console.log(e, "is ocurred");
+            })
+            //왜 promise라는 객체가 만들어졌을까요? : 
+            // 비동기적인 작업을 할 때 비동기적인 작업들의 순서를 보장할 수 있도록 만들어짐. 12:12
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-01_intro-04await</title>
+</head>
+<body>
+    <script>
+        function increase(number){
+            //1. make promise 
+            // deliver function into the promise 
+            const promise = new Promise((resolve, reject) => {      
+                //2. move setTimeout into the const promise    11:47      
+                setTimeout(() => {
+                    const result = number +10;
+    
+                    if(result > 50) {
+                        const e = new Error('NumberTooBig');
+
+                        return reject (e);
+                        //실패했을 시 reject를 통해 e를 호출한다. (실패 시 reject 호출) 
+                    }
+                    resolve(result);
+                    // 성공한다면 result를 넣은 resolve 함수를 호출한다.
+
+                    //콜백이 있으면 콜백을 또 호출합니다 부분 삭제 if(callback){callback(result);} 
+                }, 1000);
+            });
+            //최종적으로 increase라는 함수 안에서 promise라는 객체를 반환한다.
+            return promise;
+        }
+        console.log(increase(0));
+        /*Promise
+        [[Prototype]]:  Promise
+        [[PromiseState]]: "fulfilled"
+        [[PromiseResult]]: 10
+        chrome f12 console에서 [[Prototype]], [[PromiseState]], [[PromiseResult]]는 
+        대괄호 두 개로 둘러싸여 있고 연한 회색으로 되어있는데, 
+        이 부분은 개발자가 직접적으로 접근할 수 없다.  */
+
+        /*03promise에서와 달리 .then말고 다른 함수를 사용한다. 13:06*/
+        //함수 run 선언 13:07
+        //03promise에서 increase를 promise를 통해 작업의 순서를 보장한(?) 비동기적인 함수로 만들었음.  13:08
+        async function run() {
+            try{
+                let result = await increase(0);
+                //await는 async와 함께 짝궁으로 쓰여야 함 13:09
+                console.log(result);
+
+                result = await increase(result);
+                console.log(result);
+
+                result = await increase(result);
+                console.log(result);
+
+                result = await increase(result);
+                console.log(result);
+
+                result = await increase(result);
+                console.log(result);
+
+                result = await increase(result);
+                console.log(result);
+                //try catch문으로 감싸서 error 처리해보겠음  13:13
+            }catch(e){
+                console.log(e,"is ocurred!!")
+            }
+        }
+        run();
+            //왜 promise라는 객체가 만들어졌을까요? : 
+            // 비동기적인 작업을 할 때 비동기적인 작업들의 순서를 보장할 수 있도록 만들어짐. 12:12
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-02_API-01</title>
+</head>
+<body>
+    <script>
+        //google에 'json placeholder' 검색해서 가짜 json 페이지(가짜 json 코드?) 이용 13:22
+        async function callAPI(){
+            const promise = fetch('https://jsonplaceholder.typicode.com/users')
+            //promise 타입으로 fetch를 반환함  
+            console.log(promise);
+            //promise 객체 이용법: 1 .then method chaining 이용 2. async-await 사용 13:28
+            console.log(promise['[[PromiseResult]]']);  //undefined(chrome console값) -> 접근불가함을 의미 13:29
+
+            //비동기적인 함수 호출
+            //fetch에 await를 쓰기 위해 async를 function 앞에 붙인다. 13:31
+            const response = await fetch('https://jsonplaceholder.typicode.com/users')
+            console.log(response);
+
+            console.log(`본문 내용 사용 여부 : ${response.bodyUsed}`)    ;
+
+            //fetch해온 것 중 활용할 수 있는 것을 json형태로 변환해서 받아보겠다.  13:32
+            const responseJson =  await response.json();
+            console.log(responseJson);
+            // const responseJson = response.json();에도 await 키워드를 써야 원래 의도대로 가짜 json페이지에서 활용할 수 있는 것을 받아볼 수 있다.
+
+            console.log(`본문 내용 사용 여부 : ${response.bodyUsed}`);
+            // 읽어왔는지 안 읽어왔는 bodyUsed로 확인 가능 13:39
+
+            //text로도 값 변환해서 반환받아볼 수 있다. 13:34
+            /*const responseText = await response.text();
+            console.log(responseText); 
+            Uncaught (in promise) TypeError: Failed to execute 'text'
+             on 'Response': body stream already read
+                 at callAPI (01_fetch-async-await.html:30:49)*/
+        }
+        //fetch 첫 번째 인자 : 요청하는 url 주소  13:25
+
+        callAPI();
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function callAPI() {
+
+            console.log(fetch('https://jsonplaceholder.typicode.com/users'))
+            
+            fetch('https://jsonplaceholder.typicode.com/users')
+            .then(response => response.json())
+            //response.json()이 data로 console에 찍혀서 출력된다. 13:45
+            .then(data => console.log(data));
+        }
+        callAPI();
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-02_API-03axios</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <!--axios는 library. 기본 내장 library는 아니고, axios CDN이라고 검색한 후 CDM 코드를 입력해야 쓸 수 있다.  13:47 -->
+    <script>
+        function callAPI() {
+             fetch('https://jsonplaceholder.typicode.com/users')
+             .then(response => {
+                console.log('fetch response : ', response)
+                return response.json()
+             })
+             .then(data => console.log('fetch data : ', data));
+
+             //axios 사용
+            axios.get('https://jsonplaceholder.typicode.com/users')
+            .then(response => {
+                console.log('axios response : ', response);
+                //data 응답값을 axios가 자동으로 변환해준다.  14:04
+                console.log(response.data);
+                /*axios를 사용했을 땐 return responxe.json() 사용할 필요 없이 
+                body의 데이터를 바로 받아올 수 있다. 14:06*/
+            })
+        }
+        callAPI();
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-02_API-04githubApiEmoji</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        //use REST API  250630 14:10
+        //1. make input box 
+        /*어떤 값이 state로? -> input 박스에 들어가는 text 값이 state가 되어야 함
+        비동기 통신은 어떻게?
+        props는 무엇이 내려와야할까? -> 검색창에 들어간 text값이 props로 내려와야할 듯*/
+        const {useState} = React;
+
+        /*요청 주소:   https://api.github.com/emojis */
+
+        // function SearchBox({text, setText})안에 onSearch 추가 
+        function SearchBox({text, setText, onSearch}){
+            //const clickHandler = ({text}) => setText({text});
+            return(
+                <>
+                    <input type="text" 
+                            value={text} 
+                            name="searchBox" 
+                            onChange={e=>setText(e.target.value)}/>
+                    <button onClick={onSearch}>검색</button>
+                </>
+            )
+            //<button onClick={clickHandler}>을 {onSearch}로 바꿈(search 상태를 변경해 전달해주기 위해) 15:04
+        }
+        //엥? input box 나왔다. 14:58
+
+        //function ImageBox 수정 15:16
+        function ImageBox({ emojiUrl }) {
+            return (
+                <>
+                  {emojiUrl ? (
+                      <img src={emojiUrl} alt="emoji" width="64" height="64" />
+                  ) : ('')}
+                  {/*자바스크립트(JSX)에서
+                    {emojiUrl ? ( <img ... /> ) : ()}
+                    이렇게 삼항 연산자의 "else" 부분을 빈 괄호 ()로 남기면 문법 오류가 납니다.
+                    
+                    이유: JSX에서 ()는 아무것도 반환하지 않는 "빈 식"이 아닙니다.
+                    ()는 JS 문법적으로 함수 호출, 식(표현식), 그룹화 등으로 쓰이지만,
+                    JSX에서 ()만 단독으로 쓰면 값이 아니므로 파싱 에러가 발생합니다.
+                    (예: undefined, null, '', <></> 등은 가능함) */}
+                </>
+            );
+        }
+        /*function ImageBox({text}){
+            //State 사용해서 text값을 받아온다. 14:30
+            //비동기 통신 사용 : Rest API, json
+           fetch ('https://api.github.com/emojis')
+            .then(response => {
+                console.log(response)
+                return response.json()
+            })
+            .then(data => console.log(data))
+        } */
+
+        function App() {
+            const [text, setText] = useState("")
+            const [emojiUrl, setEmojiUrl] = useState("")
+
+            // 검색 버튼 클릭 시 실행할 함수
+            const handleSearch = () => {
+                fetch("https://api.github.com/emojis")
+                    .then(res => res.json())
+                    .then(data => {
+                     // 입력값이 key로 있는지 확인 후, 있으면 url 저장
+                    if (data[text]) {
+                        setEmojiUrl(data[text]);
+                    } else {
+                        setEmojiUrl(""); // 없으면 빈 값(또는 에러 메시지도 가능)
+                    }
+                });
+            };
+            /*15: 28 왜 handleSearch를 App에 두는가?
+            1. 상태(state) 관리의 주체가 App이기 때문 : 
+            emoji 데이터(검색 결과)를 저장하는 state(emojiUrl)는 App에 있습니다.
+            fetch를 통해 받아온 데이터를 이 state에 저장해야 하므로,
+            fetch 로직(즉, 검색 버튼 클릭 시 동작) 역시 App에서 관리해야 합니다.
+            
+            2. 데이터 흐름의 일관성(단방향 데이터 흐름) : 
+            React의 핵심 원칙: 부모 → 자식 방향으로 데이터와 함수를 전달(props)
+            만약 SearchBox 내부에서 fetch를 하고 결과를 관리하면,
+            App이 그 결과를 알 수 없어 하위 컴포넌트끼리 데이터가 분리됩니다.
+            App이 모든 상태와 로직을 관리하면,
+            여러 컴포넌트가 "공유된 결과"를 props로 쉽게 받을 수 있습니다.
+            
+            3. 역할 분리의 명확성 : 
+            SearchBox: 입력값을 받고, 버튼 클릭 시 이벤트만 발생시키는 "UI 컴포넌트"
+            App: "상태"와 "비즈니스 로직(API 호출, 결과 저장 등)"을 관리하는 "컨테이너 컴포넌트"
+            
+            만약 SearchBox에 handleSearch가 있다면? : 
+            fetch 결과를 SearchBox가 알아서 처리해야 하고,
+            그 결과를 App에 올려주려면 또 props로 함수를 받아야 함(복잡해짐).
+            여러 하위 컴포넌트가 결과를 써야 할 때(예: ImageBox),
+            데이터 공유가 어렵고 앱 구조가 복잡해짐.
+            
+            React의 대표적인 패턴 :
+            상태와 데이터, 주요 로직은 상위 컴포넌트(App)가 가지고,
+            입력/버튼 같은 UI와 이벤트 트리거는 하위 컴포넌트가 담당한다.
+            
+            정리 예시 :
+            1. App
+            상태: text, emojiUrl
+            함수: handleSearch (fetch & setEmojiUrl)
+            하위 컴포넌트에 props로 text, setText, handleSearch, emojiUrl 등 전달
+            
+            2. SearchBox
+            입력값 변경: setText를 props로 받아서 사용
+            검색 버튼 클릭: onClick={onSearch} (props로 받은 함수 호출만 함)
+            
+            결론 : 
+            검색 버튼 클릭 시 수행할 fetch/search 로직은,
+            1) 결과 상태를 보관하고,
+            2) 여러 컴포넌트에 공유해야 하며,
+            3) 앱의 "상위 컨테이너" 역할인 App이 담당하는 것이 가장 React답고, 유지보수에 좋기 때문입니다!*/
+
+            return(
+            <>
+                {/*input box 컴포넌트
+                <SearchBox name={text}/>*/}
+                <SearchBox text={text} setText={setText} onSearch={handleSearch} />
+                <br/>            
+                <ImageBox emojiUrl={emojiUrl}/>
+                {/*image출력하는 컴포넌트*/}
+            </>
+        )
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+    </script>
+</body>
+</html>
+
+# 수정 전 ver. (개인 힘으로 할 수 있는 만큼만 함)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04_async-02_API-04githubApiEmoji</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        //use REST API  250630 14:10
+        //1. make input box 
+        /*어떤 값이 state로? -> input 박스에 들어가는 text 값이 state가 되어야 함
+        비동기 통신은 어떻게?
+        props는 무엇이 내려와야할까? -> 검색창에 들어간 text값이 props로 내려와야할 듯*/
+        const {useState} = React;
+
+        /*요청 주소:   https://api.github.com/emojis */
+
+        // function SearchBox({text, setText})안에 onSearch 추가 
+        function SearchBox({text, setText, onSearch}){
+            //const clickHandler = ({text}) => setText({text});
+            return(
+                <>
+                    <input type="text" 
+                            value={text} 
+                            name="searchBox" 
+                            onChange={e=>setText(e.target.value)}/>
+                    <button onClick={onSearch}>검색</button>
+                </>
+            )
+            //<button onClick={clickHandler}>을 {onSearch}로 바꿈(search 상태를 변경해 전달해주기 위해) 15:04
+        }
+        //엥? input box 나왔다. 14:58
+
+        function ImageBox({text}){
+            //State 사용해서 text값을 받아온다. 14:30
+            //비동기 통신 사용 : Rest API, json
+           fetch ('https://api.github.com/emojis')
+            .then(response => {
+                console.log(response)
+                return response.json()
+            })
+            .then(data => console.log(data))
+        }
+
+       function App() {
+  	    const [text, setText] = useState("");
+  	    const [emojiUrl, setEmojiUrl] = useState("");
+
+  	    // fetchEmoji 함수 정의: 검색 버튼 클릭시 실행
+  	    const fetchEmoji = () => {
+   	     fetch("https://api.github.com/emojis")
+      	        .then(res => res.json())
+      	        .then(data => {
+             // text에 해당하는 이모지 url을 찾아서 저장
+        	setEmojiUrl(data[text]);
+      		});
+ 	 };
+
+  return (
+    <>
+      <SearchBox text={text} setText={setText} onSearch={fetchEmoji}/>
+      <ImageBox emojiUrl={emojiUrl}/>
+    </>
+  )
+}
+     ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+    </script>
+</body>
+</html>
