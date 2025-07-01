@@ -90,14 +90,18 @@
                     .then(response => response.json())
                     .then(data => {
                         setImage(data.sprites.front_default);
+                        setId(data.id);
                     })
                     //여기에서 setImage 사용  12:53
                 // 'https://pokeapi.co/api/v2/pokemon/숫자1-20/'의 속성 중 하나인 id를 사용하기 위해서 useEffect 안에서 fetch 해온다. 14:11   
-                fetch(pokemon.url)
+                /*fetch(pokemon.url)
                     .then(response => response.json())
                     .then(data => {
                         setId(data.id);
-                    })             
+                    })    원래 이렇게 fetch 구문 전체(?)를 한 번 더 썼는데,
+                        copilot에게 물어보니 그냥 setImage(); 아래 
+                        setId(); 한 줄만 추가하는 걸 더 추천한다고 해서 고쳤다.  
+                        https://github.com/copilot/share/0043130e-41a4-80a2-a040-c00780172848  19:27 */
             })
 
             return(
