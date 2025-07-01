@@ -1,4 +1,4 @@
-# React 실습 React practice
+# React 실습 최종 (React practice latest)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -128,6 +128,108 @@
                 <>
                     <Title/>
                     <PokemonList/>
+                </>
+            )
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+    </script>
+    
+</body>
+</html>
+
+# 이전 버전 Before
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03_data-component_05_example_pokemon</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        .card {
+            border: 1px solid black;
+            width: 300px;
+            margin: 10px;
+            padding: 20px;
+            display: inline-block;
+        }
+        .card>* {
+            display: inline-block;
+        }
+        .card>img {
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        //1. React에서 useState와 useEffect 둘 다 꺼내오기  12:39
+        const {useState, useEffect} =React;
+
+        function Title() {
+            return(
+                <h1>List of Pokemon</h1>
+            )
+        }
+
+        //포켓몬 목록에 대한 API 주소 요청하는 PokemonList 함수형 컴포넌트 생성 12:03
+        function PokemonList({card}) {
+            const [pokemonName, setPokemonName]=useState('');
+            //전체 포켓몬 목록에 대한 api요청
+            // https://pokeapi.co/api/v2/pokemon
+            fetch(`https://pokeapi.co/api/v2/pokemon`)
+                .then(response => response.json())
+                .then(data =>
+                        {
+                            console.log(data);
+                            setImgUrl(data[pokemonName])
+                        }
+                    );
+            return( 
+                <> 
+                   <Card/>     
+                </>
+            )
+        }
+
+
+        function Card({imgUrl}){
+            //image를 받아오기 위한 state 설정 12:52
+            const [image, setImage]=useState('');
+            //한 포켓몬의 이미지 주소 요청(이전 api 요청 결과의 url 속성으로 존재함)
+            // EX. https://pokeapi.co/api/v2/pokemon/1
+            //앞모습 이미지 속성 : sprites.front_default 사용
+            useEffect(() => {
+                fetch(`https://pokeapi.co/api/v2/pokemon/1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        setImage(data.sprites.front_default);
+                    })
+                    //여기에서 setImage 사용  12:53
+            })
+            return(
+                <div className="card">
+                    <img src={imgUrl} alt="pokemon image"/>
+                    <div className="info">
+                        <h2>No. </h2>
+                        <h3>name: </h3>
+                    </div>
+                </div>        
+            )
+        }
+
+        //PokemonList와 Card를 합성할 App 컴포넌트 생성 12:06
+        function App() {
+            const[imgUrl, setImgUrl] = useState('');
+            return(
+                <>
+                    <Title/>
+                    <PokemonList card={card}/>
                 </>
             )
         }
