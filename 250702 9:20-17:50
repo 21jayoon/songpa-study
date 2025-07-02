@@ -1,0 +1,74 @@
+# Next.js 실행방법 How to run Next.js
+# https://www.notion.so/Nest-js-224fc892a16f80a7ac16f59b24891553?source=copy_link
+
+# 1. 새 next.js 폴더 생성 (터미널 코드 작성으로)
+# 1-1. npx create-next-app @latest (생성할 폴더 이름1)   예시: npx create-next-app @latest 01_nexts-app
+# 1-2. cd (폴더 이름1)으로 들어간다.
+# 1-3. Next.js 프로젝트의 루트 폴더(즉, package.json이 있는 폴더)까지 내려간(?) 상태에서 
+#   npm run dev를 치면 내 로컬 환경(PC)에서 개발 서버가 실행되고, 
+#   브라우저에서 localhost:3000 등으로 접속해 볼 수 있다.
+#   ("라우팅"은 pages 또는 app 폴더 내 파일/폴더 구조에 따라 
+#    자동으로 처리되며 라우팅 자체는 npm run dev 명령과 직접 연결되지 않는다)
+# 1-4. 해당 폴더에서 상위 폴더로 빠져나가고 싶다면: cd..
+# 1-5. 일괄 작업 끝내기: CTRL+C 누르고 Y 누르면 인터넷과 연결 끊김
+
+# 05_ROUTER
+## 01_NEXTS-APP
+import Link from "next/link";
+
+export default function Home() {
+  return ( //return 안에 있던 <div>태그 다 지우고 코드 작성 10:00
+    //JSX 이용, <a> 대신 Link 이용 10:02
+    <>
+      <h1>Welcome</h1>
+      <Link href="/">Main</Link><br/>
+      <Link href="/about">Introduce</Link><br/>
+      <Link href="/menu">Menu</Link>
+    </> 
+  );
+}
+
+export default function About() {
+    return(
+        <>
+            <h1>What's about</h1>
+        </>
+    )
+}
+
+export default function Menu() {
+    return(
+        <>
+            <h1>Menu page</h1>
+        </>
+    )
+}
+
+## 03_NEXTS-PARAMS
+# public 폴더 안에 이미지 폴더 생성, menu와 관련된 이미지 넣기
+# src 하위 app 하위 data 폴더 안에 menu-detail.json으로 json 파일 넣기
+[
+    {
+       "menuCode":1,
+       "menuName":"열무김치라떼",
+       "menuPrice":4500,
+       "categoryName":"쥬스",
+       "isOrderable":true,
+       "detail": {
+           "description": "갓 담근 열무김치를 착즙한 순도 100% 열무김치와 대관령 목장에서 방금 짜낸 싱싱한 우유의 조합",
+           "image": "/images/1.PNG"
+       }
+    },
+......
+    {
+       "menuCode":21,
+       "menuName":"돌미나리백설기",
+       "menuPrice":5000,
+       "categoryName":"한식",
+       "isOrderable":true,
+       "detail": {
+           "description": "거름이 풍성한 미나리깡에서 수확한 국내산 돌미나리를 이용한 백설기",
+           "image": "/images/21.PNG"
+       }
+    }
+ ]
