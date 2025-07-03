@@ -224,3 +224,324 @@ redux 특징
 2. State is read-only : redux에서는 액션을 전달하는 reducer함수를 이용해서만 상태를 변경하며 직접 state를 변경하지 못한다.
 3. Changes are made with pure function
 변경은 오로지 순수 함수로만 가능하다.
+
+# 01_REDUX_BASIC-01_redux-intro.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_redux-01_redux-basic-01redux-intro</title>
+    <!--CDN 추가 목록 (redux도 CDN으로 추가)  11:34-->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/redux@4.2.0/dist/redux.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        /*
+            [redux]
+            상태관리를 위한 라이브러리이다
+            app의 상태는 전부 하나의 저장소(store) 안에 있는 객체 트리에 저장되며
+            상태 트리를 변경하는 유일한 방법은 어떤 행동이 일어날지에 해당하는 action이다.
+            action에 따라 상태를 어떻게 변경할지 명시하기 위해 함수를 작성하며,
+            이를 reducer함수라고 한다.  11:35
+        */
+       //1. 스토어(저장소) 만들기  11:44
+       const { createStore } = Redux;
+       //store를 만들 땐 리듀서 함수를 전달하면서 만든다. -> 리듀서 함수 선언 필요 11:45
+       //declare reducer function counter()  11:45(2)
+       function counter(state =0, action) {
+         //(state =0, action) => state 초기값 0, action 대기 
+            /* action이란 객체의 생김새는 아래와 같다  11:47
+                [action]
+                {
+                    type: 'ACTION_NAME'    //type은 필수! 
+                    payload: {name: 'pande', age: 5}   //payload는 선택(옵션)!
+                }
+            */
+            //리듀서 함수는 state 값을 어떻게저떻게 변경해서 반환해주는 함수이다.  11:49
+            //switch를 통해 스테이트에 action을 넣어준다.   11:50
+            switch(action.type) {
+                case 'INCREMENT' : return state +1;
+                case 'DECREMENT' : return state -1;
+                default : return state;
+            }
+       }
+
+       //아까 Redux에서 꺼낸 createStore에 redux함수 counter를 전달하며 store를 만든다.  11:52
+       /*App의 state(상태)를 보관하는 redux 저장소를 만든다.  11:53*/
+       const store = createStore(counter);
+       //console.log(store);
+
+       /*store의 상태변화를 구독하여 실행될 콜백 함수를 전달한다.
+       store의 상태값이 변화할 때 콜백 함수가 호출된다  
+       subscribe는 redux에서 직접 쓰이는 일이 잘 없지만
+       구독과 관련된 개념을 이해하기 위해 아래와 같이 코드를 적는다. 11:57*/
+       store.subscribe(() => console.log(store.getState()));
+
+       /*
+        dispatch는 리듀서 함수를 호출하며,
+        state의 현재 상태가 리듀서에 자동으로 전달되며 호출된다.
+        action을 넣어 호출하면 리듀서 함수의 두 번째 인자로 action 값을 전달한다
+        state를 변경하는 유일한 방법은
+        dispatch를 통해 리듀서에 action을 보내는 것 뿐이다.  12:03
+       */
+       store.dispatch({type: 'INCREMENT'});
+       store.dispatch({type: 'INCREMENT'});
+       store.dispatch({type: 'DECREMENT'});
+    </script>
+    
+</body>
+</html>
+
+# 01-02_react-redux.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_redux-01_redux-basic-01redux-intro</title>
+    <!--CDN 추가 목록 (redux도 CDN으로 추가)  13:06-->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/redux@4.2.0/dist/redux.js"></script>
+    <script src="https://unpkg.com/react-redux@8.0.4/dist/react-redux.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        //useSelector 등 꺼내오기 13: 14
+        const {useSelector, useDispatch, Provider} = ReactRedux;
+
+        //Redux에서 createStore 꺼내오기  13:07
+        const { createStore } = Redux;
+
+        const initialState = 0;
+
+        function reducer(state=initialState, action){
+            //구조분해할당으로 type과 payload를 꺼내온다  13:08
+           //const {type, payload} = action;를 안 쓴다면
+           //reducer의 매개변수 중 하나 action을 {type, payload}로 바꿀 수도 있다.
+            const {type, payload} = action;
+            switch(type) {
+                case 'INCREMENT' : return state + payload.incrementValue;
+                case "DECREMENT" : return state + payload.decrementValue;
+                default: return state;
+            }
+        }
+
+        const store = createStore(reducer);
+        //react component와 이어준다. 13:13
+
+        function App() {
+            /*useSelector hook을 이용해여 store가 관리하는 state를 이용할 수 있다.
+            반드시 인자로 state를 매개변수로 하는 함수를 callback함수로 전달해야 한다.*/
+            const count = useSelector(state => state);
+            
+            /*useDispatch hook을 이용해 dispatch를 호출할 수 있다(=reducer함수를 호출할 수 있다.)
+            state 변경에 필요한 값을 action에 담아 전달한다.
+            ->reducer는 이 action 객체를 받아서 state의 상태를 변경한다. */
+            const dispatch = useDispatch();
+            //dispatch 함수는 useDispatch를 통해 react에서 이용가능하며, 
+            // reducer 함수를 갖고오는 용도로 사용된다. 13:19
+
+            const increaseCount = () => {
+                dispatch({
+                    //액션 전달
+                    type: 'INCREMENT',
+                    payload: {
+                        incrementValue: 1
+                    }
+                })
+            }
+
+            const decreaseCount = () => {
+                dispatch({
+                    type: 'DECREMENT',
+                    payload: {
+                        decrementValue: -1
+                    }
+                })
+            }            
+            return(
+                <>
+                    <h1>Count : {count} </h1>
+                    <button onClick={increaseCount}>Add</button>
+                    <button onClick={decreaseCount}>Minus</button>
+                </>
+            )
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <Provider store={store}>
+                {/*props로 위에서 만들어놓은 store를 내려서 
+                    App이란 컴포넌트에 '공급'해줘야 한다. 13:27*/}
+                <App/>
+            </Provider>
+        );
+</script> 
+</body>
+</html>
+
+# 03_redux-combine-reducers.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_redux-01_redux-basic-01redux-intro</title>
+    <!--CDN 추가 목록 (redux도 CDN으로 추가)  13:06-->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/redux@4.2.0/dist/redux.js"></script>
+    <script src="https://unpkg.com/react-redux@8.0.4/dist/react-redux.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const {createStore, combineReducers} = Redux;
+        const {useSelector, useDispatch, Provider} = ReactRedux;
+
+        //state 초기값 설정을 위한 변수 선언 13:38
+        const countInitState ={
+            currentCount: 5
+        }
+
+        //관리해야할 state 2개 선언 13:39
+        const activationInitState = {
+            isActivity: false
+        }
+
+        const userInitState ={
+            name: '',
+            email: '',
+            phone: ''
+        }
+
+        //reducer함수1
+        //아래에서 선언한 모든 reducer 함수를 combineReducers로 합쳐준다.
+        // 이 때 key:value 형식으로 묶어서 합쳐야한다.  
+        // 아래를 보면 key 값으로 countReducer : 하고
+        // 뒷부분은 value 값인 걸 알 수 있다 13:51
+        const rootReducer =  combineReducers({
+            countReducer : (state = countInitState, action) => {
+            const {type, payload} = action;
+            switch(type){
+                case "INCREMENT": return {currentCount : state.currentCount + payload.incrementValue}
+                case "DECREMENT": return {currentCount : state.currentCount - payload.decrementValue}
+                default: return state;
+            }
+        },  //,를 찍어서 아래 reducer함수2도 activationReducer란 이름으로 합친다.  13:53
+        //reducer함수 2 :활성화 여부에 대한 관리를 해줄 부분(구조분해 할당 사용)  13:45
+            activationReducer : (state =  activationInitState, action) => {
+            const {type} = action;
+            switch(type) {
+                case 'TOGGLE': 
+                    return {isActivity : !state.isActivity};
+                default: 
+                    return state;    
+            }
+        },
+        //reducer함수 3  13:49
+        userReducer : (state = userInitState, {type, payload}) => {
+            switch(type) {
+                case 'INPUT':
+                    return {
+                        ...state,
+                        [payload.name]: payload.value
+                    };
+                default:
+                    return state;                        
+            }
+        }});
+
+        const store = createStore(rootReducer);
+
+        function App() {
+            console.log(useSelector(state => state));
+
+            //구조분해 할당하지 않는다면
+            // const currentCount = useSelector(state => state.countReducer.currentCount)
+            // 이렇게 적어야 함  14:14
+            /*combineReducers를 이용하는 경우
+            useSelector의 콜백함수를 통해 리듀서 별로 관리되는 state를 반환한다*/
+            const {currentCount} = useSelector(state => state.countReducer)
+            const {isActivity} = useSelector(state => state.activationReducer)
+            const {name, email, phone} = useSelector(state => state.userReducer)
+
+            const dispatch = useDispatch();
+
+            //increaseCount 만들기(dispatch 호출)  14:23
+            const increaseCount = () => {
+                dispatch({
+                    type: 'INCREMENT',
+                    payload: {
+                        incrementValue: 10
+                    }
+                })
+            }
+
+            //declare decreaseCount 14:24
+            const decreaseCount = () => {
+                dispatch({
+                    type: 'DECREMENT',
+                    payload: {
+                        decrementValue: 10
+                    }
+                });
+            }
+
+            const toggleActivation =()=> {
+                dispatch({type: 'TOGGLE'});
+            }
+
+            const onChangeHandler =(e) => {
+                dispatch({
+                    type: 'INPUT',
+                    payload: {
+                        name: e.target.name,
+                        //payload의 value 값에 들어갈 것은 e.target.value  14:27
+                        value: e.target.value
+                    }
+                })
+            }
+
+            //return 안 쪽 = 렌더링될 화면 부분  14:17
+            return(
+                <>
+                    <h1>currentCount : {currentCount}</h1>
+                    <button onClick={increaseCount}>add</button>
+                    <button onClick={decreaseCount}>minus</button>
+                    <br/>
+                    <h1>isActivity: {isActivity.toString()}</h1>
+                    <button onClick={toggleActivation}>Toggle</button>
+                    <br/>
+                    <h1>input control</h1>
+                    <label>name : </label>
+                    <input type="text" name="name" value={name} onChange={onChangeHandler} />
+                    <label>email :</label>
+                    <input type="text" name="email" value={email} onChange={onChangeHandler}/>
+                    <label>phone : </label>
+                    <input type="text" name="phone" value={phone} onChange={onChangeHandler}/>
+                    <br/>
+                    <h3>name : {name}</h3>
+                    <h3>email : {email}</h3>
+                    <h3>phone : {phone}</h3>
+                </>
+            )
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            //store={store} -> store 공급해준다
+            <Provider store={store}>
+                <App/>
+            </Provider>
+        );
+    </script>    
+</body>
+</html>
