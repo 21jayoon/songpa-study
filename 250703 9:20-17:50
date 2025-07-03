@@ -1,0 +1,64 @@
+04_nexts-cinema
+1. src/app에 있는 page.js그리고 page.module.css 예시 내용을 다 삭제
+2. src/app 하위에 componenets 폴더 생성
+3. 하위에 Header.jsx, Footer.jsx, Layout.jsx 생성
+4. src/app 하위에 layout.js에 function컴포넌트 RootLayout 변경. 
+export default function RootLayout({ children }) {
+  return (
+    <>
+      <html>
+        <body>
+            <Header/>
+              {children}
+            <Footer/>
+        </body>  
+      </html>    
+    </>
+  );
+}
+나머지 예시 코드는 다 삭제
+5. page.js 내용 수정
+<div className="contetn-row">
+        <Link href="/boxoffice-now">See what's on today's cinema </Link>
+      </div>
+6. notion에서 https://www.notion.so/ohgiraffers/Router-21d649136c118173a4ffdfc359cf40cb 
+css 코드 복사해서 글로벌.css로 붙여넣기
+7. src/app page.js 코드 만들어놨던 거 구조 수정
+return (
+    <>
+      <div className="content-row">
+        <h1><Link href="/boxoffice-now">See what's on today's cinema </Link></h1>
+      </div>
+    </>
+  );
+TO
+ return (
+    <>
+    <Link href="/movie">
+      <div className="content-row">
+        <h1>See what's on today's cinema </h1>
+      </div>
+    </Link>  
+    </>
+  );
+
+8. src/app 하위 moive 폴더와 안에 page.js 생성
+9. movie/page.js 내 useEffect(() => {setMovieList()}) 에서 쓰일 API 주소(?)를 위해 src 하위에 api 폴더와 MovieAPI.js라는 파일 생성
+10. MovieAPI.js에 함수 (함수형 컴포넌트 X) getMovieList 생성, API URL 복붙
+function getMovieList(){
+    const url =`http://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json`;
+}
+11. http://www.kobis.or.kr/kobisopenapi/webservice/rest/까지를 다른 곳에서도 반복해서 쓸 수 있도록 
+const BASE_URL = 'http://www.kobis.or.kr/kobisopenapi/webservice/rest/';
+
+function getMovieList(){
+    const url =`${BASE_URL}boxoffice/searchDailyBoxOfficeList.json`;
+} 이렇게 만든다
+12. API KEY 갖고 온다. 얘도 다양한 곳에서 이용하기 위해 const API_KEY 생성
+const BASE_URL = 'http://www.kobis.or.kr/kobisopenapi/webservice/rest/';
+const API_KEY = '1b7c30a1db12dfd4a61e2a594d281a31';
+
+function getMovieList(){
+    const url =`${BASE_URL}boxoffice/searchDailyBoxOfficeList.json?key=${API_KEY}&targetDt=`;
+}
+13. 어제 날짜를 yyyy-mm-dd 포맷에 맞춰 변환하는 함수 const getDateFormat 생성
