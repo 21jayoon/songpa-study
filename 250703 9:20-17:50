@@ -62,3 +62,165 @@ function getMovieList(){
     const url =`${BASE_URL}boxoffice/searchDailyBoxOfficeList.json?key=${API_KEY}&targetDt=`;
 }
 13. 어제 날짜를 yyyy-mm-dd 포맷에 맞춰 변환하는 함수 const getDateFormat 생성
+14. getMovieList의 url 나머지를 채우고, fetch를 통해 url을 갖고 온다. 이 때 fetch에 async-await사용
+`${BASE_URL}boxoffice/searchDailyBoxOfficeList.json?key=${API_KEY}&targetDt=${getDateFormat()}`;
+ const response = await fetch(url);
+
+async function getMovieList(){
+    const url =`${BASE_URL}boxoffice/searchDailyBoxOfficeList.json?key=${API_KEY}&targetDt=${getDateFormat()}`;
+
+    //fetch를 통해 요청
+    const response = await fetch(url);
+}
+15. data를 json형태로 꺼내기 그리고 console.log로 확인
+const data = await response.json();
+
+console.log(data);
+
+16. getMovieList function 완성
+export async function getMovieList(){
+    const url =`${BASE_URL}boxoffice/searchDailyBoxOfficeList.json?key=${API_KEY}&targetDt=${getDateFormat()}`;
+
+    //fetch를 통해 요청
+    const response = await fetch(url);
+
+    const data = await response.json();
+
+    console.log(data);
+
+    return data.boxOfficeResult.dailyBoxOfficeList;
+}
+17. getDateFormat 완성 !! return 값 꼭 쓰기
+const getDateFormat = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1 < 10 ? '0' + (today.getMonth() +1) : today.getMonth() +1 ;
+    const date = today.getDate() -1 < 10 ? '0' + (today.getDate() -1) : today.getDate() -1;
+    return `${year}${month}${date}`
+}
+18. movie/page.js 수정
+setMovieList(getMovieList()) 에서     getMovieList().then(data => setMovieList(data)); 로
+
+19. movieItem 완성
+export default function MovieItem({movie}) {
+    //props로 movie를 전달받아야 한다   10:38
+    return(
+        <div className="item">
+            <h3> Rank : </h3>
+            <h2>{movie.movieNm}</h2>
+            <h4>Open date : {movie.openDt}</h4>
+            <h4>누적 관객수 : {Number(movie.audiAcc).toLocaleString()} 명</h4>
+        </div>
+    )
+}
+20. MovieItem 수정
+export default function MovieItem({movie}) {
+    //props로 movie를 전달받아야 한다   10:38
+    return(
+        <Link href={`/movie/${movie.movieCd}`}>
+            <div className="item">
+                <h3> Rank : {movie.rank}</h3>
+                <h2>{movie.movieNm}</h2>
+                <h4>Open date : {movie.openDt}</h4>
+                <h4>누적 관객수 : {Number(movie.audiAcc).toLocaleString()} 명</h4>
+            </div>
+        </Link>
+    )
+}
+
+21. movieCd의 비동기처리를 받아올(?) movieCd페이지(?)를 따로 만든다.
+ 이 때 movie 폴더 하위에 {movieCd}폴더를 추가하고 그 밑에 page.js를 넣는다.
+
+22. {moiveCd}폴더 하위에 page.js에 함수형 컴포넌트 MovieDetail을 만든다. 이 때 movieDetail 페이지 url에서 pathvariable로 넘어오는 movieCd를 추출해오기 위해 useParams 사용
+'use client';
+import { useParams } from "next/navigation";
+import { useState } from "react";
+
+export default function MovieDetail({movieCd}){
+    //(Url 내의) pathvariable 값으로 넘어오는 movieCd를 useParams로 갖고 온다 10:58
+    const {movieCd} = useParams();
+
+    const [movie, setMovie] = useState();
+
+    return()
+}
+
+23. MovieAPI .js 내 getMovieDetail 함수 수정 및 완성
+export async function getMovieDetail() {
+    const url = `${BASE_URL}movie/searchMovieInfo.json?key=${API_KEY}&movieCd=${movieCd}`
+    return 
+}
+
+export async function getMovieDetail() {
+    const url = `${BASE_URL}movie/searchMovieInfo.json?key=${API_KEY}&movieCd=${movieCd}`
+    const response = await fetch(url);
+    //json 형태로 data를 갖고 온다 11:02
+    const data = await response.json();
+
+    console.log(data);
+
+    return data.movieInfoResult.movieInfo;
+}
+24. {movieCd} 폴더 아래 page.js 완료
+'use client';
+import { getMovieDetail } from "@/app/api/MovieAPI";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export default function MovieDetail(){
+    //(Url 내의) pathvariable 값으로 넘어오는 movieCd를 useParams로 갖고 온다 10:58
+    const {movieCd} = useParams();
+
+    const [movie, setMovie] = useState();
+
+    useEffect(() => {
+        //getMovieDetail({movieCd}.then(data => setMovie(data))); 수정 전 11:20
+   	// getMovieDetail({movieCd}).then(data => setMovie(data)); 1차 수정 11:22
+        getMovieDetail(movieCd).then(data => setMovie(data));
+    }, [])
+
+    return(
+        <div className="content-col">
+            {movie &&
+                <>
+                    <h1>{movie.movieNm}({movie.movieNmEn})</h1>
+                    <div>Running time : {movie.showTm} minutes</div>
+                    <div>
+                        {/**국가명은 여러 개 배열 형태라서 .map을 사용하고, 
+                         * index를 key로 이용해 해당 국가명을 갖고 온다.  11:10  */}
+                        Nationality : {movie.nations.map((nations, index) => <span key={index}>{nations.nationNm}</span>)}
+                    </div>
+                    <div>
+                        Cast:
+                        {movie.actors.map((actor, index) => {
+                            return(
+                                <div key={index}>
+                                    <span className="actor">{actor.peopleNm}</span>
+                                    <span>{actor.cast && `-${actor.cast}역`}</span>
+                                </div>    
+                            )
+                        })}
+                    </div>
+                    <Link href="/movie">Back to the boxoffice</Link>
+                </>
+            }
+        </div>
+    )
+}
+25. MovieAPI 수정
+export async function getMovieDetail() {} -> export async function getMovieDetail(movieCd) {}
+
+26. Router 끝!! -> redux라는 상태관리 라이브러리(react 쪽에서 자주 사용되는 library) 강의 시작 11:26
+
+
+# REDUX
+redux는 상태 관리를 하기위한 라이브러리로, 앱의 전체 상태는 하나의 store(저장소) 안에 있는 객체 트리에 저장된다. (=Redux State라는 개념으로 저장소에서 관리된다.)
+store에서 객체 트리에 저장된 state들을 변경하는 유일한 방법은 변화를 주는 action을 통하는 것이다.
+또한 action에 따라 state를 어떻게 변경할지 명시하기위해 작성하는 함수를 reducer함수라고 한다.
+자주 이용 : useSelector -> state와 action 활용, useDispatch ->  action을 reducer함수로 dispatch해준다
+
+redux 특징
+1. SIngle-source of truth : store라는 하나뿐인 데이터공간을 이용하기 때문에 신뢰성 있는 데이터이다.
+2. State is read-only : redux에서는 액션을 전달하는 reducer함수를 이용해서만 상태를 변경하며 직접 state를 변경하지 못한다.
+3. Changes are made with pure function
+변경은 오로지 순수 함수로만 가능하다.
