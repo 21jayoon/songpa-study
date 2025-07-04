@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_redux-01-04_action-function.html</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/redux@4.2.0/dist/redux.js"></script>
+    <script src="https://unpkg.com/react-redux@8.0.4/dist/react-redux.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        /*Ducks 패턴에 의하면 초기값, action, reducer를
+        관련 있는 state 별로 modules 폴더(하나의 폴더)에 만들어서 관리한다.  250704 9:30*/
+        const {Provider, useSelector, useDispatch} = ReactRedux;
+        const {createStore} = Redux;
+
+        /*Initial value*/
+        const initialState = 0;
+
+        //action타입을 상수로 적용 9:34
+        /*action: declares action type as a 상수. 
+        접두사는 다른 모듈과 액션 값이 겹치지 않도록 하기 위함이다.*/
+        const INCREMENT = 'count/INCREMENT'
+        const DECREMENT = 'count/DECREMENT'
+        //action명이 겹치는 경우를 방지하기 위해
+        //module명/action명으로 action 이름을 지정한다 9:35
+
+        /*action type을 함수 형태로 재사용할 수 있도록
+        dispatch 호출 시 인자로 전달할 값을 반환하는 함수 작성  9:37*/
+        const increase = () => ({
+            //위에서 선언한 상수를 아래에서 사용함.  9:38
+            type : INCREMENT,
+            payload: {
+                incrementValue: 1
+            }
+        });
+
+         const decrease = () => ({
+            //위에서 선언한 상수를 아래에서 사용함.  9:40
+            type : DECREMENT,
+            payload: {
+                decrementValue: -1
+            }
+        });
+
+        //reducer 작성  9:41
+        function reducer(state = initialState, {type, payload}) {
+        //state 값 -> 위에서 선언한  initialState 사용, action값 -> 구조분해할당 이용 9:42
+            switch(type) {
+                case INCREMENT: return state + payload.incrementValue;
+                case DECREMENT: return state + payload.decrementValue;
+                default: return state;
+            }
+        }
+
+        /*--------실제 프로젝트 작성 시 여기 위까지 하고 
+        하나의 Ducks 패턴을 담은 모듈 패턴이 끊긴다--------*/
+
+        /*component*/
+        function App() {
+            const count = useSelector(state => state);
+            //지금은 간단하게 숫자 하나이기 때문에 stat값 전달만 해준다.  9:47
+            const dispatch = useDispatch();
+
+            //만들어둔 action function들을 전달한다.  9:48
+            const increaseCount = () => {               
+                dispatch(increase());
+            }
+             /*사전에 정의한 액션 함수를 호출해
+                반환받은 액션 객체를 dispatch에 전달한다
+                사전 정의 액션함수 호출 시 
+                직접 action 객체를 리터럴로 작성하는 것보다
+                가독성, 재사용성이 증가하는 장점이 있다.  9:50*/
+            const decreaseCount = () => {
+                dispatch(decrease());
+            }
+
+            return(
+                <>
+                    <h1>Count: {count}</h1>
+                    <button onClick={increaseCount}>ADD</button>
+                    <button onClick={decreaseCount}>MINUS</button>
+                </>
+            )
+        }
+/*-------component 이 선 기준으로 또 하나 분리----------*/
+        /*store*/
+        const store = createStore(
+            //store 만들 땐 생성해놨던 리듀서를 전달하면서 스토어를 만든다. 9:46
+            reducer,
+            /*Write a code below to utilizing React dev tools in chrome  10:01*/
+            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+        );
+
+        /*-------component 이 선 기준으로 또 하나 분리----------*/
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            /*Provider에 props 하나 전달해주며 provider 이용
+            (이 때 props는 {store}) 9:55*/
+            <Provider store={store}>
+                <App/>
+            </Provider>            
+        );
+    </script>
+</body>
+</html>
+
+# CHROME WEB STORE에서 Redux DevTools 설치  9:59
+visual studio 내 코드 중 store 부분 수정
+const store = createStore(reducer);
+-> const store = createStore(
+            //store 만들 땐 생성해놨던 리듀서를 전달하면서 스토어를 만든다. 9:46
+            reducer,
+            /*Write a code below to utilizing React dev tools in chrome  10:01*/
+            window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+        );
