@@ -117,3 +117,363 @@ const store = createStore(reducer);
             /*Write a code below to utilizing React dev tools in chrome  10:01*/
             window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
         );
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_redux-01-05_redux-actions.html</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/redux@4.2.0/dist/redux.js"></script>
+    <script src="https://unpkg.com/react-redux@8.0.4/dist/react-redux.js"></script>
+    <script src="https://unpkg.com/redux-actions@2.6.5/dist/redux-actions.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+
+        const { Provider, useSelector, useDispatch}= ReactRedux;
+        const { createStore } = Redux;
+        const { createAction, createActions, handleActions } = ReduxActions;
+
+        /*초기값*/
+        const initialState = 0;
+
+        /*action*/
+        const INCREMENT = 'count/INCREASE'
+        const DECREMENT = 'count/DECREASE'
+
+        /*1. createAction 사용  10:28*/
+        //createAction( , callback함수)
+        //callback함수의 매개변수는 payload 속성에 담길 애를 넣는다.
+        /*-첫 번째 인자(문자열): reducer로 전달되는 action의 type 속성
+        -두 번째 인자(콜백함수): return 값을 자동으로 payload 속성에 담는 함수*/
+        const increase = createAction(INCREMENT, (amount = 0) => ({incrementValue: amount}));
+        const decrease = createAction(DECREMENT, (amount = 0) => ({decrementValue: amount})); 
+        /*createAcions를 사용하기 위해 위의 두 줄을 모두 주석처리한다. 10:50*/
+
+        /*2. createActions 사용*/
+        /*
+            -여러 개의 action함수를 한 번에 생성할 수 있다
+            -접두사가 있으므로 대괄호를 이용해 키 식별자 작성 가능
+            -중첩 구조분해 할당으로 꺼낼 수 있다
+        */
+        /*const { count: {increase, decrease}} = createActions({
+            [INCREMENT] : (amount = 0) => ({incrementValue: amount}),
+            [DECREMENT] : (amount = 0) => ({decrementValue: amount})
+        });*/
+
+        /* reducer */
+        /* 
+            첫번째 인자: 객체(key - action type, value - state, action)을 전달받아 새로운 state 반환
+            두번째 인자: state의 초기값
+        */
+        // 10:33 handleactions를 활용하면 switch 없이 코드 작성 가능. 확인해보자 -> 
+        const reducer = handleActions(
+            {
+                [INCREMENT] : (state, {payload : {incrementValue} }) => state + incrementValue,
+                [DECREMENT] : (state, {payload : {decrementValue} }) => state - decrementValue
+            },
+            initialState
+        )
+        // [key값=action] : state값(상태값)과 action값을 받은 것이 value.  10:36
+        // action을 {type, payload} 형태로 만들었다.
+        // payload 안에 있는 것 중 incrementValue, decrementValue만 쓰고 싶었기 때문에 
+        // {payload : incrementValue}와 같은 형식으로 구조분해할당을 해준 것이다.  10:39
+
+        /*--------------------------------------*/
+        /*component*/
+        function App(){
+            const count = useSelector(state => state);
+            const dispatch = useDispatch();
+
+            const increaseCount = () => {
+                dispatch(increase(3));
+            }
+            const decreaseCount = () => {
+                dispatch(decrease(3));
+            }
+            //increase(숫자) : 숫자에 들어간 값에 따라 payload amount가 달라진다. 10:42
+            //decrease(숫자) : 숫자에 들어간 값에 따라 payload amount가 달라진다. 10:42
+            return(
+                <>
+                    <h1>COUNT: {count}</h1>
+                    <button onClick={increaseCount}>+3</button>
+                    <button onClick={decreaseCount}>-3</button>
+                </>
+            )
+        }
+
+        const store = createStore(reducer);
+        //reducer를 전달하며 store를 만들어준다  10:46
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <Provider store={store}>
+                <App/>
+            </Provider>
+        );
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_Redux-02-01_redux-middleware-logger</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/redux@4.2.0/dist/redux.js"></script>
+    <script src="https://unpkg.com/react-redux@8.0.4/dist/react-redux.js"></script>
+    <script src="https://unpkg.com/redux-actions@2.6.5/dist/redux-actions.js"></script>
+    <script src="https://unpkg.com/redux-logger@3.0.6/dist/redux-logger.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const consoleLoggingMiddleware = store => next => action => {
+            console.log(action);            //action을 출력하는 로그 기능을 보기 위한 콘솔
+            const result = next(action); // 다음 미들웨어 혹은 리듀서에게 액션 전달하는 역할 11:30
+
+            return result;
+        }
+
+        //cdn으로 redux-logger 추가 후 로거 불러오기 11:50
+        /*recus-logger Middleware*/
+        const logger = reduxLogger.createLogger();
+
+        /*----------------------------*/
+        /*module*/
+        const {createActions, handleActions} = ReduxActions;
+
+        /*초기 값*/
+        const initialState = 0;
+
+        /*action*/
+        const INCREMENT = 'count/INCREASE'
+        const DECREMENT = 'count/DECREASE'
+
+        const { count: {increase, decrease}} = createActions({
+            [INCREMENT]: (amount = 1) => ({incrementValue: amount}),
+            [DECREMENT]: (amount = 1) => ({decrementValue: amount})
+        })
+
+        /*reducer*/
+        const reducer = handleActions(
+            {
+                [INCREMENT]: (state, {payload: {incrementValue}}) => {
+                    console.log('Call the reducer...')
+                    return state + incrementValue;
+                },
+                [DECREMENT]: (state, {payload: {decrementValue}}) => {
+                    return state - decrementValue;
+                }
+            }, initialState
+        )
+/*----------- 이 선 기점으로 모듈 파일 분리---------------*/
+        /*UI*/
+        const { useSelector, useDispatch } = ReactRedux;
+
+        function App() {
+            const count = useSelector(state => state);
+            const dispatch = useDispatch();
+
+            const increaseCount = () => {
+                dispatch(increase());
+            }
+            const decreaseCount = () => {
+                dispatch(decrease());
+            }
+
+            return (
+                <>
+                    <h1> COUNT: {count}</h1>
+                    <button onClick={increaseCount}>increase</button>
+                    <button onClick={decreaseCount}>decrease</button>
+                </>
+            )
+        }
+        /*---------------------------------------------*/
+        const {createStore, applyMiddleware} = Redux;
+        //Redux에서 applyMiddleware도 꺼내온다 11:46
+        
+        const store = createStore(reducer, applyMiddleware(consoleLoggingMiddleware, logger));
+        //createStore할 때 reducer 뿐만 아니라 applyMiddleware도 같이 갖고 온다.  11:47
+        // consoleLoggingMiddleware함수 옆에 logger 넣어주기 11:52
+
+        /*---------------------------------------------*/
+        const {Provider}=ReactRedux;
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <Provider store={store}>
+                <App/>
+            </Provider>    
+        );
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>06_redux-03-01_redux-toolkit</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@reduxjs/toolkit@1.9.5/dist/redux-toolkit.umd.js"></script>
+    <script src="https://unpkg.com/react-redux@8.0.4/dist/react-redux.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const {Provider, useSelector, useDispatch} = ReactRedux;
+        const {createSlice, configureStore} = RTK;
+        //RTK = Redux ToolKit  12:05
+        //createSlice = action, reducer 동시 생성 가능 
+
+        const counterSlice = createSlice({
+            //slice이름을 정하면서 생성할 수 있다.  12:06
+            name: 'count',
+            initialState: 0,
+            reducers: {
+                increase: (state, action) => state + (action.payload || 1),
+                decrease: (state, action) => state - (action.payload || 1)
+            }
+        });
+
+        console.log(counterSlice);
+
+        const { increase, decrease } = counterSlice.actions;
+        const reducer = counterSlice.reducer;
+
+        /*store 설정  13:07*/
+        const store = configureStore({
+            reducer: reducer
+        })
+
+        /*React component  13:09*/
+        function App(){
+            const count = useSelector(state => state);
+            const dispatch = useDispatch();
+
+            const increaseCount = () => {
+                //dispatch에 increase 전달  13:14
+                dispatch(increase());
+            }
+
+            const decreaseCount = () => {
+                //dispatch에 decrease 전달 13:15
+                dispatch(decrease());
+            }
+
+            return(
+                <>
+                    <h1>COUNT: {count}</h1>
+                    <button onClick={increaseCount}>+1</button>
+                    <button onClick={decreaseCount}>-1</button>
+                </>
+            )
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <Provider store={store}>
+                <App/>
+            </Provider>    
+        );
+    </script>
+    
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>recux-toolkit-fetch</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@reduxjs/toolkit@1.9.5/dist/redux-toolkit.umd.js"></script>
+    <script src="https://unpkg.com/react-redux@8.0.4/dist/react-redux.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const {Provider, useSelector, useDispatch} = ReactRedux;
+        const {createSlice, configureStore, createAsyncThunk} = RTK;
+
+        /*비동기 액션 만들기*/
+        const fetchUsers = createAsyncThunk('users/fetch', async () => {
+            const res = await fetch('https://jsonplaceholder.typicode.com/users');
+            //fetch는 promise를 기본값으로 반환함. 그런데 
+            // promise로는 값을 받을 수 없으므로 .then이나 async-await를 함께 사용해야한다 13:29
+            return await res.json();
+            //반환받은 값을 json 형태로 변환시켜 갖고 온다 13:30
+        });
+
+        console.log(fetchUsers());
+
+        /*slice 생성*/
+        const userSlice = createSlice({
+            name: 'users',
+            initialState: {
+                users: [], 
+                isLoading: false
+            },
+            reducers: {},
+            //비동기적인 걸 이용할 땐 extraReducers를 이용해야한다 13:33
+            extraReducers: (builder) => {
+                builder
+                    .addCase(fetchUsers.pending, (state) => {state.isLoading = true})
+                    .addCase(fetchUsers.fulfilled, (state, action) => {
+                        console.log(action);
+                        state.users = action.payload;  // = createAsyncThunk 안에서 return한 값 13:41
+                        state.isLoading =false;
+                    })
+            }
+        });
+
+        const store = configureStore({
+            reducer: userSlice.reducer
+        });
+
+        function App(){
+            const { users, isLoading } = useSelector(state => state);
+            const dispatch = useDispatch();
+
+            const handleClick = () => {
+                dispatch(fetchUsers());
+            }
+
+            return (
+                <>
+                    <h1>List of members</h1>
+                    <button onClick={handleClick} disabled={isLoading}>
+                        {isLoading? 'Listing...' : 'Search the member'}
+                    </button>
+                    <ul>
+                        {users.map(user => (
+                            <li key={user.id}>{user.name}</li>
+                        ))}
+                    </ul>  
+                </>
+            )
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <Provider store={store}>
+                <App/>
+            </Provider>
+        );
+    </script>    
+</body>
+</html>
