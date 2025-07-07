@@ -1,0 +1,566 @@
+# Team project developing log
+# Starts from 20250707
+## 1. Make config/SecurityConfig.java, auth package under domain package and AuthUserDTO under dto package
+public class AuthUserDTO {
+
+[//]: # (login, register, response 용 DTO.)
+    GPT 조언에 따라 DB테이블 중복 관리 문제가 생길 수 있으니
+    AuthUser라는 이름으로
+    entity class를 새로 생성(내용은 User entity class와 동일)했던 것은 삭제하고
+    User 엔티티는 그대로 두고, 인증 로직은 user/entity/User.java를 받아온
+    DTO나 Wrapper로 간접 접근하는 방식을 채택했다.  250707 12:00
+
+    참고로 entity class가 @Table(name="tbl_user")와 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)를 통해
+    쿼리와 자바를 연결시키는 mapper 역할을 한다. 12:24
+
+    Entity 객체를 DTO(Data Transfer Object)로 변환하는 것은
+    데이터베이스에서 가져온 Entity 정보를 가공하여
+    다른 계층(예: 서비스 계층, 프레젠테이션 계층)으로 전달하기 위해 수행됩니다.
+    Entity는 데이터베이스 테이블과 매핑되는 객체이고,
+    DTO는 이러한 Entity를 특정 목적에 맞게 변환한 객체입니다.
+
+    DTO는 뷰에 필요한 데이터만을 담거나, 민감한 정보를 숨기는 등의 역할을 한다.
+
+    Entity와 DTO의 차이점:
+    Entity:
+    데이터베이스 테이블과 1:1로 매핑되는 객체.
+    일반적으로 데이터베이스의 컬럼을 속성으로 가집니다.
+
+    DTO:
+    계층 간 데이터 교환을 위해 사용되는 객체.
+    필요에 따라 Entity를 변환하여 사용합니다.
+    
+    DTO 사용 이유:
+    1. 데이터 독립성:
+    Entity는 데이터베이스 구조에 종속적입니다.
+    만약 Entity의 구조가 변경되면(추가되는 사항이 생긴다면)
+    이를 사용하는 다른 모든 곳에 영향을 줄 수 있습니다.
+    DTO를 사용하면 이러한 종속성을 분리하여
+    데이터베이스 변경으로부터 다른 계층을 보호할 수 있습니다.
+    
+    2. 데이터 보안:
+    Entity에는 민감한 정보(예: 비밀번호)가 포함될 수 있습니다.
+    DTO를 사용하면 이러한 민감 정보를 제외하고 필요한 데이터만 전달하여 보안 문제를 해결할 수 있습니다.
+    
+    3. 성능 최적화:
+    DTO를 사용하면 필요한 데이터만 선택하여 전달하므로 네트워크 전송량을 줄여 성능을 향상시킬 수 있습니다.
+    
+    4. 유지보수성 향상:
+    DTO를 사용하면 특정 뷰 또는 서비스에 필요한 데이터만 담을 수 있어 코드의 가독성 및 유지보수성을 높일 수 있습니다  12:13
+}
+
+class 선언부 위에 작성한
+Lombok어노테이션(@Getter, @Setter, @ToString)으로
+코드의 중복과 수작업을 줄였다. (AuthUserDTO) 12:22
+
+만일 현재(12:30)의 AuthUserDTO말고 LoginUserDTO를 새로 만든다면
+필드로 private UserRole userRole;이 필요하다.
+이 field는 is_admin이 true(1)일 경우에만 관리자가 되는 것을 관리하고
+is_admin의 기본값은 false(0)다.
+또한 chap01-spring-security를 참조하면
+UserRole은 common 패키지 아래에
+열거 타입 Enum(UserRole.enum) 파일로 추가해서 사용하면 된다. 12:33
+
+    예시example)
+    package com.ohgiraffers.sessionsecurity.common;
+    
+    public enum UserRole {
+    //열거타입 enum = 상수의 집합. 관련 상수들을 집합으로 갖고 있는 것이 enum type
+
+        // user와 사용자의 권한에 대한 값을 여기서 상수로 받아줄 것임
+        USER("USER"),
+        ADMIN("ADMIN");
+
+        private String role;
+
+        UserRole(String role) {
+            // 생성자. UserRole() 앞에 public이 생략되어있음
+            this.role=role;
+        }
+
+        public String getRole() {
+            return role;
+        } //내(?)가 갖고 있는 role 정보를 getRole로 꺼내온다
+
+        @Override
+        public String toString() {
+            return "UserRole{" +
+                    "role='" + role + '\'' +
+                    '}';
+        }
+    }
+
+## 2. Add common package and UserRole enum class
+### Fill enum class to create two kinds of role : USER and ADMIN
+    package com.header.header.domain.auth.common;
+
+    public enum UserRole {
+        USER("USER"),
+        ADMIN("ADMIN");
+
+        private String role;
+
+        UserRole(String role) {
+            // 생성자. UserRole() 앞에 public이 생략되어있음
+            this.role=role;
+        }
+    
+        public String getRole() {
+            return role;
+        } //내(?)가 갖고 있는 role 정보를 getRole로 꺼내온다 13:03
+
+        @Override
+        public String toString() {
+            return "UserRole{" +
+                    "role='" + role + '\'' +
+                    '}';
+        }
+    }
+
+## 3. Make LoginUserDTO and write a field that needed
+    @Getter
+    @Setter
+    @ToString
+    public class LoginUserDTO {
+        private int userCode;
+        private String userId;
+        private String userPwd;
+        private String userName;
+        private UserRole userRole;
+        //기본 생성자 public LoginUserDTO() {}는
+        // entity에서 @NoArgsCons...어노테이션을 통해
+        // public으로 만들어질 수 있도록 따로 명시 안 함. 13:10
+
+        /* @NoArgsConstructor: 파라미터가 없는 "기본 생성자를 자동으로 생성해주는 Lombok 어노테이션"
+        접근 제어자를 지정하지 않으면 기본적으로 public 생성자가 생성됨.
+        protected 생성자를 원하면 @NoArgsConstructor(access = AccessLevel.PROTECTED)처럼 명시적으로 설정해야 함.*/
+    }
+### 3-1. Check if there's a @NoArgsCons.. annotation in user/entity/User.java -> it has that annotation
+
+## 4. Create SignupDTO under dto package and fill out
+### First
+    @Getter
+    @Setter
+    @ToString
+    public class SignupDTO {
+        private String userName; //필수 입력 값
+        private String userPhone; //필수 입력 값, 전화번호 인증 필요 13:27
+        private String userId;
+        private String userPwd;
+        private Date birthday;
+        private String role;
+    }
+
+### Second
+    public class SignupDTO {
+        private String userName; //필수 입력 값
+        private String userPhone; //필수 입력 값, 전화번호 인증 필요 13:27
+        private String userId;
+        private String userPwd;
+        private Date birthday;
+        private String role; //In User(entity class) -> private boolean isAdmin;
+        /*고민! 여기서 회원가입할 사람이 알아서 골라 받는 거 아니고
+        shopLocation 등록하거나 등록상태(shopStatus) '영업 중'인 경우에는
+        자동으로 ADMIN 되게끔 만들어야 함.
+        shopLocation이 삭제되어 shopCode를 하나도 갖고 있지 않게 되거나
+        '폐업'한 경우에는 ADMIN 권한 삭제되도록 만들어야 함 13:47*/
+}
+
+### Third
+
+
+## 5. Edit application.yml
+    spring:
+        datasource:
+            driver-class-name: com.mysql.cj.jdbc.Driver
+            url: jdbc:mysql://localhost:3306/headerdb
+            username: ohgiraffers
+            password: ohgiraffers
+        jpa:
+            show-sql: true
+            database: mysql
+            hibernate:
+                ddl-auto: none
+        properties:
+            hibernate:
+                format_sql: true
+
+    logging:
+        level:
+            org:
+              springframework:
+                security=DEBUG:
+
+## 6. Make repository.AuthUserRepository that extends User entity
+    JpaRepository<다루려는 엔티티, (해당엔티티의)Id(PK)타입>
+User의 @Id field(PK)가 "int" userCode이므로
+extends JpaRepository<User, Integer> 추가
+-> 자료형이 int라서 대신 Integer 사용
+
+## 7. Insert templates/user/signup.html under resources directory
+### Copy and paste from 'chap01-speing-security' lecture source
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>SignUp to Header</title>
+        <script>
+            //inline 표현식으로 메세지 표현
+            const msg=`[[${msg}]]`;
+            if(msg) {
+                alert(msg);
+            }
+        </script>
+    </head>
+    <body>
+    <h1>SignUP</h1>
+    <form th:action="@{/user/signup}" method="post">
+        ID: <input type="text" name="userId"><br>
+        NAME: <input type="text" name="userName"><br>
+        PWD: <input type="password" name="userPass"><br>
+        ADMIN:
+        <select name="role">
+            <option value="USER">user</option>
+            <option value="ADMIN">administrator</option>
+        </select><br>
+        <button>Sign up</button>
+    </form>
+    </body>
+    </html>
+
+## 8. Add service/AuthUserService.java under domain/auth
+Attach @Service, @RequiredArgsConstructor annotation
+
+AuthUserService와 관련된 repository와 ModelMapper 주입
+private final AuthUserRepository authUserRepository;
+private final ModelMapper modelMapper;
+
+    chap01-spring-security 두 service 관계 요약: 
+    [ Spring Security Filter ]
+    ↓
+    [AuthService] ← implements UserDetailsService
+    ↓
+    [UserService] ← 실제 사용자 정보(DB) 조회, 회원가입 등
+    ↓
+    [UserMapper]  ← DB에 쿼리 실행
+    AuthService는 Spring Security 인증에만 관여
+
+    UserService는 회원가입/조회/탈퇴 등 비즈니스 로직 담당
+
+    UserMapper는 실제 쿼리를 실행하는 DAO/Repository 계층
+
+## 9. Create model package and move repository, service, dto package under the model package
+
+## 10. Write a code at the AuthUserService.java
+
+## 11. Make domain/auth/AuthUserServiceTest under test/.../header
+And attach @SpringBootTest, @Transactional annotation
+
+## 12. Delete SignupDTO field
+private String role; //In User(entity class) -> private boolean isAdmin;
+-> DELETE
+
+    * 상황 정리
+
+    회원가입 시 role(또는 isAdmin)은 회원이 직접 입력하는 게 아니라,
+    시스템(서버 측) 조건에 따라 자동으로 설정되어야 함.
+
+    조건: shopLocation을 등록하거나 shopStatus == '영업 중'이면 ⇒ isAdmin = true
+
+    shopCode가 없음 또는 shopStatus == '폐업'이면 ⇒ isAdmin = false
+
+    ✅ 결론: SignupDTO에 role(또는 isAdmin) 필드를 넣지 않는 것이 맞다.
+
+    이유 설명: 
+    ❌ 역할(role/isAdmin)은 사용자 입력이 아님 >>
+    DTO는 보통 프론트에서 받아오는 데이터를 담는데, 이 값은 백엔드 로직에 의해 정해져야 함
+
+    ❌ 보안상 위험 가능성 >>만약 사용자가 role: ADMIN을 직접 넣어 요청을 보내면? 잘못된 권한 부여로 이어질 수 있음
+
+    ✅ 비즈니스 로직으로 처리하는 게 맞음 >> SignupDTO에는 필요한 사용자 정보만 받고, 관리자는 서버에서 판단해서 User 엔티티에 반영해야 함
+
+## 13. Typing more codes in AuthUserService
+(Latest)
+@Transactional
+public void registerNewUser(SignupDTO signupDTO) {
+  //중복확인 1 : userId
+  if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+    throw new IllegalArgumentException(
+      String.format("이미 존재하는 아이디입니다.", signupDTO.getUserId()));
+  }
+  
+  //중복확인 2 : userPhone
+  if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+    throw new IllegalArgumentException(
+      String.format("이미 존재하는 전화번호입니다.", signupDTO.getUserPhone()));
+  }
+}
+
+(Before)
+/*save : registerNewUser
+-> SignupDTO 사용 */
+@Transactional
+public void registerNewUser(SignupDTO signupDTO){
+authUserRepository.save(modelMapper.map(signupDTO, User.class));
+}
+
+## 14. Complete the test code
+    @Test
+    @DisplayName("회원가입(user 생성) 테스트")
+    void registerNewUserTest() {
+      //given
+      SignupDTO newSignup = new SignupDTO();
+      newSignup.setUserName("Kim tolkong");
+      newSignup.setUserId("user31");
+      newSignup.setUserPwd("user01pwd");
+      newSignup.setUserPhone("010-1233-2567");
+      newSignup.setBirthday(new Date(2000,12,31));
+
+      //when
+      SignupDTO checkUserIn = authUserService.registerNewUser(newSignup);
+
+      //then
+      assertNotNull(checkUserIn);
+      assertNotNull(checkUserIn.getUserId());
+      assertEquals(31, checkUserIn.getUserId());
+      assertEquals("Kim tolkong", checkUserIn.getUserName());
+      assertEquals("user31", checkUserIn.getUserName());
+      assertEquals("user31pwd", checkUserIn.getUserPwd());
+      assertEquals("010-1233-2567", checkUserIn.getUserPhone());
+      assertEquals("2000-12-31", checkUserIn.getBirthday());
+    }
+
+## 15. Add userCode in SignupDTO
+    private Integer userCode;
+
+## 16. Edit AuthUserService
+    @Transactional
+    public SignupDTO registerNewUser(SignupDTO signupDTO){
+      User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+      // 생성된 userCode를 DTO에 다시 설정
+      signupDTO.setUserCode(newUser.getUserCode());
+      return signupDTO;
+    }
+### 16-2. 주석이었던 exception 처리 부분과 합치기
+    @Transactional
+    public SignupDTO registerNewUser(SignupDTO signupDTO){
+        //중복확인 1 : userId
+        if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+            throw new IllegalArgumentException(
+                    String.format("이미 존재하는 아이디입니다.", signupDTO.getUserId()));
+        }
+        //중복확인 2 : userPhone
+        if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            throw new IllegalArgumentException(
+                    String.format("이미 존재하는 전화번호입니다.", signupDTO.getUserPhone()));
+        }
+
+        User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+        // 생성된 userCode를 DTO에 다시 설정
+        signupDTO.setUserCode(newUser.getUserCode());
+        return signupDTO;
+    }
+
+## 17. [FIX] AuthUserServiceTests
+Causing Error:
+Expected :2000-12-31
+Actual   :Thu Jan 31 00:00:00 KST 3901
+
+org.opentest4j.AssertionFailedError: expected: <2000-12-31> but was: <Thu Jan 31 00:00:00 KST 3901>
+at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+......
+at com.header.header.domain.auth.AuthUserServiceTests.registerNewUserTest(AuthUserServiceTests.java:48)
+at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+    @Test
+    @DisplayName("회원가입(user 생성) 테스트")
+    void registerNewUserTest() throws ParseException {
+      //setBirthday에서 parse 해줘야하기 때문에 throws ParseException 추가 19:33
+      //given
+      SignupDTO newSignup = new SignupDTO();
+      newSignup.setUserId("user37");
+      newSignup.setUserPwd("user37pwd");
+      newSignup.setUserName("Kim tolkong");
+      newSignup.setUserPhone("010-1233-2567");
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+      newSignup.setBirthday(sdf.parse("2000-12-31"));
+
+      //when
+      SignupDTO checkUserIn = authUserService.registerNewUser(newSignup);
+
+      //then
+      assertNotNull(checkUserIn);
+      assertNotNull(checkUserIn.getUserCode());
+      assertEquals(37, checkUserIn.getUserCode());
+      assertEquals("user37", checkUserIn.getUserId());
+      assertEquals("user37pwd", checkUserIn.getUserPwd());
+      assertEquals("Kim tolkong", checkUserIn.getUserName());
+      assertEquals("010-1233-2567", checkUserIn.getUserPhone());
+      assertEquals("2000-12-31", checkUserIn.getBirthday());
+    }
+
+## 18. SignupDTO Birthday 값 String으로 고쳤음
+### ⭐나중에 노션에 있는 물리 DB모델도 고쳐야함⭐
+Expected :Sun Dec 31
+Actual   :Sun Dec 31 00:00:00 KST 2000
+<Click to see difference>
+
+org.opentest4j.AssertionFailedError: expected: <Sun Dec 31> but was: <Sun Dec 31 00:00:00 KST 2000>
+at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+...
+at com.header.header.domain.auth.AuthUserServiceTests.registerNewUserTest(AuthUserServiceTests.java:52)
+at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+### 드디어 Test 통과!!!! 250707 19:50
+
+/*참고 사항:
+/**
+* 광고성 템플릿 생성
+*
+* @param templateDTO 생성할 템플릿 DTO
+* @return MessageTemplateDTO
+@Transactional
+public MessageTemplateDTO createPromotionalTemplate(MessageTemplateDTO templateDTO){
+  // 1. 기본 필드 검증 : 비어있는 값 있는지 확인.
+* validateBasicFields(templateDTO);
+
+        // 2. 비즈니스 로직 검증 : 광고성 템플릿만 사용자가 생성 가능.
+        validateBusinessRules(templateDTO);
+
+        // 3. 플레이스홀더 유효성 검증 : 플레이스 홀더에 올바른 제공되는 키를 넣었는지 확인.
+        validateTemplatePalceholder(templateDTO.getTemplateContent());
+
+        // Save
+        MessageTemplate savedTemplate = messageTemplateRepository
+                .save(modelMapper.map(templateDTO, MessageTemplate.class));
+
+        return modelMapper.map(savedTemplate, MessageTemplateDTO.class);
+    }*/
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+
+## 1. Delete the codes inside the return, page.js
+
+## 2. Make components folder and three jsx files under src/app folder.
+
+## 3. Fill the Header.jsx and Navbar.jsx with functional components
+
+## 4. Make pokemons folder and page. js under the src/app to link with view page
+
+## 5. Fill the Layout.jsx with functional component
+
+## 6. To use Layout.jsx, change RootLayout components in the layout.js
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <Layout>
+          {children}
+        </Layout>
+      </body>
+    </html>
+  );
+}
+
+## 7. Update page.js under src/app
+export default function Pokemons() {
+  return (
+    <>
+      <h1>Pokemons names</h1>
+    </>
+  );
+}
+
+## 8. Try to connect with client using 'npm run dev'
+
+## 9. Make folder 'module' under src and pokemonSilce.js
+
+## 10. Fill up pokemonSlice.js
+
+## 11. Go to the page.js under the pokemons folder
+
+## 12. With CTRL+C, 나와서npm install useSelector
+
+## 13. 다시 npm run dev 돌리고 src folder 하위에 provider 폴더와 ReduxProvider.jsx 파일 만든다.
+
+## 14. Make store folder and index.js file under src folder
+
+## 15. Fill up store/index.js with configurestore
+
+## 16. Write 'npm install @reduxjs/toolkit' in terminal and install it.
+
+## 17. import { configureStore } at store/index.js
+
+## 18. Add export default pokemonSlice.reducer; in pokemonSlice.js to use pokemonSlice outside of file
+
+## 19. import pokemonSlice as pokemonReducer in th store/index.js
+
+## 20. Put functional component at ReduxProvider.jsx
+
+## 21. Go to the src/layout.js and edit the RootLayout return part
+(Latest)
+return (
+    <html lang="en">
+      <body>
+        <ReduxProvider>
+          <Layout>
+            {children}
+          </Layout>
+        </ReduxProvider>
+      </body>
+    </html>
+  );
+
+(Before)
+return (
+    <html lang="en">
+      <body>
+        <Layout>
+          {children}
+        </Layout>
+      </body>
+    </html>
+  );
+
+## 22. Edit pokemons/page.js
+'use client';
+import { getPokemons } from "@/modules/pokemonSlice";
+......
+const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getPokemons());
+    }, [])
+
+## 23. Import `import { createAsyncThunk } from "@reduxjs/toolkit";`  in pokemonSlice.js
+
+## 24. [FIX] Add 'use client' at ReduxProvider.jsx
+
+## 25. [FIX] CTRL+C로 빠져나온 후 Write 'npm install react-redux' in terminal
+
+## 26. npm run dev 다시 동작
+
+## 27. [FIX] Import createSlice at pokemonSlice.js
