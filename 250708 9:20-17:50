@@ -1,0 +1,415 @@
+250708 9:34
+JPA 혹은 React 배우기 전엔 thymeleaf로 서버 하나 (예.8080)로
+프론트엔드를 다 했음
+스프링 세큐리티에서는 서버를 하나 더 따로 써서 (CSR, 8080 외)
+보안을 유지(?)함.
+
+1. 세션 기반 인증
+언제 쓰냐? 프론트엔드 따로 없는 서브사이드 렌더링 구조에서 보통 사용함
+
+2. JWT 제이슨 웹 토큰
+언제 사용? 팀프로젝트 상황처럼 세션 공유 불가한 프론트엔드/백엔드 따로 있는 경우
+JWT토큰은 프론트엔드에서 보통 쿠키 등에 저장이 된다.
+
+예민한 정보(주민번호 등)은 토큰에 담지 않는다.
+스프링 세큐리티의 secret key덕분에 token에 
+가짜 admin정보 등이 담겨서 오더라도 거르는 것이 가능하다.
+
+JWT 토큰은 3가지로 구분된다.
+1. Header 2. Payload 3. Signiture
+
+토큰 예시 Bearer token문자열블라블라
+
+* 추천: Refresh token 프로젝트에서 구현해보기
+(수업시간에 배우진 않을거임. 수업 땐 Access token만 사용)
+
+시큐리티 아키텍처는 동일
+1. Authen-Filter에서 Token임시 발급
+2. ......
+세큐리티 콘텍스트에 저장...
+
+* JWT 관련 로직은 common/utils/TokenUtils에 들어가 있음
+
+
+"RESTful한 개발???"
+Reference :
+https://lob-dev.tistory.com/90
+https://nbcamp.spartacodingclub.kr/blog/%EA%B0%9C%EB%85%90-%EC%BD%95-%EC%9B%B9-%EA%B0%9C%EB%B0%9C-%EC%A7%80%EC%8B%9D-%ED%8E%B8-restful%ED%95%9C-api-%EC%84%A4%EA%B3%84%EB%B2%95-21182
+https://blog.naver.com/chowin21/220706118396
+
+프론트엔드 백엔드 포트가 다르면 교차 측정에 대한 필터를 설정해줘야한다.
+-> 프론트엔드와 백엔드의 포트가 다르면 서로 다른 출처로 간주되므로
+CORS(Cross-Origin Resource Sharing) 설정을 통해 요청을 허용해줘야 함.
+Spring Security를 사용하는 경우, CORS 설정을 Security Filter에 반영해야 정상 작동함.
+
+# 토 기반 인증에서 bearer는 무엇일까?
+https://velog.io/@cada/%ED%86%A0%EA%B7%BC-%EA%B8%B0%EB%B0%98-%EC%9D%B8%EC%A6%9D%EC%97%90%EC%84%9C-bearer%EB%8A%94-%EB%AC%B4%EC%97%87%EC%9D%BC%EA%B9%8C
+
+
+package com.ohgiraffers.jwtsecurity.auth.config;
+
+import com.ohgiraffers.jwtsecurity.auth.filter.HeaderFilter;
+import com.ohgiraffers.jwtsecurity.auth.interceptor.JwtTokenInterceptor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/*
+* Web configuration을 위한 클래스
+* */
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+
+    private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
+            "classpath:/static/", "classpath:/public/", "classpath:/", "classpath:/resources/",
+            "classpath:/META-INF/resources/", "classpath:/META-INF/resources/webjars/"
+    };
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        //정적자원 선언해놓은 걸 CLASSPATH_RESOURCE_LOCATIONS에 등록해줬다. 9:49
+        /*정적 자원에 대해 접근 허용 9:50*/
+        registry.addResourceHandler("**").addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
+    }
+
+    @Bean
+    public FilterRegistrationBean<HeaderFilter> getFilterRegistrationBean() {
+        //bean으로 등록, new FilterRegistrationBean bean 생성할 때 Filter값(?)을 넣을 수 있음  9:51
+        //아래에서 넣은 HeaderFilter는 CORS 설정을 위한 filter 설정 클래스, 위조 사이트 공격을 막기위해 설정해주는 필터
+        FilterRegistrationBean<HeaderFilter> registrationBean = new FilterRegistrationBean<HeaderFilter>(createHeaderFilter());
+        registrationBean.setOrder(Integer.MIN_VALUE);
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
+    }
+
+    @Bean
+    public HeaderFilter createHeaderFilter() {
+        return new HeaderFilter();
+    }
+
+    @Bean
+    public JwtTokenInterceptor jwtTokenInterceptor() {
+        return new JwtTokenInterceptor();
+    }
+}
+
+package com.ohgiraffers.jwtsecurity.auth.filter;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+/*
+ * CORS 설정을 위한 filter 설정 클래스
+ * 위조 사이트 공격을 막기위해 설정해주는 필터
+ * */
+public class HeaderFilter implements Filter {
+    //implements Filter를 했다면 doFilter를 강제로 오버라이딩해야한다.  9:53
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletResponse res = (HttpServletResponse) servletResponse; //웹 캐스팅 형식에 맞추기 위해 다운캐스팅함 9:53(2)
+
+        res.setHeader("Access-Control-Allow-Origin", "*");                          // 다른 외부 요청의 응답을 허용할 것인가?
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");    // 외부 요청에 허용할 메소드
+        res.setHeader("Access-Control-Max-Age", "3600");                            // 캐싱을 허용할 시간 (3600= 1시간)
+        res.setHeader("Access-Control-Allow-Headers",                                   // 요청 시에 허용할 header 타입
+                "X-Requested-With, Content-Type, Authorization, X-XSRF-token");
+        res.setHeader("Access-Control-Allow-Credentials", "false");                 // 자격 증명을 허용할 것인가?
+        //우리가 만든 자격증명을 이용할 것이기 때문에 자격증명 false로 막는다. 9:55
+
+        filterChain.doFilter(servletRequest, res);
+        //dofilter() = 필터를 걸거나, 반환값을 가져와.  9:56
+    }
+}
+
+* JWT 생성/반환만 하는 건 spring security를 사용하지 않는 것이다. 주의.  11:56
+
+
+# 20250708 Developing Day 2
+
+## 1. Add Read while login in AuthUserSevice
+    /*Read : Login
+    * ID갖고 회원정보 조회하는 method 생성. 반환은 UserDTO로
+    *
+    * @param username
+    * @return
+    * @throws */
+    public LoginUserDTO findByUsername(String username) {
+        if(!Objects.isNull(login)){
+            return login;
+        }else {
+            return null;
+        }
+    }
+
+## 2. Test at AuthUserServiceTests
+    @Test
+    @DisplayName("Read 로그인 테스트")
+    void loginUserTest() {
+    //given
+    LoginUserDTO newLogin = new LoginUserDTO();
+    newLogin.setUserId("user03");
+    newLogin.setUserPwd("pass03");
+
+    //when
+    LoginUserDTO checkLoggedIn = authUserService.findByUserId("user03");
+
+    //then
+    assertNotNull(checkLoggedIn);
+    assertEquals("user03", newLogin.getUserId());
+    assertEquals("pass03", newLogin.getUserPwd());
+    }
+뭔가 엄청난 양의 오류가 뜸. 
+
+## 3. Edit AuthUserService
+    /*Spring-data-jpa: findById (Repository에서 제공해주는 메소드) 이용하는 방법*/
+    public  LoginUserDTO findUserByUserId(int userCode) {
+        User foundUser = authUserRepository.findById(userCode).orElseThrow(IllegalAccessError::new);
+        return modelMapper.map(foundUser, LoginUserDTO.class);
+    }
+    // findByID()는 Optional<T>이란 타입으로 감싸져있다. 이 Optional<T>은 NullPointException을 방지하기 위해 있다.
+    // .orElseThrow(IllegalAccessError::new); -> 개발자 헷갈리게 하지 말고 정해진 오류 IllegalAccessError를 발생시켜라
+
+    // Menu entity를 DTO로 바꿔서 반환해야한다.
+    // 방법1. Menu에 있는 값들을 하나하나 DTO에 옮겨담는다 -> 코드가 너무 많아지고 불편함
+    // -> 방법2. DTO에 하나씩 담아주는 library 사용
+        /*강의자료 PDF: Menu Entity에 있는 값을 getter 메소드로 꺼내서 MenuDTO 객체를 생성한 뒤
+        setter 메소드로 설정하는 과정이 필요하다. 해당 과정을 직접 작성하는 것은 번거로우므로 ModelMapper 라이브러리를 이용한다.*/
+    //-> Add  implementation 'org.modelmapper:modelmapper:3.1.1'  into the build.gradle
+    //modelMappper을 사용하기 위해 필요한 Bean 설정파일 클래스를 하나 생성한다. config package > class BeanConfig
+    // foundUser(User entity)에 있던 필드 중 LoginUserDTO에 있는 필드명과 똑같은 이름을 가진 필드들이 LoginUserDTO로 옮겨간다.
+    // (ModelMapper library를 사용했기 때문에 가능한 일)
+
+## 4. Change a line in AuthUserServiceTests
+(Latest)
+    
+    @Test
+    @DisplayName("Read 로그인 테스트")
+    void loginUserTest() {
+        //given
+        //when
+        LoginUserDTO checkLoggedIn = authUserService.findUserByUserId(3);
+
+        //then
+        //1. 고객 정보 확인
+        assertNotNull(checkLoggedIn);
+        assertNotNull(checkLoggedIn.getUserCode());
+        assertNotNull(checkLoggedIn.getUserName());
+        assertNotNull(checkLoggedIn.getUserRole().getRole());
+
+        assertEquals("user03", checkLoggedIn.getUserId());
+        assertEquals("pwd03", checkLoggedIn.getUserPwd());
+        assertEquals("홍길동", checkLoggedIn.getUserName());
+        assertEquals(UserRole.USER, checkLoggedIn.getUserRole());
+    }
+
+(Before)
+
+    @Test
+    @DisplayName("Read 로그인 테스트")
+    void loginUserTest() {
+    //given
+    //when
+    LoginUserDTO checkLoggedIn = authUserService.findUserByUserId(3);
+
+    //then
+    //1. 고객 정보 확인
+    assertNotNull(checkLoggedIn);
+    assertNotNull(checkLoggedIn.getUserCode());
+    assertNotNull(checkLoggedIn.getUserName());
+    assertNotNull(checkLoggedIn.getUserRole().getRole());
+
+    assertEquals("user03", checkLoggedIn.getUserId());
+    assertEquals("pwd03", checkLoggedIn.getUserPwd());
+    assertEquals("홍길동", checkLoggedIn.getUserName());
+    assertEquals(0, checkLoggedIn.getUserRole());
+    }
+
+현재 상황에서 핵심 문제는 다음 한 줄이야:
+
+    assertEquals(0, checkLoggedIn.getUserRole());
+🔥 문제 핵심
+userRole의 타입은 int가 아니라 아래 enum이야:
+
+    private UserRole userRole;
+그리고 이 UserRole enum은 다음과 같이 정의돼 있어:
+
+    public enum UserRole {
+        USER("USER"),
+        ADMIN("ADMIN");
+    }
+→ 그러니까 checkLoggedIn.getUserRole()은 UserRole.USER 혹은 UserRole.ADMIN 이 반환돼.
+정수형 0이나 1이 아니라.
+
+✅ 해결 방법 1: assertEquals() 비교 수정
+
+    assertEquals(UserRole.USER, checkLoggedIn.getUserRole());
+→ 이게 정확한 enum 비교 방식이야.
+
+또는 문자열로 비교하고 싶다면:
+
+    assertEquals("USER", checkLoggedIn.getUserRole().getRole());
+⚠️ 참고: 데이터베이스에는 is_admin = 0이 저장돼 있으니...
+User 엔티티에서 userRole을 enum으로 매핑할 때는 @Enumerated(EnumType.STRING) 또는 @Enumerated(EnumType.ORDINAL)을 사용해야 해.
+
+너는 "USER" 또는 "ADMIN" 문자열로 저장하고 매핑해야 하는 구조이니, 아래처럼 되어 있어야 해:
+✅ User 엔티티 예시:
+
+    @Enumerated(EnumType.STRING) // 꼭 있어야 enum <-> DB 문자열 매핑 됨
+    private UserRole userRole;
+
+## 5. Revise LoginUserDTO
+(Latest)
+    
+    @Getter
+    @Setter
+    @ToString
+    public class LoginUserDTO {
+        private int userCode;
+        private String userId;
+        private String userPwd;
+        private String userName;
+        private boolean isAdmin;
+        /*@Enumerated(EnumType.STRING)
+        @Column(name = "is_admin")
+        private UserRole userRole; */
+    //기본 생성자 public LoginUserDTO() {}는
+    // entity에서 @NoArgsCons...어노테이션을 통해
+    // public으로 만들어질 수 있도록 따로 명시 안 함. 13:10
+    }
+
+(Before)
+
+    @Getter
+    @Setter
+    @ToString
+    public class LoginUserDTO {
+        private int userCode;
+        private String userId;
+        private String userPwd;
+        private String userName;
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "is_admin") // annotation2개 추가 16:04
+        private UserRole userRole;
+        //기본 생성자 public LoginUserDTO() {}는
+        // entity에서 @NoArgsCons...어노테이션을 통해
+        // public으로 만들어질 수 있도록 따로 명시 안 함. 250707 13:10
+    }
+
+## 6. Complete loginUserTest at AuthUserServiceTests
+    @Test
+    @DisplayName("Read 로그인 테스트")
+    void loginUserTest() {
+        //given
+        //1. 고객 정보 확인
+        //when
+        LoginUserDTO checkLoggedIn = authUserService.findUserByUserId(3);
+
+        //then
+        assertNotNull(checkLoggedIn);
+        assertNotNull(checkLoggedIn.getUserCode());
+        assertNotNull(checkLoggedIn.getUserName());
+
+        assertEquals("user03", checkLoggedIn.getUserId());
+        assertEquals("pwd03", checkLoggedIn.getUserPwd());
+        assertEquals("홍길동", checkLoggedIn.getUserName());
+        assertFalse(checkLoggedIn.isAdmin());
+
+        //2. 관리자 정보 확인
+        //when
+        LoginUserDTO checkAdmin = authUserService.findUserByUserId(2);
+
+        //then
+        assertNotNull(checkAdmin);
+        assertNotNull(checkAdmin.getUserCode());
+        assertNotNull(checkAdmin.getUserName());
+
+        assertEquals("admin02", checkAdmin.getUserId());
+        assertEquals("pwd02", checkAdmin.getUserPwd());
+        assertEquals("권은지", checkAdmin.getUserName());
+        assertTrue(checkAdmin.isAdmin());
+    }
+### Test 통과 완료 확인함 16:16
+
+## C, R(상세) 완료 -> 여기서 의문. User 전체조회(R전체)는 필요가 없지 않나?
+## CRM을 관리할 회사 주체가 있는 것도 아니고 샵별 고객조회가 User 전체조회를 대신하는 거 같은데...  16:24
+
+## 7. Fix AuthUserService to handle IllegalAccessError
+    public  LoginUserDTO findUserByUserId(int userCode) {
+        User foundUser = authUserRepository.findById(userCode)
+                .orElseThrow(() -> new IllegalAccessError("해당하는 회원이 없습니다. 회원가입 후 로그인 해주십시오."));
+        return modelMapper.map(foundUser, LoginUserDTO.class);
+    }
+
+    AuthUserServiceTests{......
+    //3. 존재하지 않는 userCode로 유저 정보 불러오기
+        //when
+        LoginUserDTO checkNoUser = authUserService.findUserByUserId(31);
+
+        //then
+        assertNull(checkLoggedIn);
+        assertNull(checkLoggedIn.getUserCode());
+        assertNull(checkLoggedIn.getUserId());
+        assertNull(checkLoggedIn.getUserPwd());
+        assertNull(checkLoggedIn.getUserName());
+        assertNull(checkLoggedIn.isAdmin());
+    }
+해당하는 회원이 없습니다. 회원가입 후 로그인 해주십시오.
+java.lang.IllegalAccessError: 해당하는 회원이 없습니다. 회원가입 후 로그인 해주십시오.
+at com.header.header.domain.auth.model.service.AuthUserService.lambda$findUserByUserId$0(AuthUserService.java:63)
+at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+at com.header.header.domain.auth.model.service.AuthUserService.findUserByUserId(AuthUserService.java:63)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+
+## 8. [FIX] Add getUserInfo method that using AuthUserDTO under public LoginUserDTO findUserByUserId(int userCode)
+    AuthUserServiceTests
+    @Test
+    @DisplayName("Delete(논리적 삭제, isLeave=true) 테스트")
+    void leaveTest() {
+    //given
+    AuthUserDTO checkLeaved = authUserService.findUserByUserId(30); // 오류 발생.
+
+    AuthUserService
+    public LoginUserDTO findUserByUserId(int userCode) {
+        User foundUser = authUserRepository.findById(userCode)
+                .orElseThrow(() -> new IllegalAccessError("해당하는 회원이 없습니다. 회원가입 후 로그인 해주십시오."));
+        return modelMapper.map(foundUser, LoginUserDTO.class);
+    }
+-> Test에서는 AutherUserDTO를 쓰는데, authUService에서 쓰인 findUserByUserId는
+LoginUserDTO를 쓰고 있음을 알 수 있다.
+
+AuthUserservice에
+
+    public AuthUserDTO getUserInfo(int userCode) {
+        User user = authUserRepository.findById(userCode)
+                .orElseThrow(() -> new NoSuchElementException("해당 회원이 존재하지 않습니다."));
+        return modelMapper.map(user, AuthUserDTO.class);
+    }
+를 추가했다.
+
+## 9. Complete delete (logical delete(change isLeave==true from isLeave==false), not a physical delete)
+    @Test
+    @DisplayName("Delete(논리적 삭제, isLeave=true) 테스트")
+    void leaveTest() {
+        //given
+        AuthUserDTO checkLeaved = authUserService.getUserInfo(30);
+
+        //when
+        //isLeave가 false(기본값)이라면
+        assertFalse(checkLeaved.isLeave());
+
+        //then
+        checkLeaved.setLeave(true);
+
+        assertTrue(checkLeaved.isLeave());
+    }
