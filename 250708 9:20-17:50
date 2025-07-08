@@ -413,3 +413,15 @@ AuthUserservice에
 
         assertTrue(checkLeaved.isLeave());
     }
+
+## 10. Edit little about getUserInfo in AuthUserService
+    public AuthUserDTO getUserInfo(int userCode) {
+        User user = authUserRepository.findById(userCode)
+            .orElseThrow(() -> new NoSuchElementException("해당하는 회원이 없습니다. 회원가입 후 로그인 해주십시오."));
+
+        if (user.isLeave()) {
+            throw new IllegalStateException("탈퇴한 회원입니다.");
+        }
+
+        return modelMapper.map(user, AuthUserDTO.class);
+    }
