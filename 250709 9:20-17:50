@@ -413,30 +413,6 @@ Change like this and also change type of modifyUser method
     @Transactional
     public void modifyUser(AuthUserDTO authUserDTO){
 
-### 11-2. Change all codes
-(Now)
-
-    
-
-(Before)
-
-    // 2. 이전 값과 동일한지 확인
-    if (user.getUserPwd().equals(authUserDTO.getUserPwd())) {
-        return SAME_PASSWORD.getMessage();
-    }
-
-    if (user.getUserPhone().equals(authUserDTO.getUserPhone())) {
-        throw new IllegalArgumentException("이전 전화번호와 동일합니다.");
-    }
-
-    if (user.getUserName().equals(authUserDTO.getUserName())) {
-        throw new IllegalArgumentException("이전 이름과 동일합니다.");
-    }
-
-    // 3. 전화번호 중복 확인
-    if (authUserRepository.existsByUserPhone(authUserDTO.getUserPhone())) {
-        throw new IllegalArgumentException("이미 존재하는 전화번호입니다.");
-    }
 
 ## 12. Insert spring security implement in the build.gradle
 implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -728,3 +704,38 @@ kakao:
 
         System.out.println("After modify=" + updateDTO);*/
 }
+
+## 18. Edit registerNewUserTest in AuthUserServiceTests
+assertEquals((number), checkUserIn.getUserCode());로 
+userCode를 확인했었는데,
+auto_increment 속성 때문에 숫자가 계속 올라가는 걸
+수기로 반영해야해서 불편했다.
+해당 사항을 
+
+        System.out.println(checkUserIn.getUserCode());
+로 바꾸어 해결했다.
+
+    @Test
+    @DisplayName("회원가입(user 생성) 테스트")
+    void registerNewUserTest() {
+        //given
+        SignupDTO newSignup = new SignupDTO();
+        newSignup.setUserId("user41");
+        newSignup.setUserPwd("user41pwd");
+        newSignup.setUserName("Kim tolkong");
+        newSignup.setUserPhone("010-1233-2567");
+        newSignup.setBirthday("2000-12-31");
+
+        //when
+        SignupDTO checkUserIn = authUserService.registerNewUser(newSignup);
+
+        //then
+        assertNotNull(checkUserIn);
+        assertNotNull(checkUserIn.getUserCode());
+        System.out.println(checkUserIn.getUserCode());
+        assertEquals("user41", checkUserIn.getUserId());
+        assertEquals("user41pwd", checkUserIn.getUserPwd());
+        assertEquals("Kim tolkong", checkUserIn.getUserName());
+        assertEquals("010-1233-2567", checkUserIn.getUserPhone());
+        assertEquals("2000-12-31", checkUserIn.getBirthday());
+    }
