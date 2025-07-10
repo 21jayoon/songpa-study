@@ -1,0 +1,572 @@
+# 6월 26일 교육일지 내용 (복습)
+6/26 : React(JS library) 04.state~06.iteration
+6/25 : React(JavaScript library) 01.element&rendering~03.props
+6/24 : Spring-data-jpa
+6/23 : JPQL 05.native query
+6/20 : JPQL 1~4.paging
+6/19 : JPA 3~5
+6/18 : JPA 2.mapping
+6/17 : JPA chapter00~01.persistence-context
+6/16 : Spring security
+6/13 : RestAPI, swagger
+
+JPA의 persistence-context는 spring의 IOC container와 비슷한 역할을 한다.
+(JPA는 자바의 ORM기술을 쉽게 구현하도록 도와주는 API)
+
+JpaRepository를 상속하는 인터페이스에
+메서드 이름만 적어놓으면 메서드 이름을 분석해서
+자동으로 SQL (JPQL)을 만들어준다.
+(이를 Query Method 또는 Derived Query Method라고 함)
+
+(ORM: Object-Relational Mapping의 약자.
+객체 지향 프로그래밍 언어의 객체와 
+관계형 데이터베이스의 테이블을 자동으로 연결해주는 기술)
+
+JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어를 제공한다.
+개발자가 SQL을 작성하지 않아도 쿼리문을 만들어주며,
+따라서 엔티티 객체를 대상으로 쿼리한다.
+
+JPQL(Java Persistence Query Language)은 
+SQL을 추상화했기 때문에 MySQL같은 
+특정 데이터베이스 SQL에 의존하지 않는 장점이 있다.
+(JPQL은 결국 SQL로 변환된다.)
+
+Spring Data JPA를 사용해 MySQL에 구축된 자체 DB를 기반으로, 
+JPA 엔티티를 통해 기본 조회 페이지를 구현할 수 있었다.
+
+# 20250710 Developing Day 4
+## 1. [FIX] registerNewUser in AuthUserService and registerNewUserTests in AuthUserServiceTests
+(Now)
+
+    @Test
+    @DisplayName("회원가입(user 생성) + 중복 체크 테스트")
+    void registerNewUserTest() {
+        //given1. 기존 정보와 중복 없이 가입할 때
+        SignupDTO newSignup = new SignupDTO();
+        newSignup.setUserId("user41");
+        newSignup.setUserPwd("user41pwd");
+        newSignup.setUserName("Kim tolkong");
+        newSignup.setUserPhone("010-1233-2567");
+        newSignup.setBirthday("2000-12-31");
+
+        //when
+        Object result1 = authUserService.registerNewUser(newSignup);
+
+        //then
+        assertTrue(result1 instanceof SignupDTO);
+        SignupDTO savedDTO = (SignupDTO) result1;
+        assertEquals(newSignup, savedDTO);
+        System.out.println("가입 정보 확인:"+savedDTO);
+
+        //given2. 중복된 userId 사용
+        SignupDTO duplicateIdDTO = new SignupDTO();
+        duplicateIdDTO.setUserId("admin01"); // DB에 존재
+        duplicateIdDTO.setUserPwd("test1234");
+        duplicateIdDTO.setUserName("Test User");
+        duplicateIdDTO.setUserPhone("010-9999-9999");
+        duplicateIdDTO.setBirthday("2025-07-10");
+
+        //when(중복 아이디 가입 시도)
+        Object result2 = authUserService.registerNewUser(duplicateIdDTO);
+
+        //then: 중복 아이디 메시지 확인
+        assertEquals(ApiResponse.DUPLICATE_ID.getMessage(), result2);
+        System.out.println("Check Id msg: "+result2);
+
+        //given3. 중복된 전화번호로 가입 시도
+        SignupDTO duplicatePhoneDTO = new SignupDTO();
+        duplicatePhoneDTO.setUserId("unique_user_001");
+        duplicatePhoneDTO.setUserPwd("pass001");
+        duplicatePhoneDTO.setUserName("Unique User");
+        duplicatePhoneDTO.setUserPhone("010-1004-1004"); // DB에 존재
+        duplicatePhoneDTO.setBirthday("2025-07-10");
+
+        //when
+        Object result3 = authUserService.registerNewUser(duplicatePhoneDTO);
+
+        //then: 중복 전화번호 메시지 확인
+        assertEquals(ApiResponse.DUPLICATE_PHONE.getMessage(), result3);
+        System.out.println("Check phone msg: "+ result3);
+    }
+
+    @Transactional
+    public Object registerNewUser(SignupDTO signupDTO){
+        //중복확인 1 : userId
+        if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+            return DUPLICATE_ID.getMessage();
+        }
+        //중복확인 2 : userPhone
+        if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+        // 생성된 userCode를 DTO에 다시 설정
+        signupDTO.setUserCode(newUser.getUserCode());
+        return signupDTO;
+    }
+
+    
+
+(Before)
+
+    @Transactional
+    public SignupDTO registerNewUser(SignupDTO signupDTO){
+        //중복확인 1 : userId
+        if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+            throw new IllegalArgumentException(
+                    String.format("이미 존재하는 아이디입니다.", signupDTO.getUserId()));
+        }
+        //중복확인 2 : userPhone
+        if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            throw new IllegalArgumentException(
+                    String.format("이미 존재하는 전화번호입니다.", signupDTO.getUserPhone()));
+        }
+
+        User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+        // 생성된 userCode를 DTO에 다시 설정
+        signupDTO.setUserCode(newUser.getUserCode());
+        return signupDTO;
+    }
+
+    @Test
+    @DisplayName("회원가입(user 생성) 테스트")
+    void registerNewUserTest() {
+        //given
+        SignupDTO newSignup = new SignupDTO();
+        newSignup.setUserId("user41");
+        newSignup.setUserPwd("user41pwd");
+        newSignup.setUserName("Kim tolkong");
+        newSignup.setUserPhone("010-1233-2567");
+        newSignup.setBirthday("2000-12-31");
+
+        //when
+        SignupDTO checkUserIn = (SignupDTO) authUserService.registerNewUser(newSignup);
+
+        //then
+        assertNotNull(checkUserIn);
+        assertNotNull(checkUserIn.getUserCode());
+        System.out.println(checkUserIn.getUserCode());
+        assertEquals("user41", checkUserIn.getUserId());
+        assertEquals("user41pwd", checkUserIn.getUserPwd());
+        assertEquals("Kim tolkong", checkUserIn.getUserName());
+        assertEquals("010-1233-2567", checkUserIn.getUserPhone());
+        assertEquals("2000-12-31", checkUserIn.getBirthday());
+    }
+
+    @Test
+    @DisplayName("회원가입(user 생성) 테스트")
+    void registerNewUserTest() {
+        //given
+        ......
+
+        //when
+        SignupDTO checkUserIn = authUserService.registerNewUser(newSignup);
+
+        //then
+        ......
+    }
+
+## 2. Delete comment in AuthUserService
+// 3. 전화번호 중복 확인
+//        if (authUserRepository.existsByUserPhone(authUserDTO.getUserPhone())) {
+//            return DUPLICATE_PHONE.getMessage();
+//        }
+
+## 3. Change comment as the codes diversified
+(Now)
+    
+    @Test
+    @DisplayName("회원가입(user 생성) + 중복 체크 테스트")
+    void registerNewUserTest() {
+        //given1. 기존 정보와 중복 없이 가입할 때
+        SignupDTO newSignup = new SignupDTO();
+        newSignup.setUserId("user41");
+        newSignup.setUserPwd("user41pwd");
+        newSignup.setUserName("Kim tolkong");
+        newSignup.setUserPhone("010-1233-2567");
+        newSignup.setBirthday("2000-12-31");
+
+        //when
+        Object result1 = authUserService.registerNewUser(newSignup);
+
+        //then
+        System.out.print("가입 성공 메세지: " + result1);
+        System.out.println("가입 정보 확인: "+ newSignup);
+
+        //given2. 중복된 userId 사용
+        SignupDTO duplicateIdDTO = new SignupDTO();
+        duplicateIdDTO.setUserId("admin01"); // DB에 존재
+        duplicateIdDTO.setUserPwd("test1234");
+        duplicateIdDTO.setUserName("Test User");
+        duplicateIdDTO.setUserPhone("010-9999-9999");
+        duplicateIdDTO.setBirthday("2025-07-10");
+
+        //when(중복 아이디 가입 시도)
+        Object result2 = authUserService.registerNewUser(duplicateIdDTO);
+
+        //then: 중복 아이디 메시지 확인
+        assertEquals(ApiResponse.DUPLICATE_ID.getMessage(), result2);
+        System.out.println("Check Id msg: "+result2);
+
+        //given3. 중복된 전화번호로 가입 시도
+        SignupDTO duplicatePhoneDTO = new SignupDTO();
+        duplicatePhoneDTO.setUserId("unique_user_001");
+        duplicatePhoneDTO.setUserPwd("pass001");
+        duplicatePhoneDTO.setUserName("Unique User");
+        duplicatePhoneDTO.setUserPhone("010-1004-1004"); // DB에 존재
+        duplicatePhoneDTO.setBirthday("2025-07-10");
+
+        //when
+        Object result3 = authUserService.registerNewUser(duplicatePhoneDTO);
+
+        //then: 중복 전화번호 메시지 확인
+        assertEquals(ApiResponse.DUPLICATE_PHONE.getMessage(), result3);
+        System.out.println("Check phone msg: "+ result3);
+    }
+
+    /*save : registerNewUser
+    -> SignupDTO 사용
+    @param signupDTO 생성할 user 정보가 담긴 DTO
+    @return 생성된 signupDTO(user관련 DTO)
+    @throws ApiResponse 이미 존재하는 아이디나 전화번호일 때 */
+    @Transactional
+    public Object registerNewUser(SignupDTO signupDTO){
+        //중복확인 1 : userId
+        if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+            return DUPLICATE_ID.getMessage();
+        }
+        //중복확인 2 : userPhone
+        if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+        // 생성된 userCode를 갖고와서 DTO에 다시 설정
+        signupDTO.setUserCode(newUser.getUserCode());
+
+        //return: 회원가입 성공메세지
+        return SUCCESS_REGISTER_USER.getMessage();
+    }
+
+(Before)
+
+    @Test
+    @DisplayName("회원가입(user 생성) + 중복 체크 테스트")
+    void registerNewUserTest() {
+        //given1. 기존 정보와 중복 없이 가입할 때
+        SignupDTO newSignup = new SignupDTO();
+        newSignup.setUserId("user41");
+        newSignup.setUserPwd("user41pwd");
+        newSignup.setUserName("Kim tolkong");
+        newSignup.setUserPhone("010-1233-2567");
+        newSignup.setBirthday("2000-12-31");
+
+        //when
+        Object result1 = authUserService.registerNewUser(newSignup);
+
+        //then
+        assertTrue(result1 instanceof SignupDTO); //result1이 실제 SignupDTO인지(=정상가입이 되었는지) 확인
+        assertEquals(ApiResponse.SUCCESS_REGISTER_USER.getMessage(), result1);
+        System.out.println("가입 성공 메시지: " + result1);
+
+        //        SignupDTO savedDTO = (SignupDTO) result1;
+        //        assertEquals(newSignup, savedDTO);
+        System.out.println("가입 정보 확인:"+newSignup);
+        ......
+
+    /*save : registerNewUser
+    -> SignupDTO 사용
+    @param signupDTO 생성할 user 정보가 담긴 DTO
+    @return 생성된 signupDTO(user관련 DTO)
+    @throws IllegalArgumentException 이미 존재하는 아이디나 전화번호일 때 */
+    @Transactional
+    public Object registerNewUser(SignupDTO signupDTO){
+        //중복확인 1 : userId
+        if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+            return DUPLICATE_ID.getMessage();
+        }
+        //중복확인 2 : userPhone
+        if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+        // 생성된 userCode를 갖고와서 DTO에 다시 설정
+        signupDTO.setUserCode(newUser.getUserCode());
+
+        //return: 회원가입 성공메세지
+        return SUCCESS_REGISTER_USER.getMessage();
+    }
+    
+
+## 4. Edit registerNewMember in AuthUserService again
+
+    @Transactional
+    public Object registerNewUser(SignupDTO signupDTO){
+        //중복확인 1 : userId
+        if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+            return DUPLICATE_ID.getMessage();
+        }
+        //중복확인 2 : userPhone
+        if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+        // 생성된 userCode를 갖고와서 DTO에 다시 설정
+        signupDTO.setUserCode(newUser.getUserCode());
+
+        //return: 회원가입 성공메세지
+        return SUCCESS_REGISTER_USER.getMessage();
+    }
+
+## 5. Revise modifyUser in AuthUserService
+(Now)
+
+    /*Update : Modify user information
+    *
+    * @param authUserDTO
+    * @throws IllegalArgumentException */
+    @Transactional
+    public String modifyUser(AuthUserDTO authUserDTO){
+        // 1. 기존 유저 엔티티 조회 (예시로 userCode 또는 userId 기준으로 조회)
+        User user = authUserRepository.findById(authUserDTO.getUserCode())
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        // 2. 이전에 사용한 값과 동일한지 확인
+        if (authUserDTO.getUserPwd() != null && user.getUserPwd().equals(authUserDTO.getUserPwd())) {
+            return authUserDTO.getUserPwd() + SAME_PASSWORD.getMessage();
+        }
+
+        if (authUserDTO.getUserPhone() != null && user.getUserPhone().equals(authUserDTO.getUserPhone())) {
+            return authUserDTO.getUserPhone() + SAME_PHONE.getMessage();
+        }
+
+        if (authUserDTO.getUserName() != null && user.getUserName().equals(authUserDTO.getUserName())) {
+            return authUserDTO.getUserName() + SAME_NAME.getMessage();
+        }
+
+        // 3. DB 전체와 비교, 전화번호 중복 확인 (자기 자신 제외)
+        if (authUserRepository.existsByUserPhoneAndUserCodeNot(authUserDTO.getUserPhone(), authUserDTO.getUserCode())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        // 4. 도메인 메서드를 통한 정보 수정
+        if (authUserDTO.getUserPwd() != null) user.modifyUserPassword(authUserDTO.getUserPwd());
+        if (authUserDTO.getUserPhone() != null) user.modifyUserPhone(authUserDTO.getUserPhone());
+        if (authUserDTO.getUserName() != null) user.modifyUserName(authUserDTO.getUserName());
+
+        return SUCCESS_MODIFY_USER.getMessage();
+    }
+
+(Before)
+    
+    /*Update : Modify user information
+    *
+    * @param authUserDTO
+    * @throws IllegalArgumentException */
+    @Transactional
+    public String modifyUser(AuthUserDTO authUserDTO){
+        // 1. 기존 유저 엔티티 조회 (예시로 userCode 또는 userId 기준으로 조회)
+        User user = authUserRepository.findById(authUserDTO.getUserCode())
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        // 2. 이전 값과 동일한지 확인
+        if (user.getUserPwd().equals(authUserDTO.getUserPwd())) {
+            return SAME_PASSWORD.getMessage();
+        }
+
+        if (user.getUserPhone().equals(authUserDTO.getUserPhone())) {
+            return SAME_PHONE.getMessage();
+        }
+
+        if (user.getUserName().equals(authUserDTO.getUserName())) {
+            return SAME_NAME.getMessage();
+        }
+
+        // 3. 전화번호 중복 확인 (자기 자신 제외)
+        if (authUserRepository.existsByUserPhoneAndUserCodeNot(authUserDTO.getUserPhone(), authUserDTO.getUserCode())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        // 4. 도메인 메서드를 통한 정보 수정
+        if (authUserDTO.getUserPwd() != null) user.modifyUserPassword(authUserDTO.getUserPwd());
+        if (authUserDTO.getUserPhone() != null) user.modifyUserPhone(authUserDTO.getUserPhone());
+        if (authUserDTO.getUserName() != null) user.modifyUserName(authUserDTO.getUserName());
+
+        return (user != null)? SUCCESS_MODIFY_USER.getMessage() : String.valueOf(user);
+    }
+
+## 6. Renovate modifyUserTest(series)
+    @Test
+    @DisplayName("Update 유저 정보 수정-1 비밀번호 수정 시 메세지 반환 확인")
+    void modifyUserTest() {
+        User dbuser = authUserRepository.findById(29).orElseThrow();
+
+        AuthUserDTO updateDTO = new AuthUserDTO();
+        updateDTO.setUserCode(dbuser.getUserCode());
+        updateDTO.setUserPwd(dbuser.getUserPwd());
+        System.out.println("original: " + updateDTO);
+        //original: AuthUserDTO(userCode=29, userId=null, userPwd=pwd29, isAdmin=false, userName=null, userPhone=null, birthday=null, isLeave=false)
+
+        // when1. 동일한 정보로 수정 시도
+        String result = authUserService.modifyUser(updateDTO);
+
+        // then(동일한 값에 대한 경고 메시지 확인)
+        assertTrue(result.contains(ApiResponse.SAME_PASSWORD.getMessage()));
+        System.out.println("동일한 비밀번호 메시지: " + result);
+        //동일한 비밀번호 메시지: pwd29(은)는 이전 비밀번호와 동일합니다.
+
+        // when2. 새로운 비밀번호(다른 값으)로 바꾸는 경우
+        updateDTO.setUserPwd("newPwd29");
+
+        //then
+        String successResult = authUserService.modifyUser(updateDTO);
+
+        assertEquals(ApiResponse.SUCCESS_MODIFY_USER.getMessage(), successResult);
+        System.out.println("비밀번호 수정 성공 메시지: " + successResult);
+        //비밀번호 수정 성공 메시지: 회원 정보가 성공적으로 수정되었습니다.
+    }
+
+    @Test
+    @DisplayName("Update 유저 정보 수정-2 전화번호 수정 시 메세지 반환 및 중복 전화번호 확인")
+    void modifyUserTest2() {
+        // given: 기존 사용자 정보 조회
+        User dbuser = authUserRepository.findById(29).orElseThrow();
+
+        AuthUserDTO updateDTO2 = new AuthUserDTO();
+        updateDTO2.setUserCode(dbuser.getUserCode());
+        updateDTO2.setUserPhone(dbuser.getUserPhone());
+        System.out.println("original: " + updateDTO2);
+        //original: AuthUserDTO(userCode=29, userId=null, userPwd=null, isAdmin=false, userName=null, userPhone=010-1029-1029, birthday=null, isLeave=false)
+
+        // when1. 동일한 정보로 수정 시도
+        String result2 = authUserService.modifyUser(updateDTO2);
+
+        // then: 동일한 값에 대한 경고 메시지 확인
+        System.out.println("Same modifying result: " + result2);
+        //Same modifying result: 010-1029-1029(은)는 이전 전화번호와 동일합니다.
+
+        assertTrue(result2.contains(ApiResponse.SAME_PHONE.getMessage()));
+        //result2에 SAME_PHONE의 msg값이 들어가 있는지 확인
+
+        // when2. 다른 값으로 바꾸는 경우
+        updateDTO2.setUserPhone("010-1234-2222");
+        String successResult = authUserService.modifyUser(updateDTO2);
+
+        // then 변경 값 학인
+        assertEquals(ApiResponse.SUCCESS_MODIFY_USER.getMessage(), successResult);
+        System.out.println("전화번호 수정 성공 메시지: " + successResult);
+        //전화번호 수정 성공 메시지: 회원 정보가 성공적으로 수정되었습니다.
+        System.out.println("After modify phone: " + updateDTO2);
+        //After modify phone: AuthUserDTO(userCode=29, userId=null, userPwd=null, isAdmin=false, userName=null, userPhone=010-1234-2222, birthday=null, isLeave=false)
+    }
+
+    @Test
+    @DisplayName("Update 유저 정보 수정-3 이름 수정 시 메세지 반환 확인")
+    void modifyUserTest3() {
+        // given: 기존 사용자 정보 조회
+        User dbuser = authUserRepository.findById(29).orElseThrow();
+
+        AuthUserDTO updateDTO3 = new AuthUserDTO();
+        updateDTO3.setUserCode(dbuser.getUserCode());
+        updateDTO3.setUserName(dbuser.getUserName());
+        System.out.println("original: " + updateDTO3);
+        //original: AuthUserDTO(userCode=29, userId=null, userPwd=null, isAdmin=false, userName=수지, userPhone=null, birthday=null, isLeave=false)
+
+        // when1. 동일한 정보로 수정 시도
+        String result = authUserService.modifyUser(updateDTO3);
+
+        // then: 동일한 값에 대한 경고 메시지 확인
+        assertTrue(result.contains(ApiResponse.SAME_NAME.getMessage()));
+
+        System.out.println("ModifyUser result: " + result);
+        //ModifyUser result: 이전 이름과 동일합니다.
+
+        // when2. 다른 값으로 바꾸는 경우
+        updateDTO3.setUserName("배수지");
+
+        // then 변경 값 학인
+        String successResult = authUserService.modifyUser(updateDTO3);
+        assertEquals(ApiResponse.SUCCESS_MODIFY_USER.getMessage(), successResult);
+        System.out.println("이름 수정 성공 메시지: " + successResult);
+        System.out.println("After modify name: " + updateDTO3);
+        //After modify name: AuthUserDTO(userCode=29, userId=null, userPwd=null, isAdmin=false, userName=배수지, userPhone=null, birthday=null, isLeave=false)
+    }
+
+(Before)
+
+    void modifyUserTest() {
+        // given: 기존 사용자 정보 DTO에 받아 조회
+        User dbuser = authUserRepository.findById(29).orElseThrow();
+
+        AuthUserDTO updateDTO = new AuthUserDTO();
+        updateDTO.setUserCode(dbuser.getUserCode());
+        updateDTO.setUserPwd(dbuser.getUserPwd());
+        updateDTO.setUserPhone(dbuser.getUserPhone());
+        updateDTO.setUserName(dbuser.getUserName());
+        System.out.println("original: " + updateDTO);
+        //original: AuthUserDTO(userCode=29, userId=null, userPwd=pwd29, isAdmin=false, userName=수지, userPhone=010-1029-1029, birthday=null, isLeave=false)
+
+        // when1. 동일한 정보로 수정 시도
+        String result = authUserService.modifyUser(updateDTO);
+
+        // then: 동일한 값에 대한 경고 메시지 확인
+        assertEquals(ApiResponse.SAME_PASSWORD.getMessage(), result);
+        System.out.println("Modifying same result: " + result);
+        //Modifying same result: 이전 비밀번호와 동일합니다.
+
+        // when2. 새로운 비밀번호(다른 값으)로 바꾸는 경우
+        updateDTO.setUserPwd("newPwd29");
+
+        //then
+        assertEquals("newPwd29", updateDTO.getUserPwd());
+
+        System.out.println("After modify pwd: " + updateDTO);
+        //After modify pwd: AuthUserDTO(userCode=29, userId=null, userPwd=newPwd29, isAdmin=false, userName=수지, userPhone=010-1029-1029, birthday=null, isLeave=false)
+    }
+    ......
+
+## 7. Change ApiResponse
+    
+    package com.header.header.domain.auth.common;
+
+    import lombok.Getter;
+    import org.springframework.http.HttpStatus;
+    
+    @Getter
+    public enum ApiResponse {
+
+        // 성공 응답
+        SUCCESS_MODIFY_USER("회원 정보가 성공적으로 수정되었습니다.", HttpStatus.OK),
+        SUCCESS_REGISTER_USER("회원가입이 완료되었습니다.", HttpStatus.CREATED),
+    
+        // 에러 응답
+        DUPLICATE_PHONE("이미 존재하는 전화번호입니다.", HttpStatus.CONFLICT),
+        DUPLICATE_ID("이미 존재하는 아이디입니다.", HttpStatus.CONFLICT),
+    
+        SAME_PASSWORD("(은)는 이전 비밀번호와 동일합니다.", HttpStatus.BAD_REQUEST),
+        SAME_PHONE("(은)는 이전 전화번호와 동일합니다.", HttpStatus.BAD_REQUEST),
+        SAME_NAME("(은)는 이전 이름과 동일합니다.", HttpStatus.BAD_REQUEST);
+    
+        private final String message;
+        private final HttpStatus status;
+    
+        ApiResponse(String message, HttpStatus status) {
+            this.message = message;
+            this.status = status;
+        }
+    }
+
+## 8. Extend the due day of milestones from today to tomorrow
+
+## 9. Make Github New Milestones and new issue
+new Milestones : API Controller & Mapping Implements
+new issue : [FEATURE] CRUD User C&M
+(C&M : Controller and Mapping)
