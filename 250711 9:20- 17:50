@@ -1,0 +1,1221 @@
+# 20250711 Developing Day 5
+## 1. Make login.html under new package auth
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Form</title>
+</head>
+<body>
+<h1>Login</h1>
+<form action="/auth/login" method="post">
+    ID: <input type="text" name="userId"><br>
+    PWD: <input type="password" name="userPass"><br>
+    <button>Sign up</button>
+</form>
+</body>
+</html>
+
+## 2. Change login.html
+(Now)
+
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>HEADER - 로그인 페이지</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f0f2f5;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            .header-top {
+                background-color: #fff;
+                padding: 15px 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .header-top h1 {
+                margin: 0;
+                color: #333;
+                font-size: 24px;
+            }
+            .main-content {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .login-container, .button-container {
+                background-color: #fff;
+                padding: 40px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                width: 100%;
+                max-width: 400px;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .login-container h2 {
+                margin-bottom: 30px;
+                color: #333;
+            }
+            .input-group {
+                margin-bottom: 20px;
+            }
+            .input-group label {
+                display: block;
+                margin-bottom: 5px;
+                color: #555;
+                text-align: left;
+            }
+            .input-group input {
+                width: calc(100% - 20px);
+                padding: 12px 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 16px;
+            }
+            .login-button {
+                width: 100%;
+                padding: 12px 0;
+                background-color: #5b68ad; /* Adjusted color for better contrast */
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 18px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .login-button:hover {
+                background-color: #4a548c;
+            }
+            .links {
+                margin-top: 15px;
+                font-size: 14px;
+            }
+            .links a {
+                color: #5b68ad;
+                text-decoration: none;
+                margin: 0 10px;
+            }
+            .links a:hover {
+                text-decoration: underline;
+            }
+            .button-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-top: 40px;
+            }
+            .role-button {
+                background-color: #f5f5f5;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-align: center;
+            }
+            .role-button:hover {
+                background-color: #e0e0e0;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .role-button img {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 15px;
+            }
+            .role-button span {
+                display: block;
+                font-size: 18px;
+                color: #333;
+                font-weight: bold;
+            }
+            .footer {
+                background-color: #333;
+                color: #ccc;
+                padding: 20px;
+                font-size: 12px;
+                text-align: center;
+                width: 100%;
+                box-sizing: border-box;
+                line-height: 1.6;
+            }
+            .footer a {
+                color: #ccc;
+                text-decoration: none;
+                margin: 0 5px;
+            }
+            .footer a:hover {
+                text-decoration: underline;
+            }
+            .footer-links {
+                margin-bottom: 10px;
+            }
+            .footer-address {
+                margin-top: 10px;
+            }
+            .login-page-title {
+                width: 100%;
+                max-width: 400px;
+                text-align: left;
+                margin-top: 20px; /* Adjust as needed */
+                font-size: 20px;
+                color: #555;
+                font-weight: bold;
+            }
+            .error-message {
+                color: red;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+    <header class="header-top">
+        <h1>&lt;HEADER&gt;</h1>
+    </header>
+    
+    <div class="main-content">
+        <div id="role-selection" class="button-container">
+            <header class="header-top">
+                <h1>&lt;HEADER&gt;</h1>
+            </header>
+            <div class="button-grid">
+                <div class="role-button" onclick="showLoginPage('admin')">
+                    <img src="https://via.placeholder.com/80/5b68ad/ffffff?text=✂️" alt="관리자 아이콘">
+                    <span>관리자 페이지</span>
+                </div>
+                <div class="role-button" onclick="showLoginPage('customer')">
+                    <img src="https://via.placeholder.com/80/5b68ad/ffffff?text=💇‍♀️" alt="고객 아이콘">
+                    <span>고객 페이지</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="login-form" class="login-container" style="display: none;">
+            <h2></h2> <p class="error-message" id="login-error"></p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="아이디" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="비밀번호" required>
+                </div>
+                <button type="submit" class="login-button">LOGIN</button>
+            </form>
+            <div class="links">
+                    <span id="register-link-wrapper" style="display: none;">
+                        <a href="#" onclick="alert('회원가입 페이지로 이동'); return false;">회원가입</a> |
+                    </span>
+                <a href="#" onclick="alert('아이디 찾기 페이지로 이동'); return false;">아이디 찾기</a> |
+                <a href="#" onclick="alert('비밀번호 찾기 페이지로 이동'); return false;">비밀번호 찾기</a>
+            </div>
+        </div>
+        <h3 class="login-page-title" id="login-page-title-text" style="display: none;">로그인 페이지</h3>
+    </div>
+    
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#">이용약관</a> |
+            <a href="#">개인정보처리방침</a> |
+            <a href="#">이메일무단수집거부</a> |
+            <a href="#">사이트맵</a> |
+            <a href="#">소상공인회</a>
+        </div>
+        <div class="footer-address">
+            <p>서울특별시 송파구 24/7책방로 000번길 00-00 0층 | 사업자등록번호: 000-00-00000 | 대표: HEADER | FAX: 02-000-0000</p>
+            <p>Copyright© 2025. 뷰티미용인재개발(주) TEAM HEADER. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        let selectedRole = '';
+    
+        function showLoginPage(role) {
+            selectedRole = role;
+            document.getElementById('role-selection').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('login-page-title-text').style.display = 'block';
+    
+            const loginFormTitle = document.querySelector('#login-form h2');
+            const registerLinkWrapper = document.getElementById('register-link-wrapper');
+            const loginError = document.getElementById('login-error');
+            loginError.textContent = ''; // Clear previous errors
+    
+            if (role === 'admin') {
+                loginFormTitle.textContent = '관리자 로그인';
+                registerLinkWrapper.style.display = 'none'; // 관리자는 회원가입 없음
+            } else { // customer
+                loginFormTitle.textContent = '고객 로그인';
+                registerLinkWrapper.style.display = 'inline'; // 고객은 회원가입 가능
+            }
+        }
+    
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // 폼 제출의 기본 동작 방지
+    
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('login-error');
+            loginError.textContent = ''; // Clear previous errors
+    
+            console.log(`Attempting login as ${selectedRole}: ${username}/${password}`);
+    
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password, role: selectedRole })
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Login successful!', data);
+                    // 실제 애플리케이션에서는 서버로부터 받은 세션 정보 또는 성공 메시지 처리
+                    alert(`로그인 성공! ${selectedRole === 'admin' ? '관리자' : '고객'} 페이지로 이동합니다.`);
+                    // 성공 시 해당 역할의 대시보드 페이지로 리디렉션
+                    window.location.href = `/${selectedRole}/dashboard`;
+                } else {
+                    const errorData = await response.json();
+                    console.error('Login failed:', errorData.message);
+                    loginError.textContent = errorData.message || '로그인 실패. 사용자 이름 또는 비밀번호를 확인해주세요.';
+                }
+            } catch (error) {
+                console.error('Network error during login:', error);
+                loginError.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+            }
+        });
+    </script>
+    </body>
+    </html>
+
+(Before)
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Login Form</title>
+    </head>
+    <body>
+    <h1>Login</h1>
+    <form action="/auth/login" method="post">
+        ID: <input type="text" name="userId"><br>
+        PWD: <input type="password" name="userPass"><br>
+        <button>Sign up</button>
+    </form>
+    </body>
+    </html>
+
+## 3. Add three *login.html file (not complete)
+main-login.html
+
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>HEADER - 로그인 페이지</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f2f2f2;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+        .logo {
+          width: 243px;
+          height: 117px;
+        }
+        .main-content {
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        .button-container {
+          background-color: #fff;
+          padding: 40px;
+          border-radius: 15px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          width: 100%;
+          max-width: 600px;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .input-group {
+          margin-bottom: 20px;
+        }
+        .input-group label {
+          display: block;
+          margin-bottom: 5px;
+          color: #555;
+          text-align: left;
+        }
+        .input-group input {
+          width: calc(100% - 20px);
+          padding: 12px 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 16px;
+        }
+        .links a {
+          color: #5b68ad;
+          text-decoration: none;
+        }
+        .links a:hover {
+          text-decoration: underline;
+        }
+        .button-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-top: 40px;
+        }
+        .role-button1 {
+          background-color: #13183d;
+          width: 200px;
+          height: 200px;
+          border-radius: 15px;
+          padding: 40px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-align: center;
+        }
+        .role-button2 {
+          background-color: #8588A2;
+          border-radius: 15px;
+          padding: 20px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-align: center;
+        }
+        .role-button:hover {
+          background-color: #000000;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .role-button img {
+          width: 130px;
+          height: 150px;
+          margin-bottom: 10px;
+        }
+        .role-button p {
+          display: block;
+          font-size: 20px;
+          color: #ffffff;
+          font-weight: bold;
+        }
+        .footer {
+          background-color: #f2f2f2;
+          color: #000000;
+          padding: 20px;
+          font-size: 12px;
+          text-align: center;
+          width: 100%;
+          box-sizing: border-box;
+          line-height: 1.6;
+        }
+        .footer a {
+          color: #000000; /* Adjusted link color */
+          text-decoration: none;
+          margin: 0 5px;
+        }
+        .footer a:hover {
+          text-decoration: underline;
+        }
+        .footer-links {
+          margin-bottom: 10px;
+        }
+        .footer-address {
+          margin-top: 10px;
+        }
+        .login-page-title {
+          width: 100%;
+          max-width: 400px;
+          text-align: left;
+          margin-top: 20px;
+          font-size: 20px;
+          color: #555;
+          font-weight: bold;
+        }
+        .error-message {
+          color: red;
+          margin-bottom: 10px;
+        }
+      </style>
+    </head>
+    <body>
+    
+    <div class="main-content">
+      <div id="role-selection" class="button-container">
+      <img src="/static/header_logo.png" alt="HEADER Logo" class="logo">
+        <div class="button-grid">
+          <div class="role-button role-button1">
+            <img src="/static/admin_vector.png" alt="관리자 아이콘" onclick="redirectToLogin('admin')">
+            <p>관리자 페이지로</p>
+          </div>
+          <div class="role-button role-button2">
+            <img src="/static/userpage-button.png" alt="고객 아이콘"  onclick="redirectToLogin('customer')">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="#">이용약관</a> |
+        <a href="#">개인정보처리방침</a> |
+        <a href="#">이메일무단수집거부</a> |
+        <a href="#">사이트맵</a> |
+        <a href="#">소상공인회</a>
+      </div>
+      <div class="footer-address">
+        <p>서울특별시 송파구 24/7책방로 000번길 00-00 0층 | 사업자등록번호: 000-00-00000 | 대표: HEADER | FAX: 02-000-0000</p> [cite: 44]
+        <p>Copyright© 2025. 뷰티미용인재개발(주) TEAM HEADER. All rights reserved.</p>
+      </div>
+    </footer>
+    
+    <script>
+      function redirectToLogin(role) {
+        if (role === 'admin') {
+          window.location.href = '/admin/login';
+        } else if (role === 'customer') {
+          window.location.href = '/customer/login';
+        }
+      }
+    </script>
+    </body>
+    </html>
+
+admin-login.html
+
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>HEADER - 관리자 로그인</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f2f2f2; /* Updated background color [cite: 2] */
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+        .header-top {
+          background-color: #fff;
+          padding: 15px 20px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .header-top h1 {
+          margin: 0;
+          color: #333;
+          font-size: 24px;
+          display: flex;
+          align-items: center;
+          gap: 10px; /* Space between logo and text */
+        }
+        .header-top h1 img {
+          height: 30px; /* Adjust logo size as needed */
+        }
+        .main-content {
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        .login-container {
+          background-color: #fff;
+          padding: 40px;
+          border-radius: 8px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          width: 100%;
+          max-width: 400px;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .login-container h2 {
+          margin-bottom: 30px;
+          color: #333;
+        }
+        .input-group {
+          margin-bottom: 20px;
+        }
+        .input-group label {
+          display: block;
+          margin-bottom: 5px;
+          color: #555;
+          text-align: left;
+        }
+        .input-group input {
+          width: calc(100% - 20px);
+          padding: 12px 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 16px;
+        }
+        .login-button {
+          width: 100%;
+          padding: 12px 0;
+          background-color: #5b68ad; /* Adjusted color for better contrast [cite: 16] */
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-size: 18px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        .login-button:hover {
+          background-color: #4a548c;
+        }
+        .links {
+          margin-top: 15px;
+          font-size: 14px;
+          display: flex; /* Apply flexbox for alignment */
+          justify-content: flex-end; /* Align items to the right for admin */
+          width: 100%;
+        }
+        .links a {
+          color: #5b68ad;
+          text-decoration: none;
+        }
+        .links a:hover {
+          text-decoration: underline;
+        }
+        .footer {
+          background-color: #f2f2f2; /* Updated background color [cite: 29] */
+          color: #555; /* Adjusted text color for readability on light background */
+          padding: 20px;
+          font-size: 12px;
+          text-align: center;
+          width: 100%;
+          box-sizing: border-box;
+          line-height: 1.6;
+        }
+        .footer a {
+          color: #555; /* Adjusted link color */
+          text-decoration: none;
+          margin: 0 5px;
+        }
+        .footer a:hover {
+          text-decoration: underline;
+        }
+        .footer-links {
+          margin-bottom: 10px;
+        }
+        .footer-address {
+          margin-top: 10px;
+        }
+        .login-page-title {
+          width: 100%;
+          max-width: 400px;
+          text-align: left;
+          margin-top: 20px;
+          font-size: 20px;
+          color: #555;
+          font-weight: bold;
+        }
+        .error-message {
+          color: red;
+          margin-bottom: 10px;
+        }
+      </style>
+    </head>
+    <body>
+    <header class="header-top">
+      <h1>
+        <img src="/static/header_logo.png" alt="HEADER Logo"> &lt;HEADER&gt;
+      </h1>
+    </header>
+    
+    <div class="main-content">
+      <div id="login-form" class="login-container">
+        <h2>관리자 로그인</h2>
+        <p class="error-message" id="login-error"></p>
+        <form id="loginForm">
+          <div class="input-group">
+            <input type="text" id="username" placeholder="아이디" required>
+          </div>
+          <div class="input-group">
+            <input type="password" id="password" placeholder="비밀번호" required>
+          </div>
+          <button type="submit" class="login-button">LOGIN</button>
+        </form>
+        <div class="links">
+                    <span class="find-links">
+                        <a href="#" onclick="alert('아이디 찾기 페이지로 이동'); return false;">아이디 찾기</a> |
+                        <a href="#" onclick="alert('비밀번호 찾기 페이지로 이동'); return false;">비밀번호 찾기</a>
+                    </span>
+        </div>
+      </div>
+    </div>
+    
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="#">이용약관</a> |
+        <a href="#">개인정보처리방침</a> |
+        <a href="#">이메일무단수집거부</a> |
+        <a href="#">사이트맵</a> |
+        <a href="#">소상공인회</a>
+      </div>
+      <div class="footer-address">
+        <p>서울특별시 송파구 24/7책방로 000번길 00-00 0층 | 사업자등록번호: 000-00-00000 | 대표: HEADER | FAX: 02-000-0000</p> [cite: 44]
+        <p>Copyright© 2025. 뷰티미용인재개발(주) TEAM HEADER. All rights reserved.</p>
+      </div>
+    </footer>
+    
+    <script>
+      // 이 페이지는 항상 'admin' 역할을 가정합니다.
+      const selectedRole = 'admin';
+    
+      document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // 폼 제출의 기본 동작 방지
+    
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const loginError = document.getElementById('login-error');
+        loginError.textContent = ''; // Clear previous errors
+    
+        console.log(`Attempting login as ${selectedRole}: ${username}/${password}`);
+    
+        try {
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password, role: selectedRole })
+          });
+    
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Login successful!', data);
+            // 실제 애플리케이션에서는 서버로부터 받은 세션 정보 또는 성공 메시지 처리 [cite: 50]
+            alert(`로그인 성공! 관리자 페이지로 이동합니다.`); [cite: 51]
+            // 성공 시 해당 역할의 대시보드 페이지로 리디렉션 [cite: 52]
+            window.location.href = `/admin/dashboard`;
+          } else {
+            const errorData = await response.json(); [cite: 53]
+            console.error('Login failed:', errorData.message); [cite: 53]
+            loginError.textContent = errorData.message || '로그인 실패. 사용자 이름 또는 비밀번호를 확인해주세요.'; [cite: 54]
+          }
+        } catch (error) {
+          console.error('Network error during login:', error); [cite: 55]
+          loginError.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.'; [cite: 55]
+        }
+      });
+    </script>
+    </body>
+    </html>
+
+user-login.html
+
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>HEADER - 로그인 페이지</title>
+      <style>
+          body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              background-color: #f2f2f2;
+              display: flex;
+              flex-direction: column;
+              min-height: 100vh;
+          }
+          .header-top {
+              background-color: #fff;
+              padding: 15px 20px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+          }
+          .header-top img {
+              width: 162px;
+              height: 78px;
+          }
+          .main-content {
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              padding: 20px;
+          }
+          .login-container, .button-container {
+              background-color: #fff;
+              padding: 40px;
+              border-radius: 8px;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+              width: 100%;
+              max-width: 400px;
+              text-align: center;
+              margin-bottom: 20px;
+          }
+          .login-container h2 {
+              margin-bottom: 30px;
+              color: #333;
+          }
+          .input-group {
+              margin-bottom: 20px;
+          }
+          .input-group label {
+              display: block;
+              margin-bottom: 5px;
+              color: #555;
+              text-align: left;
+          }
+          .input-group input {
+              width: calc(100% - 20px);
+              padding: 12px 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              font-size: 16px;
+          }
+          .login-button {
+              width: 100%;
+              padding: 12px 0;
+              background-color: #5b68ad; /* Adjusted color for better contrast */
+              color: white;
+              border: none;
+              border-radius: 4px;
+              font-size: 18px;
+              cursor: pointer;
+              transition: background-color 0.3s ease;
+          }
+          .login-button:hover {
+              background-color: #000000;
+          }
+          .links {
+              margin-top: 15px;
+              font-size: 14px;
+              display: flex; /* Flexbox 사용 */
+              justify-content: space-between; /* 양 끝 정렬 */
+              width: 100%; /* 부모 너비에 맞춤 */
+          }
+          .links a {
+              color: #5b68ad;
+              text-decoration: none;
+              /* margin: 0 10px; // 이제 이 margin은 필요 없을 수 있음, 필요에 따라 조정 */
+          }
+          .links a:hover {
+              text-decoration: underline;
+          }
+       /* 아이디 찾기/비밀번호 찾기 그룹에 대한 스타일 */
+      .links .find-links {
+          /* 필요에 따라 추가 스타일링 */
+      }
+      .button-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-top: 40px;
+      }
+      .role-button {
+          background-color: #f5f5f5;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 20px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-align: center;
+      }
+      .role-button:hover {
+          background-color: #000000;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+        .role-button img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        .role-button span {
+            display: block;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f2f2f2;
+            color: #000000;
+            padding: 20px;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+        .footer a {
+            color: #000000;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        .footer-address {
+            margin-top: 10px;
+        }
+        .login-page-title {
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+            margin-top: 20px; /* Adjust as needed */
+            font-size: 20px;
+            color: #555;
+            font-weight: bold;
+        }
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+    </head>
+    <body>
+    <header class="header-top">
+        <img src="/static/header_logo.png">
+    </header>
+    
+    
+    <script>
+        <div id="login-form" className="login-container" style="display: none;">
+            <h2></h2> <p className="error-message" id="login-error"></p>
+            <form id="loginForm">
+                <div className="input-group">
+                    <input type="text" id="username" placeholder="아이디" required/>
+                </div>
+                <div className="input-group">
+                    <input type="password" id="password" placeholder="비밀번호" required/>
+                </div>
+                <button type="submit" className="login-button">LOGIN</button>
+            </form>
+            <div className="links">
+                    <span id="register-link-wrapper" style="display: none;">
+                        <a href="#" onClick="alert('회원가입 페이지로 이동'); return false;">회원가입</a> |
+                    </span>
+                <a href="#" onClick="alert('아이디 찾기 페이지로 이동'); return false;">아이디 찾기</a> |
+                <a href="#" onClick="alert('비밀번호 찾기 페이지로 이동'); return false;">비밀번호 찾기</a>
+            </div>
+        </div>
+        let selectedRole = '';
+    
+        function showLoginPage(role) {
+            selectedRole = role;
+            document.getElementById('role-selection').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('login-page-title-text').style.display = 'block';
+    
+            const loginFormTitle = document.querySelector('#login-form h2');
+            const registerLinkWrapper = document.getElementById('register-link-wrapper');
+            const loginError = document.getElementById('login-error');
+            loginError.textContent = ''; // Clear previous errors
+    
+            if (role === 'admin') {
+                loginFormTitle.textContent = '관리자 로그인';
+                registerLinkWrapper.style.display = 'none'; // 관리자는 회원가입 없음
+            } else { // customer
+                loginFormTitle.textContent = '고객 로그인';
+                registerLinkWrapper.style.display = 'inline'; // 고객은 회원가입 가능
+            }
+        }
+    
+        document.getElementById('loginForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // 폼 제출의 기본 동작 방지
+    
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('login-error');
+            loginError.textContent = ''; // Clear previous errors
+    
+            console.log(`Attempting login as ${selectedRole}: ${username}/${password}`);
+    
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({username, password, role: selectedRole})
+                });
+    
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Login successful!', data);
+                    // 실제 애플리케이션에서는 서버로부터 받은 세션 정보 또는 성공 메시지 처리
+                    alert(`로그인 성공! ${selectedRole === 'admin' ? '관리자' : '고객'} 페이지로 이동합니다.`);
+                    // 성공 시 해당 역할의 대시보드 페이지로 리디렉션
+                    window.location.href = `/${selectedRole}/dashboard`;
+                } else {
+                    const errorData = await response.json();
+                    console.error('Login failed:', errorData.message);
+                    loginError.textContent = errorData.message || '로그인 실패. 사용자 이름 또는 비밀번호를 확인해주세요.';
+                }
+            } catch (error) {
+                console.error('Network error during login:', error);
+                loginError.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+            }
+        });
+    </script>
+    </body>
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#">이용약관</a> |
+            <a href="#">개인정보처리방침</a> |
+            <a href="#">이메일무단수집거부</a> |
+            <a href="#">사이트맵</a> |
+            <a href="#">소상공인회</a>
+        </div>
+        <div class="footer-address">
+            <p>서울특별시 송파구 24/7책방로 000번길 00-00 0층 | 사업자등록번호: 000-00-00000 | 대표: HEADER | FAX: 02-000-0000</p>
+            <p>Copyright© 2025. 뷰티미용인재개발(주) TEAM HEADER. All rights reserved.</p>
+        </div>
+    </footer>
+    </html>
+
+
+## 4. Move auth package under header. (before: under domain)
+
+## 5. SecurityService sample code for study
+Reference : https://drg2524.tistory.com/148
+
+    package com.header.header.config;
+
+    import org.slf4j.LoggerFactory;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+    import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+    import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+    import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+    import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+    import org.springframework.security.web.SecurityFilterChain;
+    import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+    
+    import java.util.logging.Logger;
+    
+    @Configuration
+    @EnableWebSecurity
+    @EnableGlobalMethodSecurity(prePostEnabled = true)
+    public class SecurityConfig {
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+        @Autowired
+        private PrincipalDetailsService principalDetails;
+    
+        // security 로그인 실패 핸들러 DI
+        @Autowired
+        private AuthenticationFailureHandler customFailHandler;
+    
+        @Autowired
+        private BCryptPasswordEncoder encodePwd;
+    
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            return http
+                    .csrf() // csrf 선언  = 어디에 쓸꺼야 ?
+                    .ignoringAntMatchers("/uploadSummernoteImageFile")
+                    .ignoringAntMatchers("/user/**")
+                    .ignoringAntMatchers("/auth/**")
+                    .ignoringAntMatchers("/admin/**")// csrf token Post 403 error Exception filter
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers("/include/**", "/temcss/**", "temjs/**").permitAll()
+                    .antMatchers("/").authenticated()
+                    .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
+                    .antMatchers("/manager/**").access("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
+                    .anyRequest().permitAll()
+                    .and()
+                    .formLogin()// 나는 폼 로그인을 사용할거야 !
+                    .loginPage("/auth/login") // 근데 난 로그인 폼이 있어  이 경로야 !
+                    .usernameParameter("userid") // 근데 난 username이라고 선언 안해. 별도로  name 선언 했어
+                    .passwordParameter("pwd") // 동일해
+                    .loginProcessingUrl("/auth/login") // security login // 로그인 요청 들어왔어 !! true / false ?
+                    .failureHandler(customFailHandler) // login Fail // false
+                    .defaultSuccessUrl("/") // true
+                    .and()
+                    .logout()
+                    .logoutSuccessUrl("/")
+                    .invalidateHttpSession(true) // HTTP session reset
+                    .and()
+                    .build();
+    
+        }
+    
+        @Bean
+        public DaoAuthenticationProvider daoAuthenticationProvider() {
+            DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+            authenticationProvider.setUserDetailsService(principalDetails);
+            authenticationProvider.setPasswordEncoder(encodePwd);
+            authenticationProvider.setHideUserNotFoundExceptions(false);
+    
+            return authenticationProvider;
+        }
+    }
+
+## 6. Copy and paste AuthFailHandler from 'spring-security lecture source' and edit
+    package com.header.header.auth.authconfig;
+    
+    import jakarta.servlet.ServletException;
+    import jakarta.servlet.http.HttpServletRequest;
+    import jakarta.servlet.http.HttpServletResponse;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+    import org.springframework.security.authentication.BadCredentialsException;
+    import org.springframework.security.authentication.InternalAuthenticationServiceException;
+    import org.springframework.security.core.AuthenticationException;
+    import org.springframework.security.core.userdetails.UsernameNotFoundException;
+    import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+    
+    import java.io.IOException;
+    import java.net.URLEncoder;
+    
+    @Configuration
+    public class AuthFailHandler extends SimpleUrlAuthenticationFailureHandler {
+    //인증 실패 시의 예외처리를 하는  method
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    String errorMessage ="";
+    if(exception instanceof BadCredentialsException){
+    errorMessage = "아이디가 없거나 비밀번호가 일치하지 않습니다.";
+    
+            } else if (exception instanceof InternalAuthenticationServiceException) {
+                errorMessage = "서버에서 오류 발생. 관리자에게 문의 요망";
+                
+            } else if (exception instanceof UsernameNotFoundException) {
+                errorMessage ="없는 ID입니다.";
+    
+            } else if(exception instanceof AuthenticationCredentialsNotFoundException){
+                errorMessage="인증요청이 거부되었습니다";
+    
+            } else {
+                errorMessage="알 수 없는 오류로 로그인 요청 처리 불가";
+            }
+    
+            errorMessage= URLEncoder.encode(errorMessage, "UTF-8");
+            
+            setDefaultFailureUrl("/auth/fail?message=" +errorMessage);
+    
+            super.onAuthenticationFailure(request, response,exception);
+        }
+    }
+
+## 7. Copy & paste UserRole from lecture source
+
+    package com.header.header.auth.common;
+
+    public enum UserRole {
+        //열거타입 enum = 상수의 집합
+        //관련 상수들을 집합으로 갖고 있는 것이 enum type
+    
+        // user와 사용자의 권한에 대한 값을 여기서 상수로 받아줄 것임
+        USER("USER"),
+        ADMIN("ADMIN");
+    
+        private String role;
+    
+        UserRole(String role) {
+            // 생성자. UserRole() 앞에 public이 생략되어있음
+            this.role=role;
+        }
+    
+        public String getRole() {
+            return role;
+        } //내(?)가 갖고 있는 role 정보를 getRole로 꺼내온다
+    
+        @Override
+        public String toString() {
+            return "UserRole{" +
+                    "role='" + role + '\'' +
+                    '}';
+        }
+    }
+
+### 7-1. Attach some codes in AuthService to divide ADMIN / USER
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    User user = userRepository.findByUserId(username)
+    .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (user.isAdmin()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUserId(),
+                user.getUserPwd(),
+                authorities
+        );
+    }
+
+## 8. Insert a line into the AuthDetails
+    private AuthUserRepository authUserRepository;
+
+## 9. Create new constructor in AuthDetails
+public AuthDetails(String userId, String userPwd, List<GrantedAuthority> authorities) {
+}
+
+## 10. Reform SecurityConfiguration
+(Now)
+    
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        /* 요청에 대한 권한Authority 체크 */
+        http.authorizeHttpRequests( auth -> {
+            auth.requestMatchers("/auth/login/*", "/user/signup", "/auth/fail", "/", "/main").permitAll();
+            // auth/login 등 위의 5가지 페이지는 권한이 없어도 볼 수 있다는 공통점이 있다.
+            // 그렇기 때문에 '권한이 없어도 모든 사용자들이 접근 가능합니다'를 함의해주는
+            // .permitAll()을 넣어준다. (=모든 사용자가 접근하게 허용해주겠다)
+            auth.requestMatchers("/admin/**").hasRole("ADMIN");
+            auth.requestMatchers("/user/**").hasRole("USER");
+            auth.anyRequest().authenticated();
+
+(Before)
+
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        /* 요청에 대한 권한Authority 체크 */
+        http.authorizeHttpRequests( auth -> {
+            auth.requestMatchers("/auth/login/*", "/user/signup", "/auth/fail", "/", "/main").permitAll();
+            // auth/login 등 위의 5가지 페이지는 권한이 없어도 볼 수 있다는 공통점이 있다.
+            // 그렇기 때문에 '권한이 없어도 모든 사용자들이 접근 가능합니다'를 함의해주는
+            // .permitAll()을 넣어준다. (=모든 사용자가 접근하게 허용해주겠다)
+            auth.requestMatchers("/admin/*").hasAnyAuthority();
+            auth.requestMatchers("/user/*").hasAnyAuthority();
+            auth.anyRequest().authenticated();
