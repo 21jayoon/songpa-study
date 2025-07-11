@@ -1,0 +1,871 @@
+회원가입 단계 표시 요소인 동그라미와 동그라미 안의 1, 2, 3에 대해: 동그라미2가 페이지 정 가운데 오게 만들고 동그라미1과 동그라미 3이 동그라미2에서 같은 간격으로 놓여있게 만들어줘.
+만약 마우스 커서가 다음 버틍 위를 hover하게 되면 배경색이 하얀색, '다음'글자가 #13183D로 바뀌게 만들어.
+회원가입 단계 요소에 대해서는 만약 동그라미 1로 약관페이지에 있다고 표시한 페이지에서 다음버튼을 눌러 두 번째 페이지로 넘어갔다면, 동그라미2의 배경이 #13183D, '2'가 ffffff하얀색으로 변하게 해줘. 2번째 회원가입 정보입력페이지에서 다음버튼과 취소버튼을 다음버튼과 이전으로 버튼으로 바뀌주고 css는 동일(다음 버튼의 경우 기본 배경 #13183D, 글씨 색 #ffffff -> hover했을 때 배경 #ffffff, 글자 #13183D로 바뀜.
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEADER - 로그인 페이지</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header-top {
+            background-color: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-top h1 {
+            margin: 0;
+            color: #333;
+            font-size: 24px;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container, .button-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-container h2 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            text-align: left;
+        }
+        .input-group input {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .login-button {
+            width: 100%;
+            padding: 12px 0;
+            background-color: #5b68ad; /* Adjusted color for better contrast */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .login-button:hover {
+            background-color: #4a548c;
+        }
+        .links {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .links a {
+            color: #5b68ad;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .role-button {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .role-button:hover {
+            background-color: #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .role-button img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        .role-button span {
+            display: block;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #333;
+            color: #ccc;
+            padding: 20px;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+        .footer a {
+            color: #ccc;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        .footer-address {
+            margin-top: 10px;
+        }
+        .login-page-title {
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+            margin-top: 20px; /* Adjust as needed */
+            font-size: 20px;
+            color: #555;
+            font-weight: bold;
+        }
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<header class="header-top">
+    <h1>&lt;HEADER&gt;</h1>
+</header>
+
+<div class="main-content">
+    <div id="role-selection" class="button-container">
+        <header class="header-top">
+            <h1>&lt;HEADER&gt;</h1>
+        </header>
+        <div class="button-grid">
+            <div class="role-button" onclick="showLoginPage('admin')">
+                <img src="https://via.placeholder.com/80/5b68ad/ffffff?text=✂️" alt="관리자 아이콘">
+                <span>관리자 페이지</span>
+            </div>
+            <div class="role-button" onclick="showLoginPage('customer')">
+                <img src="https://via.placeholder.com/80/5b68ad/ffffff?text=💇‍♀️" alt="고객 아이콘">
+                <span>고객 페이지</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-form" class="login-container" style="display: none;">
+        <h2></h2> <p class="error-message" id="login-error"></p>
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="아이디" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="비밀번호" required>
+            </div>
+            <button type="submit" class="login-button">LOGIN</button>
+        </form>
+        <div class="links">
+                <span id="register-link-wrapper" style="display: none;">
+                    <a href="#" onclick="alert('회원가입 페이지로 이동'); return false;">회원가입</a> |
+                </span>
+            <a href="#" onclick="alert('아이디 찾기 페이지로 이동'); return false;">아이디 찾기</a> |
+            <a href="#" onclick="alert('비밀번호 찾기 페이지로 이동'); return false;">비밀번호 찾기</a>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#">이용약관</a> |
+        <a href="#">개인정보처리방침</a> |
+        <a href="#">이메일무단수집거부</a> |
+        <a href="#">사이트맵</a> |
+        <a href="#">소상공인회</a>
+    </div>
+    <div class="footer-address">
+        <p>서울특별시 송파구 24/7책방로 000번길 00-00 0층 | 사업자등록번호: 000-00-00000 | 대표: HEADER | FAX: 02-000-0000</p>
+        <p>Copyright© 2025. 뷰티미용인재개발(주) TEAM HEADER. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    let selectedRole = '';
+
+    function showLoginPage(role) {
+        selectedRole = role;
+        document.getElementById('role-selection').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('login-page-title-text').style.display = 'block';
+
+        const loginFormTitle = document.querySelector('#login-form h2');
+        const registerLinkWrapper = document.getElementById('register-link-wrapper');
+        const loginError = document.getElementById('login-error');
+        loginError.textContent = ''; // Clear previous errors
+
+        if (role === 'admin') {
+            loginFormTitle.textContent = '관리자 로그인';
+            registerLinkWrapper.style.display = 'none'; // 관리자는 회원가입 없음
+        } else { // customer
+            loginFormTitle.textContent = '고객 로그인';
+            registerLinkWrapper.style.display = 'inline'; // 고객은 회원가입 가능
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // 폼 제출의 기본 동작 방지
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const loginError = document.getElementById('login-error');
+        loginError.textContent = ''; // Clear previous errors
+
+        console.log(`Attempting login as ${selectedRole}: ${username}/${password}`);
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password, role: selectedRole })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Login successful!', data);
+                // 실제 애플리케이션에서는 서버로부터 받은 세션 정보 또는 성공 메시지 처리
+                alert(`로그인 성공! ${selectedRole === 'admin' ? '관리자' : '고객'} 페이지로 이동합니다.`);
+                // 성공 시 해당 역할의 대시보드 페이지로 리디렉션
+                window.location.href = `/${selectedRole}/dashboard`;
+            } else {
+                const errorData = await response.json();
+                console.error('Login failed:', errorData.message);
+                loginError.textContent = errorData.message || '로그인 실패. 사용자 이름 또는 비밀번호를 확인해주세요.';
+            }
+        } catch (error) {
+            console.error('Network error during login:', error);
+            loginError.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+        }
+    });
+</script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEADER - 로그인 페이지</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header-top {
+            background-color: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-top img {
+            width: 162px;
+            height: 78px;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container, .button-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-container h2 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            text-align: left;
+        }
+        .input-group input {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .login-button {
+            width: 100%;
+            padding: 12px 0;
+            background-color: #5b68ad; /* Adjusted color for better contrast */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .login-button:hover {
+            background-color: #4a548c;
+        }
+        .links {
+            margin-top: 15px;
+            font-size: 14px;
+            display: flex; /* Flexbox 사용 */
+            justify-content: space-between; /* 양 끝 정렬 */
+            width: 100%; /* 부모 너비에 맞춤 */
+        }
+        .links a {
+            color: #5b68ad;
+            text-decoration: none;
+            /* margin: 0 10px; // 이제 이 margin은 필요 없을 수 있음, 필요에 따라 조정 */
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        /* 아이디 찾기/비밀번호 찾기 그룹에 대한 스타일 */
+        .links .find-links {
+            /* 필요에 따라 추가 스타일링 */
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .role-button {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .role-button:hover {
+            background-color: #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .role-button img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        .role-button span {
+            display: block;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f2f2f2;
+            color: #000000;
+            padding: 20px;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+        .footer a {
+            color: #000000;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        .footer-address {
+            margin-top: 10px;
+        }
+        .login-page-title {
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+            margin-top: 20px; /* Adjust as needed */
+            font-size: 20px;
+            color: #555;
+            font-weight: bold;
+        }
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<header class="header-top">
+    <img src="/static/header_logo.png">
+</header>
+<div id="login-form" class="login-container" style="display: none;">
+    <h2></h2> <p class="error-message" id="login-error"></p>
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="text" id="username" placeholder="아이디" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="비밀번호" required>
+        </div>
+        <button type="submit" class="login-button">LOGIN</button>
+    </form>
+    <div class="links">
+                <span id="register-link-wrapper" style="display: none;">
+                    <a href="#" onclick="alert('회원가입 페이지로 이동'); return false;">회원가입</a> |
+                </span>
+        <a href="#" onclick="alert('아이디 찾기 페이지로 이동'); return false;">아이디 찾기</a> |
+        <a href="#" onclick="alert('비밀번호 찾기 페이지로 이동'); return false;">비밀번호 찾기</a>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#">이용약관</a> |
+        <a href="#">개인정보처리방침</a> |
+        <a href="#">이메일무단수집거부</a> |
+        <a href="#">사이트맵</a> |
+        <a href="#">소상공인회</a>
+    </div>
+    <div class="footer-address">
+        <p>서울특별시 송파구 24/7책방로 000번길 00-00 0층 | 사업자등록번호: 000-00-00000 | 대표: HEADER | FAX: 02-000-0000</p>
+        <p>Copyright© 2025. 뷰티미용인재개발(주) TEAM HEADER. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    let selectedRole = '';
+
+    function showLoginPage(role) {
+        selectedRole = role;
+        document.getElementById('role-selection').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('login-page-title-text').style.display = 'block';
+
+        const loginFormTitle = document.querySelector('#login-form h2');
+        const registerLinkWrapper = document.getElementById('register-link-wrapper');
+        const loginError = document.getElementById('login-error');
+        loginError.textContent = ''; // Clear previous errors
+
+        if (role === 'admin') {
+            loginFormTitle.textContent = '관리자 로그인';
+            registerLinkWrapper.style.display = 'none'; // 관리자는 회원가입 없음
+        } else { // customer
+            loginFormTitle.textContent = '고객 로그인';
+            registerLinkWrapper.style.display = 'inline'; // 고객은 회원가입 가능
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // 폼 제출의 기본 동작 방지
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const loginError = document.getElementById('login-error');
+        loginError.textContent = ''; // Clear previous errors
+
+        console.log(`Attempting login as ${selectedRole}: ${username}/${password}`);
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password, role: selectedRole })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Login successful!', data);
+                // 실제 애플리케이션에서는 서버로부터 받은 세션 정보 또는 성공 메시지 처리
+                alert(`로그인 성공! ${selectedRole === 'admin' ? '관리자' : '고객'} 페이지로 이동합니다.`);
+                // 성공 시 해당 역할의 대시보드 페이지로 리디렉션
+                window.location.href = `/${selectedRole}/dashboard`;
+            } else {
+                const errorData = await response.json();
+                console.error('Login failed:', errorData.message);
+                loginError.textContent = errorData.message || '로그인 실패. 사용자 이름 또는 비밀번호를 확인해주세요.';
+            }
+        } catch (error) {
+            console.error('Network error during login:', error);
+            loginError.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+        }
+    });
+</script>
+</body>
+</html>
+
+package com.header.header.auth.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfiguration {
+    @Autowired
+    private AuthFailHandler authFailHandler;
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();  //pwd 암호화에 가장 많이 사용되는 알고리즘, BCryptPasswordEncoder
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return web -> web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+        //static이란 정적인 resources에 대해서만 web.ignoring (무시)해라.
+    }
+
+    @Bean
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        /* 요청에 대한 권한Authority 체크 */
+        http.authorizeHttpRequests( auth -> {
+            auth.requestMatchers("/auth/login/*", "/user/signup", "/auth/fail", "/", "/main").permitAll();
+            auth.requestMatchers("/admin/**").hasRole("ADMIN");
+            auth.requestMatchers("/user/**").hasRole("USER");
+            auth.anyRequest().authenticated();
+
+        }).formLogin( adminlogin -> {
+            adminlogin.loginPage("/auth/login/*");
+            // login.loginPage => login Page로 등록해주는 코드
+            adminlogin.usernameParameter("userId");
+            adminlogin.passwordParameter("userPass");
+            /*match with login.html
+            <form th:action="@{/auth/login}" method="post">
+                    ID: <input type="text" name="userId"><br>
+                    PWD: <input type="password" name="userPass"><br>  250625*/
+            adminlogin.defaultSuccessUrl("/", true);
+            adminlogin.failureHandler(authFailHandler);
+            // .failureHandler : 로그인 실패했을 때 어떻게 할 것인지 경로 설정.
+            // (여기선 아까 만든 authFailHandler로 이동시키겠다고 해줌)
+
+        }).logout( logout -> {
+            logout.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"));
+            // Ant... : 특정 URL로 이동시킬 것이다
+            logout.deleteCookies("JSESSIONID");
+            // sessionId를 갖고 있기 때문에 deleteCookies라는 method로 JSESSIONID 삭제
+            logout.invalidateHttpSession(true);
+            // logout 시 세션 소멸되도록
+            logout.logoutSuccessUrl("/");
+            // logout 시 메인 페에지로 돌아가도록
+
+        }).sessionManagement( session -> {
+            session.maximumSessions(1);
+            session.invalidSessionUrl("/");
+
+        }).csrf( csrf -> csrf.disable());
+        //CrossSignRequestFolder :csrf = 내가(서버가?) 보낸 것처럼 악의적으로 위조해서 보내는 요청
+        // 원래 csrf.disable()을 거는 게 권장되진 않으나 개발단계에선 문제가 발생할 수 있으므로 .disable로
+        // 잠깐 기능을 닫아(?)놓는다.
+
+        return http.build();
+    }
+}
+
+package com.header.header.auth.config;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+
+@Configuration
+public class AuthFailHandler extends SimpleUrlAuthenticationFailureHandler {
+    //인증 실패 시의 예외처리를 하는  method
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+        String errorMessage ="";
+        if(exception instanceof BadCredentialsException){
+            errorMessage = "아이디가 없거나 비밀번호가 일치하지 않습니다.";
+            
+        } else if (exception instanceof InternalAuthenticationServiceException) {
+            errorMessage = "서버에서 오류 발생. 관리자에게 문의 요망";
+            
+        } else if (exception instanceof UsernameNotFoundException) {
+            errorMessage ="없는 ID입니다.";
+
+        } else if(exception instanceof AuthenticationCredentialsNotFoundException){
+            errorMessage="인증요청이 거부되었습니다";
+
+        } else {
+            errorMessage="알 수 없는 오류로 로그인 요청 처리 불가";
+        }
+
+        errorMessage= URLEncoder.encode(errorMessage, "UTF-8");
+        
+        setDefaultFailureUrl("/auth/fail?message=" +errorMessage);
+
+        super.onAuthenticationFailure(request, response,exception);
+    }
+}
+
+package com.header.header.auth.model.repository;
+
+import com.header.header.auth.model.dto.LoginUserDTO;
+import com.header.header.domain.user.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface AuthUserRepository extends JpaRepository<User, Integer> {
+    boolean existsByUserId(String userId);
+
+    boolean existsByUserPhone(String userPhone);
+
+    boolean existsByUserPhoneAndUserCodeNot(String userPhone, int userCode);
+
+    Optional<Object> findByUserId(String userId);
+
+    LoginUserDTO findByUsername(String username);
+}
+
+package com.header.header.auth.model.service;
+
+import com.header.header.auth.model.AuthDetails;
+import com.header.header.auth.model.dto.AuthUserDTO;
+import com.header.header.auth.model.dto.LoginUserDTO;
+import com.header.header.auth.model.dto.SignupDTO;
+import com.header.header.auth.model.repository.AuthUserRepository;
+import com.header.header.domain.user.entity.User;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+
+import static com.header.header.auth.common.ApiResponse.*;
+
+@Service
+@RequiredArgsConstructor
+// final 붙은 필드만 골라서 생성자를 자동 생성해줌 -> 의존성을 안정적으로 주입하고 코드를 간결하게 유지해줌
+public class AuthUserService {
+    private final AuthUserRepository authUserRepository;
+    private final ModelMapper modelMapper;
+
+    /*save : registerNewUser
+    -> SignupDTO 사용
+    @param signupDTO 생성할 user 정보가 담긴 DTO
+    @return 생성된 signupDTO(user관련 DTO)
+    @throws IllegalArgumentException 이미 존재하는 아이디나 전화번호일 때 */
+    @Transactional
+    public SignupDTO registerNewUser(SignupDTO signupDTO){
+        //중복확인 1 : userId
+        if (authUserRepository.existsByUserId(signupDTO.getUserId())) {
+            throw new IllegalArgumentException(
+                    String.format("이미 존재하는 아이디입니다.", signupDTO.getUserId()));
+        }
+        //중복확인 2 : userPhone
+        if (authUserRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            throw new IllegalArgumentException(
+                    String.format("이미 존재하는 전화번호입니다.", signupDTO.getUserPhone()));
+        }
+
+        User newUser = authUserRepository.save(modelMapper.map(signupDTO, User.class));
+
+        // 생성된 userCode를 DTO에 다시 설정
+        signupDTO.setUserCode(newUser.getUserCode());
+        return signupDTO;
+    }
+
+    /*Read specific : Login
+    * ID갖고 회원정보 조회하는 method 생성. 반환은 UserDTO로
+    *
+    * @param userCode
+    * @return modelMapper
+    * @throws IllegalAccessError */
+    /*Spring-data-jpa: findById (Repository에서 제공해주는 메소드) 이용하는 방법*/
+//    public LoginUserDTO findUserByUserId(int userCode) {
+//        User foundUser = authUserRepository.findById(userCode)
+//                .orElseThrow(() -> new IllegalAccessError("해당하는 회원이 없습니다. 회원가입 후 로그인 해주십시오."));
+//        return modelMapper.map(foundUser, LoginUserDTO.class);
+//    }
+    public LoginUserDTO findByUsername(String username){
+        LoginUserDTO login = authUserRepository.findByUsername(username);
+        if(!Objects.isNull(login)){
+            return login;
+        }else {
+            return null;
+        }
+    }
+
+    /*Update : Modify user information
+    *
+    * @param authUserDTO
+    * @throws IllegalArgumentException */
+    /*수정(엔티티 객체의 필드 값 변경) -> 일단 수정할 menuCode를 findById로 받아온다. */
+    @Transactional
+    public String modifyUser(AuthUserDTO authUserDTO){
+        // 1. 기존 유저 엔티티 조회 (예시로 userCode 또는 userId 기준으로 조회)
+        User user = authUserRepository.findById(authUserDTO.getUserCode())
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        // 2. 이전 값과 동일한지 확인
+        if (user.getUserPwd().equals(authUserDTO.getUserPwd())) {
+            return SAME_PASSWORD.getMessage();
+        }
+
+        if (user.getUserPhone().equals(authUserDTO.getUserPhone())) {
+            return SAME_PHONE.getMessage();
+        }
+
+        if (user.getUserName().equals(authUserDTO.getUserName())) {
+            return SAME_NAME.getMessage();
+        }
+
+        // 3. 전화번호 중복 확인
+//        if (authUserRepository.existsByUserPhone(authUserDTO.getUserPhone())) {
+//            return DUPLICATE_PHONE.getMessage();
+//        }
+
+        // 3. 전화번호 중복 확인 (자기 자신 제외)
+        if (authUserRepository.existsByUserPhoneAndUserCodeNot(authUserDTO.getUserPhone(), authUserDTO.getUserCode())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        // 4. 도메인 메서드를 통한 정보 수정
+        user.modifyUserPassword(authUserDTO.getUserPwd());
+        user.modifyUserPhone(authUserDTO.getUserPhone());
+        user.modifyUserName(authUserDTO.getUserName());
+        return String.valueOf(user);
+    }
+
+
+    /*DELETE
+     -> deleteById() 말고
+     실제론 Update가 사용되어야 함
+     isLeave = true 형태로
+     @param autuUserDTO
+     */
+    @Transactional
+    public void deleteUser(AuthUserDTO authUserDTO) {
+        User user = authUserRepository.findById(authUserDTO.getUserCode())
+                .orElseThrow(() -> new NoSuchElementException("이미 탈퇴한 회원입니다"));
+        user.modifyUserLeave(true);
+    }
+}
+
+package com.header.header.auth.model.service;
+
+import com.header.header.auth.model.AuthDetails;
+import com.header.header.auth.model.dto.LoginUserDTO;
+import com.header.header.domain.user.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class AuthService implements UserDetailsService {
+    @Autowired
+    private AuthUserService authUserService;
+
+    @Override
+    public AuthDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        LoginUserDTO user = authUserService.findByUsername(userId);
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (user.isAdmin()==true) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+
+        return new AuthDetails(
+                user.getUserId(),
+                user.getUserPwd(),
+                authorities
+        );
+    }
+}
