@@ -1,0 +1,239 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header Styles */
+.header {
+    background-color: #ffffff;
+    padding: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.scissors {
+    font-size: 24px;
+    color: #333;
+}
+
+.header-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    letter-spacing: 2px;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.login-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 60px 40px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    background-color: #fafafa;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #2c3e50;
+    background-color: white;
+}
+
+.input-group input::placeholder {
+    color: #999;
+    font-weight: 400;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 14px;
+    text-align: center;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+.login-button {
+    width: 100%;
+    padding: 18px;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.login-button:hover {
+    background-color: #34495e;
+}
+
+.login-button:active {
+    transform: translateY(1px);
+}
+
+.login-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.login-links .link {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.login-links .link:hover {
+    color: #2c3e50;
+    text-decoration: underline;
+}
+
+.login-links .separator {
+    color: #ccc;
+}
+
+/* Footer Styles */
+.footer {
+    background-color: #ffffff;
+    padding: 30px 20px;
+    border-top: 1px solid #eee;
+    margin-top: auto;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    color: #666;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.footer-links .separator {
+    color: #ccc;
+}
+
+.company-info {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.company-info p {
+    margin: 5px 0;
+}
+
+.copyright {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-container {
+        margin: 20px;
+        padding: 40px 30px;
+    }
+    
+    .header-text {
+        font-size: 20px;
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .footer-links .separator {
+        display: none;
+    }
+    
+    .company-info {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        padding: 30px 20px;
+    }
+    
+    .input-group input {
+        padding: 14px 16px;
+        font-size: 15px;
+    }
+    
+    .login-button {
+        padding: 16px;
+        font-size: 16px;
+    }
+}

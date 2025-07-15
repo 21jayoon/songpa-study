@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEADER - 로그인</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="scissors">✂</span>
+                <span class="header-text">HEADER</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="login-container">
+                <form th:action="@{/auth/session}" method="post" class="login-form">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            name="id" 
+                            id="id" 
+                            placeholder="아이디" 
+                            required
+                        />
+                    </div>
+                    
+                    <div class="input-group">
+                        <input 
+                            type="password" 
+                            name="password" 
+                            id="password" 
+                            placeholder="비밀번호" 
+                            required
+                        />
+                    </div>
+
+                    <div th:if="${error}" class="error-message">
+                        <span th:text="${error}"></span>
+                    </div>
+
+                    <button type="submit" class="login-button">LOGIN</button>
+
+                    <div class="login-links">
+                        <a href="#" class="link">회원가입</a>
+                        <span class="separator">|</span>
+                        <a href="#" class="link">아이디 찾기</a>
+                        <span class="separator">|</span>
+                        <a href="#" class="link">비밀번호 찾기</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#">이용약관</a>
+                <span class="separator">|</span>
+                <a href="#">개인정보처리방침</a>
+                <span class="separator">|</span>
+                <a href="#">이메일무단수집거부</a>
+                <span class="separator">|</span>
+                <a href="#">사용자가이드</a>
+                <span class="separator">|</span>
+                <a href="#">소상공인협회</a>
+            </div>
+            
+            <div class="company-info">
+                <p>서울특별시 송파구 중대로9길 34(가락동) 대호빌딩2층</p>
+                <p>
+                    대표 : HEADER &nbsp; 사업자등록번호 : 215-82-12405 &nbsp; 
+                    전화 : 02-430-6070 &nbsp; 팩스 : 02-430-6071 &nbsp; 
+                    개인정보관리책임자 : HEADER
+                </p>
+            </div>
+            
+            <div class="copyright">
+                <p>Copyright© 2025. 송파성인직업전문센터 TEAM HEADER. All rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
