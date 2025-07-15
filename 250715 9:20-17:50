@@ -1,0 +1,658 @@
+https://www.maeil-mail.kr/question/16
+# React (front-end)의 props와 state
+props는 부모 컴포넌트가 자식 컴포넌트에 전달하는 데이터.
+props는 읽기 전용으로, 자식 컴포넌트는 props를 수정할 수 없다.
+props를 통해 컴포넌트 간의 데이터 흐름을 예측 가능하게 만들고, 컴포넌트의 재사용성이 높아진다.
+
+state는 컴포넌트 내부에서 관리되는 데이터. 동적으로 변경될 수 있으며, 컴포넌트의 렌더링에 영향을 미친다.
+state를 변경하면 컴포넌트는 다시 렌더링되며, UI가 업데이트된다.
+state는 주로 "사용자 입력"이나 네트워크 요청의 "응답에 따라 변하는 데이터"를 관리할 때 사용한다.
+
+# props가 자식 컴포넌트에서 변하지 않는 이유??
+리액트의 "단방향 데이터 흐름 원칙" 때문.
+리액트는 부모 컴포넌트가 자식 컴포넌트에 데이터를 전달할 때 단방향으로 전달하도록 설계되었다.
+이렇게 하면 컴포넌트 간의 데이터 흐름을 예측 가능하고 일관성 있게 만들 수 있어
+애플리케이션 상태 관리가 간단해진다.
+
+props는 읽기 전용이기 때문에, 
+부모 컴포넌트에서 전달된 값이 자식 컴포넌트 내에서 임의로 변경되지 않는다. 
+이로 인해, 특정 상태가 어디서 어떻게 변했는지를 예측할 수 있어 
+버그 발생 가능성을 줄이고 디버깅을 쉽게 만든다.
+
+만약 props가 변경될 수 있다면, 
+자식 컴포넌트는 독립적으로 동작하지 않게 되고, 재사용이 어려워질 수 있다.
+props가 불변으로 유지됨으로써
+컴포넌트는 외부 입력에 의존할 뿐 내부적으로 변경되지 않아
+재사용성이 높아지고, 코드의 캡슐화가 강화된다.
+
+# 만약 자식 컴포넌트에서 부모 컴포넌트로부터 받은 props를 변경해야 한다면???
+자식 컴포넌트가 부모로부터 받은 props를 변경해야 한다면,
+부모 컴포넌트에서 상태로 해당 데이터를 관리하고,
+상태 변경 함수를 자식 컴포넌트로 전달하는 방식으로 구현해야 한다.
+
+이렇게 하면 데이터는 여전히 단방향으로 흐르고,
+상태는 부모 컴포넌트가 관리하므로 일관성을 유지할 수 있다. 
+이러한 기법을 "상태 끌어올리기"라고 한다.
+
+
+# 20250715 Developing Day 7
+## 1. Change import of AccessDeniedException in UserFacadeService, MsgTemplateService, MSBService, SalesService, BossReservationService
+Detract 'throws AccessDeniedException' at each method and
+import org.springframework.security.access.AccessDeniedException;
+
+## 2. /* 11. MenuCategoryService authorization : createMenuCategory, updateMenuCategory, deleteMenuCategory */
+    @Transactional
+    public MenuCategoryDTO authCreateMenuCategory(LoginUserDTO loginUserDTO, MenuCategoryDTO dto, Integer shopCode) {
+        User user = userRepository.findByUserId(loginUserDTO.getUserId());
+
+        // MenuCategorySercie 내의 createMenuCategory 메소드 수정 없이 이용하기 위해
+        // 파사드서비스에서의 exception 사용 
+        if (!user.isAdmin()) {
+            throw new AccessDeniedException("관리자만 접근가능한 페이지입니다.");
+        }
+
+        return menuCategoryService.createMenuCategory(dto, shopCode);
+    }
+
+    @Transactional
+    public MenuCategoryDTO authUpdateMenuCategory(LoginUserDTO loginUserDTO, Integer categoryCode, Integer shopCode, MenuCategoryDTO dto) {
+        User user = userRepository.findByUserId(loginUserDTO.getUserId());
+
+        if (!user.isAdmin()) {
+            throw new AccessDeniedException("관리자만 접근가능한 페이지입니다.");
+        }
+
+        return menuCategoryService.updateMenuCategory(categoryCode, shopCode, dto);
+    }
+
+    @Transactional
+    public void deleteMenuCategory(LoginUserDTO loginUserDTO, Integer categoryCode, Integer shopCode) {
+        User user = userRepository.findByUserId(loginUserDTO.getUserId());
+
+        if (!user.isAdmin()) {
+            throw new AccessDeniedException("관리자만 접근가능한 페이지입니다.");
+        }
+
+        menuCategoryService.deleteMenuCategory(categoryCode, shopCode);
+    }
+
+## 3. [FIX] 대형 문제상황 발생
+
+    accessMsgTemplate 이 메소드 하나만으로 어떻게 MessageTemplateService의 전체 접근을 막는 거야?
+
+    정답은: ❗ "못 막아. 그 메소드만으로는 MessageTemplateService의 전체 접근을 막을 수 없어."
+    
+    🎯 왜 못 막을까?
+    accessMsgTemplate(User user) 메서드는 그 함수 안에서만 관리자 권한을 검사할 뿐이야.
+    그러니까, 다른 누군가가 MessageTemplateService의 다른 메서드들을 직접 호출하면?
+    → accessMsgTemplate()는 호출되지 않으니까
+    → 권한 검사가 안 됨 ❌
+    
+    즉, accessMsgTemplate()는 "막는 방법"이 아니라 "검사 도구"일 뿐이야.
+    
+    🧯그럼 어떻게 전체 접근을 막을 수 있어?
+    👉 FacadeService를 통해서만 MessageTemplateService에 접근하게 하고,
+    그 안에서 accessMsgTemplate()을 항상 호출하게 강제해야 해.
+    
+    즉, 구조적으로 "MessageTemplateService는 직접 쓰지 말고, 반드시 파사드(FacadeService)를 통해서만 써라" 라고 강제해야 해.
+    
+    ✅ 예시 그림
+    [❌ 잘못된 구조]
+    Controller → MessageTemplateService.getTemplate()  ←❌ 권한검사 안 함
+    
+    
+    [✅ 바람직한 구조]
+    Controller → FacadeService.adminGetTemplate()
+    ↓
+    accessMsgTemplate(user) ← 관리자 확인
+    ↓
+    MessageTemplateService.getTemplate()
+    ✅ 결론
+    accessMsgTemplate() 메서드 하나만으로는 전체 접근을 막을 수 없다. ❌
+    
+    이 메서드는 "도우미(guard) 함수"일 뿐이고,
+    실제로는 모든 호출 전에 "이 함수를 반드시 호출하도록 강제하는 구조(Facade 또는 AOP 등)"가 필요하다.
+    
+    따라서 MessageTemplateService를 직접 호출하지 않고, 
+    항상 UserFacadeService 같은 곳을 거치게 해야 한다.
+    
+    ✍️ 보너스: 완전히 자동으로 막고 싶다면?
+    Spring Security + AOP 또는 @PreAuthorize 같은 어노테이션을 쓰면,
+    아예 특정 메서드에 "이건 관리자만 접근 가능"이라고 선언할 수도 있어.
+    
+    예:
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<MessageTemplateDTO> getTemplates() {
+    ...
+    }
+    이건 나중에 스프링 시큐리티 공부할 때 자연스럽게 배울 거야!
+    
+    필요하면 AOP 방식으로 accessMsgTemplate() 자동 호출하는 구조도 알려줄 수 있어.
+    지금은 "Facade를 통해서만 쓰게 구조적으로 강제해야 막을 수 있다"는 핵심만 꼭 기억해!
+
+### 3-1. Revise all entity services and UserFacadeService
+
+## 4. Create FacadeServiceAuthTest only for test authorization of other colleague's entity
+https://seonjun0906.tistory.com/entry/SpringBootTest-vs-Mock
+
+    package com.header.header.domain.auth;
+
+    import com.header.header.auth.model.dto.LoginUserDTO;
+    import com.header.header.domain.menu.dto.MenuCategoryDTO;
+    import com.header.header.domain.user.facade.UserFacadeService;
+    import com.header.header.domain.user.repository.MainUserRepository;
+    import jakarta.transaction.Transactional;
+    import org.junit.jupiter.api.DisplayName;
+    import org.junit.jupiter.api.Test;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.boot.test.context.SpringBootTest;
+    import org.springframework.security.access.AccessDeniedException;
+    
+    import static org.junit.jupiter.api.Assertions.*;
+    
+    @SpringBootTest
+    @Transactional
+    public class FacadeServiceAuthTest {
+    
+        // @Autowired를 사용하여 실제 UserFacadeService 빈을 주입받습니다.
+        // @InjectMocks 대신 @Autowired를 사용하는 이유는 @SpringBootTest 환경에서는 실제 빈을 사용하기 때문입니다.
+        @Autowired
+        private UserFacadeService userFacadeService;
+    
+        // @MockBean을 사용하여 Spring 컨텍스트에 있는 BossReservationService 빈을 모의 객체로 대체합니다.
+        // 이렇게 하면 UserFacadeService가 주입받는 BossReservationService는 이 모의 객체가 됩니다.
+        @MockBean
+        private BossReservationService bossReservationService;
+    
+        // @MockBean을 사용하여 MainUserRepository도 모의 객체로 대체합니다.
+        @MockBean
+        private MainUserRepository userRepository;
+    
+        // 테스트를 위한 상수 데이터
+        private static final Integer TEST_SHOP_CODE = 1;
+        private static final Integer TEST_RESV_CODE = 100;
+        private static final String TEST_MENU_NAME = "Test Menu";
+        private static final String TEST_USER_NAME = "Test User";
+        private static final Date TEST_DATE = Date.valueOf(LocalDate.now());
+        private static final Time TEST_TIME = Time.valueOf(LocalTime.of(10, 0));
+        private BossResvInputDTO TEST_REGIST_INPUT_DTO;
+        private SalesDTO TEST_SALES_DTO;
+    
+        @BeforeEach
+        void setUp() {
+            // SecurityContextHolder.clearContext()는 @WithMockUser나 @WithUserDetails를 사용할 경우
+            // Spring Security 테스트 어노테이션이 자동으로 컨텍스트를 관리하므로 명시적으로 호출할 필요가 없습니다.
+            // 하지만 혹시 모를 상황을 대비해 두어도 무방합니다.
+            SecurityContextHolder.clearContext();
+    
+            // 테스트에 사용할 DTO 객체 초기화 (매 테스트마다 새로운 인스턴스 생성)
+            TEST_REGIST_INPUT_DTO = new BossResvInputDTO(TEST_USER_NAME, "01012345678", TEST_MENU_NAME, TEST_SHOP_CODE, TEST_DATE, TEST_TIME, "comment");
+            TEST_SALES_DTO = new SalesDTO(TEST_RESV_CODE, TEST_SHOP_CODE, TEST_MENU_NAME, 10000);
+        }
+    
+        /**
+         * Spring Security Context에 특정 사용자의 인증 정보를 설정하는 헬퍼 메소드.
+         * {@code @WithMockUser}나 {@code @WithUserDetails}를 사용하는 것이 더 일반적이지만,
+         * 여기서는 유연성을 위해 수동 설정 방식을 유지합니다.
+         *
+         * @param username 설정할 사용자 이름
+         * @param isAdmin  해당 사용자가 관리자인지 여부
+         */
+        private void setSecurityContext(String username, boolean isAdmin) {
+            // UserDetails Mock: Spring Security의 Principal 역할을 합니다.
+            UserDetails userDetails = mock(UserDetails.class);
+            when(userDetails.getUsername()).thenReturn(username);
+            // 권한은 checkAdminAccess 로직에서 isAdmin 필드를 직접 확인하므로 Collections.emptyList()로 충분합니다.
+            when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
+    
+            // User Entity Mock: checkAdminAccess()에서 userRepository를 통해 조회되는 User 객체를 모의합니다.
+            User mockUser = mock(User.class);
+            when(mockUser.getIsAdmin()).thenReturn(isAdmin ? 1 : 0); // 관리자면 1, 아니면 0 반환하도록 설정
+    
+            // MainUserRepository Mock: findByUsername 호출 시 위에서 정의한 mockUser를 반환하도록 설정
+            // @MockBean으로 주입된 userRepository에 대한 스텁 설정입니다.
+            when(userRepository.findByUsername(username)).thenReturn(Optional.of(mockUser));
+    
+            // Authentication 객체 생성 및 SecurityContextHolder에 설정
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+    
+        @Test
+        @DisplayName("관리자 접근 테스트 - 모든 BossReservation 관련 메소드")
+        void adminAccessToBossReservationMethodsTest() {
+            // given
+            // 관리자 사용자 설정. 이 메소드는 @SpringBootTest 환경에서도 작동합니다.
+            setSecurityContext("adminUser", true);
+    
+            // when & then: 관리자는 모든 *ForAdmin 메소드에 예외 없이 접근 가능해야 함
+    
+            // findReservationListForAdmin
+            assertDoesNotThrow(() -> userFacadeService.findReservationListForAdmin(TEST_SHOP_CODE));
+            // @MockBean으로 대체된 bossReservationService의 메소드가 호출되었는지 검증
+            verify(bossReservationService, times(1)).findReservationList(TEST_SHOP_CODE);
+    
+            // findReservationListByDateForAdmin
+            assertDoesNotThrow(() -> userFacadeService.findReservationListByDateForAdmin(TEST_SHOP_CODE, TEST_DATE));
+            verify(bossReservationService, times(1)).findReservationListByDate(TEST_SHOP_CODE, TEST_DATE);
+    
+            // findReservationListByNameForAdmin
+            assertDoesNotThrow(() -> userFacadeService.findReservationListByNameForAdmin(TEST_SHOP_CODE, TEST_USER_NAME));
+            verify(bossReservationService, times(1)).findReservationListByName(TEST_SHOP_CODE, TEST_USER_NAME);
+    
+            // findReservationListByMenuNameForAdmin
+            assertDoesNotThrow(() -> userFacadeService.findReservationListByMenuNameForAdmin(TEST_SHOP_CODE, TEST_MENU_NAME));
+            verify(bossReservationService, times(1)).findReservationListByMenuName(TEST_SHOP_CODE, TEST_MENU_NAME);
+    
+            // findReservationByResvCodeForAdmin
+            assertDoesNotThrow(() -> userFacadeService.findReservationByResvCodeForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, times(1)).findReservationByResvCode(TEST_RESV_CODE);
+    
+            // registNewReservationForAdmin
+            assertDoesNotThrow(() -> userFacadeService.registNewReservationForAdmin(TEST_REGIST_INPUT_DTO));
+            verify(bossReservationService, times(1)).registNewReservation(TEST_REGIST_INPUT_DTO);
+    
+            // updateReservationForAdmin
+            BossResvInputDTO updateInputDTO = new BossResvInputDTO(TEST_USER_NAME, "01098765432", TEST_MENU_NAME, TEST_SHOP_CODE, TEST_DATE, TEST_TIME, "updated comment");
+            assertDoesNotThrow(() -> userFacadeService.updateReservationForAdmin(updateInputDTO, TEST_RESV_CODE));
+            verify(bossReservationService, times(1)).updateReservation(updateInputDTO, TEST_RESV_CODE);
+    
+            // cancelReservationForAdmin
+            assertDoesNotThrow(() -> userFacadeService.cancelReservationForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, times(1)).cancelReservation(TEST_RESV_CODE);
+    
+            // deleteReservationForAdmin
+            assertDoesNotThrow(() -> userFacadeService.deleteReservationForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, times(1)).deleteReservation(TEST_RESV_CODE);
+    
+            // afterProcedureForAdmin
+            assertDoesNotThrow(() -> userFacadeService.afterProcedureForAdmin(TEST_SALES_DTO));
+            verify(bossReservationService, times(1)).afterProcedure(TEST_SALES_DTO);
+    
+            // findNoShowListForAdmin
+            assertDoesNotThrow(() -> userFacadeService.findNoShowListForAdmin(TEST_DATE, ReservationState.NOSHOW, TEST_SHOP_CODE));
+            verify(bossReservationService, times(1)).findNoShowList(TEST_DATE, ReservationState.NOSHOW, TEST_SHOP_CODE);
+    
+            // noShowHandlerForAdmin
+            assertDoesNotThrow(() -> userFacadeService.noShowHandlerForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, times(1)).noShowHandler(TEST_RESV_CODE);
+        }
+    
+        // 비관리자 접근 테스트를 추가할 수도 있습니다.
+        @Test
+        @DisplayName("비관리자 접근 테스트 - 모든 BossReservation 관련 메소드 접근 거부")
+        void nonAdminAccessToBossReservationMethodsTest() {
+            // given
+            setSecurityContext("normalUser", false); // 비관리자 사용자 설정
+    
+            // when & then: 비관리자는 *ForAdmin 메소드에 접근 시 예외가 발생해야 함 (예: AccessDeniedException 또는 커스텀 예외)
+    
+            // 이 부분은 userFacadeService.checkAdminAccess()가 어떤 종류의 예외를 던지는지에 따라
+            // assertThrows의 두 번째 인자(기대하는 예외 클래스)를 맞춰주어야 합니다.
+            // 예를 들어, AccessDeniedException을 던진다면 다음과 같이 작성합니다.
+            // assertThrows(AccessDeniedException.class, () -> userFacadeService.findReservationListForAdmin(TEST_SHOP_CODE));
+    
+            // 여기서는 편의상 예외 타입은 명시하지 않고 assertThrows를 사용합니다.
+            // 실제로는 여러분의 checkAdminAccess 로직에서 던지는 정확한 예외 타입을 지정해야 합니다.
+    
+            // findReservationListForAdmin
+            // userFacadeService.findReservationListForAdmin 내부에서 checkAdminAccess 호출 시 예외 발생을 예상합니다.
+            assertThrows(RuntimeException.class, () -> userFacadeService.findReservationListForAdmin(TEST_SHOP_CODE));
+            verify(bossReservationService, never()).findReservationList(TEST_SHOP_CODE); // 서비스 메소드는 호출되지 않아야 합니다.
+    
+            // findReservationListByDateForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.findReservationListByDateForAdmin(TEST_SHOP_CODE, TEST_DATE));
+            verify(bossReservationService, never()).findReservationListByDate(TEST_SHOP_CODE, TEST_DATE);
+    
+            // findReservationListByNameForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.findReservationListByNameForAdmin(TEST_SHOP_CODE, TEST_USER_NAME));
+            verify(bossReservationService, never()).findReservationListByName(TEST_SHOP_CODE, TEST_USER_NAME);
+    
+            // findReservationListByMenuNameForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.findReservationListByMenuNameForAdmin(TEST_SHOP_CODE, TEST_MENU_NAME));
+            verify(bossReservationService, never()).findReservationListByMenuName(TEST_SHOP_CODE, TEST_MENU_NAME);
+    
+            // findReservationByResvCodeForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.findReservationByResvCodeForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, never()).findReservationByResvCode(TEST_RESV_CODE);
+    
+            // registNewReservationForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.registNewReservationForAdmin(TEST_REGIST_INPUT_DTO));
+            verify(bossReservationService, never()).registNewReservation(TEST_REGIST_INPUT_DTO);
+    
+            // updateReservationForAdmin
+            BossResvInputDTO updateInputDTO = new BossResvInputDTO(TEST_USER_NAME, "01098765432", TEST_MENU_NAME, TEST_SHOP_CODE, TEST_DATE, TEST_TIME, "updated comment");
+            assertThrows(RuntimeException.class, () -> userFacadeService.updateReservationForAdmin(updateInputDTO, TEST_RESV_CODE));
+            verify(bossReservationService, never()).updateReservation(updateInputDTO, TEST_RESV_CODE);
+    
+            // cancelReservationForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.cancelReservationForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, never()).cancelReservation(TEST_RESV_CODE);
+    
+            // deleteReservationForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.deleteReservationForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, never()).deleteReservation(TEST_RESV_CODE);
+    
+            // afterProcedureForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.afterProcedureForAdmin(TEST_SALES_DTO));
+            verify(bossReservationService, never()).afterProcedure(TEST_SALES_DTO);
+    
+            // findNoShowListForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.findNoShowListForAdmin(TEST_DATE, ReservationState.NOSHOW, TEST_SHOP_CODE));
+            verify(bossReservationService, never()).findNoShowList(TEST_DATE, ReservationState.NOSHOW, TEST_SHOP_CODE);
+    
+            // noShowHandlerForAdmin
+            assertThrows(RuntimeException.class, () -> userFacadeService.noShowHandlerForAdmin(TEST_RESV_CODE));
+            verify(bossReservationService, never()).noShowHandler(TEST_RESV_CODE);
+        }
+
+## 5. Cut & organize UserFacadeService
+(Now)
+
+    package com.header.header.domain.user.facade;
+
+    import com.header.header.auth.model.dto.LoginUserDTO;
+    import com.header.header.auth.model.dto.SignupDTO;
+    import com.header.header.common.exception.NotFoundException;
+    import com.header.header.domain.menu.dto.MenuCategoryDTO;
+    import com.header.header.domain.menu.service.MenuCategoryService;
+    import com.header.header.domain.message.service.MessageSendBatchService;
+    import com.header.header.domain.message.service.MessageTemplateService;
+    import com.header.header.domain.message.service.ShopMessageHistoryService;
+    import com.header.header.domain.reservation.dto.BossResvInputDTO;
+    import com.header.header.domain.reservation.dto.BossResvProjectionDTO;
+    import com.header.header.domain.reservation.enums.ReservationState;
+    import com.header.header.domain.reservation.service.BossReservationService;
+    import com.header.header.domain.sales.dto.SalesDTO;
+    import com.header.header.domain.sales.service.SalesService;
+    import com.header.header.domain.user.dto.UserDTO;
+    import com.header.header.domain.user.entity.User;
+    import com.header.header.domain.user.repository.MainUserRepository;
+    import com.header.header.domain.user.service.UserService;
+    import lombok.RequiredArgsConstructor;
+    import org.apache.commons.logging.Log;
+    import org.springframework.security.core.Authentication;
+    import org.springframework.security.core.context.SecurityContextHolder;
+    import org.springframework.security.core.userdetails.UserDetails;
+    import org.springframework.security.core.userdetails.UsernameNotFoundException;
+    import org.springframework.stereotype.Service;
+    import org.springframework.transaction.annotation.Transactional;
+    import org.springframework.security.access.AccessDeniedException;
+    
+    import java.sql.Date;
+    import java.util.List;
+    
+    @Service
+    @RequiredArgsConstructor
+    public class UserFacadeService {
+    
+        private final UserService userService;
+        private final MainUserRepository userRepository;
+        private final BossReservationService bossReservationService;
+        private final SalesService salesService;
+        private final MessageSendBatchService messageSendBatchService;
+        private final MessageTemplateService messageTemplateService;
+        private final MenuCategoryService menuCategoryService;
+        private final ShopMessageHistoryService shopMessageHistoryService;
+    
+        /* 1. 더미 유저 등록 (전화번호/이름 기반)
+        * 업장에서 전화번호 + 이름만으로 임시 가입한 dummy user 생성 */
+        @Transactional
+        public User registerDummyUser(String userName, String userPhone) {
+            return userService.createUserByNameAndPhone(userName, userPhone);
+        }
+    
+        /* 2. 이름/전화번호로 유저 코드 조회 */
+        public Integer getUserCodeByNameAndPhone(String name, String phone) {
+            return userService.findUserByNameAndPhone(name, phone);
+        }
+    
+        /* 3. 회원가입 처리 (중복검사 포함) */
+        @Transactional
+        public String registerUser(SignupDTO signupDTO) {
+            return userService.registerNewUser(signupDTO);
+        }
+    
+        /* 4. 로그인 시 유저 정보 조회 */
+        public LoginUserDTO login(String userId) {
+            return userService.findByUserId(userId);
+        }
+    
+        /* 5. 회원 정보 수정 */
+        @Transactional
+        public String updateUser(UserDTO dto) {
+            return userService.modifyUser(dto);
+        }
+    
+        /* 6. 회원 탈퇴 처리 (isLeave = true) */
+        @Transactional
+        public void withdrawUser(UserDTO dto) {
+            userService.deleteUser(dto);
+        }
+    }
+
+(Before)
+
+    package com.header.header.domain.user.facade;
+    ......
+    
+    @Service
+    @RequiredArgsConstructor
+    public class UserFacadeService {
+    
+        private final UserService userService;
+        private final MainUserRepository userRepository;
+        private final BossReservationService bossReservationService;
+        private final SalesService salesService;
+        private final MessageSendBatchService messageSendBatchService;
+        private final MessageTemplateService messageTemplateService;
+        private final MenuCategoryService menuCategoryService;
+        private final ShopMessageHistoryService shopMessageHistoryService;
+    
+        /* 1. 더미 유저 등록 (전화번호/이름 기반)
+        * 업장에서 전화번호 + 이름만으로 임시 가입한 dummy user 생성 */
+        @Transactional
+        public User registerDummyUser(String userName, String userPhone) {
+            return userService.createUserByNameAndPhone(userName, userPhone);
+        }
+    
+        /* 2. 이름/전화번호로 유저 코드 조회 */
+        public Integer getUserCodeByNameAndPhone(String name, String phone) {
+            return userService.findUserByNameAndPhone(name, phone);
+        }
+    
+        /* 3. 회원가입 처리 (중복검사 포함) */
+        @Transactional
+        public String registerUser(SignupDTO signupDTO) {
+            return userService.registerNewUser(signupDTO);
+        }
+    
+        /* 4. 로그인 시 유저 정보 조회 */
+        public LoginUserDTO login(String userId) {
+            return userService.findByUserId(userId);
+        }
+    
+        /* 5. 회원 정보 수정 */
+        @Transactional
+        public String updateUser(UserDTO dto) {
+            return userService.modifyUser(dto);
+        }
+    
+        /* 6. 회원 탈퇴 처리 (isLeave = true) */
+        @Transactional
+        public void withdrawUser(UserDTO dto) {
+            userService.deleteUser(dto);
+        }
+    
+        /* 7. 타 엔티티 서비스의 인가 처리 및 확인을 위한 메서드*/
+        private void checkAdminAccess() {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new AccessDeniedException("회원가입 및 로그인 후 이용가능합니다.");
+            }
+    
+            Object principal = authentication.getPrincipal();
+    
+            if (principal instanceof UserDetails userDetails) {
+                User currentUser = userRepository.findByUserId(userDetails.getUsername());
+    
+                if (currentUser == null) {
+                    throw new UsernameNotFoundException("해당 유저를 찾을 수 없습니다.");
+                }
+    
+                if (currentUser.isAdmin() == false) { // isAdmin이 false(일반 고객)라면
+                    throw new AccessDeniedException("관리자만 접근가능한 페이지입니다.");
+                }
+            } else {
+                throw new AccessDeniedException("샵 등록 후 관리자 전환이 되어야만 접근가능한 페이지입니다.");
+            }
+        }
+    
+        /* 7. BossReservation Authorization 처리 */
+        public List<BossResvProjectionDTO> findReservationListForAdmin(Integer shopCode) {
+            checkAdminAccess();
+            return bossReservationService.findReservationList(shopCode);
+        }
+    
+        public List<BossResvProjectionDTO> findReservationListByDateForAdmin(Integer shopCode, Date selectedDate) {
+            checkAdminAccess();
+            return bossReservationService.findReservationListByDate(shopCode, selectedDate);
+        }
+    
+        public List<BossResvProjectionDTO> findReservationListByNameForAdmin(Integer shopCode, String userName) {
+            checkAdminAccess();
+            return bossReservationService.findReservationListByName(shopCode, userName);
+        }
+    
+        public List<BossResvProjectionDTO> findReservationListByMenuNameForAdmin(Integer shopCode, String menuName) {
+            checkAdminAccess();
+            return bossReservationService.findReservationListByMenuName(shopCode, menuName);
+        }
+    
+        public BossResvProjectionDTO findReservationByResvCodeForAdmin(Integer resvCode) {
+            checkAdminAccess();
+            return bossReservationService.findReservationByResvCode(resvCode);
+        }
+    
+        public void registNewReservationForAdmin(BossResvInputDTO inputDTO) {
+            checkAdminAccess();
+            bossReservationService.registNewReservation(inputDTO);
+        }
+    
+        public void updateReservationForAdmin(BossResvInputDTO inputDTO, Integer resvCode) {
+            checkAdminAccess();
+            bossReservationService.updateReservation(inputDTO, resvCode);
+        }
+    
+        public void cancelReservationForAdmin(Integer resvCode) {
+            checkAdminAccess();
+            bossReservationService.cancelReservation(resvCode);
+        }
+    
+        public void deleteReservationForAdmin(Integer resvCode) {
+            checkAdminAccess();
+            bossReservationService.deleteReservation(resvCode);
+        }
+    
+    
+        /* 8. SalesService Authorization 처리 */
+        @Transactional
+        public void adminSalesLookup(LoginUserDTO loginUserDTO) throws AccessDeniedException {
+            User user = userRepository.findByUserId(loginUserDTO.getUserId());
+            salesService.accessSales(user);
+        }
+    
+        /* 9. Message Authorization 처리 */
+        @Transactional
+        public void adminMsgAuthorize(LoginUserDTO loginUserDTO) {
+            User user = userRepository.findByUserId(loginUserDTO.getUserId());
+            messageSendBatchService.accessMSB(user);
+        }
+    
+        /* 10. MsgTemplate 처리 */
+        @Transactional
+        public void adminMsgTemplateAuthorize(LoginUserDTO loginUserDTO){
+            User user = userRepository.findByUserId(loginUserDTO.getUserId());
+            messageSendBatchService.accessMSB(user);
+        }
+    
+        /* 11. MsgHistory 인가 */
+        @Transactional
+        public void adminMsgHistoryAuthorize(LoginUserDTO loginUserDTO) {
+            User user = userRepository.findByUserId(loginUserDTO.getUserId());
+            messageSendBatchService.accessMSB(user);
+        }
+    
+        /* 12. MenuCategoryService authorization : createMenuCategory, updateMenuCategory, deleteMenuCategory */
+        @Transactional
+        public MenuCategoryDTO authCreateMenuCategory(LoginUserDTO loginUserDTO, MenuCategoryDTO dto, Integer shopCode) {
+            User user = userRepository.findByUserId(loginUserDTO.getUserId());
+    
+            // MenuCategorySercie 내의 createMenuCategory 메소드 수정 없이 이용하기 위해
+            // 파사드서비스에서의 exception 사용
+            if (!user.isAdmin()) {
+                throw new AccessDeniedException("관리자만 접근가능한 페이지입니다.");
+            }
+    
+            return menuCategoryService.createMenuCategory(dto, shopCode);
+        }
+    
+        @Transactional
+        public MenuCategoryDTO authUpdateMenuCategory(LoginUserDTO loginUserDTO, Integer categoryCode, Integer shopCode, MenuCategoryDTO dto) {
+            User user = userRepository.findByUserId(loginUserDTO.getUserId());
+    
+            if (!user.isAdmin()) {
+                throw new AccessDeniedException("관리자만 접근가능한 페이지입니다.");
+            }
+    
+            return menuCategoryService.updateMenuCategory(categoryCode, shopCode, dto);
+        }
+    
+        @Transactional
+        public void authDeleteMenuCategory(LoginUserDTO loginUserDTO, Integer categoryCode, Integer shopCode) {
+            User user = userRepository.findByUserId(loginUserDTO.getUserId());
+    
+            if (!user.isAdmin()) {
+                throw new AccessDeniedException("관리자만 접근가능한 페이지입니다.");
+            }
+    
+            menuCategoryService.deleteMenuCategoryWithBulkUpdate(categoryCode, shopCode);
+        }
+    }
+
+
+## 6. Remove this code from MessageSendBatchService
+
+    /* Authorization */
+    /**
+     * isAdmin=true인 user만 접근 가능
+     * (이 메소드는 UserFacadeService를 통해
+     * AuthUserServiceTests - adminMSBauthorize에서 사용됩니다)
+     *
+     * @param user
+     * @throw AccessDeniedException */
+    public void accessMSB(User user) {
+        if (!user.isAdmin()) {
+            throw new AccessDeniedException("이 페이지는 관리자만 접근 가능합니다.");
+        }
+    }
+
+## 7. Eradicate this codes from the SalesService
+
+    /**
+    * isAdmin=true인 user만 접근 가능
+    * (이 메소드는 UserFacadeService를 통해
+     * AuthUserServiceTests - adminSalesAuthorize에서 사용됩니다)
+    *
+    * @param user 
+    * @throw AccessDeniedException */
+    public void accessSales(User user) {
+        if (!user.isAdmin()) {
+            throw new AccessDeniedException("매출 관리는 관리자만 접근 가능합니다.");
+        }
+    }
+
+## 8. Commit and push  15:28
+
+## 9. Checkout from branch 45 and change branch into feature/86-feature-user-controller-mapping 15:53
