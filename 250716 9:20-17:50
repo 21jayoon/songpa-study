@@ -1,0 +1,838 @@
+# WebSecurityConfigureAdapter 대체
+# https://zrr.kr/H2Xmj5
+
+WebSecurityConfigureAdapter는
+Spring Security 5.7 버전부터 
+WebSecurityConfigurerAdapter가 더 이상 권장되지 않으며, 
+공식적으로 사용 중단되었습니다.
+
+대신, SecurityFilterChain 빈을 생성하여 
+HTTP 보안 설정을 구성하거나, 
+WebSecurityCustomizer 빈을 생성하여 
+웹 보안 설정을 구성하는 방식으로 변경되었습니다. 
+
+대체 방법:
+1. SecurityFilterChain 빈 생성:
+@Bean 어노테이션을 사용하여 SecurityFilterChain 빈을 정의하고,
+HttpSecurity 객체를 사용하여 
+인증, 권한 부여, 폼 로그인, 로그아웃 등과 같은 HTTP 보안 설정을 구성합니다.
+
+예시: java
+@Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http
+                .authorizeHttpRequests((authz) -> authz
+                    .requestMatchers("/public/**").permitAll()
+                    .anyRequest().authenticated()
+                )
+                .httpBasic(withDefaults());
+            return http.build();
+        }
+
+2. WebSecurityCustomizer 빈 생성:
+@Bean 어노테이션을 사용하여 
+WebSecurityCustomizer 빈을 정의하고, 
+WebSecurity 객체를 사용하여 웹 보안 설정을 구성합니다. 
+
+예시: java
+ @Bean
+        public WebSecurityCustomizer webSecurityCustomizer() {
+            return (web) -> web.ignoring().requestMatchers("/ignore1", "/ignore2");
+        }
+
+이유:
+WebSecurityConfigurerAdapter는 설정이 복잡하고 유연성이 떨어진다는 단점이 있었습니다.
+새로운 방법은 구성이 더 명확하고 유연하며, 컴포넌트 기반으로 설정할 수 있도록 개선되었습니다.
+
+참고:
+- WebSecurityConfigurerAdapter를 완전히 제거하려면 spring-boot-starter-security 의존성을 사용하는 경우, 
+spring-boot-starter-web 의존성에 포함된 기본 설정이 적용됩니다.
+- spring-boot-starter-security를 사용하지 않고 직접 보안 설정을 구성하려면 WebSecurityCustomizer를 사용해야 합니다. 
+
+추가 정보:
+Spring Security 공식 문서: https://spring.io/guides/tutorials/spring-security-5-webflux/
+Spring Security 없이 효율적인 인가 구현하기: https://masiljangajji-coding.tistory.com/82
+Spring Security 6.0 버전에서는 WebSecurityConfigurerAdapter를 완전히 사용할 수 없습니다.
+
+# 20250716 Developing Day 8
+## 1. Edit UserFacadeService's registerUser
+(Now)
+
+    /* 3. 회원가입 처리 (중복검사 포함) */
+    @Transactional
+    public int registerUser(SignupDTO signupDTO) {
+        String resultMessage = userService.registerNewUser(signupDTO);
+
+        // Convert the String message to an int for the controller
+        if (resultMessage.equals(SUCCESS_REGISTER_USER.getMessage())) {
+            return 1; // Or any positive integer to indicate success
+        } else {
+            return 0; // Or any non-positive integer to indicate failure
+        }
+    }
+
+(Before)
+
+    /* 3. 회원가입 처리 (중복검사 포함) */
+    @Transactional
+    public String registerUser(SignupDTO signupDTO) {
+        return userService.registerNewUser(signupDTO);
+    }
+
+## 2. Changed registerNewUser in UserService
+(Now)
+
+    @Transactional
+    public String registerNewUser(SignupDTO signupDTO) {
+        //중복확인 1 : userId
+        if (userRepository.existsByUserId(signupDTO.getUserId())) {
+            return DUPLICATE_ID.getMessage();
+        }
+
+        //중복확인 2 : userPhone
+        if (userRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+
+        // 비밀번호 암호화
+        signupDTO.setUserPwd(passwordEncoder.encode(signupDTO.getUserPwd()));
+
+        // DTO → Entity로 변환 후 저장
+        User userEntity = modelMapper.map(signupDTO, User.class);
+        User savedUser = userRepository.save(userEntity);
+
+        // 저장된 userCode를 다시 DTO에 설정
+        signupDTO.setUserCode(savedUser.getUserCode());
+
+        return SUCCESS_REGISTER_USER.getMessage();
+    }
+
+## 3. Add UNKNOWN_ERROR in ApiResponse
+
+## 4. Revise Securityconfig with spring-security lecture source
+
+    @Configuration
+    @EnableWebSecurity
+    public class SecurityConfig {
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+    return new BCryptPasswordEncoder();  //pwd 암호화에 가장 많이 사용되는 알고리즘, BCryptPasswordEncoder
+    }
+    
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http
+                    .authorizeHttpRequests((authz) -> authz
+                            .requestMatchers("/public/**").permitAll()
+                            .anyRequest().authenticated()
+                    )
+                    .httpBasic(withDefaults());
+            return http.build();
+        }
+    
+        @Bean
+        public WebSecurityCustomizer webSecurityCustomizer(){
+            return web -> web.ignoring()
+                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+            //static이란 정적인 resources에 대해서만 web.ignoring (무시)해라.
+        }
+    
+        @Bean
+        public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+            /* 요청에 대한 권한Authority 체크 */
+            http.authorizeHttpRequests( auth -> {
+                auth.requestMatchers("/auth/login", "/user/signup", "/auth/fail", "/", "/main").permitAll();
+                // auth/login 등 위의 5가지 페이지는 권한이 없어도 볼 수 있다는 공통점이 있다.
+                // 그렇기 때문에 '권한이 없어도 모든 사용자들이 접근 가능합니다'를 함의해주는
+                // .permitAll()을 넣어준다. (=모든 사용자가 접근하게 허용해주겠다)
+                auth.requestMatchers("/admin/*").hasAnyAuthority(UserRole.ADMIN.getRole());
+                auth.requestMatchers("/user/*").hasAnyAuthority(UserRole.USER.getRole());
+                auth.anyRequest().authenticated();
+    
+            }).formLogin( login -> {
+                login.loginPage("/auth/login");
+                // login.loginPage => login Page로 등록해주는 코드
+                login.usernameParameter("userId");
+                login.passwordParameter("userPass");
+                /*match with login.html
+                <form th:action="@{/auth/login}" method="post">
+                        ID: <input type="text" name="userId"><br>
+                        PWD: <input type="password" name="userPass"><br>  250625*/
+                login.defaultSuccessUrl("/", true);
+                login.failureHandler(authFailHandler);
+                // .failureHandler : 로그인 실패했을 때 어떻게 할 것인지 경로 설정.
+                // (여기선 아까 만든 authFailHandler로 이동시키겠다고 해줌)
+    
+            }).logout( logout -> {
+                logout.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"));
+                // Ant... : 특정 URL로 이동시킬 것이다
+                logout.deleteCookies("JSESSIONID");
+                // sessionId를 갖고 있기 때문에 deleteCookies라는 method로 JSESSIONID 삭제
+                logout.invalidateHttpSession(true);
+                // logout 시 세션 소멸되도록
+                logout.logoutSuccessUrl("/");
+                // logout 시 메인 페에지로 돌아가도록
+    
+            }).sessionManagement( session -> {
+                session.maximumSessions(1);
+                session.invalidSessionUrl("/");
+    
+            }).csrf( csrf -> csrf.disable());
+            //CrossSignRequestFolder :csrf = 내가(서버가?) 보낸 것처럼 악의적으로 위조해서 보내는 요청
+            // 원래 csrf.disable()을 거는 게 권장되진 않으나 개발단계에선 문제가 발생할 수 있으므로 .disable로
+            // 잠깐 기능을 닫아(?)놓는다.
+    
+            return http.build();
+        }
+    }
+
+## 5. Insert AuthFailHandler under header/header/auth/config/handler
+
+    package com.header.header.auth.config.handler;
+
+    import jakarta.servlet.ServletException;
+    import jakarta.servlet.http.HttpServletRequest;
+    import jakarta.servlet.http.HttpServletResponse;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+    import org.springframework.security.authentication.BadCredentialsException;
+    import org.springframework.security.authentication.InternalAuthenticationServiceException;
+    import org.springframework.security.core.AuthenticationException;
+    import org.springframework.security.core.userdetails.UsernameNotFoundException;
+    import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+    
+    import java.io.IOException;
+    import java.net.URLEncoder;
+    
+    @Configuration
+    public class AuthFailHandler extends SimpleUrlAuthenticationFailureHandler {
+    //인증 실패 시의 예외처리를 하는  method
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    String errorMessage ="";
+    if(exception instanceof BadCredentialsException){
+    errorMessage = "아이디가 없거나 비밀번호가 일치하지 않습니다.";
+    
+            } else if (exception instanceof InternalAuthenticationServiceException) {
+                errorMessage = "서버에서 오류 발생. 관리자에게 문의 요망";
+    
+            } else if (exception instanceof UsernameNotFoundException) {
+                errorMessage ="없는 ID입니다.";
+    
+            } else if(exception instanceof AuthenticationCredentialsNotFoundException){
+                errorMessage="인증요청이 거부되었습니다";
+    
+            } else {
+                errorMessage="알 수 없는 오류로 로그인 요청 처리 불가";
+            }
+    
+            errorMessage= URLEncoder.encode(errorMessage, "UTF-8");
+    
+            setDefaultFailureUrl("/auth/fail?message=" +errorMessage);
+    
+            super.onAuthenticationFailure(request, response,exception);
+        }
+    }
+
+## 6. UserController
+
+    package com.header.header.domain.user.controller;
+
+    import com.header.header.auth.model.dto.SignupDTO;
+    import com.header.header.domain.user.facade.UserFacadeService;
+    import org.springframework.stereotype.Controller;
+    import org.springframework.web.bind.annotation.*;
+    import org.springframework.web.servlet.ModelAndView;
+    
+    @Controller
+    @RequestMapping("/auth")
+    public class UserController {
+    private final UserFacadeService userFacadeServiceService;
+    
+        public UserController(UserFacadeService userFacadeServiceService) {
+            this.userFacadeServiceService = userFacadeServiceService;
+        }
+    
+        @GetMapping("/users")
+        public void signup(){
+            //void = user/signup으로 (자동) 반환
+        }
+    
+        //post 요청 받아줄 핸들러 메소드 작성
+        @PostMapping("/users")
+        public ModelAndView signup(ModelAndView mv, @ModelAttribute SignupDTO signupDTO){
+            //@ModelAttribute SignupDTO signupDTO ->
+            // 원래는 signupDTO가 유효성에 부합하는지도 확인해야함.
+            //그러나 이번엔 간단하게 바로 DTO 적용하는 걸로.
+    
+            int result = userFacadeServiceService.registerUser(signupDTO);
+            //수행횟수(숫자)를 반환 받기위해 int result로 변수 생성
+    
+            String msg = "";
+    
+            if(result >0){
+                msg = "Successfully Signed up";
+                mv.setViewName("auth/session.html");
+                // 회원가입 성공 시 로그인 페이지로 이동
+            }else {
+                msg="Fail to sign up";
+                mv.setViewName("auth/users");
+                //실패 시 회원가입 form("auth/users")으로 다시 돌아오도록 설정
+            }
+            //signup 페이지 <header> <script> 내에 메세지 alert 뜨도록 작성
+            mv.addObject("msg", msg);
+    
+            return mv;
+        }
+    }
+
+## 7. Revise AuthDetails
+(Now)
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (user.isAdmin()) { // Assuming isAdmin() method exists in your User entity
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+        return authorities;
+    }
+
+(Before)
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+## 8. [FRONT_END] fix all '/signup' into '/auth/signup'
+### 8-1. [FRONT_END] Header.jsx
+
+    // 헤더 액션 버튼 설정을 별도 객체로 분리
+    const HEADER_ACTIONS = {
+    authenticated: [
+    { href: "/profile", text: "프로필", type: "link" },
+    { href: "/logout", text: "로그아웃", type: "action" }
+    ],
+    unauthenticated: [
+    { href: "/login", text: "로그인", type: "link" },
+    { href: "/auth/signup", text: "회원가입", type: "link" }
+    ]
+    };
+
+## 9. [FRONT_END] Made auth folder under src/app and create login, signup folder
+
+![img.png](img.png)
+
+    "use client"; 
+    import React from 'react'; // Importing React
+    import styles from "../login/page.module.css";
+    
+    export default function Login() {
+    return (
+    <>
+    {/* The main container for the entire page, applying styles from the CSS module */}
+    <div className={styles.container}>
+    
+            {/* Main content area, centered and styled as a card */}
+            <main className={styles.mainContent}>
+              <div className={styles.loginContainer}>
+                {/* Login form */}
+                <form action="/auth/session" method="post" className={styles.loginForm}>
+                  {/* ID input group */}
+                  <div className={styles.inputGroup}>
+                    <input
+                      type="text"
+                      name="id"
+                      id="id"
+                      placeholder="아이디"
+                      required
+                      className={styles.input}
+                    />
+                  </div>
+    
+                  {/* Password input group */}
+                  <div className={styles.inputGroup}>
+                    <input
+                      type="password"
+                      name="password"
+                      id="password"
+                      placeholder="비밀번호"
+                      required
+                      className={styles.input}
+                    />
+                  </div>
+    
+                  {/* Error message display (will be dynamic in a real app) */}
+                  <div id="error" className={`${styles.errorMessage} hidden`}>
+                    <span>로그인에 실패하였습니다.</span>
+                  </div>
+    
+                  {/* Login button */}
+                  <button
+                    type="submit"
+                    className={styles.loginButton}
+                  >
+                    LOGIN
+                  </button>
+    
+                  {/* Login links (회원가입, 아이디 찾기, 비밀번호 찾기) */}
+                  <div className={styles.loginLinks}>
+                    <a href="/auth/signup" className={styles.link}>회원가입</a>
+                    <span className={styles.separator}>|</span>
+                    <a href="#" className={styles.link}>아이디 찾기</a>
+                    <span className={styles.separator}>|</span>
+                    <a href="#" className={styles.link}>비밀번호 찾기</a>
+                  </div>
+                </form>
+              </div>
+            </main>
+    
+            {/* Footer section */}
+            <footer className={styles.footer}>
+              {/* Footer navigation links */}
+              <div className={styles.footerLinks}>
+                <a href="#">이용약관</a>
+                <span className={styles.separator}>|</span>
+                <a href="#">개인정보처리방침</a>
+                <span className={styles.separator}>|</span>
+                <a href="#">이메일무단수집거부</a>
+                <span className={styles.separator}>|</span>
+                <a href="#">사용자가이드</a>
+                <span className={styles.separator}>|</span>
+                <a href="#">소상공인협회</a>
+              </div>
+    
+              {/* Company information */}
+              <div className={styles.companyInfo}>
+                <p>서울특별시 송파구 중대로9길 34(가락동) 대호빌딩2층</p>
+                <p>
+                  대표 : HEADER &nbsp; 사업자등록번호 : 215-82-12405 &nbsp;
+                  전화 : 02-430-6070 &nbsp; 팩스 : 02-430-6071 &nbsp;
+                  개인정보관리책임자 : HEADER
+                </p>
+              </div>
+    
+              {/* Copyright information */}
+              <div className={styles.copyright}>
+                <p>Copyright© 2025. 송파여성새일센터 TEAM HEADER. All rights Reserved.</p>
+              </div>
+            </footer>
+          </div>
+        </>
+    );
+    }
+
+    "use client";
+    import React, { useState } from 'react';
+    
+    export default function Signup() {
+    // State to manage form input values
+    const [formData, setFormData] = useState({
+    userName: '',
+    userPhone: '',
+    userId: '',
+    userPwd: '',
+    birthday: '',
+    });
+    
+        // Handle input changes
+        const handleChange = (e) => {
+            const { name, value } = e.target;
+            setFormData(prevData => ({
+                ...prevData,
+                [name]: value,
+            }));
+        };
+    
+        // Handle form submission
+        const handleSubmit = async (e) => {
+            e.preventDefault(); // Prevent default browser form submission
+    
+            // You would typically send this data to your backend
+            console.log('Form submitted with data:', formData);
+    
+            try {
+                const response = await fetch('/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+    
+                if (response.ok) {
+                    // Handle successful signup (e.g., redirect, show success message)
+                    console.log('Signup successful!');
+                    alert('회원가입이 성공적으로 완료되었습니다!');
+                    // Example: Redirect to a login page
+                    // window.location.href = '/login';
+                } else {
+                    // Handle errors (e.g., show error message)
+                    const errorData = await response.json();
+                    console.error('Signup failed:', errorData);
+                    alert(`회원가입 실패: ${errorData.message || '알 수 없는 오류'}`);
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        };
+    
+        return (
+            <div className="signup-container"> {/* Added a container for overall styling */}
+                <h1>회원가입 페이지</h1>
+                <div className="content-card">
+                    <form onSubmit={handleSubmit}> {/* Use onSubmit for React forms */}
+                        <div className="form-group">
+                            <label htmlFor="userName">이름:</label>
+                            <input
+                                type="text"
+                                id="userName"
+                                name="userName"
+                                value={formData.userName}
+                                onChange={handleChange}
+                                required // Add HTML5 validation
+                            />
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="userPhone">전화번호:</label>
+                            <input
+                                type="tel"
+                                id="userPhone"
+                                name="userPhone"
+                                value={formData.userPhone}
+                                onChange={handleChange}
+                                placeholder="예: 010-1234-5678"
+                                pattern="[0-9]{3}-?[0-9]{4}-?[0-9]{4}" // Basic pattern for phone number
+                                required
+                            />
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="userId">아이디:</label>
+                            <input
+                                type="text"
+                                id="userId"
+                                name="userId"
+                                value={formData.userId}
+                                onChange={handleChange}
+                                required
+                                minLength="4" // Example: Minimum length for ID
+                            />
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="userPwd">비밀번호:</label>
+                            <input
+                                type="password"
+                                id="userPwd"
+                                name="userPwd"
+                                value={formData.userPwd}
+                                onChange={handleChange}
+                                required
+                                minLength="6" // Example: Minimum length for password
+                            />
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="birthday">생년월일:</label>
+                            <input
+                                type="date"
+                                id="birthday"
+                                name="birthday"
+                                value={formData.birthday}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+    
+                        <button type="submit">회원가입</button> {/* Use type="submit" */}
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+## 10. [FRONT_END] Insert password-rest(+page.js) and id-retrieval(+page.js) under auth
+
+## 11. [FRONT_END] components/layout/SideMenuBar.jsx에서 인가(isAdmin) true/false 값으로 접근 막는 기능 필요함
+
+## 12. Remove AuthController's method into UserController
+
+    @GetMapping("/session")
+    public void login() {
+    }
+
+    //로그인 실패시 핸들해줄 핸들러 메소드 작성
+    @GetMapping("/session/fail")
+    public ModelAndView loginFail(ModelAndView mv,
+                                  @RequestParam(value = "msg"
+                                          , defaultValue = "login failed") String msg) {
+        //@RequestParam을 통해 어떤 실패가 일어난 건지 메시지 받는다.
+        mv.addObject("msg", msg);
+        mv.setViewName("/auth/fail");
+        return mv;
+    }
+    //spring-security-architecture에서 실제 인증이 일어난다
+
+    @GetMapping("/auth/{user_id}")
+    public void leaveHeader() {}
+
+    //회원탈퇴 시 patchmapping 이용해서 isAdmin 변경
+    @PatchMapping("/auth/{user_id}")
+    public...
+
+## 13. Rephrase AuthController into MainController
+(Now)
+
+    package com.header.header.auth.controller;
+
+    import org.springframework.stereotype.Controller;
+    
+    @Controller
+    public class MainController {
+    }
+
+(Before)
+
+    package com.header.header.auth.controller;
+
+    import org.springframework.stereotype.Controller;
+    import org.springframework.web.bind.annotation.RequestMapping;
+    
+    @Controller
+    @RequestMapping("/auth")
+    public class MainController {
+
+
+}
+
+## 14. Revise SecurityConfig into JWT version
+(Now)
+
+    package com.header.header.auth.config;
+    ......
+    
+    /**
+    * Spring Security 설정을 담당하는 클래스입니다.
+      * JWT 기반 인증을 위해 세션 관리를 비활성화하고 JWT 필터를 추가합니다.
+        */
+        @Configuration
+        @EnableWebSecurity
+        public class SecurityConfig {
+    
+        @Autowired
+        private AuthFailHandler authFailHandler; // 로그인 실패 핸들러
+    
+        @Autowired
+        private JwtTokenProvider jwtTokenProvider; // JWT 토큰 생성 및 검증 프로바이더
+    
+        @Autowired
+        private ObjectMapper objectMapper; // JSON 직렬화를 위한 ObjectMapper (LoginSuccessHandler에서 사용)
+    
+        /**
+          * 비밀번호 암호화를 위한 BCryptPasswordEncoder를 빈으로 등록합니다.
+          * @return PasswordEncoder 인스턴스
+            */
+            @Bean
+            public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+            }
+    
+        /**
+          * 정적 리소스(CSS, JS, 이미지 등)에 대한 보안 필터 적용을 무시하도록 설정합니다.
+          * @return WebSecurityCustomizer 인스턴스
+            */
+            @Bean
+            public WebSecurityCustomizer webSecurityCustomizer() {
+            return web -> web.ignoring()
+            .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+            }
+    
+        /**
+          * HTTP 보안 설정을 구성하는 SecurityFilterChain 빈입니다.
+          * JWT 기반 인증을 위해 세션 관리를 STATELESS로 설정하고, JWT 필터를 추가하며,
+          * 로그인 및 로그아웃 동작을 정의합니다.
+          * @param http HttpSecurity 객체
+          * @return SecurityFilterChain 인스턴스
+          * @throws Exception 예외 발생 시
+            */
+            @Bean
+            public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http
+            // CSRF 보호 비활성화 (JWT는 토큰 기반이므로 CSRF 공격에 덜 취약하며, 일반적으로 비활성화합니다)
+            .csrf(csrf -> csrf.disable())
+    
+                     // 세션 관리 전략을 STATELESS로 설정 (세션을 사용하지 않음)
+                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    
+                     // 요청에 대한 권한 설정
+                     .authorizeHttpRequests(auth -> {
+                         // 다음 경로들은 인증 없이 모든 사용자에게 허용합니다.
+                         auth.requestMatchers("/auth/session", "/auth/users", "/auth/session/fail", "/", "/main").permitAll();
+                         // "/public/**" 경로도 인증 없이 허용합니다.
+                         auth.requestMatchers("/public/**").permitAll();
+                         // "/auth/login" (POST) 요청도 허용하여 로그인 시도를 가능하게 합니다.
+                         auth.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
+    
+                         // "/admin/**" 경로는 ADMIN 역할만 접근 가능합니다.
+                         auth.requestMatchers("/admin/**").hasRole("ADMIN");
+                         // "/user/**" 경로는 USER 역할만 접근 가능합니다.
+                         auth.requestMatchers("/user/**").hasRole("USER");
+                         // 그 외 모든 요청은 인증된 사용자만 접근 가능합니다.
+                         auth.anyRequest().authenticated();
+                     })
+    
+                     // 폼 로그인 설정
+                     .formLogin(login -> {
+                         login.loginPage("/auth/session"); // 로그인 페이지 URL
+                         login.loginProcessingUrl("/auth/login"); // 로그인 처리 URL (POST 요청)
+                         login.usernameParameter("userId"); // 사용자 ID 파라미터 이름
+                         login.passwordParameter("userPwd"); // 비밀번호 파라미터 이름
+                         // 로그인 성공 시 LoginSuccessHandler를 사용합니다.
+                         login.successHandler(new LoginSuccessHandler(jwtTokenProvider, objectMapper));
+                         // 로그인 실패 시 AuthFailHandler를 사용합니다.
+                         login.failureHandler(authFailHandler);
+                     })
+    
+                     // 로그아웃 설정
+                     .logout(logout -> {
+                         logout.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", HttpMethod.POST.name())); // 로그아웃 요청 URL (POST)
+                         // JWT는 세션을 사용하지 않으므로 JSESSIONID 삭제나 세션 무효화는 필요 없습니다.
+                         // 만약 JWT를 HttpOnly 쿠키에 저장했다면 해당 쿠키를 삭제하는 로직을 추가할 수 있습니다.
+                         logout.deleteCookies("jwt_token_cookie_name"); // 예시: JWT를 저장한 쿠키 이름
+                         // 로그아웃 성공 시 200 OK 상태 코드를 반환합니다. (API 방식에 적합)
+                         logout.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler());
+                         // 또는 특정 URL로 리다이렉트: logout.logoutSuccessUrl("/");
+                     })
+    
+                     // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 이전에 추가합니다.
+                     // 이 필터는 모든 요청에서 JWT 토큰을 검증합니다.
+                     .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+    
+            return http.build();
+            }
+            }
+
+(Before)
+
+    package com.header.header.auth.config;
+    ......
+    
+    import static org.springframework.security.config.Customizer.withDefaults;
+    
+    @Configuration
+    @EnableWebSecurity
+    public class SecurityConfig {
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+    return new BCryptPasswordEncoder();  //pwd 암호화에 가장 많이 사용되는 알고리즘, BCryptPasswordEncoder
+    }
+    
+        @Autowired
+        private AuthFailHandler authFailHandler;
+    
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http
+                    .authorizeHttpRequests((authz) -> authz
+                            .requestMatchers("/public/**").permitAll()
+                            .anyRequest().authenticated()
+                    )
+                    .httpBasic(withDefaults());
+            return http.build();
+        }
+    
+        @Bean
+        public WebSecurityCustomizer webSecurityCustomizer(){
+            return web -> web.ignoring()
+                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+            //static이란 정적인 resources에 대해서만 web.ignoring (무시)해라.
+        }
+    
+        @Bean
+        public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+            /* 요청에 대한 권한Authority 체크 */
+            http.authorizeHttpRequests( auth -> {
+                auth.requestMatchers("/auth/session", "/auth/users", "/auth/session/fail", "/", "/main").permitAll();
+                // auth/login 등 위의 5가지 페이지는 권한이 없어도 볼 수 있다는 공통점이 있다.
+                // 그렇기 때문에 '권한이 없어도 모든 사용자들이 접근 가능합니다'를 함의해주는
+                // .permitAll()을 넣어준다. (=모든 사용자가 접근하게 허용해주겠다)
+                //아래는 인증 이후 "인가"와 관련된 두 줄
+                auth.requestMatchers("/admin/**").hasRole("ADMIN");
+                auth.requestMatchers("/user/**").hasRole("USER");
+                auth.anyRequest().authenticated();
+    
+            }).formLogin( login -> {
+                login.loginPage("/auth/session");
+                // login.loginPage => login Page로 등록해주는 코드
+                login.usernameParameter("userId");
+                login.passwordParameter("userPwd");
+                /*match with login.html
+                <form th:action="@{/auth/login}" method="post">
+                        ID: <input type="text" name="userId"><br>
+                        PWD: <input type="password" name="userPass"><br>  250625*/
+                login.defaultSuccessUrl("/", true);
+                login.failureHandler(authFailHandler);
+                // .failureHandler : 로그인 실패했을 때 어떻게 할 것인지 경로 설정.
+                // (여기선 아까 만든 authFailHandler로 이동시키겠다고 해줌)
+    
+            }).logout( logout -> {
+                logout.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"));
+                // Ant... : 특정 URL로 이동시킬 것이다
+                logout.deleteCookies("JSESSIONID");
+                // sessionId를 갖고 있기 때문에 deleteCookies라는 method로 JSESSIONID 삭제
+                logout.invalidateHttpSession(true);
+                // logout 시 세션 소멸되도록
+                logout.logoutSuccessUrl("/");
+                // logout 시 메인 페에지로 돌아가도록
+    
+            }).sessionManagement( session -> {
+                session.maximumSessions(1);
+                session.invalidSessionUrl("/");
+    
+            }).csrf( csrf -> csrf.disable());
+    
+            return http.build();
+        }
+    }
+
+## 15. [FRONT_END] Change layout.js under src/app
+(Now)
+
+    // 랜딩페이지 경로들 (사이드메뉴 없는 페이지들)
+    const landingPaths = ['/', '/auth/session', '/auth/signup'];
+    const isLandingPage = landingPaths.includes(pathname);
+
+(Before)
+
+    // 랜딩페이지 경로들 (사이드메뉴 없는 페이지들)
+    const landingPaths = ['/', '/auth/login', '/auth/signup'];
+    const isLandingPage = landingPaths.includes(pathname);
+
+-> login 페이지에서 사이드바 없애기 성공!!  17:22
+
+## 16. Edit SecurityConfig
+(Now)
+
+    // "/my-shops/**" 경로는 ADMIN 역할만 접근 가능합니다.
+    auth.requestMatchers("/my-shops/**").hasRole("ADMIN");
+    // "/shops/**" 경로는 USER 역할만 접근 가능합니다.
+    auth.requestMatchers("/shops/**").hasRole("USER");
+
+## 17. Put JsonWebToken dependency in build.gradle
+(Now)
+
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
+(Before)
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'    
