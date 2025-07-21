@@ -1,0 +1,1515 @@
+# 20250721 Developing Day 12
+## 1. Edit AuthUserService
+(Before)
+    
+    @Transactional
+    public UserDTO signup(UserDTO userDTO) {
+        log.info("[AuthService] signup() Start.");
+        log.info("[AuthService] userDTO {}", userDTO);
+
+        /* 1. 중복 유효성 검사 */
+        // 중복확인 1 : userId
+        if (userRepository.existsByUserId(userDTO.getUserId())) {
+            log.info("[AuthService] 아이디가 중복됩니다.");
+            throw new DuplicatedMemberEmailException(ApiResponse.DUPLICATE_ID.getMessage());
+        }
+        // 중복확인 2 : userPhone
+        if (userRepository.existsByUserPhone(userDTO.getUserPhone())) {
+            log.info("[AuthService] 전화번호가 중복됩니다.");
+            try {
+                throw new DuplicatedPhoneException(ApiResponse.DUPLICATE_PHONE.getMessage());
+                    //여기서부터
+                // 2. 비밀번호 암호화
+                String encodedPassword = passwordEncoder.encode(userDTO.getUserPwd());
+
+                // 3. User 엔티티 생성 및 기본 권한(isAdmin=false) 설정
+                User registUser = new User(
+                        userDTO.getUserId(),
+                        encodedPassword,
+                        false, // isAdmin: 회원가입 시 기본값은 false (일반 사용자)
+                        userDTO.getUserName(),
+                        userDTO.getUserPhone(),
+                        userDTO.getBirthday(),
+                        false  // isLeave: 회원가입 시 기본값은 false (탈퇴하지 않음)
+                );
+
+                // 4. User 엔티티 저장
+                User result = userRepository.save(registUser);
+                    //여기까지 회색 글자됨. 안 먹힘 왜? 
+                    /* Based on the image and the provided code,
+                    the reason the "2. 비밀번호 암호화" section 
+                    and the subsequent code (User entity creation and saving) are grayed out and not being recognized 
+                    is because they are placed inside the try block of the DuplicatedPhoneException handling, 
+                    and more critically, after a throw statement.
+                    https://g.co/gemini/share/88698b56b9d9  */
+
+                /* 설명. 위의 save()가 성공해야 해당 트랜잭션이 성공했다고 판단. */
+                log.info("[AuthService] User Insert Result {}",
+                        (result != null) ? "회원 가입 성공" : "회원 가입 실패");
+
+                return userDTO;
+
+            } catch (DuplicatedPhoneException e) {
+                throw new RuntimeException(e);
+            } catch (Exception e) {
+                // 예상치 못한 다른 모든 예외 처리
+                log.error("회원가입 중 알 수 없는 오류 발생", e);
+                throw new RegistrationUnknownException(ApiResponse.UNKNOWN_ERROR.getMessage(), e);
+            } finally {
+                log.info("[AuthService] signup() End.");
+            }
+        }
+    }//여기서 빨간줄 오류남(왜? return 없어서)
+
+## 2. Change DuplicatePhoneException into Unchecked Exception from Checked Exception like DuplicatedMemberEmailException does.
+### UnChecked Exception : extending RuntimeException
+(Now)
+
+    package com.header.header.auth.exception;
+
+    public class DuplicatedPhoneException extends RuntimeException {
+        public DuplicatedPhoneException(String message) {
+            super(message);
+        }
+    }
+
+(Before)
+
+    package com.header.header.auth.exception;
+
+    public class DuplicatedPhoneException extends Throwable {
+        public DuplicatedPhoneException(String message) {
+        }
+    }
+
+## 1-1. [FIX] signup method in AuthUserService
+(Now)
+
+    @Transactional
+    public UserDTO signup(UserDTO userDTO) {
+        log.info("[AuthService] Let's start signup().");
+        log.info("[AuthService] userDTO {}", userDTO);
+
+        /* 1. 중복 유효성 검사 */
+        // 중복확인 1 : userId
+        if (userRepository.existsByUserId(userDTO.getUserId())) {
+            log.info("[AuthService] 아이디가 중복됩니다.");
+            throw new DuplicatedUserIdException(ApiResponse.DUPLICATE_ID.getMessage());
+        }
+        // 중복확인 2 : userPhone
+        if (userRepository.existsByUserPhone(userDTO.getUserPhone())) {
+            log.info("[AuthService] 전화번호가 중복됩니다.");
+            throw new DuplicatedPhoneException(ApiResponse.DUPLICATE_PHONE.getMessage());
+        }
+
+        try {
+            // 2. 비밀번호 암호화
+            String encodedPassword = passwordEncoder.encode(userDTO.getUserPwd());
+
+            // 3. User 엔티티 생성 및 기본 권한(isAdmin=false) 설정
+            User registUser = new User(
+                    userDTO.getUserId(),
+                    encodedPassword,
+                    false, // isAdmin: 회원가입 시 기본값은 false (일반 사용자)
+                    userDTO.getUserName(),
+                    userDTO.getUserPhone(),
+                    userDTO.getBirthday(),
+                    false  // isLeave: 회원가입 시 기본값은 false (탈퇴하지 않음)
+            );
+
+            // 4. User 엔티티 저장
+            User result = userRepository.save(registUser);
+
+            /* 설명. 위의 save()가 성공해야 해당 트랜잭션이 성공했다고 판단. */
+            log.info("[AuthService] 유저 생성 결과, {}",
+                    (result != null) ? "회원 가입 성공" : "회원 가입 실패");
+
+            return userDTO;
+
+        } catch (Exception e) {
+            // Catch any *unexpected* exceptions during the actual registration process
+            log.error("회원가입 중 알 수 없는 오류 발생", e);
+            throw new RegistrationUnknownException(ApiResponse.UNKNOWN_ERROR.getMessage(), e);
+        } finally {
+            log.info("[AuthService] signup() End.");
+        }
+    }
+
+## 3. Remove registerNewUser method since it has no use.
+
+    /** save : registerNewUser
+    -> SignupDTO 사용
+    @param signupDTO 생성할 user 정보가 담긴 DTO
+    @return 생성된 signupDTO(user관련 DTO)
+     이미 존재하는 아이디나 전화번호일 때 */ /* @throws ApiResponse 이 부분 없는데 써서 오류나서 지웠어요 - 예람*/
+    @Transactional
+    public String registerNewUser(SignupDTO signupDTO) {
+        //중복확인 1 : userId
+        if (userRepository.existsByUserId(signupDTO.getUserId())) {
+            return DUPLICATE_ID.getMessage();
+        }
+
+        //중복확인 2 : userPhone
+        if (userRepository.existsByUserPhone(signupDTO.getUserPhone())) {
+            return DUPLICATE_PHONE.getMessage();
+        }
+        try {
+            // DTO → Entity로 변환 후 저장
+            User userEntity = modelMapper.map(signupDTO, User.class);
+            User savedUser = userRepository.save(userEntity);
+
+            // 저장된 userCode를 다시 DTO에 설정
+            signupDTO.setUserCode(savedUser.getUserCode());
+
+            return SUCCESS_REGISTER_USER.getMessage();
+        } catch (Exception e) {
+            // Log the exception for debugging
+            e.printStackTrace(); // In a real app, use a logger (e.g., logger.error("Error during user registration", e);)
+            return UNKNOWN_ERROR.getMessage();
+        }
+    }
+
+## 4. Revise UserFacadeService for mapping with (Rest)Controller
+(Now)
+
+    /* 3. 회원가입 처리 (중복검사 포함) */
+    @Transactional
+    public UserDTO registerUser(UserDTO userDTO) { // SignupDTO 대신 UserDTO를 파라미터로 받음
+        log.info("[UserFacadeService] registerUser() started with UserDTO: {}", userDTO);
+
+        try {
+            // AuthService의 signup 메소드를 호출하여 회원가입 처리
+            // 비밀번호 암호화 및 중복 검사는 AuthService 내부에서 모두 처리됩니다.
+            UserDTO registeredUser = authService.signup(userDTO);
+            log.info("[UserFacadeService] User registration successful for user: {}", registeredUser.getUserId());
+            return registeredUser;
+        } catch (DuplicatedUserIdException e) {
+            log.warn("[UserFacadeService] Duplicated User ID: {}", e.getMessage());
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (DuplicatedPhoneException e) {
+            log.warn("[UserFacadeService] Duplicated Phone: {}", e.getMessage());
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (RegistrationUnknownException e) {
+            log.error("[UserFacadeService] Unknown error during registration: {}", e.getMessage(), e);
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (Exception e) { // 예상치 못한 다른 예외 처리
+            log.error("[UserFacadeService] An unexpected error occurred: {}", e.getMessage(), e);
+            throw new RegistrationUnknownException(ApiResponse.UNKNOWN_ERROR.getMessage(), e);
+        }
+    }
+
+(Before)
+
+    @Transactional
+    public int registerUser(SignupDTO signupDTO) {
+        // 비밀번호 암호화
+        signupDTO.setUserPwd(passwordEncoder.encode(signupDTO.getUserPwd()));
+
+        String resultMessage = userService.registerNewUser(signupDTO);
+
+        // Convert the String message to an int for the controller
+        if (resultMessage.equals(SUCCESS_REGISTER_USER.getMessage())) {
+            return 1; // Or any positive integer to indicate success
+        } else {
+            return 0; // Or any non-positive integer to indicate failure
+        }
+    }
+
+## 5. Change RegistrationUnknownException
+(Now)
+
+    package com.header.header.auth.exception;
+
+    import com.header.header.auth.common.ApiResponse;
+    
+    public class RegistrationUnknownException extends RuntimeException {
+        public RegistrationUnknownException(Exception cause) { // 원인(cause)만 받는 생성자
+            super(ApiResponse.UNKNOWN_ERROR.getMessage(), cause);
+        }
+    }
+
+(Try)
+
+    import static com.header.header.auth.common.ApiResponse.UNKNOWN_ERROR;
+
+    public class RegistrationUnknownException extends RuntimeException {
+        public RegistrationUnknownException(ApiResponse message, Exception e) {
+            message = UNKNOWN_ERROR;
+        }
+    }
+
+(First)
+
+    package com.header.header.auth.exception;
+
+    public class RegistrationUnknownException extends RuntimeException {
+        public RegistrationUnknownException(String message, Exception e) {
+        }
+    }
+
+### 5-1. Therefore, remodel AuthUserService and UserFacadeService
+(Now)
+
+    
+
+(Before)
+
+    @Transactional
+    public UserDTO signup(UserDTO userDTO) {
+        log.info("[AuthService] Let's start signup().");
+        log.info("[AuthService] userDTO {}", userDTO);
+
+        /* 1. 중복 유효성 검사 */
+        // 중복확인 1 : userId
+        if (userRepository.existsByUserId(userDTO.getUserId())) {
+            log.info("[AuthService] 아이디가 중복됩니다.");
+            throw new DuplicatedUserIdException(ApiResponse.DUPLICATE_ID.getMessage());
+        }
+        // 중복확인 2 : userPhone
+        if (userRepository.existsByUserPhone(userDTO.getUserPhone())) {
+            log.info("[AuthService] 전화번호가 중복됩니다.");
+            throw new DuplicatedPhoneException(ApiResponse.DUPLICATE_PHONE.getMessage());
+        }
+
+        try {
+            // 2. 비밀번호 암호화
+            String encodedPassword = passwordEncoder.encode(userDTO.getUserPwd());
+
+            // 3. User 엔티티 생성 및 기본 권한(isAdmin=false) 설정
+            User registUser = new User(
+                    userDTO.getUserId(),
+                    encodedPassword,
+                    false, // isAdmin: 회원가입 시 기본값은 false (일반 사용자)
+                    userDTO.getUserName(),
+                    userDTO.getUserPhone(),
+                    userDTO.getBirthday(),
+                    false  // isLeave: 회원가입 시 기본값은 false (탈퇴하지 않음)
+            );
+
+            // 4. User 엔티티 저장
+            User result = userRepository.save(registUser);
+
+            /* 설명. 위의 save()가 성공해야 해당 트랜잭션이 성공했다고 판단. */
+            log.info("[AuthService] 유저 생성 결과, {}",
+                    (result != null) ? "회원 가입 성공" : "회원 가입 실패");
+
+            return userDTO;
+
+        } catch (Exception e) {
+            log.error("회원가입 중 알 수 없는 오류 발생", e);
+            throw new RegistrationUnknownException(ApiResponse.UNKNOWN_ERROR.getMessage(), e);
+        } finally {
+            log.info("[AuthService] signup() End.");
+        }
+    }
+
+UserFacadeService
+(Now)
+
+    /* 3. 회원가입 처리 (중복검사 포함) */
+    @Transactional
+    public UserDTO registerUser(UserDTO userDTO) { // SignupDTO 대신 UserDTO를 파라미터로 받음
+        log.info("[UserFacadeService] registerUser() started with UserDTO: {}", userDTO);
+
+        try {
+            // AuthService의 signup 메소드를 호출하여 회원가입 처리
+            // 비밀번호 암호화 및 중복 검사는 AuthService 내부에서 모두 처리됩니다.
+            UserDTO registeredUser = authService.signup(userDTO);
+            log.info("[UserFacadeService] User registration successful for user: {}", registeredUser.getUserId());
+            return registeredUser;
+        } catch (DuplicatedUserIdException e) {
+            log.warn("[UserFacadeService] Duplicated User ID: {}", e.getMessage());
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (DuplicatedPhoneException e) {
+            log.warn("[UserFacadeService] Duplicated Phone: {}", e.getMessage());
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (RegistrationUnknownException e) {
+            log.error("[UserFacadeService] Unknown error during registration: {}", e.getMessage(), e);
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (Exception e) { // 예상치 못한 다른 예외 처리
+            log.error("[UserFacadeService] An unexpected error occurred: {}", e.getMessage(), e);
+            throw new RegistrationUnknownException(e);
+        }
+    }
+
+(Before)
+
+    /* 3. 회원가입 처리 (중복검사 포함) */
+    @Transactional
+    public UserDTO registerUser(UserDTO userDTO) { // SignupDTO 대신 UserDTO를 파라미터로 받음
+        log.info("[UserFacadeService] registerUser() started with UserDTO: {}", userDTO);
+
+        try {
+            // AuthService의 signup 메소드를 호출하여 회원가입 처리
+            // 비밀번호 암호화 및 중복 검사는 AuthService 내부에서 모두 처리됩니다.
+            UserDTO registeredUser = authService.signup(userDTO);
+            log.info("[UserFacadeService] User registration successful for user: {}", registeredUser.getUserId());
+            return registeredUser;
+        } catch (DuplicatedUserIdException e) {
+            log.warn("[UserFacadeService] Duplicated User ID: {}", e.getMessage());
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (DuplicatedPhoneException e) {
+            log.warn("[UserFacadeService] Duplicated Phone: {}", e.getMessage());
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (RegistrationUnknownException e) {
+            log.error("[UserFacadeService] Unknown error during registration: {}", e.getMessage(), e);
+            throw e; // Facade에서 예외를 다시 던져 컨트롤러나 @ControllerAdvice에서 처리하도록 함
+        } catch (Exception e) { // 예상치 못한 다른 예외 처리
+            log.error("[UserFacadeService] An unexpected error occurred: {}", e.getMessage(), e);
+            throw new RegistrationUnknownException(ApiResponse.UNKNOWN_ERROR.getMessage(), e);
+        }
+    }
+
+## 6. Alter signup method's parameter from SingupDTO to UserDTO
+
+    @PostMapping("/users")
+    public ResponseEntity<ResponseDTO> signup(@RequestBody UserDTO userDTO) {	// 회원 가입 정보를 받아 냄
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(HttpStatus.CREATED, "회원가입 성공", userFacadeService.registerUser(userDTO)));
+    }
+
+## 7. Change UserFacadeServiceTests
+(Now)
+
+    @Test
+    @DisplayName("회원가입(user 생성) + 중복 체크 테스트")
+    void registerUserTest() {
+        //given1. 기존 정보와 중복 없이 가입할 때
+        UserDTO newSignup = new UserDTO();
+        newSignup.setUserId("user41");
+        newSignup.setUserPwd("user41pwd");
+        newSignup.setUserName("Kim tolkong");
+        newSignup.setUserPhone("010-1233-2567");
+        newSignup.setBirthday(LocalDate.parse("2000-12-31"));
+
+        //when
+        Object result1 = facadeService.registerUser(newSignup);
+
+(Before)
+
+    @Test
+    @DisplayName("회원가입(user 생성) + 중복 체크 테스트")
+    void registerUserTest() {
+        //given1. 기존 정보와 중복 없이 가입할 때
+        SignupDTO newSignup = new SignupDTO();
+        newSignup.setUserId("user41");
+        newSignup.setUserPwd("user41pwd");
+        newSignup.setUserName("Kim tolkong");
+        newSignup.setUserPhone("010-1233-2567");
+        newSignup.setBirthday("2000-12-31");
+
+        //when
+        Object result1 = facadeService.registerUser(newSignup); //newsignup에서 UserDTO가 아닌 SingupDTO를 사용해서 오류가 남
+나머지도 SignupDTO -> UserDTO로 바꾸고 setBirthday를 LocalDate.parse로 파싱해줌
+
+## 8. Revise UserFacadeService
+(Now)
+
+    public Object login(LoginUserDTO loginUserDTO) throws FailedLoginException { // loginUser가 FailedLoginException을 던지므로 처리
+        // AuthUserService의 loginUser 메소드를 호출하고 반환 값을 그대로 리턴
+        // AuthUserService의 loginUser가 TokenDTO를 반환한다고 가정
+        return authUserService.loginUser(loginUserDTO);
+    }
+    
+(Before)
+
+    /* 4. 로그인 시 유저 정보 조회 */
+    public LoginUserDTO login(String userId) {
+        return userService.findByUserId(userId);
+    }
+
+## 9. Change UserController by using new login method in UserFacadeService
+
+(Try)
+
+    @PostMapping("/session")
+    public ResponseEntity<ResponseDTO> login(@RequestBody LoginUserDTO loginUserDTO) throws FailedLoginException {
+
+        /* 설명. ResponseEntity
+         *  HTTP 응답 몸체와 헤더, 그리고 상태 코드를 제어할 수 있는 Spring Framework의 클래스다.
+         * 	응답으로 변환될 정보가 담긴 모든 요소들을 해당 객체로 만들어서 반환해 준다.(body + header + status)
+         *  (ResponseBody와 차별점이 있다면, ResponseEntity는 HTTP 상태 코드나 헤더도 다룰 수 있다.)
+         *  필요한 정보들만 담아서 전달할 수 있기 때문에 REST API를 만들 때 유용하게 사용하는 클래스다.
+         * 	또한 ResponseEntity를 사용할 때, 생성자 대신 Builder 사용을 권장한다.
+         *  (숫자 타입인 상태 코드를 실수로 잘못 입력하지 않도록 메소드들이 제공 된다.)
+         * */
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(HttpStatus.OK, "로그인 성공", userFacadeService.login(loginUserDTO)));
+        /* 설명. (React 및 Spring 연계 시, 가장 중요한 개념!!!)
+         *  ResponseEntity의 body() 메소드를 사용하면 Response객체의 body에 담기는 ResponseDTO는 JSON문자열이 되고
+         *  화면단이 React인 곳으로 가면 결국 Redux Store에 해당 리듀서가 관리하는 state 값이 된다.
+         * */
+    }
+
+## 10. Insert GlobalExeptionHandlerForApiResponse with DuplicatedUserIdException, DuplicatedPhoneException, FailedLoginException(?)
+
+
+## 11. Question
+강의 코드에서 login 관련된 메소드를 정의할 떄 사용자 정의 익셉션인 LoginFaliedException을 사용했던 것과 달리
+나는 기존에 있는 라이브러리(라이브러리? API? 뭐라고 불러야해?)에 있던 exception인 FailedLoginException을 사용했어.
+1. FailedLoginException은 내가 예상하는 이 두 가지 예외사항을 처리하기에 알맞는 익셉션이야?
+2. 강의 코드에서는 LoginFailedException를
+   /* 설명. RuntimeException을 상속 받아 예외 발생 시 throws로 처리하지 않아도 되도록 한다. */
+   public class LoginFailedException extends RuntimeException {
+
+   public LoginFailedException(String message) {
+   super(message);
+   }
+   }
+   이렇게 1차 핸들링(?)하고
+   @RestControllerAdvice
+   public class ApiExceptionAdvice {
+   /* 설명. AuthService에서 비밀번호 불일치 시 발생하는 예외 상황 처리 */
+   @ExceptionHandler(LoginFailedException.class)
+   public ResponseEntity<ApiExceptionDTO> exceptionHandler(LoginFailedException e) {
+   return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+   .body(new ApiExceptionDTO(HttpStatus.BAD_REQUEST, e.getMessage()));
+   }
+   ......
+   }
+   이렇게 2차처리까지 했는데, FailedLoginException은 기존에 있는 거잖아. 내 팀 프로젝트에도 이렇게 2번 처리해야해?
+3. CSR, JSON 요청 및 반환, RESTful, JWT 방식에서 살펴볼 때 FailedLoginException을 사용하는 게 낫니? 아님 강의코드처럼 사용자 정의 익셉션을 사용하는 게 낫니?
+
+-----
+
+### 1\. `FailedLoginException`은 예상하는 두 가지 예외 상황을 처리하기에 알맞은 예외인가요?
+
+네, **`FailedLoginException`은 로그인 실패와 관련된 두 가지 주요 예외 상황(사용자 없음, 비밀번호 불일치)을 처리하기에 매우 적합한 예외입니다.**
+
+* **`FailedLoginException`**: `javax.security.auth.login` 패키지에 속해 있으며, 말 그대로 인증 과정에서 실패했을 때 발생하는 예외입니다. 사용자 ID를 찾지 못했거나, 비밀번호가 일치하지 않는 경우 모두 "로그인 실패"라는 큰 범주 안에 속하죠. 이런 경우에 이 예외를 사용하는 것은 의미론적으로도 정확하고, 코드의 가독성도 높여줍니다.
+
+-----
+
+### 2\. `FailedLoginException`도 두 번 처리해야 하나요?
+
+**아니요, `FailedLoginException`은 이미 Java 표준 라이브러리에 정의된 예외이므로, 강의 코드처럼 직접 `RuntimeException`을 상속받아 `LoginFailedException`을 만드는 1차 핸들링 과정은 필요 없습니다.**
+
+강의 코드에서 `LoginFailedException`을 `RuntimeException`으로 만든 이유는 `throws` 키워드를 사용하지 않고도 예외를 던질 수 있도록 하기 위함입니다. (`RuntimeException`은 **Unchecked Exception**이라 컴파일러가 예외 처리 여부를 강제하지 않거든요.)
+
+하지만 **`FailedLoginException`은 `Exception`을 상속받는 Checked Exception입니다.**
+즉, `FailedLoginException`을 던지는 메소드는 반드시 `throws FailedLoginException`을 선언하거나, 해당 예외를 `try-catch`로 직접 처리해야 합니다.
+
+**팀 프로젝트에서의 처리:**
+`FailedLoginException`을 사용한다면, 다음과 같은 방식으로 처리하게 됩니다.
+
+1.  **서비스 계층**: `AuthService.login()` 메소드에서 `FailedLoginException`이 발생하면, 메소드 시그니처에 `throws FailedLoginException`을 선언하여 이 예외를 호출하는 쪽으로 던집니다.
+
+    ```java
+    // AuthUserService (또는 AuthService)
+    public TokenDTO loginUser(LoginUserDTO userDTO) throws FailedLoginException {
+        // ... (아이디 조회, 비밀번호 매칭 로직)
+        if (user == null) {
+            throw new FailedLoginException(userDTO.getUserId() + " 유저를 찾을 수 없습니다.");
+        }
+        if (!passwordEncoder.matches(userDTO.getUserPwd(), user.getUserPwd())) {
+            throw new FailedLoginException("잘못된 비밀번호입니다.");
+        }
+        // ... (토큰 발급)
+        return newToken;
+    }
+    ```
+
+2.  **전역 예외 처리 (`@RestControllerAdvice`)**: 컨트롤러에서 `try-catch`를 사용하지 않고 깔끔하게 유지하려면, 이전에 설명드렸던 `GlobalExceptionHandler`와 같은 `@RestControllerAdvice` 클래스에서 `FailedLoginException`을 잡아 처리하면 됩니다.
+
+    ```java
+    // GlobalExceptionHandler (또는 ApiExceptionAdvice)
+    import javax.security.auth.login.FailedLoginException; // import 필요
+
+    @RestControllerAdvice
+    public class GlobalExceptionHandler {
+
+        @ExceptionHandler(FailedLoginException.class)
+        public ResponseEntity<ResponseDTO> handleFailedLoginException(FailedLoginException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED) // 401 Unauthorized가 더 적절
+                    .body(new ResponseDTO(HttpStatus.UNAUTHORIZED.value(), e.getMessage(), null));
+        }
+
+        // ... 다른 예외 핸들러
+    }
+    ```
+
+결론적으로, **`FailedLoginException`은 1차 핸들링(RuntimeException 상속)이 필요 없고, 바로 서비스 계층에서 던진 후 `@RestControllerAdvice`에서 2차 처리(전역 핸들링)를 하는 방식이 일반적입니다.**
+
+-----
+
+### 3\. CSR, JSON 요청/반환, RESTful, JWT 방식에서 `FailedLoginException`을 사용하는 게 낫나요, 아니면 사용자 정의 예외를 사용하는 게 낫나요?
+
+이것은 프로젝트의 특정 요구사항과 개발팀의 선호도에 따라 달라질 수 있는 부분입니다. 어떤 것이 더 낫다고 단정하기는 어렵지만, 각각의 장단점을 고려하여 선택할 수 있습니다.
+
+#### 1\. `FailedLoginException` (표준 라이브러리 예외) 사용
+
+* **장점**:
+    * **의미론적 명확성**: 이름 자체가 "로그인 실패"를 의미하므로, 코드만 봐도 어떤 상황인지 명확히 알 수 있습니다.
+    * **학습 비용**: 이미 정의된 예외이므로, 별도로 클래스를 만들고 관리할 필요가 없습니다.
+    * **표준화**: Java 생태계에서 널리 알려진 예외이므로, 다른 개발자가 코드를 이해하기 쉽습니다.
+* **단점**:
+    * **Checked Exception**: `throws` 선언이 강제되어 코드가 조금 더 장황해질 수 있습니다 (하지만 `@RestControllerAdvice`로 깔끔하게 처리 가능).
+    * **커스터마이징의 한계**: 예외에 추가적인 정보(예: 특정 에러 코드, 상세한 에러 타입 등)를 담고 싶을 때, 직접 필드를 추가하는 것이 불가능합니다. 메시지 문자열에 의존해야 합니다.
+
+#### 2\. 사용자 정의 예외 (`LoginFailedException` 등) 사용
+
+* **장점**:
+    * **유연성 및 커스터마이징**: 예외 클래스 내부에 `errorCode`, `errorType` 등 필요한 필드를 추가하여 더 상세하고 구조화된 에러 정보를 클라이언트에게 전달할 수 있습니다. 이는 RESTful API에서 일관된 에러 응답 형식을 유지하는 데 매우 유용합니다.
+    * **unchecked 예외로 정의 가능**: `RuntimeException`을 상속받아 Unchecked Exception으로 만들면, `throws` 선언 없이도 예외를 던질 수 있어 서비스 계층 코드가 더 간결해집니다.
+* **단점**:
+    * **추가적인 코드**: 예외 클래스를 직접 정의해야 하므로 약간의 개발 비용이 발생합니다.
+    * **이름 충돌**: 표준 예외와 이름이 유사하여 혼동을 줄 수 있습니다 (하지만 패키지 구조로 구분 가능).
+
+#### **결론 및 추천:**
+
+CSR, JSON 요청/반환, RESTful, JWT 방식의 현대적인 웹 서비스에서는 **사용자 정의 예외를 `RuntimeException`으로 상속받아 사용하는 것을 더 많이 추천합니다.**
+
+**이유**:
+
+1.  **Unchecked Exception의 간결성**: 서비스 계층에서 비즈니스 로직에 집중하고, 예외 처리는 `@RestControllerAdvice`에서 통합적으로 관리하는 것이 현대적인 스프링 개발의 흐름입니다. `RuntimeException`을 사용하면 메소드 시그니처가 지저분해지는 것을 막을 수 있습니다.
+
+2.  **세분화된 에러 응답**: 사용자 정의 예외에 특정 에러 코드(`LOGIN_FAIL_USER_NOT_FOUND`, `LOGIN_FAIL_PASSWORD_MISMATCH` 등)를 담아 클라이언트에게 반환하면, 프론트엔드에서 단순히 "로그인 실패"가 아닌, "아이디가 존재하지 않습니다" 또는 "비밀번호가 틀렸습니다"와 같이 **사용자 친화적이고 상세한 메시지를 표시**할 수 있습니다. 이는 사용자 경험을 크게 향상시킵니다.
+    예를 들어, `ApiExceptionDTO`에 `code` 필드를 추가하여 에러 상황을 구분할 수 있습니다.
+
+    ```java
+    // LoginFailedException (사용자 정의 예시)
+    public class LoginFailedException extends RuntimeException {
+        private final String errorCode; // 추가적인 에러 코드를 위한 필드
+
+        public LoginFailedException(String message, String errorCode) {
+            super(message);
+            this.errorCode = errorCode;
+        }
+        public String getErrorCode() { return errorCode; }
+    }
+
+    // GlobalExceptionHandler에서 사용
+    @ExceptionHandler(LoginFailedException.class)
+    public ResponseEntity<ResponseDTO> handleLoginFailedException(LoginFailedException e) {
+        // e.getErrorCode()를 활용하여 클라이언트에 더 상세한 정보를 제공할 수 있습니다.
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ResponseDTO(HttpStatus.UNAUTHORIZED.value(), e.getMessage(), null));
+                // ResponseDTO에 에러 코드를 담는 필드가 있다면 함께 전달
+    }
+    ```
+
+물론 `FailedLoginException`을 사용하는 것이 틀렸다는 의미는 아닙니다. 하지만 장기적으로 더 유연하고 체계적인 에러 처리를 원한다면 사용자 정의 예외를 고려해 보세요.
+
+어떤 방식을 선택하시든, **전역 예외 처리(`@RestControllerAdvice`)를 통해 컨트롤러를 깔끔하게 유지하는 것**은 현대 웹 서비스 개발에서 매우 중요합니다.
+
+궁금한 점이 있다면 언제든지 다시 질문해 주세요\!
+
+## 12. Refactor the parameters of login methods in UserFacadeService and UserController
+
+    /* 4. 로그인 시 유저 정보 조회 */
+    public Object login(LoginUserDTO loginUserDTO) throws FailedLoginException {
+        return authService.loginUser(loginUserDTO);
+    }
+
+    @PostMapping("/session")
+    public ResponseEntity<ResponseDTO> login(@RequestBody LoginUserDTO loginUserDTO) {
+        try {
+            // 로그인 성공 시 200 OK와 토큰 정보를 담은 ResponseDTO 반환
+            return ResponseEntity
+                    .ok()
+                    .body(new ResponseDTO(HttpStatus.OK, "로그인 성공", userFacadeService.login(loginUserDTO)));
+        } catch (FailedLoginException e) {
+            // 로그인 실패 시 (아이디 없음, 비밀번호 불일치 등) 401 Unauthorized 반환
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED) // 401 Unauthorized (인증 실패)
+                    .body(new ResponseDTO(HttpStatus.UNAUTHORIZED, e.getMessage(), null)); // 에러 메시지 포함
+        } catch (Exception e) {
+            // 그 외 예상치 못한 서버 에러 발생 시 500 Internal Server Error 반환
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR) // 500 Internal Server Error
+                    .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.", null));
+        }
+    }
+
+## 13. [FIX] UserFacadeServiceTests
+
+    
+## 14. Question
+    throws FailedLoginException나 try/catch
+    try {
+        return ResponseEntity
+            .ok()
+            .body(new ResponseDTO(HttpStatus.OK, "로그인 성공", userFacadeService.login(loginUserDTO)));
+    } catch (FailedLoginException e) {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED) // 401 Unauthorized (인증 실패)
+            .body(new ResponseDTO(HttpStatus.UNAUTHORIZED, e.getMessage(), null));
+    } catch (Exception e) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR) // 500 Internal Server Error
+            .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.", null));
+    }
+    로 해결할 수 있는 거면 글로벌익셉션핸들러에
+    @ExceptionHandler(FailedLoginException.class)
+    public ResponseEntity<ResponseDTO> handleFailedLoginException(FailedLoginException e) {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED) //401
+            .body(new ResponseDTO(HttpStatus.UNAUTHORIZED, e.getMessage(), null));
+    }
+    이건 추가할 필요 없는 거 아냐? 얘는 왜 넣으라고 했던거야? 뭔가 프론트엔드까지 갔을 때 구체적인 역할을 해?
+
+
+정말 중요한 질문입니다! `throws FailedLoginException` 또는 `try/catch` 블록으로 예외를 처리할 수 있다면, `GlobalExceptionHandler`에 `@ExceptionHandler(FailedLoginException.class)`를 추가하는 것이 무슨 의미인지 혼란스러울 수 있습니다.
+
+핵심은 **"예외 처리의 책임과 일관성"**에 있습니다.
+
+---
+
+### 왜 `GlobalExceptionHandler`에 `FailedLoginException` 핸들러를 추가하라고 했을까?
+
+**1. 컨트롤러 코드의 간결성 유지 (핵심 이유)**
+
+* **`try/catch` 사용 시**: 컨트롤러 메소드마다 `try/catch` 블록을 작성해야 합니다. `FailedLoginException`이 발생하는 곳이 `login` 메소드뿐만 아니라 다른 메소드(예: 비밀번호 찾기, 회원가입 중복 확인 등)에서도 발생할 수 있다면, **모든 메소드에 동일한 `try/catch` 블록을 반복적으로 작성**해야 합니다. 이는 코드 중복을 유발하고 가독성을 해칩니다.
+* **`throws FailedLoginException` 사용 시 (그리고 `FailedLoginException`이 Checked Exception일 때)**:
+    * 컨트롤러 메소드 시그니처에 `throws FailedLoginException`을 추가함으로써 컴파일 오류는 해결됩니다.
+    * 하지만 이 경우, `FailedLoginException`이 발생하면 컨트롤러 밖으로 예외가 전파되고, **스프링이 기본적으로 제공하는 예외 처리 메커니즘에 맡겨지게 됩니다.**
+    * 스프링의 기본 예외 처리기는 대부분의 경우 500 Internal Server Error를 반환하거나, 특정 예외에 대해 미리 정의된 HTML 에러 페이지를 반환합니다. **우리가 원하는 HTTP 401 Unauthorized와 커스텀 `ResponseDTO` 형식의 JSON 응답을 자동으로 제공하지 않습니다.**
+
+* **`GlobalExceptionHandler` 사용 시**:
+    * 컨트롤러 메소드에서 `try/catch`를 완전히 제거하고, **`throws FailedLoginException` (또는 `FailedLoginException`이 `RuntimeException`을 상속한다면 `throws`조차 필요 없음)**만 남깁니다.
+    * `FailedLoginException`이 발생하면, 이 예외는 컨트롤러 밖으로 전파되고, **우리가 `GlobalExceptionHandler`에 정의해 놓은 `@ExceptionHandler(FailedLoginException.class)` 메소드가 이 예외를 가로채서 처리**합니다.
+    * 결과적으로, `GlobalExceptionHandler`는 `FailedLoginException`에 대해 **HTTP 401 상태 코드와 우리가 원하는 `ResponseDTO` 형식의 JSON 응답**을 생성하여 클라이언트에게 반환합니다.
+
+**즉, `GlobalExceptionHandler`를 사용하는 목적은 `try/catch`나 `throws`를 통해 "컴파일 오류를 해결하는 것"을 넘어, "특정 예외에 대한 일관되고 표준화된 JSON 응답을 모든 컨트롤러에서 자동적으로 생성하도록 만드는 것"입니다.**
+
+**2. API 응답의 일관성 보장 (프론트엔드 관점에서의 중요성)**
+
+* 프론트엔드 개발자는 백엔드 API로부터 어떤 형태로 응답을 받을지 예측 가능해야 합니다. 특히 에러 응답은 매우 중요합니다.
+* `GlobalExceptionHandler`를 사용하지 않고 각 컨트롤러 메소드에서 `try/catch`로 예외를 잡으면, 실수로라도 각 메소드에서 다른 응답 형식이나 다른 HTTP 상태 코드를 반환할 가능성이 있습니다.
+* `GlobalExceptionHandler`는 `FailedLoginException`이 발생할 때마다 **항상 `HTTP 401` 상태 코드와 `ResponseDTO` 형식의 JSON 응답**을 보장합니다.
+    * 프론트엔드 개발자는 "아, 401 응답이 오고, 바디는 `{ 'status': 401, 'message': '로그인 실패 메시지', 'data': null }` 형태겠구나" 하고 예측하고 코드를 짤 수 있습니다.
+    * 이렇게 되면 프론트엔드에서 **에러 처리 로직을 중앙화**할 수 있으며, 백엔드로부터 오는 모든 401 에러를 동일한 방식으로 처리하도록 구현할 수 있습니다.
+
+**3. 단일 책임 원칙 (SRP) 준수**
+
+* 컨트롤러의 주된 책임은 "HTTP 요청을 처리하고, 서비스 계층으로 전달하며, 서비스 계층의 결과를 HTTP 응답으로 변환하는 것"입니다.
+* 예외 처리 로직을 컨트롤러 안에 넣으면, 컨트롤러가 "요청 처리"와 "예외 처리"라는 두 가지 책임을 동시에 지게 되어 단일 책임 원칙을 위반하게 됩니다.
+* `GlobalExceptionHandler`는 "애플리케이션 전반의 예외 처리"라는 단일 책임을 가집니다.
+
+---
+
+### 결론
+
+* `throws FailedLoginException`나 `try/catch` 블록은 **Java 문법적으로 예외를 처리하는 방법**입니다. 이를 통해 컴파일 오류를 해결하거나, 특정 위치에서 예외를 즉시 처리할 수 있습니다.
+* 하지만 `GlobalExceptionHandler`에 `@ExceptionHandler(FailedLoginException.class)`를 추가하는 것은 **스프링 프레임워크 수준에서, 웹 계층의 예외 처리를 중앙 집중화하고, 모든 API 요청에 대해 일관된 오류 응답을 제공하며, 컨트롤러 코드의 가독성과 유지보수성을 극대화하기 위한 전략적인 접근 방식**입니다.
+
+따라서, `GlobalExceptionHandler`에 예외 핸들러를 정의하고 컨트롤러에서 `try/catch`를 제거하는 것이 훨씬 더 권장되는 모범 사례입니다.
+
+## 15. Test codes error occurred
+
+    ***************************
+    APPLICATION FAILED TO START
+    ***************************
+    
+    Description:
+    
+    The dependencies of some of the beans in the application context form a cycle:
+    
+    loginSuccessHandler defined in file [D:\lecture\Header-backend\build\classes\java\main\com\header\header\auth\config\handler\LoginSuccessHandler.class]
+    ┌─────┐
+    |  jwtTokenProvider defined in file [D:\lecture\Header-backend\build\classes\java\main\com\header\header\auth\config\JwtTokenProvider.class]
+    ↑     ↓
+    |  authUserService defined in file [D:\lecture\Header-backend\build\classes\java\main\com\header\header\auth\model\service\AuthUserService.class]
+    ↑     ↓
+    |  securityConfig (field private com.header.header.auth.config.JwtTokenProvider com.header.header.auth.config.SecurityConfig.jwtTokenProvider)
+    └─────┘
+    이건 무슨 오류야? 한국어로 답해줘
+
+---
+
+## Spring 순환 의존성 오류 (Circular Dependency Error)
+
+이 오류 메시지는 스프링(Spring) 애플리케이션의 **빈(Bean)들 사이에 순환 의존성(Circular Dependency)이 발생했다**는 의미입니다. 쉽게 말해, 서로가 서로를 필요로 하는 무한 루프에 빠져서 스프링이 어떤 빈을 먼저 생성하고 초기화해야 할지 결정할 수 없을 때 발생하는 문제입니다.
+
+### 오류 설명 상세
+
+제공된 오류 메시지에 따르면 다음과 같은 순환 관계가 형성되어 있습니다:
+
+* `loginSuccessHandler`
+    * `jwtTokenProvider`를 사용합니다.
+* `jwtTokenProvider`
+    * `authUserService`를 사용합니다.
+* `authUserService`
+    * `securityConfig`와 연관되어 있습니다.
+* `securityConfig`
+    * `jwtTokenProvider` 필드를 가지고 있습니다.
+
+이러한 관계 때문에 스프링은 다음과 같은 딜레마에 빠지게 됩니다:
+
+1.  `SecurityConfig`를 만들려면 `JwtTokenProvider`가 필요합니다.
+2.  `JwtTokenProvider`를 만들려면 `AuthUserService`가 필요합니다.
+3.  `AuthUserService`를 만들려면 `SecurityConfig`와 관련된 무언가가 필요합니다.
+
+결국, 어느 하나를 먼저 완성할 수 없어서 애플리케이션 시작에 실패하게 됩니다.
+
+### 해결 방법
+
+순환 의존성을 해결하기 위해서는 이 루프를 끊어줘야 합니다. 몇 가지 일반적인 해결책은 다음과 같습니다.
+
+1.  **의존성 재구성 (Refactor Dependencies):**
+    가장 권장되는 방법입니다. 각 빈의 역할과 책임을 명확히 하고, 불필요한 의존성을 제거하거나 의존성 방향을 바꾸는 것입니다.
+    * **역할 분리:** 예를 들어, `AuthUserService`가 `SecurityConfig` 자체에 의존하기보다는, `SecurityConfig`가 `AuthUserService`를 주입받아 사용하는 형태로 바꿔야 합니다. `AuthUserService`는 사용자 인증 및 권한 로직에만 집중해야 합니다.
+    * **인터페이스 활용:** 특정 빈의 전체 기능이 아니라 일부 기능만 필요한 경우, 해당 기능에 대한 인터페이스를 정의하고, 그 인터페이스에 의존하도록 변경하여 결합도를 낮출 수 있습니다.
+    * **메서드 주입:** 빈 생성 시점에 필요한 것이 아니라 특정 메서드가 호출될 때만 필요한 의존성이라면, 생성자 주입 대신 메서드 인자로 전달하는 방법을 고려할 수 있습니다. (흔한 경우는 아니지만 가능합니다.)
+
+2.  **`@Lazy` 어노테이션 사용 (권장하지 않음):**
+    순환 의존성이 있는 빈 중 하나에 `@Lazy` 어노테이션을 붙여서 스프링이 해당 빈을 필요한 시점까지 지연 초기화하도록 할 수 있습니다. 이 방법은 순환 의존성을 "해결"하는 것처럼 보이지만, 실제로는 문제를 잠시 숨기는 것에 가깝습니다. 런타임에 `NullPointerException`이 발생할 가능성이 있으며, 근본적인 설계 문제를 해결해주지 않습니다. 따라서 비상용으로만 고려하고, 가능하다면 앞서 언급한 의존성 재구성을 우선해야 합니다.
+
+### 이 경우 예상되는 해결 방향
+
+* **`AuthUserService`의 역할 재정의:** `AuthUserService`는 사용자 정보를 로드하고 처리하는 데 집중해야 하며, `SecurityConfig`나 `JwtTokenProvider`에 직접적으로 의존하는 것은 피해야 합니다. 오히려 `JwtTokenProvider`가 `AuthUserService`를 주입받아 사용자 정보를 가져오는 것이 일반적입니다.
+* **`SecurityConfig`와 `JwtTokenProvider` 간의 관계:** `SecurityConfig`는 JWT 기반 인증을 설정하기 위해 `JwtTokenProvider`를 주입받는 것이 맞습니다. 하지만 `JwtTokenProvider`가 다시 `SecurityConfig`의 특정 요소에 의존하게 되면 순환이 발생합니다. `JwtTokenProvider`가 JWT 생성 및 검증에 필요한 정보(예: Secret Key 등)를 `SecurityConfig`에서 직접 가져오기보다, 이러한 정보를 별도의 설정 클래스나 프로퍼티를 통해 주입받는 방식으로 변경해야 합니다.
+
+코드를 직접 봐야 정확한 진단과 해결책을 제시할 수 있지만, 위의 원칙들을 바탕으로 각 클래스의 의존 관계를 검토하고 수정해 보세요.
+
+## 16. How to solve
+이 오류는 AuthUserService와 JwtTokenProvider 빈(Bean) 사이에 **직접적인 순환 의존성(Circular Dependency)**이 발생했기 때문입니다.
+
+코드를 분석해 보면 다음과 같은 의존 관계가 확인됩니다:
+
+1. AuthUserService:
+
+* 생성자에서 JwtTokenProvider를 주입받고 있습니다:
+public AuthUserService(..., JwtTokenProvider tokenProvider, ...)
+
+* loginUser 메서드에서 주입받은 tokenProvider를 사용하여 토큰을 생성합니다.
+
+2. JwtTokenProvider:
+
+* 생성자에서 AuthUserService를 주입받고 있습니다:
+public JwtTokenProvider(..., AuthUserService authUserService)
+
+* getAuthentication 메서드에서 주입받은 authUserService를 사용하여 사용자 정보(UserDetails)를 로드합니다.
+
+문제의 핵심:
+
+* AuthUserService를 생성하려면 JwtTokenProvider가 필요합니다.
+
+* JwtTokenProvider를 생성하려면 AuthUserService가 필요합니다.
+
+이처럼 서로가 서로를 필요로 하는 무한 루프에 빠져서 스프링 컨테이너가 어떤 빈을 먼저 생성하고 초기화해야 할지 결정할 수 없기 때문에 "순환 의존성 오류"가 발생하는 것입니다.
+
+해결 방법
+이 순환 의존성을 해결하려면, AuthUserService가 JwtTokenProvider를 생성자에서 직접 주입받는 부분을 제거해야 합니다. AuthUserService의 주된 역할은 사용자 인증 및 사용자 정보를 로드하는 것이어야 하며, 토큰 생성은 JwtTokenProvider의 역할입니다.
+
+로그인 성공 후 토큰을 발급하는 시점은 LoginSuccessHandler에서 처리하는 것이 가장 적절합니다. SecurityConfig에서 이미 LoginSuccessHandler에 JwtTokenProvider를 주입하고 있으므로, LoginSuccessHandler 내에서 토큰을 생성하도록 로직을 변경하면 됩니다.
+
+수정 제안:
+
+1. AuthUserService에서 JwtTokenProvider 의존성 제거:
+
+* AuthUserService의 생성자에서 JwtTokenProvider tokenProvider 파라미터와 this.tokenProvider = tokenProvider; 라인을 제거합니다.
+
+* AuthUserService의 loginUser 메서드에서 tokenProvider.generateTokenDTO(...) 호출을 제거합니다. 이 메서드는 인증된 사용자 정보(LoginUserDTO 또는 User 엔티티)를 반환하도록 변경합니다.
+
+2. LoginSuccessHandler에서 토큰 생성 로직 구현:
+
+* LoginSuccessHandler는 이미 JwtTokenProvider를 주입받고 있으므로, onAuthenticationSuccess 메서드 내에서 인증된 사용자 정보(Authentication 객체에서 추출)를 사용하여 jwtTokenProvider.generateTokenDTO()를 호출하고 토큰을 응답으로 보냅니다.
+
+추가 설명:
+
+* AuthUserService는 이제 오직 사용자 인증 및 회원가입, 사용자 정보 로드(loadUserByUsername)에만 집중합니다.
+
+* JwtTokenProvider는 JWT 토큰의 생성, 유효성 검증, 정보 추출에 집중합니다. getAuthentication 메서드에서 AuthUserService를 사용하여 UserDetails를 로드하는 것은 여전히 유효하며 순환을 일으키지 않습니다.
+
+* LoginSuccessHandler는 로그인 성공이라는 이벤트에 반응하여, AuthUserService가 인증한 사용자 정보를 바탕으로 JwtTokenProvider를 통해 토큰을 발급하는 역할을 수행합니다.
+
+이러한 분리를 통해 각 클래스의 책임이 명확해지고, 순환 의존성 문제가 해결됩니다.
+
+## 17. Insane Error : To solve it, revise MainController
+(Now)
+
+    package com.header.header.auth.controller;
+
+    import org.springframework.stereotype.Controller;
+    import org.springframework.web.bind.annotation.GetMapping;
+    
+    @Controller
+    public class MainController {
+        @GetMapping(value = {"/"})
+        public String main(){
+            return "/";
+        }
+    }
+
+(Before)
+
+    package com.header.header.auth.controller;
+
+    import org.springframework.stereotype.Controller;
+    import org.springframework.web.bind.annotation.GetMapping;
+    
+    @Controller
+    public class MainController {
+        @GetMapping(value = {"/", "/main"})
+        public String main(){
+           return "main";
+        }
+    }
+
+## 18. Refactoring UserFacadeServiceTests
+(Now)
+
+    
+
+(Before)
+
+    package com.header.header.domain.user.service;
+    ......
+
+    @SpringBootTest
+    @ComponentScan(basePackages = "com.header.header")
+    @Transactional // 테스트 후 데이터 롤백
+    public class UserFacadeServiceTests {
+    
+        @Autowired
+        private UserFacadeService facadeService;
+    
+        @Autowired
+        private MainUserRepository userRepository;
+    
+        @Test
+        @DisplayName("회원가입(user 생성) + 중복 체크 테스트")
+        void registerUserTest() {
+            //given1. 기존 정보와 중복 없이 가입할 때
+            UserDTO newSignup = new UserDTO();
+            newSignup.setUserId("user41");
+            newSignup.setUserPwd("user41pwd");
+            newSignup.setUserName("Kim tolkong");
+            newSignup.setUserPhone("010-1233-2567");
+            newSignup.setBirthday(LocalDate.parse("2000-12-31"));
+    
+            //when
+            Object result1 = facadeService.registerUser(newSignup);
+            //then
+            System.out.println("가입 성공 메세지: " + result1);
+            System.out.println("가입 정보 확인: "+ newSignup);
+            //가입 성공 메세지: 회원가입이 완료되었습니다.
+            //가입 정보 확인: SignupDTO(userCode=101, userName=Kim tolkong, userPhone=010-1233-2567, userId=user41, userPwd=$2a$10$L3Md/JUWLKOGKBEwOSunD.VaonwaE.SAxZW8KZX5KcICbPBb7LlDG, birthday=2000-12-31)
+    
+            //given2. 중복된 userId 사용
+            UserDTO duplicateIdDTO = new UserDTO();
+            duplicateIdDTO.setUserId("kwoneunji"); // DB에 존재
+            duplicateIdDTO.setUserPwd("test1234");
+            duplicateIdDTO.setUserName("Test User");
+            duplicateIdDTO.setUserPhone("010-9999-9999");
+            duplicateIdDTO.setBirthday(LocalDate.parse("2025-07-21"));
+    
+            //when(중복 아이디 가입 시도)
+            Object result2 = facadeService.registerUser(duplicateIdDTO);
+    
+            //then: 중복 아이디 메시지 확인
+            assertEquals(ApiResponse.DUPLICATE_ID.getMessage(), result2);
+            System.out.println("Check Id msg: "+result2);
+            //Check Id msg: 이미 존재하는 아이디입니다.
+    
+            //given3. 중복된 전화번호로 가입 시도
+            UserDTO duplicatePhoneDTO = new UserDTO();
+            duplicatePhoneDTO.setUserId("newuser01");
+            duplicatePhoneDTO.setUserPwd("pass001");
+            duplicatePhoneDTO.setUserName("Jane Doe");
+            duplicatePhoneDTO.setUserPhone("010-1004-1004"); // DB에 존재
+            duplicatePhoneDTO.setBirthday(LocalDate.parse("2025-07-10"));
+    
+            //when
+            Object result3 = facadeService.registerUser(duplicatePhoneDTO);
+    
+            //then: 중복 전화번호 메시지 확인
+            assertEquals(ApiResponse.DUPLICATE_PHONE.getMessage(), result3);
+            System.out.println("Check phone msg: "+ result3);
+            //Check phone msg: 이미 존재하는 전화번호입니다.
+        }
+    
+        @Test
+        @DisplayName("Read 로그인 테스트")
+        void facadeLoginTest() {
+            //given
+            //1. 고객 정보 확인
+            //when
+            // Given
+            LoginUserDTO checkLoggedIn = new LoginUserDTO();
+            checkLoggedIn.setUserId("leeyounghee");
+            checkLoggedIn.setUserPwd("leeyounghee");
+    
+            //then
+            assertNotNull(checkLoggedIn);
+            assertNotNull(checkLoggedIn.getUserCode());
+            assertNotNull(checkLoggedIn.getUserName());
+            assertNotNull(checkLoggedIn.isAdmin());
+    
+            assertEquals("leegahyeon", checkLoggedIn.getUserId());
+            assertEquals("leegahyeon", checkLoggedIn.getUserPwd());
+            assertEquals("이가현", checkLoggedIn.getUserName());
+            assertFalse(checkLoggedIn.isAdmin());
+            System.out.println("고객 정보 확인: " + checkLoggedIn);
+            //고객 정보 확인: LoginUserDTO(userCode=98, userId=leegahyeon, userPwd=leegahyeon, userName=이가현, isAdmin=false)
+    
+            //2. 관리자 정보 확인
+            //when
+            LoginUserDTO checkAdmin = new LoginUserDTO();
+            checkAdmin.setUserId("kwoneunji");
+            checkAdmin.setUserPwd("kwoneunji");
+    
+            //then
+            assertNotNull(checkAdmin);
+            assertNotNull(checkAdmin.getUserCode());
+            assertNotNull(checkAdmin.getUserName());
+            assertNotNull(checkLoggedIn.isAdmin());
+    
+            assertEquals("kwoneunji", checkAdmin.getUserId());
+            assertEquals("kwoneunji", checkAdmin.getUserPwd());
+            assertEquals("권은지", checkAdmin.getUserName());
+            assertTrue(checkAdmin.isAdmin());
+            System.out.println("관리자 정보 확인: " +checkAdmin);
+            //관리자 정보 확인: LoginUserDTO(userCode=2, userId=kwoneunji, userPwd=kwoneunji, userName=권은지, isAdmin=true)
+    
+            //3. 존재하지 않는 userId로 유저 정보 불러오기
+            // Given
+            // when
+    //        LoginUserDTO loginDto = new LoginUserDTO();
+    //        loginDto.setUserId("user01"); // 존재하지 않는 아이디
+    //        loginDto.setUserPwd("some_password");
+    //
+    //        //then
+    //        System.out.println(loginDto);
+    //        //java.lang.IllegalArgumentException: 해당 유저가 존재하지 않습니다.
+    }
+    
+        @Test
+        @DisplayName("Update 유저 정보 수정-1 비밀번호 수정 시 메세지 반환 확인")
+        void modifyUserTest() {
+            // given
+            LoginUserDTO dbUser = new LoginUserDTO();
+            dbUser.setUserId("choiminsu");
+            dbUser.setUserPwd("choiminsu");
+    
+            UserDTO updateDTO = new UserDTO();
+            updateDTO.setUserCode(dbUser.getUserCode());
+            updateDTO.setUserPwd(dbUser.getUserPwd()); // 동일한 비밀번호 설정
+            System.out.println("original: " + updateDTO);
+    
+            // when1. 동일한 정보로 수정 시도
+            String result = facadeService.updateUser(updateDTO);
+    
+            // then(동일한 값에 대한 경고 메시지 확인)
+            assertTrue(result.contains(ApiResponse.SAME_PASSWORD.getMessage()));
+            System.out.println("동일한 비밀번호 메시지: " + result);
+    
+            // when2. 새로운 비밀번호(다른 값)로 바꾸는 경우
+            updateDTO.setUserPwd("newPwd");
+    
+            //then
+            String successResult = facadeService.updateUser(updateDTO);
+            System.out.println("NewPwd: " + updateDTO);
+    
+            assertEquals(ApiResponse.SUCCESS_MODIFY_USER.getMessage(), successResult);
+            System.out.println("비밀번호 수정 성공 메시지: " + successResult);
+            //비밀번호 수정 성공 메시지: 회원 정보가 성공적으로 수정되었습니다.
+        }
+    
+        @Test
+        @DisplayName("Update 유저 정보 수정-2 전화번호 수정 시 메세지 반환 및 중복 전화번호 확인")
+        void modifyUserTest2() {
+            // given: 기존 사용자 정보 조회
+            LoginUserDTO dbuser = new LoginUserDTO();
+            dbuser.setUserId("parkshinhye");
+            dbuser.setUserPwd("parkshinhye");
+    
+            UserDTO updateDTO2 = new UserDTO();
+            updateDTO2.setUserCode(dbuser.getUserCode());
+            updateDTO2.setUserId(dbuser.getUserId());
+            updateDTO2.setUserPhone(dbuser.getUserPhone());
+            System.out.println("original: " + updateDTO2);
+            //original: UserDTO(userCode=35, userId=parkshinhye, userPwd=null, isAdmin=0, userName=null, userPhone=010-1035-1035, birthday=null, isLeave=0)
+    
+            // when1. 동일한 정보로 수정 시도
+            String result2 = facadeService.updateUser(updateDTO2);
+    
+            // then: 동일한 값에 대한 경고 메시지 확인
+            System.out.println("Same modifying result: " + result2);
+            //Same modifying result: 010-1035-1035(은)는 이전 전화번호와 동일합니다.
+    
+            assertTrue(result2.contains(ApiResponse.SAME_PHONE.getMessage()));
+            //result2에 SAME_PHONE의 msg값이 들어가 있는지 확인
+    
+            // when2. 다른 값으로 바꾸는 경우
+            updateDTO2.setUserPhone("010-1234-2222");
+            String successResult = facadeService.updateUser(updateDTO2);
+    
+            // then 변경 값 학인
+            assertEquals(ApiResponse.SUCCESS_MODIFY_USER.getMessage(), successResult);
+            System.out.println("전화번호 수정 성공 메시지: " + successResult);
+            //전화번호 수정 성공 메시지: 회원 정보가 성공적으로 수정되었습니다.
+            System.out.println("After modify phone: " + updateDTO2);
+            //After modify phone: UserDTO(userCode=35, userId=parkshinhye, userPwd=null, isAdmin=0, userName=null, userPhone=010-1234-2222, birthday=null, isLeave=0))
+        }
+    
+        @Test
+        @DisplayName("Update 유저 정보 수정-3 이름 수정 시 메세지 반환 확인")
+        void modifyUserTest3() {
+            // given: 기존 사용자 정보 조회
+            LoginUserDTO dbuser = new LoginUserDTO();
+            dbuser.setUserId("suzy29");
+            dbuser.setUserPwd("suzy29");
+    
+            UserDTO updateDTO3 = new UserDTO();
+            updateDTO3.setUserCode(dbuser.getUserCode());
+            updateDTO3.setUserName(dbuser.getUserName());
+            System.out.println("original: " + updateDTO3);
+            //original: UserDTO(userCode=29, userId=null, userPwd=null, isAdmin=0, userName=수지, userPhone=null, birthday=null, isLeave=0)
+    
+            // when1. 동일한 정보로 수정 시도
+            String result = facadeService.updateUser(updateDTO3);
+    
+            // then: 동일한 값에 대한 경고 메시지 확인
+            assertTrue(result.contains(ApiResponse.SAME_NAME.getMessage()));
+    
+            System.out.println("ModifyUser result: " + result);
+            //ModifyUser result: 수지(은)는 이전 이름과 동일합니다.
+    
+            // when2. 다른 값으로 바꾸는 경우
+            updateDTO3.setUserName("배수지");
+    
+            // then 변경 값 학인
+            String successResult = facadeService.updateUser(updateDTO3);
+            assertEquals(ApiResponse.SUCCESS_MODIFY_USER.getMessage(), successResult);
+            System.out.println("이름 수정 성공 메시지: " + successResult);
+            System.out.println("After modify name: " + updateDTO3);
+            //이름 수정 성공 메시지: 회원 정보가 성공적으로 수정되었습니다.
+            //After modify name: UserDTO(userCode=29, userId=null, userPwd=null, isAdmin=0, userName=배수지, userPhone=null, birthday=null, isLeave=0)
+        }
+    
+        @Test
+        @DisplayName("withdrawUser() - 회원탈퇴 : 논리적 삭제(isLeave=true) 확인 테스트")
+        void withdrawUserTest() {
+            // given
+            String userId = "kimgurae";
+            UserDTO dto = new UserDTO();
+            dto.setUserId(userId);
+            System.out.println("original:" + dto);
+            //original:UserDTO(userCode=0, userId=kimgurae, userPwd=null, isAdmin=0, userName=null, userPhone=null, birthday=null, isLeave=0)
+    
+            // when
+            facadeService.withdrawUser(dto);
+    
+            // then: DB에서 다시 꺼내서 isLeave가 true로 바뀌었는지 확인
+            User updatedUser = userRepository.findByUserId(userId);
+            assertTrue(updatedUser.isLeave(), "이미 탈퇴한 회원입니다");
+            System.out.println("isLeave 값: " + updatedUser.isLeave());
+            //isLeave 값: true
+        }
+    }
+
+## 19. ShopService needs to insert in UserFacadeServiceTests!
+    
+    @Autowired
+    private ShopService shopService;
+
+## 20. User entity edit
+(Now)
+
+    /*샵 생성 및 비활성화 시 서비스층에서 유저 <-> 관리자 전환*/
+    public void modifyAuthorityToAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
+(Before)
+
+    /*샵 생성 및 비활성화 시 서비스층에서 유저 <-> 관리자 전환*/
+    public void modifyAuthorityToAdmin(boolean isAdmin) { //isAdmin 사용 안 되어서 회색글씨
+        this.isAdmin = true;
+    }
+
+## 21. Remake createShop in ShopService
+(Now)
+    
+    //CREATE 샵 생성
+    public ShopDTO createShop(ShopCreationDTO dto) {
+        /*카테고리 코드 유효성 체크*/
+        ShopCategory category = shopCategoryRepository.findById(dto.getCategoryCode())
+                .orElseThrow(() -> new ShopExceptionHandler(ShopErrorCode.SHOP_CATEGORY_NOT_FOUND));
+
+        /*관리자 유효성 체크*/
+        User admin = userRepository.findById(dto.getAdminCode())
+                .orElseThrow(() -> new ShopExceptionHandler(ShopErrorCode.ADMIN_NOT_FOUND));
+
+        /*getCoordinatesFromAddress -> getCoordinates -> MapService 호출하여 API에 담긴 정보 가져옴*/
+        MapServiceDTO.Document document = getCoordinatesFromAddress(dto.getShopLocation());
+
+        /*응답받은 document 정보로 shop 위도, 경도 세팅*/
+        dto.setShopLa(document.getLatitude());
+        dto.setShopLong(document.getLongitude());
+
+        /*신규 샵 생성*/
+        Shop shop = Shop.builder()
+                .shopName(dto.getShopName())
+                .categoryInfo(category)
+                .adminInfo(admin)
+                //중복되는 줄 제거 - 정아
+                .shopPhone(dto.getShopPhone())
+                .shopLocation(dto.getShopLocation())
+                .shopLong(dto.getShopLong())
+                .shopLa(dto.getShopLa())
+                .shopOpen(dto.getShopOpen())
+                .shopClose(dto.getShopClose())
+                .isActive(true)
+                .build();
+
+        // 관리자 권한을 부여
+        if (!admin.isAdmin()) {
+            admin.modifyAuthorityToAdmin(true);
+            userRepository.save(admin);
+        }
+
+        return modelMapper.map(shopRepository.save(shop), ShopDTO.class);
+    }
+
+(Try2)
+
+    // 관리자 권한을 부여
+        if (!admin.isAdmin()) {
+            admin.modifyAuthorityToAdmin(true);
+        }
+
+(Try)
+
+    // 관리자 권한을 부여
+        if (!admin.isAdmin()) {
+            admin.modifyAuthorityToAdmin(admin.isAdmin()==true);
+        }
+
+(Before)
+
+    // 관리자 권한을 부여
+        if (!admin.isAdmin()) {
+            admin.modifyAuthorityToAdmin(admin.isAdmin());
+        }
+
+## 22. Refactor modifyAuthorityToAdmin, modifyAuthorityToMember in User entity
+(Now)
+
+    /*샵 생성 및 비활성화 시 서비스층에서 유저 <-> 관리자 전환*/
+    public void modifyAuthorityToAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
+    public void modifyAuthorityToMember(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
+(Before)
+
+    /*샵 생성 및 비활성화 시 서비스층에서 유저 <-> 관리자 전환*/
+    public void modifyAuthorityToAdmin(boolean isAdmin) {
+        this.isAdmin = true;
+    }
+
+    public void modifyAuthorityToMember(boolean isAdmin) {
+        this.isAdmin = false;
+    }
+
+## 23. Edit deActiveShop in ShopService
+(Now)
+
+    /*해당 사용자가 보유한 샵이 단 한 개 남았다면, 관리자 권한을 제거한다*/
+        if (shopRepository.isShopLeft(adminCode)) {
+            if (admin.isAdmin()) {
+                admin.modifyAuthorityToMember(false);
+                userRepository.save(admin);
+            }
+        }
+
+(Before)
+
+    /*해당 사용자가 보유한 샵이 단 한 개 남았다면, 관리자 권한을 제거한다*/
+        if (shopRepository.isShopLeft(adminCode)) {
+            if (admin.isAdmin()) {
+                admin.modifyAuthorityToMember(admin.isAdmin());
+            }
+        }
+    
+## 24. Refactor login method in AuthUserService
+(Now)
+
+    public Object login(LoginUserDTO loginUserDTO) throws FailedLoginException {
+
+        log.info("[AuthService] login() START");
+        log.info("[AuthService] {}", loginUserDTO);
+
+        /* 목차. 1. 아이디 조회 */
+        User user = memberRepository.findByUserId(loginUserDTO.getUserId());
+
+        if (user == null || user.isLeave()) {
+            log.info("[AuthService] login() Required User Not Found!");
+            throw new FailedLoginException(loginUserDTO.getUserId() + " 유저를 찾을 수 없습니다.");
+        }
+
+        /* 목차. 2. 비밀번호 매칭 */
+        if (!passwordEncoder.matches(loginUserDTO.getUserPwd(), user.getUserPwd())) {
+            log.info("[AuthService] Password Match Failed!");
+            throw new FailedLoginException("잘못된 비밀번호입니다.");
+        }
+
+        return modelMapper.map(user, LoginUserDTO.class);
+    }
+
+(Before)
+
+    public Object login(LoginUserDTO loginUserDTO) throws FailedLoginException {
+
+        log.info("[AuthService] login() START");
+        log.info("[AuthService] {}", loginUserDTO);
+
+        /* 목차. 1. 아이디 조회 */
+        User user = memberRepository.findByUserId(loginUserDTO.getUserId());
+
+        if (user == null) {
+            log.info("[AuthService] login() Required User Not Found!");
+            throw new FailedLoginException(loginUserDTO.getUserId() + " 유저를 찾을 수 없습니다.");
+        }
+
+        /* 목차. 2. 비밀번호 매칭 */
+        if (!passwordEncoder.matches(loginUserDTO.getUserPwd(), user.getUserPwd())) {
+            log.info("[AuthService] Password Match Failed!");
+            throw new FailedLoginException("잘못된 비밀번호입니다.");
+        }
+
+        return modelMapper.map(user, LoginUserDTO.class);
+    }
+
+## 25. Tried to delete admin false with deleting Shop
+
+    @Test
+    @Order(9)
+    @DisplayName("DELETE (비활성화)")
+    @Commit
+    void testDeleteShop() {
+        //given
+        Integer shopCodeToDelete =  testShopCode;
+        Integer userCodeToDelete = testUserId;
+        //        System.out.println("shopCodeToDelete : " + shopCodeToDelete);
+        //        System.out.println("userCodeToDelete : " + userCodeToDelete);
+        //
+        //        //when
+        //        shopService.deActiveShop(userCodeToDelete, shopCodeToDelete);
+        //        Shop shop = shopRepository.findById(shopCodeToDelete).orElseThrow();
+        //        User user = userRepository.findById(userCodeToDelete).orElseThrow();
+        //
+        //        //then
+        //        assertFalse(shop.getIsActive());
+        //        System.out.println(userCodeToDelete);
+
+        // 먼저 testUserId가 admin인지 확인 (테스트 전 초기 상태 확인용)
+        User initialUser = userRepository.findById(userCodeToDelete).orElseThrow();
+        System.out.println("Initial user isAdmin: " + initialUser.isAdmin()); // true여야 함
+        //Initial user isAdmin: true
+
+        // shop2를 비활성화하여 단 하나의 샵만 남도록 만듭니다. (만약 이 테스트가 마지막 샵 비활성화를 테스트하는 경우)
+        // 이 단계가 없으면 isShopLeft(adminCode)는 항상 false가 되어 isAdmin은 바뀌지 않습니다.
+        Shop shop2 = shopRepository.findByShopCodeAndAdminCode(9, 1);
+        Shop shop3 = shopRepository.findByShopCodeAndAdminCode(8, 1);
+        Shop shop4 = shopRepository.findByShopCodeAndAdminCode(7, 1);
+        if (shop2 != null) {
+            shopService.deActiveShop(userCodeToDelete, shop2.getShopCode());
+            System.out.println("Shop2 deactivated.");
+        }
+        if (shop3 != null) {
+            shopService.deActiveShop(userCodeToDelete, shop3.getShopCode());
+            System.out.println("shop3 deactivated.");
+        }
+        if (shop4 != null) {
+            shopService.deActiveShop(userCodeToDelete, shop4.getShopCode());
+            System.out.println("shop4 deactivated.");
+        }
+
+        // 이제 testShopCode (shop1)을 비활성화합니다. 이 시점에는 testUserId에게 남은 샵이 하나뿐입니다.
+        shopService.deActiveShop(userCodeToDelete, shopCodeToDelete);
+        Shop shop = shopRepository.findById(shopCodeToDelete).orElseThrow();
+
+        //then
+        // 1. 샵이 비활성화되었는지 확인
+        assertFalse(shop.getIsActive(), "샵이 비활성화되어야 합니다.");
+
+        // 2. 유저의 isAdmin 상태가 변경되었는지 확인
+        // 중요: 변경된 User 엔티티를 다시 DB에서 로드해야 합니다!
+        User updatedUser = userRepository.findById(userCodeToDelete).orElseThrow(
+                () -> new RuntimeException("테스트 후 유저를 찾을 수 없습니다.")
+        );
+
+        assertFalse(updatedUser.isAdmin(), "유저의 관리자 권한이 제거되어야 합니다.");
+        System.out.println("Updated user isAdmin: " + updatedUser.isAdmin()); // false여야 함
+    }
+
+Hibernate: (이하 "sc1_0")
+select
+sc1_0.category_code,
+sc1_0.category_name
+from
+tbl_shop_category sc1_0
+where
+sc1_0.category_code=?
+Hibernate: (이하 "user")
+select
+u1_0.user_code,
+u1_0.birthday,
+u1_0.is_admin,
+u1_0.is_leave,
+u1_0.user_id,
+u1_0.user_name,
+u1_0.user_phone,
+u1_0.user_pwd
+from
+tbl_user u1_0
+where
+u1_0.user_code=?
+Hibernate: (이하 "sc1_0 2")
+select
+null,
+sc1_0.category_name
+from
+tbl_shop_category sc1_0
+where
+sc1_0.category_code=?
+Hibernate: (이하 "insert tbl_shop")
+insert
+into
+tbl_shop
+(admin_code, category_code, is_active, shop_close, shop_la, shop_location, shop_long, shop_name, shop_open, shop_phone)
+values
+(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+서울시 송파구/37.2979/127.0276 / 가까우미/010-1111-1111/09:00/18:00
+Hibernate:
+(sc1_0 2)
+Hibernate:
+(insert tbl_shop)
+Hibernate:
+(user)
+Initial user isAdmin: true
+Hibernate: (이하 "shop_admin")
+select
+s1_0.shop_code,
+s1_0.admin_code,
+s1_0.category_code,
+s1_0.is_active,
+s1_0.shop_close,
+s1_0.shop_la,
+s1_0.shop_location,
+s1_0.shop_long,
+s1_0.shop_name,
+s1_0.shop_open,
+s1_0.shop_phone
+from
+tbl_shop s1_0
+where
+s1_0.is_active=1
+and s1_0.shop_code=?
+and s1_0.admin_code=?
+Hibernate:
+(shop_admin)
+Hibernate:
+(shop_admin)
+Hibernate:
+select
+s1_0.shop_code,
+s1_0.admin_code,
+s1_0.category_code,
+s1_0.is_active,
+s1_0.shop_close,
+s1_0.shop_la,
+s1_0.shop_location,
+s1_0.shop_long,
+s1_0.shop_name,
+s1_0.shop_open,
+s1_0.shop_phone
+from
+tbl_shop s1_0
+where
+s1_0.shop_code=?
+Hibernate:
+select
+u1_0.user_code,
+u1_0.birthday,
+u1_0.is_admin,
+u1_0.is_leave,
+u1_0.user_id,
+u1_0.user_name,
+u1_0.user_phone,
+u1_0.user_pwd
+from
+tbl_user u1_0
+where
+u1_0.user_code=?
+and u1_0.is_admin
+Hibernate:
+(shop_admin)
+Hibernate:
+select
+count(s1_0.shop_code)=1
+from
+tbl_shop s1_0
+where
+s1_0.admin_code=?
+and s1_0.is_active=1
+Hibernate:
+update
+tbl_shop
+set
+admin_code=?,
+category_code=?,
+is_active=?,
+shop_close=?,
+shop_la=?,
+shop_location=?,
+shop_long=?,
+shop_name=?,
+shop_open=?,
+shop_phone=?
+where
+shop_code=?
+Shop2 deactivated.
+......
+shop3 deactivated.
+......
+shop4 deactivated.
+......
+
+유저의 관리자 권한이 제거되어야 합니다.
+Expected :false
+Actual   :true
+<Click to see difference>
+
+org.opentest4j.AssertionFailedError: 유저의 관리자 권한이 제거되어야 합니다. ==> expected: <false> but was: <true>
+at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+at com.header.header.domain.shop.service.ShopServiceTest.testDeleteShop(ShopServiceTest.java:336)
+at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :test
+ShopServiceTest > DELETE (비활성화) FAILED
+org.opentest4j.AssertionFailedError at ShopServiceTest.java:336
+2025-07-21T19:58:59.832+09:00  INFO 22556 --- [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-21T19:58:59.832+09:00  INFO 22556 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-21T19:58:59.844+09:00  INFO 22556 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+> Task :test
+1 test completed, 1 failed
+> Task :test FAILED
+FAILURE: Build failed with an exception.
+* What went wrong:
+  Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///D:/lecture/Header-backend/build/reports/tests/test/index.html
+* Try:
+> Run with --scan to get full insights.
+BUILD FAILED in 11s
+4 actionable tasks: 2 executed, 2 up-to-date
