@@ -1,0 +1,600 @@
+# 20250721 Developing Day 12
+## 1. Check Security config runs well
+## 2. Add UserController
+
+    package com.header.header.domain.user.controller;
+
+    import com.header.header.auth.model.dto.LoginUserDTO;
+    import com.header.header.auth.model.dto.SignupDTO;
+    import com.header.header.auth.model.dto.TokenDTO;
+    import com.header.header.auth.model.service.AuthUserService;
+    import com.header.header.common.dto.ResponseDTO;
+    import com.header.header.domain.user.dto.UserDTO;
+    import com.header.header.domain.user.service.UserFacadeService;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.web.bind.annotation.*;
+    
+    import javax.security.auth.login.FailedLoginException;
+    
+    @RestController
+    @RequestMapping("/auth")
+    public class UserController {
+    
+        @Autowired
+        private final UserFacadeService userFacadeService;
+        @Autowired
+        private AuthUserService authUserService;
+    
+        public UserController(UserFacadeService userFacadeService) {
+            this.userFacadeService = userFacadeService;
+        }
+    
+        /* 설명.
+         *  @RequestBody를 통해 RequestBody로 넘어온 JSON 문자열을 파싱해 MemberDTO 속성으로 매핑해 객체로 받아낸다.
+         *  (회원 아이디, 비밀번호)
+         *  + 요청의 body에서 데이터를 뽑아내겠다는 것은 요청이 POST 요청이었다는 것을 알 수 있다.
+         *  왜냐하면 GET 요청은 body가 아니라 header에 데이터가 담겨있기 때문이다.
+         * */
+        @PostMapping("/session")
+        public ResponseEntity<ResponseDTO> login(@RequestBody LoginUserDTO loginUserDTO) throws FailedLoginException {
+            // 로그인 성공 시 200 OK와 토큰 정보를 담은 ResponseDTO 반환
+            return ResponseEntity
+                    .ok()
+                    .body(new ResponseDTO(HttpStatus.OK, "로그인 성공", userFacadeService.loginUser(loginUserDTO)));
+        }
+    
+        @PostMapping("/users")
+        public ResponseEntity<ResponseDTO> signup(@RequestBody UserDTO userDTO) {    // 회원 가입 정보를 받아 냄
+            return ResponseEntity
+                    .ok()
+                    .body(new ResponseDTO(HttpStatus.CREATED, "회원가입 성공", userFacadeService.registerUser(userDTO)));
+        }
+    
+        @PutMapping("/{user_id}")
+        public ResponseEntity<ResponseDTO> modifyUsers(@RequestBody UserDTO userDTO) {
+            return ResponseEntity
+                    .ok()
+                    .body(new ResponseDTO(HttpStatus.OK, "회원정보 수정 성공", userFacadeService.updateUser(userDTO)));
+        }
+    }
+
+## 3. [FE] Solved no data response
+![img_3.png](img_3.png)
+
+Revised users/page.js like this
+(Now)
+
+    try {
+            const response = await fetch('http://localhost:8080/auth/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                // Handle successful signup (e.g., redirect, show success message)
+                console.log('Signup successful!');
+                alert('회원가입이 성공적으로 완료되었습니다!');
+                window.location.href = '/auth/session';
+            } else {
+                // Handle errors (e.g., show error message)
+                const errorData = await response.json();
+                console.error('Signup failed:', errorData);
+                alert(`회원가입 실패: ${errorData.message || '알 수 없는 오류'}`);
+            }
+        } catch (error) {
+            console.error('Error during signup:', error);
+            alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+    };
+
+(Before)
+
+        try {
+            const response = await fetch('/auth/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+        ......
+        } catch (error) {
+            console.error('Error during signup:', error);
+            alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+    };
+드디어 데이터 제대로 넘어간다!!!ㅜ 11:40
+
+    2025-07-22T11:38:26.995+09:00  INFO 12576 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+    2025-07-22T11:38:27.107+09:00  INFO 12576 --- [nio-8080-exec-2] c.h.h.d.user.service.UserFacadeService   : [UserFacadeService] registerUser() started with UserDTO: UserDTO(userCode=0, userId=user001, userPwd=pwd001, isAdmin=0, userName=임꺽정, userPhone=010-1234-2345, birthday=2000-10-10, isLeave=0)
+    2025-07-22T11:38:27.107+09:00  INFO 12576 --- [nio-8080-exec-2] c.h.h.a.model.service.AuthUserService    : [AuthService] Let's start signup().
+    2025-07-22T11:38:27.107+09:00  INFO 12576 --- [nio-8080-exec-2] c.h.h.a.model.service.AuthUserService    : [AuthService] userDTO UserDTO(userCode=0, userId=user001, userPwd=pwd001, isAdmin=0, userName=임꺽정, userPhone=010-1234-2345, birthday=2000-10-10, isLeave=0)
+    Hibernate:
+    select
+    u1_0.user_code
+    from
+    tbl_user u1_0
+    where
+    u1_0.user_id=?
+    limit
+    ?
+    Hibernate:
+    select
+    u1_0.user_code
+    from
+    tbl_user u1_0
+    where
+    u1_0.user_phone=?
+    limit
+    ?
+    Hibernate:
+    insert
+    into
+    tbl_user
+    (birthday, is_admin, is_leave, user_id, user_name, user_phone, user_pwd)
+    values
+    (?, ?, ?, ?, ?, ?, ?)
+    2025-07-22T11:38:27.303+09:00  INFO 12576 --- [nio-8080-exec-2] c.h.h.a.model.service.AuthUserService    : [AuthService] 유저 생성 결과, 회원 가입 성공
+    2025-07-22T11:38:27.303+09:00  INFO 12576 --- [nio-8080-exec-2] c.h.h.a.model.service.AuthUserService    : [AuthService] signup() End.
+    2025-07-22T11:38:27.303+09:00  INFO 12576 --- [nio-8080-exec-2] c.h.h.d.user.service.UserFacadeService   : [UserFacadeService] User registration successful for user: user001
+
+## 4. [FE] Make settings folder under shops
+
+## 5. [FE] Insert codes in src/app/users/page.js and page.module.css
+    
+    "use client";
+    import Link from 'next/link';
+    import React, { useState } from 'react';
+    import styles from "../users/page.module.css";
+    
+    function Checkbox({ children, disabled, checked, onChange }) {
+        return (
+            <label>
+                <input
+                type="checkbox"
+                disabled={disabled}
+                checked={checked}
+                onChange={({ target: { checked } }) => onChange(checked)}
+                />
+                {children}
+            </label>
+        );
+    }
+    
+    export default function Signup() {
+        const [service, setService] = React.useState(false);
+        const [marketing, setMarketing] = React.useState(false);
+        // State to manage form input values
+        const [formData, setFormData] = useState({
+            userName: '',
+            userPhone: '',
+            userId: '',
+            userPwd: '',
+            birthday: '',
+        });
+    
+        // Handle input changes
+        const handleChange = (e) => {
+            const { name, value } = e.target;
+            setFormData(prevData => ({
+                ...prevData,
+                [name]: value,
+            }));
+        };
+    
+        // Handle form submission
+        const handleSubmit = async (e) => {
+            e.preventDefault(); // Prevent default browser form submission
+    
+        // 서비스 이용약관 필수 체크 (추가)
+        if (!service) {
+            alert('서비스 이용약관에 동의해야 회원가입을 할 수 있습니다.');
+            return; // 전송 중단
+        }
+        //백엔드로 전송되는 데이터 확인
+         console.log('Form submitted with data:', formData);
+    
+            try {
+                const response = await fetch('http://localhost:8080/auth/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+    
+                if (response.ok) {
+                    // Handle successful signup (e.g., redirect, show success message)
+                    console.log('Signup successful!');
+                    alert('회원가입이 성공적으로 완료되었습니다!');
+                    window.location.href = '/auth/session';
+                } else {
+                    // Handle errors (e.g., show error message)
+                    const errorData = await response.json();
+                    console.error('Signup failed:', errorData);
+                    alert(`회원가입 실패: ${errorData.message || '알 수 없는 오류'}`);
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        };
+    
+        return (
+            <div className="main-content">
+                <h1>회원가입 페이지</h1>
+                <div className="content-card">
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="userName">이름:</label>
+                            <input
+                                type="text"
+                                id="userName"
+                                name="userName"
+                                value={formData.userName}
+                                onChange={handleChange}
+                                required // Add HTML5 validation
+                            />
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="userPhone">전화번호:</label>
+                            <input
+                                type="tel"
+                                id="userPhone"
+                                name="userPhone"
+                                value={formData.userPhone}
+                                onChange={handleChange}
+                                placeholder="예: 010-1234-5678"
+                                pattern="[0-9]{3}-?[0-9]{4}-?[0-9]{4}"
+                                required
+                            />
+                            <button type="submit">
+                                <Link href="/auth/verification-code">전화번호 인증</Link>
+                            </button>
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="userId">아이디:</label>
+                            <input
+                                type="text"
+                                id="userId"
+                                name="userId"
+                                value={formData.userId}
+                                onChange={handleChange}                        
+                                minLength="6" // 아이디 최소 길이
+                                required
+                            />
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="userPwd">비밀번호:</label>
+                            <input
+                                type="password"
+                                id="userPwd"
+                                name="userPwd"
+                                value={formData.userPwd}
+                                onChange={handleChange}
+                                minLength="6" // 비밀번호 최소 길이
+                                required
+                            />
+                        </div>
+    
+                        <div className="form-group">
+                            <label htmlFor="birthday">생년월일:</label>
+                            <input
+                                type="date"
+                                id="birthday"
+                                name="birthday"
+                                value={formData.birthday}
+                                onChange={handleChange}
+                            />
+                        </div>
+    
+                        {/*회원가입 약관 체크*/}
+                        <Checkbox checked={service} onChange={setService}>
+                                (필수) 서비스 이용약관
+                        </Checkbox>
+                        <a class={styles.linkStyle} href="/auth/terms-of-use">
+                            이용약관 보기
+                        </a>
+                        <br/>
+                        <Checkbox checked={marketing} onChange={setMarketing}>
+                            (선택) 마케팅 수신
+                        </Checkbox>
+                        <br/>
+                        <button type="submit">회원가입</button>
+                        <button
+                            type="submit"
+                            className={styles.loginButton}
+                        >
+                            회원가입
+                        </button>    
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+## 6. [BE] Put another codes into UserController
+
+    /**
+     * 현재 로그인된 사용자의 정보를 반환하는 엔드포인트
+     * 프론트엔드 Layout.jsx에서 사용자의 권한 등을 확인하기 위해 호출됩니다.
+     */
+    @GetMapping("/me") // 사용자 정보 조회 엔드포인트
+    @PreAuthorize("isAuthenticated()") // 이 엔드포인트는 인증된(로그인된) 사용자만 접근 가능하도록 설정
+    public ResponseEntity<ResponseDTO> getMyUserInfo() {
+        // SecurityContextHolder에서 현재 인증된 사용자의 Authentication 객체를 가져옴.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Authentication 객체의 principal에서 AuthDetails를 가져옴.
+        // AuthDetails는 UserDetails를 구현하며, LoginUserDTO를 포함.
+        if (authentication != null && authentication.getPrincipal() instanceof AuthDetails) {
+            AuthDetails authDetails = (AuthDetails) authentication.getPrincipal();
+            LoginUserDTO loginUserDTO = authDetails.getLoginUserDTO();
+
+            // LoginUserDTO에 사용자의 역할(ROLE_ADMIN, ROLE_USER 등) 정보가 포함되어 있어야 함.
+            // ResponseDTO에 LoginUserDTO를 담아 반환합니다.
+            return ResponseEntity
+                    .ok()
+                    .body(new ResponseDTO(HttpStatus.OK, "사용자 정보 로드 성공", loginUserDTO));
+        } else {
+            // 인증 정보가 없거나, 예상치 못한 Principal 타입인 경우
+            // 이 경우는 @PreAuthorize("isAuthenticated()") 때문에 발생하지 않아야 하지만, 안전을 위해 처리.
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new ResponseDTO(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.", null));
+        }
+    }
+
+## 7. Erase next-auth from package.json
+
+    {
+        "name": "header",
+        "version": "0.1.0",
+        "private": true,
+        "scripts": {
+            "dev": "next dev",
+            "build": "next build",
+            "start": "next start",
+            "lint": "next lint"
+        },
+        "dependencies": {
+            "netstat": "^0.0.2",
+            "next": "15.3.4",
+            "react": "^19.0.0",
+            "react-dom": "^19.0.0"
+        },
+        "devDependencies": {
+            "@eslint/eslintrc": "^3",
+            "eslint": "^9",
+            "eslint-config-next": "15.3.4"
+        }
+    }
+
+## 8. Endless debugging
+![img_4.png](img_4.png)
+
+## 9. 
+핵심은 UserFacadeService.loginUser 메서드가 
+String 타입의 JWT 토큰을 반환하도록 타입 시그니처를 변경하고, 
+이를 위해 AuthService.login 메서드도 
+동일하게 String 타입의 JWT 토큰을 반환하도록 수정하는 것입니다. 
+실제로 토큰 생성 로직은 AuthService 내부에 있거나 AuthService가 호출하는 다른 JWT 유틸리티 클래스에 있을 겁니다.
+
+### 9-1. AuthUserService fix
+(Now)
+
+    
+
+(Then)
+
+    public Object login(LoginUserDTO loginUserDTO) throws FailedLoginException {
+
+        log.info("[AuthService] login() START");
+        log.info("[AuthService] {}", loginUserDTO);
+
+        /* 목차. 1. 아이디 조회 */
+        User user = memberRepository.findByUserId(loginUserDTO.getUserId());
+
+        // isLeave=true(탈퇴) 사용자도 exception에 포함
+        if (user == null || user.isLeave()) {
+            log.info("[AuthService] login() Required User Not Found!");
+            throw new FailedLoginException(loginUserDTO.getUserId() + " 유저를 찾을 수 없습니다.");
+        }
+
+        /* 목차. 2. 비밀번호 매칭 */
+        if (!passwordEncoder.matches(loginUserDTO.getUserPwd(), user.getUserPwd())) {
+            log.info("[AuthService] Password Match Failed!");
+            throw new FailedLoginException("잘못된 비밀번호입니다.");
+        }
+
+        return modelMapper.map(user, LoginUserDTO.class);
+    }
+
+### 9-2. JwtTokenProvider revise
+(Now)
+
+    /**
+     * 사용자 ID와 권한 정보를 기반으로 JWT 액세스 토큰 문자열을 생성합니다.
+     * @param userId 토큰에 포함될 사용자 ID
+     * @param isAdmin 사용자의 관리자 여부 (권한 부여에 사용)
+     * @return 생성된 JWT 액세스 토큰 문자열
+     */
+    // 메서드 시그니처 변경: LoginUserDTO 대신 String userId와 boolean isAdmin을 받음
+    // 반환 타입: TokenDTO -> String (액세스 토큰 문자열 자체)
+    public String generateToken(String userId, boolean isAdmin) { // ✨ 메서드 이름 변경 및 파라미터 변경
+        log.info("[TokenProvider] generateToken() Start");
+
+        long now = System.currentTimeMillis();
+        Date accessTokenExpiresIn = new Date(now + expiration);
+
+        // isAdmin 필드를 기반으로 권한 정보를 가져옵니다.
+        String authorities = isAdmin ? "ROLE_ADMIN" : "ROLE_USER";
+
+        // JWT 토큰 생성
+        String accessToken = Jwts.builder()
+                .setSubject(userId) // 토큰의 주체 (사용자 ID) 설정
+                .claim(AUTHORITIES_KEY, authorities) // 권한 정보를 클레임으로 추가
+                .setExpiration(accessTokenExpiresIn) // 토큰 만료 시간 설정
+                .signWith(key, SignatureAlgorithm.HS512) // 서명에 사용할 키와 알고리즘
+                .compact();
+
+        System.out.println("조립된 accessToken 확인 = " + accessToken);
+
+        log.info("[TokenProvider] generateToken() End");
+
+        // TokenDTO 생성 로직은 이 메서드에서 제거하고, AuthService나 AuthController에서 처리
+        return accessToken; // ✨ JWT 액세스 토큰 문자열만 반환
+    }
+
+(Before)
+
+    public TokenDTO generateTokenDTO(LoginUserDTO loginUserDTO) {
+        log.info("[TokenProvider] generateTokenDTO() Start");
+
+        long now = System.currentTimeMillis();
+        Date accessTokenExpiresIn = new Date(now + expiration);
+
+        // LoginUserDTO의 isAdmin 필드를 기반으로 권한 정보를 가져옵니다.
+        // isAdmin 필드를 통해 "ROLE_USER" 또는 "ROLE_ADMIN" 권한을 부여합니다.
+        String authorities = loginUserDTO.isAdmin() ? "ROLE_ADMIN" : "ROLE_USER";
+
+        // JWT 토큰 생성
+        String accessToken = Jwts.builder()
+                // 토큰의 주체 (사용자 ID) 설정
+                .setSubject(loginUserDTO.getUserId())
+                // 권한 정보를 클레임으로 추가
+                .claim(AUTHORITIES_KEY, authorities)
+                // 토큰 만료 시간 설정
+                .setExpiration(accessTokenExpiresIn)
+                // 서명에 사용할 키와 알고리즘
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+
+        System.out.println("조립된 accessToken 확인 = " + accessToken);
+
+        log.info("[TokenProvider] generateTokenDTO() End");
+
+        // TokenDTO 생성 시 사용자 이름(userId)과 토큰 만료 시간을 사용합니다.
+        // loginUserDTO.getUserId()를 사용하여 사용자 ID를 직접 전달합니다.
+        return new TokenDTO(BEARER_TYPE, loginUserDTO.getUserId(), accessToken, accessTokenExpiresIn.getTime());
+    }
+
+### 9-3. LoginSuccessConfig
+
+(Before)
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+
+        // 응답 본문에 담을 데이터를 위한 Map 준비
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "로그인 성공입니다."); // 기본 성공 메시지 설정
+
+        // 1. 인증된 사용자 정보 가져오기 (핵심!)
+        // LoginUserDTO 변수를 여기서 바로 초기화하지 않고, 아래 if 블록 안에서 할당합니다.
+        LoginUserDTO loginUserDTO = null;
+
+        // Spring Security가 로그인에 성공하면, Authentication 객체 안에 UserDetails 타입의 Principal을 넣어줍니다.
+        // 우리 프로젝트에서는 이 Principal이 바로 AuthDetails 객체입니다.
+        if (authentication.getPrincipal() instanceof AuthDetails) {
+            AuthDetails authDetails = (AuthDetails) authentication.getPrincipal();
+            loginUserDTO = authDetails.getLoginUserDTO(); // AuthDetails에서 LoginUserDTO를 가져와 loginUserDTO에 할당
+        }
+
+        // 2. JWT 토큰 생성 및 사용자 정보 포함 로직
+        // loginUserDTO가 성공적으로 가져와졌을 때만 (null이 아닐 때만) 토큰을 생성하고 사용자 정보를 추가합니다.
+        if (loginUserDTO != null) {
+            // 2.1. jwtTokenProvider.generateTokenDTO(loginUserDTO) 호출의 결과는 TokenDTO 객체입니다.
+            TokenDTO tokenDto = jwtTokenProvider.generateTokenDTO(loginUserDTO);
+
+            // 2.2. TokenDTO 객체에서 실제 JWT 문자열(accessToken)을 추출합니다.
+            String accessToken = tokenDto.getAccessToken();
+
+            // 2.3. 추출한 accessToken을 응답 본문에 담습니다.
+            responseBody.put("token", accessToken);
+
+            // 2.4. 사용자 정보 (LoginUserDTO) 응답 본문에 포함
+            responseBody.put("userInfo", loginUserDTO);
+
+            // 2.5. HTTP 응답 상태 코드 설정 (200 OK)
+            response.setStatus(HttpServletResponse.SC_OK);
+
+        } else {
+            responseBody.put("message", "사용자 정보를 가져오는데 실패했습니다.");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+
+        // 3. 공통 응답 헤더 설정
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // 4. 응답 본문에 JSON 데이터 작성
+        objectMapper.writeValue(response.getWriter(), responseBody);
+    }
+
+## 10. Go back to the original
+LoginSuccessHandler 클래스가 존재하고, Spring Security의 인증 성공 시 직접 호출되어 JWT 토큰을 응답에 포함시키는 역할을 한다면, TokenDTO는 여전히 필요합니다!
+
+지금까지의 논의는 프론트엔드에서 직접 http://localhost:8080/auth/session 엔드포인트로 로그인 요청을 보내고, 백엔드(AuthController -> UserFacadeService -> AuthService)에서 직접 토큰을 생성하여 반환하는 방식에 초점을 맞췄습니다.
+
+하지만 LoginSuccessHandler가 있다면, 로그인 요청은 Spring Security의 기본 로그인 처리(UsernamePasswordAuthenticationFilter 등)를 통해 진행되고, 인증에 성공하면 LoginSuccessHandler가 발동하여 토큰을 생성하고 응답에 실어주는 방식입니다.
+
+이 경우, AuthController의 /auth/session 엔드포인트는 불필요할 가능성이 높습니다. 또는, /auth/session이 Spring Security의 로그인 요청을 받는 엔드포인트일 수도 있습니다.
+
+LoginSuccessHandler를 고려한 새로운 해결책
+LoginSuccessHandler가 jwtTokenProvider.generateTokenDTO(loginUserDTO)를 호출하고 있다면, JwtTokenProvider는 TokenDTO를 반환하는 메서드를 유지해야 합니다.
+
+권장하는 방식:
+
+Spring Security를 통해 로그인 처리 (/login 또는 /auth/session 엔드포인트 사용):
+
+프론트엔드는 Spring Security의 로그인 엔드포인트(예: /login 또는 설정에 따라 /auth/session)로 폼 데이터 또는 JSON 형태의 사용자 인증 정보를 보냅니다.
+
+Spring Security가 이 요청을 가로채서 인증을 시도하고, 성공하면 LoginSuccessHandler가 실행됩니다.
+
+LoginSuccessHandler 내에서 JwtTokenProvider.generateTokenDTO(loginUserDTO)를 호출하여 TokenDTO를 얻고, 이 DTO에서 accessToken을 추출하여 응답 본문에 포함합니다.
+
+AuthController의 /auth/session 엔드포인트 재고:
+
+만약 Spring Security가 /auth/session을 로그인 엔드포인트로 사용한다면, 이 엔드포인트의 컨트롤러 메서드는 실제 로직을 가질 필요가 없거나, 전혀 다른 역할을 해야 합니다. Spring Security가 요청을 가로채기 때문이죠.
+
+만약 Spring Security의 로그인 엔드포인트가 /login 등 다른 곳이라면, AuthController의 /auth/session은 정말 불필요합니다.
+
+가장 현실적인 시나리오와 코드 수정 제안:
+
+LoginSuccessHandler를 사용하는 경우, 일반적인 Spring Security 플로우는 다음과 같습니다:
+
+프론트엔드는 http://localhost:8080/auth/session (또는 설정된 로그인 URL)로 POST 요청을 보냅니다. 이 요청은 Spring Security의 필터 체인에 의해 처리됩니다.
+
+Spring Security는 사용자 인증을 시도합니다. (이 과정에서 AuthService의 loadUserByUsername 등이 사용될 수 있습니다.)
+
+인증 성공 시, LoginSuccessHandler의 onAuthenticationSuccess 메서드가 호출됩니다.
+
+LoginSuccessHandler는 JwtTokenProvider.generateTokenDTO(loginUserDTO)를 호출하여 TokenDTO를 얻습니다.
+
+LoginSuccessHandler는 이 TokenDTO에서 필요한 정보(토큰, 사용자 정보)를 추출하여 HTTP 응답 본문에 JSON 형태로 직접 작성하여 클라이언트에게 보냅니다.
+
+이 시나리오라면, 이전에 AuthService와 UserFacadeService를 String을 반환하도록 수정한 것을 원래대로 돌려야 합니다.
+
+2. AuthService.login 및 UserFacadeService.loginUser 메서드 삭제 또는 주석 처리
+   이게 가장 큰 변경점입니다.
+
+만약 Spring Security가 로그인 요청을 가로채서 LoginSuccessHandler를 통해 토큰을 발행한다면, AuthController에 직접 구현된 /auth/session POST 메서드와 그 하위의 UserFacadeService.loginUser, AuthService.login 메서드는 더 이상 로그인 처리용으로 사용되지 않을 가능성이 매우 높습니다.
+
+Spring Security는 자체 인증 메커니즘을 사용하고, 인증 성공 시 AuthenticationSuccessHandler를 호출하기 때문입니다.
+
+AuthController의 @PostMapping("/session") 메서드를 주석 처리하거나 삭제합니다.
+
+UserFacadeService의 loginUser 메서드를 주석 처리하거나 삭제합니다.
+
+AuthService의 login 메서드를 주석 처리하거나 삭제합니다.
+
+왜냐하면, 사용자가 http://localhost:8080/auth/session (또는 설정된 로그인 URL)으로 로그인 요청을 보내면, 그 요청은 이미 Spring Security의 인증 필터에 의해 가로채지고 처리되기 때문입니다. 컨트롤러의 해당 메서드까지 도달하지 않거나, 도달하더라도 이미 인증이 완료된 후일 수 있습니다.
