@@ -598,3 +598,406 @@ UserFacadeService의 loginUser 메서드를 주석 처리하거나 삭제합니�
 AuthService의 login 메서드를 주석 처리하거나 삭제합니다.
 
 왜냐하면, 사용자가 http://localhost:8080/auth/session (또는 설정된 로그인 URL)으로 로그인 요청을 보내면, 그 요청은 이미 Spring Security의 인증 필터에 의해 가로채지고 처리되기 때문입니다. 컨트롤러의 해당 메서드까지 도달하지 않거나, 도달하더라도 이미 인증이 완료된 후일 수 있습니다.
+
+## 11. Problem solve
+
+    Hibernate:
+    select
+    u1_0.user_code,
+    u1_0.birthday,
+    u1_0.is_admin,    
+    u1_0.is_leave,    
+    u1_0.user_id,    
+    u1_0.user_name,    
+    u1_0.user_phone,    
+    u1_0.user_pwd    
+    from    
+    tbl_user u1_0    
+    where    
+    u1_0.user_id=?
+    2025-07-22T17:14:10.238+09:00  INFO 16772 --- [nio-8080-exec-3] c.h.header.auth.config.JwtTokenProvider  : [TokenProvider] generateTokenDTO() Start
+    조립된 accessToken 확인 = (일부러 삭제한 Token)
+    
+    로그인했을 때 백엔드 콘솔에서 이렇게 Token 생성이 되거든?
+
+    로그인 요청 중 오류 발생: TypeError: Failed to fetch at handleSubmit (D:\lecture\Header-Fr…ssion\page.js:17:30)
+    
+    overrideMethod@hook.js:608
+    
+    D:\lecture\Header-Fr…\session\page.js:42
+    
+    로그인 응답 형식 문제: {status: 200, message: '로그인 성공', data: {…}}
+    ......
+
+    D:\lecture\Header-Fr…ayout\Layout.jsx:34
+    
+    토큰이 없어 로그인이 안 된 사용자입니다.
+    
+    
+    D:\lecture\Header-Fr…\session\page.js:42
+    
+    로그인 응답 형식 문제: {status: 200, message: '로그인 성공', data: {…}}
+    
+    handleSubmit
+    
+    근데 왜 클라이언트 f12 개발자 도구 콘솔창에서는 로그인에 성공했지만, 서버 응답에서 토큰을 찾을 수 없습니다.고 뜰까?
+
+(Answer)
+
+    // ★★★ 여기를 추가/확장하여 정확한 응답 데이터 구조를 확인합니다 ★★★
+            console.log("★★★★★ 서버로부터 받은 전체 응답 데이터: ", responseData);
+            console.log("★★★★★ responseData.data 객체: ", responseData.data);
+            if (responseData.data) {
+                console.log("★★★★★ responseData.data.accessToken 필드: ", responseData.data.accessToken);
+            }
+            // ★★★ 여기까지 추가/확장 ★★★
+
+    위와 같이 console.log를 추가한 후, 다시 로그인 시도했을 때 "★★★★★ 서버로부터 받은 전체 응답 데이터:" 옆에 찍히는 콘솔 로그를 정확히 알려주시면 됩니다.
+    예상되는 출력은 다음과 같아야 합니다:
+        ★★★★★ 서버로부터 받은 전체 응답 데이터: {status: 200, message: '로그인 성공', data: {grantType: 'Bearer', userId: 'user001', accessToken: '...', accessTokenExpiresIn: ...}}
+        ★★★★★ responseData.data 객체: {grantType: 'Bearer', userId: 'user001', accessToken: '...', accessTokenExpiresIn: ...}
+        ★★★★★ responseData.data.accessToken 필드: 어쩌구저쩌구
+    만약 accessToken 필드에 undefined나 null이 찍힌다면, TokenDTO가 data 필드에 제대로 담기지 않았거나, 프론트엔드가 예상하는 TokenDTO의 필드 이름(accessToken)과 실제 백엔드에서 직렬화된 이름이 다를 수 있습니다. 
+    (예: token으로 직렬화될 수도 있음. 하지만 @Getter가 있다면 보통 필드명 그대로 accessToken으로 됩니다.)
+
+(Question)
+
+    D:\lecture\Header-Fr…\session\page.js:34
+
+    ★★★★★ 서버로부터 받은 전체 응답 데이터: {status: 200, message: '로그인 성공', data: {…}}
+    
+    data:
+    {grantType:null,userId:null,accessToken:null,accessTokenExpiresIn:null}
+    
+    message:    
+    "로그인 성공"
+    
+    status:  200
+    
+    [[Prototype]] :
+    Object
+    
+    D:\lecture\Header-Fr…\session\page.js:35
+    
+    ★★★★★ responseData.data 객체: {grantType: null, userId: null, accessToken: null, accessTokenExpiresIn: null}
+    
+    accessToken :  null
+    accessTokenExpiresIn :  null
+    grantType :   null
+    userId :   null
+    
+    [[Prototype]]:   Object    
+    D:\lecture\Header-Fr…\session\page.js:37    
+    ★★★★★ responseData.data.accessToken 필드: null
+
+(Answer)
+
+현재 상황 요약
+백엔드는 정상적으로 동작합니다:
+
+AuthService에서 TokenDTO를 생성하고, 해당 DTO에는 accessToken, userId 등의 값이 정상적으로 채워져 있습니다. (백엔드 로그 TokenDTO{grantType='Bearer', userId='user001', accessToken='...', accessTokenExpiresIn=...}를 통해 확인)
+
+프론트엔드 fetch 요청은 백엔드에 도달하고, 백엔드는 200 OK 응답을 보냅니다:
+
+★★★★★ 서버로부터 받은 전체 응답 데이터: {status: 200, message: '로그인 성공', data: {…}} 이 로그를 통해 확인됩니다. 즉, 네트워크 연결 자체는 성공했고, HTTP 응답 상태도 200 OK입니다.
+
+net::ERR_CONNECTION_REFUSED 오류는 아마 간헐적인 문제이거나 이전 로그의 잔재일 가능성이 높습니다. 현재 시점에서는 200 OK 응답을 받았다는 점에 집중해야 합니다.
+
+문제의 핵심: 백엔드에서 프론트엔드로 전달된 TokenDTO의 모든 필드가 null입니다.
+
+data: {grantType: null, userId: null, accessToken: null, accessTokenExpiresIn: null}
+
+★★★★★ responseData.data.accessToken 필드: null
+
+이것이 바로 프론트엔드에서 "로그인에 성공했지만, 서버 응답에서 토큰을 찾을 수 없습니다."라는 메시지가 뜨는 직접적인 원인입니다. responseData.data 객체는 받았지만, 그 안의 accessToken 등의 필드가 null이기 때문에 조건문(if (responseData.data && responseData.data.accessToken))이 false가 되는 것입니다.
+
+문제의 원인 추정
+이러러한 상황은 백엔드에서 TokenDTO가 ResponseDTO에 담겨 JSON으로 직렬화되어 네트워크를 통해 프론트엔드로 전송될 때, TokenDTO의 필드들이 제대로 직렬화되지 못하고 모두 null로 바뀌는 경우에 발생합니다.
+
+가장 흔한 원인은 다음과 같습니다:
+
+TokenDTO 클래스에 @Getter (Lombok) 또는 명시적인 Getter 메서드가 누락되었을 수 있습니다. JSON 직렬화 라이브러리(Jackson 등)는 객체의 필드 값을 읽기 위해 Getter 메서드를 사용합니다. 만약 Getter가 없으면, 해당 필드에 접근할 수 없어 null로 직렬화하거나 아예 포함시키지 않을 수 있습니다.
+
+TokenDTO 클래스의 생성자가 필드들을 올바르게 초기화하지 않거나, 필드 접근 지정자가 private인데 Getter가 없는 경우가 있을 수 있습니다.
+......
+제공해주신 TokenDTO 클래스 코드를 확인했습니다.
+
+문제는 백엔드에서 TokenDTO 객체가 정상적으로 생성되었음에도 불구하고, 이것이 프론트엔드로 전송될 때 data: {grantType: null, userId: null, accessToken: null, accessTokenExpiresIn: null}처럼 모든 필드가 null로 바뀌는 현상입니다.
+
+이러한 현상은 TokenDTO 객체가 ResponseDTO에 담겨 JSON으로 직렬화되기 직전에 어떤 이유로든 데이터가 null로 초기화되거나, 혹은 ResponseDTO 또는 직렬화 과정에서 예상치 못한 문제가 발생하는 경우에 주로 나타납니다.
+
+다음 단계: 백엔드에서 TokenDTO가 null이 되는 정확한 지점 파악
+가장 확실한 방법은 백엔드에서 TokenDTO가 ResponseDTO에 담기기 직전에 어떤 값을 가지고 있는지 확인하는 것입니다. AuthController의 login 메서드에 추가적인 로그를 넣어 봅시다.
+......
+문제의 원인
+제공해주신 AuthController의 login 메서드 코드의 핵심 문제는 바로 이 부분입니다:
+
+Java
+
+// 1. userFacadeService.loginUser 호출하여 JWT 토큰 문자열 받기
+String jwtToken = (String) userFacadeService.loginUser(loginUserDTO); // <-- 여기서 String으로 캐스팅하여 받음
+
+// 2. 받은 토큰 문자열을 TokenDTO 객체로 감싸기
+TokenDTO tokenDTO = new TokenDTO(jwtToken); // <-- TokenDTO의 '잘못된' 생성자를 호출!
+이전 대화에서 TokenDTO 클래스에 다음과 같은 생성자가 있었음을 확인했습니다:
+Java
+
+public class TokenDTO {
+// ... 필드들 ...
+
+    public TokenDTO(String grantType, String userId, String accessToken, Long accessTokenExpiresIn) {
+        // 이 생성자는 모든 필드를 초기화합니다.
+    }
+
+    public TokenDTO(String jwtToken) {
+        // 이 생성자는 'jwtToken' 인자를 받지만,
+        // TokenDTO의 '다른 어떤 필드'에도 이 값을 할당하지 않습니다!
+        // 즉, 이 생성자로 객체를 만들면 모든 필드는 기본값(null)을 가집니다.
+    }
+    // ... Getter/Setter 및 toString ...
+}
+AuthController에서 new TokenDTO(jwtToken)를 호출했을 때, TokenDTO 클래스의 public TokenDTO(String jwtToken) { } 생성자가 사용됩니다. 이 생성자는 jwtToken 문자열을 받지만, TokenDTO의 accessToken, userId 등의 필드에 해당 문자열을 할당하지 않습니다. 그렇기 때문에 tokenDTO 객체는 생성되지만, 그 안의 모든 필드 값은 null이 된 채로 프론트엔드로 전달된 것입니다.
+
+백엔드 콘솔에서 TokenDTO가 정상적으로 생성된 것처럼 보였던 것은 AuthService 내부에서 JwtTokenProvider.generateTokenDTO가 호출될 때 public TokenDTO(String grantType, String userId, String accessToken, Long accessTokenExpiresIn) 생성자를 사용하여 올바르게 값을 채웠기 때문입니다.
+하지만 AuthService가 반환한 TokenDTO를 AuthController에서 String으로 강제 캐스팅한 후, 그 String을 다시 잘못된 TokenDTO 생성자에 넣어버린 것이 문제였습니다.
+
+## 12. Refactor AuthUserService and UserFacadeService
+
+    package com.header.header.auth.model.service;
+    ......
+    @Service
+    public class AuthUserService implements UserDetailsService {
+    @Autowired
+    private UserService userService;
+    
+        private static final Logger log = LoggerFactory.getLogger(AuthUserService.class);
+        private final MainUserRepository memberRepository;
+        private final PasswordEncoder passwordEncoder;
+        private final ModelMapper modelMapper;
+        private final MainUserRepository userRepository;
+        private final JwtTokenProvider jwtTokenProvider;
+    
+        public AuthUserService(MainUserRepository memberRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, MainUserRepository userRepository, JwtTokenProvider jwtTokenProvider, UserService userService) {
+            this.memberRepository = memberRepository;
+            this.passwordEncoder = passwordEncoder;
+            this.modelMapper = modelMapper;
+            this.userRepository = userRepository;
+            this.jwtTokenProvider = jwtTokenProvider;
+            this.userService = userService;
+        }
+    
+        public TokenDTO login(LoginUserDTO loginUserDTO) throws FailedLoginException {
+    
+            log.info("[AuthService] login() START");
+            log.info("[AuthService] {}", loginUserDTO);
+    
+            /* 목차. 1. 아이디 조회 */
+            User user = memberRepository.findByUserId(loginUserDTO.getUserId());
+    
+            if (user == null || user.isLeave()) {
+                log.info("[AuthService] login() Required User Not Found!");
+                throw new FailedLoginException(loginUserDTO.getUserId() + " 유저를 찾을 수 없습니다.");
+            }
+    
+            /* 목차. 2. 비밀번호 매칭 */
+            if (!passwordEncoder.matches(loginUserDTO.getUserPwd(), user.getUserPwd())) {
+                log.info("[AuthService] Password Match Failed!");
+                throw new FailedLoginException("잘못된 비밀번호입니다.");
+            }
+    
+            TokenDTO tokenDto = jwtTokenProvider.generateTokenDTO(loginUserDTO);
+    
+            log.info("[AuthService] login() Token Generated: {}", tokenDto);
+            log.info("[AuthService] login() END");
+    
+            return tokenDto; // TokenDTO 객체를 직접 반환
+        }
+    
+        /** save : registerNewUser
+         -> UserDTO 사용
+         @param userDTO 생성할 user 정보가 담긴 DTO
+         @return 생성된 signupDTO(user관련 DTO)
+         이미 존재하는 아이디나 전화번호일 때 */
+        public UserDTO signup(UserDTO userDTO) {
+            log.info("[AuthService] Let's start signup().");
+            log.info("[AuthService] userDTO {}", userDTO);
+    
+            /* 1. 중복 유효성 검사 */
+            // 중복확인 1 : userId
+            if (userRepository.existsByUserId(userDTO.getUserId())) {
+                log.info("[AuthService] 아이디 중복");
+                throw new DuplicatedUserIdException(ApiResponse.DUPLICATE_ID.getMessage());
+            }
+            // 중복확인 2 : userPhone
+            if (userRepository.existsByUserPhone(userDTO.getUserPhone())) {
+                log.info("[AuthService] 전화번호 중복");
+                throw new DuplicatedPhoneException(ApiResponse.DUPLICATE_PHONE.getMessage());
+            }
+    
+            try {
+                // 2. 비밀번호 암호화
+                String encodedPassword = passwordEncoder.encode(userDTO.getUserPwd());
+    
+                // 3. User 엔티티 생성 및 기본 권한(isAdmin=false) 설정
+                User registUser = new User(
+                        userDTO.getUserId(),
+                        encodedPassword,
+                        false, // isAdmin: 회원가입 시 기본값은 false (일반 사용자)
+                        userDTO.getUserName(),
+                        userDTO.getUserPhone(),
+                        userDTO.getBirthday(),
+                        false  // isLeave: 회원가입 시 기본값은 false (탈퇴하지 않음)
+                );
+    
+                // 4. User 엔티티 저장
+                User result = userRepository.save(registUser);
+    
+                /* 설명. 위의 save()가 성공해야 해당 트랜잭션이 성공했다고 판단. */
+                log.info("[AuthService] 유저 생성 결과, {}",
+                        (result != null) ? "회원 가입 성공" : "회원 가입 실패");
+    
+                return userDTO;
+    
+            } catch (Exception e) {
+                log.error("회원가입 중 알 수 없는 오류 발생", e);
+                throw new RegistrationUnknownException(e);
+            } finally {
+                log.info("[AuthService] signup() End.");
+            }
+        }
+    
+        @Override
+        public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+    
+            if(userId == null || userId.equals("")) {
+                throw new AuthenticationServiceException(userId + "아이디를 입력하지 않았습니다.");
+            } else {
+                LoginUserDTO loginUserDTO = userService.findByUserId(userId);
+                if (loginUserDTO == null) {
+                    throw new UsernameNotFoundException("해당하는 회원이 없습니다. 회원 가입 후 로그인 해주십시오.");
+                }
+                return new AuthDetails(loginUserDTO);
+            }
+        }
+    }
+
+(Now)
+
+    /* 4. 로그인 시 유저 정보 조회 */
+    @Transactional
+    public TokenDTO loginUser(LoginUserDTO loginUserDTO) throws FailedLoginException {
+        return authService.login(loginUserDTO);
+    }
+
+(Before)
+
+    /* 4. 로그인 시 유저 정보 조회 */
+    @Transactional
+    public Object loginUser(LoginUserDTO loginUserDTO) throws FailedLoginException {
+        return authService.login(loginUserDTO);
+    }
+
+## 13. Fix UserController
+헐!! 중괄호 꼬이고 있었다. login method 아래에 있던 메소드 3개 전부 다 login method 안에 있는 걸로 되어있더라? -> 해결!
+(Now)
+    
+    @RestController
+    @Slf4j
+    @RequestMapping("/auth")
+    public class UserController {
+    
+        @Autowired
+        private final UserFacadeService userFacadeService;
+        @Autowired
+        private AuthUserService authUserService;
+    
+        public UserController(UserFacadeService userFacadeService) {
+            this.userFacadeService = userFacadeService;
+        }
+    
+        /* 설명.
+         *  @RequestBody를 통해 RequestBody로 넘어온 JSON 문자열을 파싱해 MemberDTO 속성으로 매핑해 객체로 받아낸다.
+         *  (회원 아이디, 비밀번호)
+         *  + 요청의 body에서 데이터를 뽑아내겠다는 것은 요청이 POST 요청이었다는 것을 알 수 있다.
+         *  왜냐하면 GET 요청은 body가 아니라 header에 데이터가 담겨있기 때문이다.
+         * */
+        @PostMapping("/session")
+        public ResponseEntity<ResponseDTO> login(@RequestBody LoginUserDTO loginUserDTO) throws FailedLoginException {
+            try {
+                // userFacadeService.loginUser 호출하여 TokenDTO 객체 직접 받기
+                TokenDTO tokenDTO = userFacadeService.loginUser(loginUserDTO);
+    
+                return ResponseEntity
+                        .ok()
+                        .body(new ResponseDTO(HttpStatus.OK, "로그인 성공", tokenDTO)); // HttpStatus.OK 사용
+    
+            } catch (FailedLoginException e) {
+                log.error("[UserController] Login Failed: {}", e.getMessage());
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(new ResponseDTO(HttpStatus.UNAUTHORIZED, e.getMessage(), null));
+            } catch (Exception e) {
+                log.error("[UserController] Login Error: ", e);
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(new ResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류 발생", null));
+            }
+        }
+    
+        @PostMapping("/users")
+        public ResponseEntity<ResponseDTO> signup(@RequestBody UserDTO userDTO) {    // 회원 가입 정보를 받아 냄
+            return ResponseEntity
+                    .ok()
+                    .body(new ResponseDTO(HttpStatus.CREATED, "회원가입 성공", userFacadeService.registerUser(userDTO)));
+        }
+    
+        @PutMapping("/{user_id}")
+        public ResponseEntity<ResponseDTO> modifyUsers(@RequestBody UserDTO userDTO) {
+            return ResponseEntity
+                    .ok()
+                    .body(new ResponseDTO(HttpStatus.OK, "회원정보 수정 성공", userFacadeService.updateUser(userDTO)));
+        }
+    
+        /**
+         * 현재 로그인된 사용자의 정보를 반환하는 엔드포인트
+         * 프론트엔드 Layout.jsx에서 사용자의 권한 등을 확인하기 위해 호출됩니다.
+         */
+        @GetMapping("/me") // 사용자 정보 조회 엔드포인트
+        @PreAuthorize("isAuthenticated()") // 이 엔드포인트는 인증된(로그인된) 사용자만 접근 가능하도록 설정
+        public ResponseEntity<ResponseDTO> getMyUserInfo () {
+            // SecurityContextHolder에서 현재 인증된 사용자의 Authentication 객체를 가져옴.
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    
+            // Authentication 객체의 principal에서 AuthDetails를 가져옴.
+            // AuthDetails는 UserDetails를 구현하며, LoginUserDTO를 포함.
+            if (authentication != null && authentication.getPrincipal() instanceof AuthDetails) {
+                AuthDetails authDetails = (AuthDetails) authentication.getPrincipal();
+                LoginUserDTO loginUserDTO = authDetails.getLoginUserDTO();
+    
+                // LoginUserDTO에 사용자의 역할(ROLE_ADMIN, ROLE_USER 등) 정보가 포함되어 있어야 함.
+                // ResponseDTO에 LoginUserDTO를 담아 반환합니다.
+                return ResponseEntity
+                        .ok()
+                        .body(new ResponseDTO(HttpStatus.OK, "사용자 정보 로드 성공", loginUserDTO));
+            } else {
+                // 인증 정보가 없거나, 예상치 못한 Principal 타입인 경우
+                // 이 경우는 @PreAuthorize("isAuthenticated()") 때문에 발생하지 않아야 하지만, 안전을 위해 처리.
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(new ResponseDTO(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.", null));
+            }
+        }
+    }
+
+(Try)
+
+    @PostMapping("/session")
+    public ResponseEntity<ResponseDTO<TokenDTO>> login(@RequestBody LoginUserDTO loginUserDTO) throws FailedLoginException {
+        // 1. userFacadeService.loginUser 호출하여 JWT 토큰 문자열 받기
+        TokenDTO tokenDTO = userFacadeService.loginUser(loginUserDTO); // <-- 여기가 가장 중요합니다!
+
+        // 2. 받은 TokenDTO 객체를 ResponseDTO의 data 필드에 담아 반환
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO<>(HttpStatus.OK.value(), "로그인 성공", tokenDTO));
+    }
