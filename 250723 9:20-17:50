@@ -1,0 +1,315 @@
+# 20250723 Developing Day 14
+## 1. [FE] Set alert on login failure
+->나중에
+
+## 2. [FE] Fix signup form
+Css
+    
+    .linkStyle {
+    color: #3b82f6;
+    font-size: x-small;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    }
+    
+    .mainContent {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    }
+    .contentCard {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    
+    padding: var(--spacing-2xl);
+    background-color: var(--background=#000); /* 이 변수가 올바른 색상 값을 주는지 확인 */
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    }
+    
+    .form-group {
+    gap: 5px;
+    }
+    
+    .loginButton {
+    width: 300px;
+    padding: 15px;
+    background-color: #13183d;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    }
+    
+Page.js
+
+    "use client";
+    import Link from 'next/link';
+    import React, { useState } from 'react';
+    import styles from "../users/page.module.css";
+    
+    function Checkbox({ children, disabled, checked, onChange }) {
+        return (
+            <label>
+                <input
+                type="checkbox"
+                disabled={disabled}
+                checked={checked}
+                onChange={({ target: { checked } }) => onChange(checked)}
+                />
+                {children}
+            </label>
+        );
+    }
+    
+    export default function Signup() {
+        const [service, setService] = React.useState(false);
+        const [marketing, setMarketing] = React.useState(false);
+        // State to manage form input values
+        const [formData, setFormData] = useState({
+            userName: '',
+            userPhone: '',
+            userId: '',
+            userPwd: '',
+            birthday: '',
+        });
+    
+        // Handle input changes
+        const handleChange = (e) => {
+            const { name, value } = e.target;
+            setFormData(prevData => ({
+                ...prevData,
+                [name]: value,
+            }));
+        };
+    
+        // Handle form submission
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+    
+        // 서비스 이용약관 필수 체크 (추가)
+        if (!service) {
+            alert('서비스 이용약관에 동의해야 회원가입을 할 수 있습니다.');
+            return; // 전송 중단
+        }
+        //백엔드로 전송되는 데이터 확인
+         console.log('Form submitted with data:', formData);
+    
+            try {
+                const response = await fetch('http://localhost:8080/auth/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+    
+                if (response.ok) {
+                    // Handle successful signup (e.g., redirect, show success message)
+                    console.log('Signup successful!');
+                    alert('회원가입이 성공적으로 완료되었습니다!');
+                    window.location.href = '/auth/session';
+                } else {
+                    // Handle errors (e.g., show error message)
+                    const errorData = await response.json();
+                    console.error('Signup failed:', errorData);
+                    alert(`회원가입 실패: ${errorData.message || '알 수 없는 오류'}`);
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        };
+    
+        return (
+            <div className={styles.mainContent}>
+                <div className={styles.contentCard}>
+                    <h2>회원가입 페이지</h2>
+                    <form onSubmit={handleSubmit}>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="userName">이름:</label>
+                            <input
+                                type="text"
+                                id="userName"
+                                name="userName"
+                                value={formData.userName}
+                                onChange={handleChange}
+                                required // Add HTML5 validation
+                            />
+                        </div>
+    
+                        <div className={styles.formGroup}>
+                            <label htmlFor="userPhone">전화번호:</label>
+                            <input
+                                type="tel"
+                                id="userPhone"
+                                name="userPhone"
+                                value={formData.userPhone}
+                                onChange={handleChange}
+                                placeholder="예: 010-1234-5678"
+                                pattern="[0-9]{3}-?[0-9]{4}-?[0-9]{4}"
+                                required
+                            />
+                            {/* <button type="submit">
+                                <Link href="/auth/verification-code">전화번호 인증</Link>
+                            </button> */}
+                        </div>
+    
+                        <div className={styles.formGroup}>
+                            <label htmlFor="userId">아이디:</label>
+                            <input
+                                type="text"
+                                id="userId"
+                                name="userId"
+                                value={formData.userId}
+                                onChange={handleChange}                        
+                                minLength="6" // 아이디 최소 길이
+                                required
+                            />
+                        </div>
+    
+                        <div className={styles.formGroup}>
+                            <label htmlFor="userPwd">비밀번호:</label>
+                            <input
+                                type="password"
+                                id="userPwd"
+                                name="userPwd"
+                                value={formData.userPwd}
+                                onChange={handleChange}
+                                minLength="6" // 비밀번호 최소 길이
+                                required
+                            />
+                        </div>
+    
+                        <div className={styles.formGroup}>
+                            <label htmlFor="birthday">생년월일:</label>
+                            <input
+                                type="date"
+                                id="birthday"
+                                name="birthday"
+                                value={formData.birthday}
+                                onChange={handleChange}
+                            />
+                        </div>
+    
+                        {/*회원가입 약관 체크*/}
+                        <Checkbox checked={service} onChange={setService}>
+                                (필수) 서비스 이용약관
+                        </Checkbox>
+                        <a className={styles.linkStyle} href="/auth/terms-of-use">
+                            이용약관 보기
+                        </a>
+                        <br/>
+                        <Checkbox checked={marketing} onChange={setMarketing}>
+                            (선택) 마케팅 수신
+                        </Checkbox>
+                        <br/>
+                        <button
+                            type="submit"
+                            className={styles.loginButton}
+                        >
+                            회원가입
+                        </button>    
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
+## 3. Edit UserController mapping url
+(Now)
+
+    @PutMapping("/profile")
+    public ResponseEntity<ResponseDTO> modifyUsers(@RequestBody UserDTO userDTO) {
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(HttpStatus.OK, "회원정보 수정 성공", userFacadeService.updateUser(userDTO)));
+    }
+
+(Before)
+
+    @PutMapping("/{user_id}")
+    public ResponseEntity<ResponseDTO> modifyUsers(@RequestBody UserDTO userDTO) {
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(HttpStatus.OK, "회원정보 수정 성공", userFacadeService.updateUser(userDTO)));
+    }
+
+## 4. JwtTokenProvider
+key 불일치로 인한 "잘못된 JWT 서명입니다" 오류 메시지 출력
+해결
+
+(Now)
+
+    public JwtTokenProvider(@Value("${jwt.secret}") String secret,
+                            @Value("${jwt.expiration}") long tokenValidityTime,
+                            @Lazy AuthUserService authUserService) {
+        // 시크릿 키를 Base64 디코딩하여 Key 객체 생성
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expiration = tokenValidityTime;
+        this.authUserService = authUserService;
+    }
+
+(Before)
+
+    public JwtTokenProvider(@Value("${jwt.secret}") String secret,
+                            @Value("${jwt.expiration}") long tokenValidityTime,
+                            @Lazy AuthUserService authUserService) {
+        // 시크릿 키를 Base64 디코딩하여 Key 객체 생성
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        this.expiration = tokenValidityTime;
+        this.authUserService = authUserService;
+    }
+
+## 5. [FE] Solve loginButton css style apply
+(Now)
+
+    <button
+                type="submit"
+                className={styles.loginButton}
+              >
+                LOGIN
+              </button>
+
+(Before)
+
+    <button
+                type="submit"
+                className={styles.login-button}
+              >
+                LOGIN
+              </button>
+
+Css
+(Now)
+
+    .loginButton {
+        width: 60%;
+        padding: 18px;
+        background-color: #13183d;
+        color: white;
+        border: none;
+        border-radius: 15px;
+        font-size: 15px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 10px;
+    }
+    
+    .loginButton:hover {
+        background-color: #000;
+    }
+    
+    .loginButton:active {
+        transform: translateY(1px);
+    }
