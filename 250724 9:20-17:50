@@ -1,0 +1,15 @@
+# 프로젝트 1차 발표
+# 프로젝트명 설명, 팀 소개, 개발 개요, 개발 상세 순서대로 발표
+
+# @Component, @Controller, @Service, @Repository의 차이점
+@Component, @Service, @Controller, @Repository는 각각의 클래스를 특정 역할을 수행하는 Spring Bean으로 등록할 때 사용
+각 annotation은 클래스가 어떤 역할을 하는지를 명시적으로 나타내며, Spring의 @ComponentScan 기능을 통해 자동으로 Bean으로 등록된다.
+@Service, @Controller, @Repository 어노테이션은 내부적으로 @Component 어노테이션을 사용하고 있으며, 각 특징과 용도는 아래와 같습니다.
+
+* @Component는 가장 일반적인 형태의 어노테이션으로, 특정 역할에 종속되지 않는 일반적인 Spring Bean을 나타냅니다. 공통 기능을 제공하는 유틸리티 클래스나, 특정 계층에 속하지 않는 일반적인 컴포넌트를 정의할 때 사용됩니다.
+
+* @Service는 비즈니스 로직을 수행하는 클래스에 사용되며 서비스 레이어의 Bean을 나타냅니다.
+
+* @Controller는 Spring MVC에서 웹 요청을 처리하는 컨트롤러 클래스에 사용되며 프레젠테이션 레이어의 Bean을 나타냅니다.
+
+* @Repository는 데이터베이스와의 상호작용을 수행하는 클래스에 사용되며. 데이터 액세스 레이어의 Bean을 나타냅니다.
