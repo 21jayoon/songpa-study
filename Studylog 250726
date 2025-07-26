@@ -1,0 +1,906 @@
+How to use Git and Github
+
+깃액션이 배포를 할 수 있는 가장 기초적인 도구
+(이외. Zenkins, Dokcer 등등)
+
+1. Git의 기초
+https://www.notion.so/coffit23/Github-23ca02b1ffb1809aad2ed6e1bc74dd67
+
+깃허브는 형상관리 툴(gitlab, svn 등)
+깃허브의 제 1 목적: 버전 관리
+분산 버전 관리 시스템(Git)을 "클라우드에 올린 것"이 Git-hub
+
+-----------  push    -----------
+|   Git   |  -->    |   Github  |
+| (Local} |  <--    |  (cloud}  |
+-----------  pull   -------------
+
+(강사님 said)
+* React 생명주기만 잘 알아도 "이거 되겠다", "안 되겠다" 판단이 잘 들 것임
+* "얘(AI)가 이렇게 얘기했는데요.(이렇게 얘기해서 넣었습니다.)" 이렇게 말하는 게 실무자입장에선 정말 답답한 부분임
+
+
+2. Git 세팅
+https://www.notion.so/coffit23/02_Git-23ca02b1ffb1802a8f3bc226dc9cf010
+
+깃 설치 확인시 바탕화면 혹은 폴더 창에서
+오른쪽 마우스 클릭 > 추가 옵션 표시 해서 깃 있는지 확인
+추가옵션 표시 바로 보려면 : Shift + 오른쪽 마우스 클릭
+>> Open Git bash
+
+git config --list
+로 사용자 정보 확인
+
+CLI를 쓰건 GUI가 쓰건 상관없음.
+"회사에선 뭘 써요?" => 개인에 따라 다름(개인의 선호에 따라 사용하면 됨)
+
+3. 기본명령어 및 버전 생성
+1) 한글로 된 파일명은 가능하면 만들지 않는다.
+2) 띄어쓰기는 하지 않는다.
+
+
+3. 기본 명령어 및 버전 생성성
+cd : Change Directory
+ . : 현재 폴더(디렉토리)
+./ : 현재 폴더에 / 뒤에 작성할 무언가를 추가한다
+.. : 이전(상위) 폴더(디렉토리)
+
+###
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first
+$ git init
+Initialized empty Git repository in D:/lecture/dev/20250726/first/.git/
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git log
+fatal: your current branch 'master' does not have any commits yet
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+
+No commits yet
+
+nothing to commit (create/copy files and use "git add" to track)
+###
+
+
+내 컴퓨터 폴더에 생기는 .git 폴더는 local repository
+
+우리가 기록하는 것은 .git folder 안에 들어와야 의미가 있지, 들어오지 않는 것은 1000줄을 바꿔도 의미없음
+
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git remote add origin https://github.com/21jayoon/Javascript_Practice.git
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ touch README.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        README.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ touch tiger.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        README.md
+        tiger.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git add monkey.md
+fatal: pathspec 'monkey.md' did not match any files
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git add README.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+        new file:   README.md
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        tiger.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git add .
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+        new file:   README.md
+        new file:   tiger.md
+
+
+
+git add . : 대기하고 있는 모든 파일을 커밋에 올린다.
+application-dev.yml
+이런식으로 파일명 뒤에 -dev를 붙인다. 
+yml에 들어가 있는 설정 파일들은 깃에 올라가자 않으니 배포할 때는 추가하는 소스를 따로 넣어야한다.
+
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git commit -m "test first commit"
+[master (root-commit) eacd0da] test first commit
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 README.md
+ create mode 100644 tiger.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git log
+commit eacd0da7b79b4ef1112fa0a7a839fb51ffa042a0 (HEAD -> master)
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 11:44:19 2025 +0900
+
+    test first commit
+
+
+:q   종료 
+:wq  저장하고 나가기
+:wq! 강제 저장 후 종료
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ vi monkey.md
+
+vi monkey.md  치면 편집기 실행
+기본: read mode
+i 클릭: Insert mode
+esc: 취소
+- read mode에서
+h 연타> 계속 왼쪽으로 감
+l 연타> 계속 오른쪽으로 감
+:wq : 다시 깃 bash로 나감
+a: 전에 쳤던 것으로 돌아가기
+dd: 한 줄이 통으로 사라짐
+
+4. 저장소 확인
+* Git 파일 상태의 주요 단계
+Untracked	: 
+Git이 추적하지 않는 파일. 새로 생성된 파일이나 Git에 추가되지 않은 파일.
+Staged : 
+커밋 전 Staging Area에 추가된 상태. 커밋 대상에 포함될 준비가 된 상태.
+Committed : 
+로컬 저장소에 커밋되어 기록된 상태. 변경 사항이 안전하게 저장되고 버전으로 관리됨.
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ touch wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        monkey.md
+        wolf.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git add wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ dd .
+dd: unrecognized operand ‘.’
+Try 'dd --help' for more information.
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   wolf.md
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        monkey.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git delete monkey.md
+git: 'delete' is not a git command. See 'git --help'.
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git commit -m "add file wolf.md"
+[master b06b982] add file wolf.md
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        monkey.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git add monkey.md
+warning: in the working copy of 'monkey.md', LF will be replaced by CRLF the next time Git touches it
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git commit -m "modify monkdy.md"
+[master eed6774] modify monkdy.md
+ 1 file changed, 2 insertions(+)
+ create mode 100644 monkey.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+nothing to commit, working tree clean
+
+
+5. 브랜치 & merge
+https://www.notion.so/coffit23/05_-Merge-23ca02b1ffb180c99313d27c43cc44b6
+
+패키지 구분 이유: 기능 분리, 위치를 빨리 찾아야해서, 사람(개발자)이 보고 구분하기 편하려고
+
+git checkout -t
+
+***origin이 붙어있으면 원격지(원격 저장소, github)에 있는 브랜치이다.***
+
+git push origin --delete : 브랜치명	원격 저장소에서 특정 브랜치를 삭제
+ex)git push origin --delete feature/login
+
+git flow는 큰 프로젝트일 때 보통 많이 사용.
+
+main에 protection 거는 게 좋음.
+
+clear: git bash 지금까지 기록했던 거 사라짐
+
+실무에선 자기 코드 설명하는 시간이 반드시 있음
+"내 코드는 이런 생각으로 작업을 했고..."
+"이번 주에 할당 받은 작업은 이것이었고, 이렇게 하다가 저렇게 오류가 났습니다."
+이런 식으로 자기 코드 설명할 줄 알아야 함.
+
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git branch newtest250726
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git branch
+* master
+  newtest250726
+
+
+ls: 목록보기
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ ls
+README.md  monkey.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ ls -a
+./  ../  .git/  README.md  monkey.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ ls -al
+total 5
+drwxr-xr-x 1 User 197121  0 Jul 26 12:16 ./
+drwxr-xr-x 1 User 197121  0 Jul 26 11:18 ../
+drwxr-xr-x 1 User 197121  0 Jul 26 12:23 .git/
+-rw-r--r-- 1 User 197121  0 Jul 26 11:32 README.md
+-rw-r--r-- 1 User 197121 16 Jul 26 12:23 monkey.md
+-rw-r--r-- 1 User 197121  0 Jul 26 11:34 tiger.md
+-rw-r--r-- 1 User 197121  0 Jul 26 12:16 wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git checkout newtest250726
+Switched to branch 'newtest250726'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ ls
+README.md  monkey.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ touch test.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git add .
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git commit -m "add test.md"
+[newtest250726 9fecaf6] add test.md
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 test.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ ls
+README.md  monkey.md  test.md  tiger.md  wolf.md
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git switch master
+Switched to branch 'master'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ ls
+README.md  monkey.md  tiger.md  wolf.md
+
+# master에는 newtest250726 branch일 때 추가했던 test.md가 없는 것을 확인할 수 있다
+
+
+*** 면접관은 좀 잘 못해도 회사와 잘 융화되고 티키타카가 잘 될 거 같은지를 더 궁금하게 봄***
+
+커밋 많이 한다해도 문제될 건 없으니 작업한 거 삭제될 수 있는 가능성 만들기보단
+커밋을 자주하는 걸 추천
+
+git pull = fetch + merge
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ ls
+README.md  monkey.md  test.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ touch sheep.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ ls
+README.md  monkey.md  sheep.md  test.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git status
+On branch newtest250726
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        sheep.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git add sheep.md
+** commit 이전에는 항상 add가 들어가야 한다 **
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git status
+On branch newtest250726
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   sheep.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git commit -m "add sheep.md"
+[newtest250726 1600e62] add sheep.md
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 sheep.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git status
+On branch newtest250726
+nothing to commit, working tree clean
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git log
+commit 1600e62cbc8142ec1071186ae9e04304240c65f4 (HEAD -> newtest250726)
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 14:20:51 2025 +0900
+
+    add sheep.md
+
+commit 9fecaf622ce7dc095fd650e02cf9af8da8aeff95
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 12:50:35 2025 +0900
+
+    add test.md
+
+commit eed6774474c71682516a64d774ae20aad7761637 (master)
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 12:23:29 2025 +0900
+
+    modify monkdy.md
+
+commit b06b9822ccfa399a134bc674dfa9a13a13ac381c
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 12:18:55 2025 +0900
+
+    add file wolf.md
+
+commit eacd0da7b79b4ef1112fa0a7a839fb51ffa042a0
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 11:44:19 2025 +0900
+
+    test first commit
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (newtest250726)
+$ git checkout master
+Switched to branch 'master'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git merge newtest250726
+Updating eed6774..1600e62
+Fast-forward
+ sheep.md | 0
+ test.md  | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 sheep.md
+ create mode 100644 test.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ ls
+README.md  monkey.md  sheep.md  test.md  tiger.md  wolf.md
+
+설정 파일 이외에는 다 패키지로 따로 구분해서(?) 만들면 충돌 날 일이 없음.
+
+git-ignore에 .id 같은 건 다 넣어서 제외시키는 것이 좋음.
+MAC에서 .ds_store 항상 생기니 이것도 깃-이그노어에 넣는 것이 좋음.
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git branch -d newtest250726
+Deleted branch newtest250726 (was 1600e62).
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git branch
+* master
+-- 만들었던 브랜치 newtest250726 삭제된 걸 확인할 수 있음.
+
+** 새 브랜치 생성
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git branch feature/summer
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git branch
+  feature/summer
+* master
+-- feature/summer 브랜치가 생긴 걸 확인할 수 있음
+
+
+***새 브랜치에서 작업이 시작되면 "분기점이 생긴다"라고 할 수 있다.***
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git checkout feature/summer
+Switched to branch 'feature/summer'
+
+-- master(=main)에서 feature/summer로 변경
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git checkout feature/summer
+Switched to branch 'feature/summer'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ touch summer.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ vi summer.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git status
+On branch feature/summer
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        summer.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git add .
+warning: in the working copy of 'summer.md', LF will be replaced by CRLF the next time Git touches it
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git commit -m "add summer.md"
+[feature/summer 3eac3de] add summer.md
+ 1 file changed, 1 insertion(+)
+ create mode 100644 summer.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git status
+On branch feature/summer
+nothing to commit, working tree clean
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git log
+commit 3eac3deb8a02158a94ea8dfbe90b3cfa801c83ae (HEAD -> feature/summer)
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 14:51:27 2025 +0900
+
+    add summer.md
+
+commit 1600e62cbc8142ec1071186ae9e04304240c65f4 (master)
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 14:20:51 2025 +0900
+
+    add sheep.md
+
+commit 9fecaf622ce7dc095fd650e02cf9af8da8aeff95
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 12:50:35 2025 +0900
+
+    add test.md
+
+commit eed6774474c71682516a64d774ae20aad7761637
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 12:23:29 2025 +0900
+
+    modify monkdy.md
+
+commit b06b9822ccfa399a134bc674dfa9a13a13ac381c
+Author: 21jayoon <21jayoon@gmail.com>
+Date:   Sat Jul 26 12:18:55 2025 +0900
+
+    add file wolf.md
+
+-- 아까와 달리 (HEAD -> feature/summer)로 feature/summer, master였던 이전과 다르게 feature/summer만으로 찢어진 것을 확인할 수 있다!!!
+:q 로 git log 창 나온다.
+
+
+https://hub.docker.com/
+
+
+"CD를 한다는 것"자체가 배포를 의미한다.
+
+
+*** 배포:
+window에선 mobaxterm
+(모바텀은 free)
+https://mobaxterm.mobatek.net/
+MAC에선 termius
+https://termius.com/index.html
+
+
+폴더에서  idea .  치면 intelliJ 바로 켜짐
+
+
+** MySQL은 윈도우, 맥 전부 설치가 잘 되어서 db가 MySQL이면 상관없는데
+Oracle은 맥에서 설치가 잘 안 되어 UTM, Parallels 같은 가상서버가 필요함.
+근데 그러면 가상서버가 하드 등 리소스를 많이 먹게 되어서 컴퓨터가 잘 안 돌아가거나 속도가 현격히 느려짐.
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ ls
+README.md  monkey.md  sheep.md  summer.md  test.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ cat summer.md
+Hot summer, hot hot summer
+-- cat 사용하면 .md 문서 내부 일부를 확인할 수 있음
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git switch main
+fatal: invalid reference: main
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ ls
+README.md  monkey.md  sheep.md  summer.md  test.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git switch master
+Switched to branch 'master'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ ls
+README.md  monkey.md  sheep.md  test.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git merge feature/summer
+Updating 1600e62..3eac3de
+Fast-forward
+ summer.md | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 summer.md
+
+
+
+2) 3 way merge
+프로젝트하는 경우에 해당.
+main에서 새로운 변곡점(브랜치1)를 만들어 거기에서만 개발을 한다.
+그러나 main 역시 다른 팀원에 의해 변경이 되고 (main2)
+브랜치 1에서 수정된 최종적인 브랜치 '브랜치3'은 main2에 병합된다.
+메인1, 메인2, 브랜치 재머지 이렇게 3가지라서 3 way merge.
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git log --all --graph --oneline
+* 3eac3de (HEAD -> master, feature/summer) add summer.md
+* 1600e62 add sheep.md
+* 9fecaf6 add test.md
+* eed6774 modify monkdy.md
+* b06b982 add file wolf.md
+* eacd0da test first commit
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ vi monkey.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ cat monkey.md
+## hello
+## I am monkey
+
+-- 일부러 main의 monkey.md 수정, feature branch에 새 md 넣고 어쩌구... conflict(충돌) 경험
+
+
+Auto-merging monkey.md -> 자동으로 두 내용을 확인하려고 했는데, 같은 줄에 다른 글이 쓰여서 충돌 남.
+
+merge 할 때 어느 쪽 소스를 이쪽 소스로 들고올 건지 항상 생각해야함.
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git merge feature/summer
+Auto-merging monkey.md
+CONFLICT (content): Merge conflict in monkey.md
+Automatic merge failed; fix conflicts and then commit the result.
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master|MERGING)
+$ git status
+On branch master
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+        new file:   hot.md
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both modified:   monkey.md
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master|MERGING)
+$ git add .
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master|MERGING)
+$ git commit -m "conflict solved"
+[master 1885c59] conflict solved
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git status
+On branch master
+nothing to commit, working tree clean
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ vi tiger.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ cat tiger.md
+## I am a tiger
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git add .
+warning: in the working copy of 'tiger.md', LF will be replaced by CRLF the next time Git touches it
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git commit -m "modify tiger.md"
+[master 48876d9] modify tiger.md
+ 1 file changed, 1 insertion(+)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git switch feature/summer
+Switched to branch 'feature/summer'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ ls
+README.md  hot.md  monkey.md  sheep.md  summer.md  test.md  tiger.md  wolf.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ vi sheep.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git add .
+warning: in the working copy of 'sheep.md', LF will be replaced by CRLF the next time Git touches it
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git commit -m "modify sheep.md"
+[feature/summer 4010120] modify sheep.md
+ 1 file changed, 1 insertion(+)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git checkout master
+Switched to branch 'master'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git log --all --graph --oneline
+* 4010120 (feature/summer) modify sheep.md
+| * 48876d9 (HEAD -> master) modify tiger.md
+| *   1885c59 conflict solved
+| |\
+| |/
+|/|
+* | b039ec3 conflict solved
+| * bfef38b monkey.md is modified
+|/
+* 3eac3de add summer.md
+* 1600e62 add sheep.md
+* 9fecaf6 add test.md
+* eed6774 modify monkdy.md
+* b06b982 add file wolf.md
+* eacd0da test first commit
+
+--아까 같은 monkey.md 파일에서 수정했던 것과 다르게 이번에는 tiger.md와 sheep.md 각각 다른 파일을 수정했기 때문에
+-- conflict 안 난다.
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git merge feature/summer
+Merge made by the 'ort' strategy.
+ sheep.md | 1 +
+ 1 file changed, 1 insertion(+)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git log --all --graph --oneline
+*   0c925a5 (HEAD -> master) Merge branch 'feature/summer'
+|\
+| * 4010120 (feature/summer) modify sheep.md
+* | 48876d9 modify tiger.md
+* | 1885c59 conflict solved
+|\|
+| * b039ec3 conflict solved
+* | bfef38b monkey.md is modified
+|/
+* 3eac3de add summer.md
+* 1600e62 add sheep.md
+* 9fecaf6 add test.md
+* eed6774 modify monkdy.md
+* b06b982 add file wolf.md
+* eacd0da test first commit
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git checkout feature/summer
+Switched to branch 'feature/summer'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git merge master
+Updating 4010120..0c925a5
+Fast-forward
+ monkey.md | 5 +++++
+ tiger.md  | 1 +
+ 2 files changed, 6 insertions(+)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (master)
+$ git checkout feature/summer
+Switched to branch 'feature/summer'
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git merge master
+Updating 4010120..0c925a5
+Fast-forward
+ monkey.md | 5 +++++
+ tiger.md  | 1 +
+ 2 files changed, 6 insertions(+)
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/first (feature/summer)
+$ git log --all --graph --oneline
+*   0c925a5 (HEAD -> feature/summer, master) Merge branch 'feature/summer'
+|\
+| * 4010120 modify sheep.md
+* | 48876d9 modify tiger.md
+* | 1885c59 conflict solved
+|\|
+| * b039ec3 conflict solved
+* | bfef38b monkey.md is modified
+|/
+* 3eac3de add summer.md
+* 1600e62 add sheep.md
+* 9fecaf6 add test.md
+* eed6774 modify monkdy.md
+* b06b982 add file wolf.md
+* eacd0da test first commit
+
+
+6. Github
+https://www.notion.so/coffit23/06_Github-23ca02b1ffb1809ab1f0e6241e7e761e
+
+강사님 반의 프로젝트에서 마일스톤 1주차, 2주차, 3주차... 이런 식으로 만들어서 진행했다고 함.
+
+수업용인 경우 왠만하면 organization을 만들어 사용하는 걸 추천함. 중간에 관두는 사람이 레포 관리를 했다면 그 사람이 나가고 레포 닫았을 때 관리가 어렵기 때문.
+
+Repository 만들 때 Add a README file 체크하면 .git이 폴더가 자동으로 생긴다는(있다는) 것.
+빼고 넣는다는 거 올릴 만한 소스를 이미 갖고 있고 빈 껍데기만 갖고 있다고 하면 나중에 리드미파일을 추가한다고 하고 Add README를 빼고 생성.
+
+fork는 branch의 연장
+
+
+
+dev> first 폴더 있는 곳에서 오른쪽 마우스 클릭, 추가 옵션 표시(Shift+오른쪽 마우스)에 Open Git bash here 열고
+git clone (Shift+Insert) 혹은 (CTRL+V) 혹은 (오른쪽 마우스 클릭, paste)로 깃 레포 주소 복붙
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726
+$ git clone https://github.com/21jayoon/git-fork-test.git
+Cloning into 'git-fork-test'...
+remote: Enumerating objects: 3, done.
+remote: Counting objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (3/3), done.
+
+* fork는 저장소 자체를 분리해서 내 걸로 만들어갖고 작업한다는 걸 의미
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726
+$ git clone https://github.com/21jayoon/git-fork-test.git
+Cloning into 'git-fork-test'...
+remote: Enumerating objects: 3, done.
+remote: Counting objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (3/3), done.
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726
+$ ls
+ first/   git-fork-test/  '새 폴더'/
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726
+$ cd git-fork-test
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/git-fork-test (main)
+$ touch jungah.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/git-fork-test (main)
+$ git add .
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/git-fork-test (main)
+$ git commit -m "my folder"
+[main 82f5463] my folder
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 jungah.md
+
+-- 내 이름으로 된 새 폴더 만들고 거기서 Git bash 다시 생성
+
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/git-fork-test (main)
+$ git pull
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 4 (delta 0), reused 4 (delta 0), pack-reused 0 (from 0)
+Unpacking objects: 100% (4/4), 312 bytes | 1024 bytes/s, done.
+From https://github.com/21jayoon/git-fork-test
+   10037b7..184eee3  main       -> origin/main
+Merge made by the 'ort' strategy.
+ YUSEUNGJE/seungje.md | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 YUSEUNGJE/seungje.md
+
+User@DESKTOP-02NHO5P MINGW64 /d/lecture/dev/20250726/git-fork-test/YOONJUNGAH (main)
+$ git push
+Enumerating objects: 10, done.
+Counting objects: 100% (10/10), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (8/8), 842 bytes | 842.00 KiB/s, done.
+Total 8 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), done.
+To https://github.com/21jayoon/git-fork-test.git
+   184eee3..b272d80  main -> main
+
+이렇게 하고 내 깃허브 레포지토리에서
+pull request > create new pull request하면
+강사님 레포지토리로 merge 요청이 날아간다.
+
+깃 레포지토리 설정에서 secrets and variables> environment secrets에서
+비공개(secret) 파일 혹은 문구(?) 추가 가능.
+** yml 파일도 통째로 넣을 수 있다. (단점: 수정 때마다 다시 넣어줘야함)
+-> - name : Set YML
+     run:  ......
+
+*** git reset보단 git revert 사용 추천!!!!
+
+https://www.coderabbit.ai/
+
+
+keyword (배포 관련 tool 등) : ssh, openssh, mobaxterm, webhook
+https://docs.tosspayments.com/resources/glossary/webhook
