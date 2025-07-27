@@ -34,6 +34,7 @@
 이를 통해 함수는 자신이 선언된 당시 스코프 내의 변수를 참조할 수 있습니다.
 
 이 세 가지 특징을 통해 자바 스크립트 코드를 매우 유연하게 작성할 수 있고, (코드 내에서) 다양한 패턴을 구현할 수 있습니다.
+(일급 객체, 익명함수, 호이스팅, 클로저, 고차 함수, 화살표 함수)
 
 e.g.
 ``` javascript
@@ -80,7 +81,6 @@ console.log(innerFunction()); // 'I am outer!' , (5) Therefore, 'outerVar' can b
 
 (일급 객체는 어떠한 특정 언어에 국한되는 문법 단어가 아니다.)
 
-(일급 객체, 익명함수, 호이스팅, 클로저, 고차 함수, 화살표 함수)
 참고Reference : https://www.maeil-mail.kr/question/33
 https://inpa.tistory.com/entry/CS-👨‍💻-일급-객체first-class-object [Inpa Dev 👨‍💻:티스토리]
 https://g.co/gemini/share/9275e97e83ad
