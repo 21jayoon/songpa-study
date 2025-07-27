@@ -1,0 +1,86 @@
+# Starts to note from 20250727
+-- Backend
+- 객체 지향 언어 장점 pros of OOP language(Object-Oriented Language)
+객체 지향 언어(예. Java)로 프로그래밍하면 공통으로 사용하는 부분*을 수정하지 않고도
+프로그램에 새 기능을 쉽게 추가할 수 있다.
+-> 유지보수성 & 확장성 good
+(OOP : Object Oriented Programming)
+* 여러 객체들이 공유하는 속성, 메서드(행동), 인터페이스 정의 등
+
+# When developers program with an OOP language(e.g. Java),
+# they can easily add new function
+# without modifying shared components such as methods or interface definitions.
+
+
+--Frontend
+- 자바스크립트 함수에 대해 아는대로 설명해주세요.
+자바스크립트 함수의 특징에는 일급 객체, 호이스팅, 클로저가 있습니다.
+
+일급객체*인 JS 함수는 값처럼 취급될 수 있어
+변수에 할당하거나 (1)
+다른 함수의 인자로 전달하거나 (2)
+함수의 반환값으로 사용할 수 있습니다. (3)
+
+두번째 특징 호이스팅은
+함수 선언식을 통해 선언한 함수는 코드가 실행되기 전,
+즉 함수 선언 이전에도 호출할 수 있다는 것입니다. (4)
+이를 '호이스팅되다'라고 합니다.
+(다만, 함수 표현식은 변수에 할당된 후에 사용 가능합니다.)
+
+마지막 특징 클로저는
+자신이 선언된 스코프(=선언 환경)를 기억하고
+해당 환경에 접근할 수 있는 기능입니다. (5)
+자바스크립트 함수로 클로저를 구현할 수 있으며,
+이를 통해 함수는 자신이 선언된 당시 스코프 내의 변수를 참조할 수 있습니다.
+
+이 세 가지 특징을 통해 자바 스크립트 코드를 매우 유연하게 작성할 수 있고, (코드 내에서) 다양한 패턴을 구현할 수 있습니다.
+
+e.g.
+``` javascript
+const sayHello = function() { return 'Hello'; };  // (1) 'sayHello' 변수에 함수가 할당됨
+console.log(sayHello()); // 'Hello'
+
+const executeFunction = function(fn) { // (2) 'fn'은 다른 함수(sayHello)를 인자로 받는 부분
+  return fn();  // (3) 'executeFunction'이 인자로 받은 함수('fn')의 실행 결과를 반환값으로 사용
+};
+console.log(executeFunction(sayHello)); // executeFunction(sayHello); -->'sayHello' 함수를 'executeFunction'의 인자로 전달 (2)
+
+
+console.log(declaredFunction()); // 'Declared Function', (4) declaredFunction 함수가 호이스팅 됨.
+function declaredFunction() {
+  return 'Declared Function';
+}
+
+// 함수 표현식은 할당 후에만 사용할 수 있음
+const expressedFunction = function() {
+  return 'Expressed Function';
+};
+console.log(expressedFunction()); // 'Expressed Function'
+
+
+function outer() {
+  const outerVar = 'I am outer!';
+
+  return function inner() { // (5) The 'inner' function, returned by 'outer', forms a closure. It "remembers" its environment (where 'outerVar' exists)
+    return outerVar; // 외부 변수에 접근 가능
+  };
+}
+
+const innerFunction = outer();
+console.log(innerFunction()); // 'I am outer!' , (5) Therefore, 'outerVar' can be accessed even though function'outer' has already finished executing.
+```
+
+* '일급' 이란 뜻은 일급 시민처럼 무슨 혜택을 받는단 뜻이 아니라,
+'사용할 때 다른 요소들과 아무런 차별이 없다는 것'을 뜻한다.
+그리고 보통 일급 객체를 아래 3가지 조건을 충족한 객체를 일컫는다.
+
+1. 모든 일급 객체는 변수나 데이터에 담을 수 있어야 한다.
+2. 모든 일급 객체는 함수의 파라미터로 전달 할 수 있어야 한다.
+3. 모든 일급 객체는 함수의 리턴값으로 사용 할수 있어야 한다.
+
+(일급 객체는 어떠한 특정 언어에 국한되는 문법 단어가 아니다.)
+
+(일급 객체, 익명함수, 호이스팅, 클로저, 고차 함수, 화살표 함수)
+참고Reference : https://www.maeil-mail.kr/question/33
+https://inpa.tistory.com/entry/CS-👨‍💻-일급-객체first-class-object [Inpa Dev 👨‍💻:티스토리]
+https://g.co/gemini/share/9275e97e83ad
