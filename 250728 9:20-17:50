@@ -1,0 +1,81 @@
+# 오늘 배운 내용 : Python
+
+# 01_python_for_LLM/01_basic_and_collections.py
+# 20250728 you can write a one-line comment with '#'
+'''
+and these are line comment wih three single quotation
+'''
+
+"""
+you can also jot the comment down with double quotation
+"""
+
+# 1. 변수와 기본 타입 Variable and basic types
+team_name='ohgiraffers'
+# There is no type declaration like 'let', 'const' in JS or 'String'... in Java
+# when you use python
+'''
+Also, snake_case is the standard. 
+Snake_case means you have to use '_' between two words.
+'''
+price = 123_456    # int, 단순 강조를 위해 숫자 사이에 _를 넣을 수도 있다.
+is_active = True     # bool(논리형)
+user_date = None  # 값이 없음을 나타내는 NoneType( Java의 null과 동일 )
+
+# f-string : 문자열 앞에 f를 붙이고 이후 쓰는 문자열 사이 중괄호를 사용,
+# 중괄호 안에 변수명을 넣으면 위에서 선언했던 변수 값value of variable을 사용할 수 있다.
+# (f-string 문법은 Python 3.6 버전부터 도입)
+print(f"팀 이름: {team_name}")  # 팀 이름: ohgiraffers
+
+"""
+VS code에서 명령 팔레트 여는 법 : SHIFT+CTRL+P
+'python selecter' 검색, "Python: select interpreter" 선택, 아까 만든 pythonstudy_env 선택
+우측 하단 구석 Go Live 왼쪽에 환경 'pythonstudy_env'로 바뀐 거 확인 가능
+"""
+
+print(f"가격: {price}") # 가격: 123456
+
+# 2.List(Java의 ArrayList와 동일): 순서가 있는 가변 배열
+scores = [88, 95, 56]
+print(f"점수 리스트: {scores}, 첫 번째 점수: {scores[0]}")
+# 점수 리스트: [88, 95, 56], 첫 번째 점수: 88
+
+# List에 값 추가(Java의 .add 기능과 동일)
+scores.append(100) # 맨 뒤에 추가
+scores.insert(1, 70) # 넣고 싶은 위치에 특정 값을 넣는 방법 .insert   1번 인덱스 위치에 70 삽입
+print(f"추가 후 점수: {scores}")  # 추가 후 점수: [88, 70, 95, 56, 100]
+
+# List 값 삭제 .pop
+last_score = scores.pop()  # 인덱스를 따로 주지 않으면 list의 맨 뒤 요소를 꺼내고 제거
+print(f"삭제 후 점수: {scores}")  # 삭제 후 점수: [88, 70, 95, 56]
+
+real_last_score = scores.pop(1)
+print(f"최종 삭제 후 점수: {scores}")  # 최종 삭제 후 점수: [88, 95, 56]
+
+# 3. Dictionary 자료형 (중요!, 자주 사용) (Java의 HashMap과 동일): Key-Value 쌍을 갖고 있는 가변 map
+# JSON 데이터가 파이썬에서는 dictionary로 변환되어 읽힌다.
+user = {'name': '홍길동', 'age': 30}  # Key : Value
+print(f"User information: {user}, name: {user['name']}")  # Key를 사용해 Value 값에 접근, 꺼냄
+# User information: {'name': '홍길동', 'age': 30}, name: 홍길동
+
+# 없는 키에다가 어떤 값을 대입한다면... 새 Key-Value가 추가됨
+user['job'] = "의적"   # 'job' 키가 없으므로 새로 추가
+# 있는 키에다가 특정 값을 대입한다면... 새 Value로 바뀜
+user['age'] = 32       # 'age' 키가 이미 있으므로 값 수정
+print(f"Revised info: {user}")  # Revised info: {'name': '홍길동', 'age': 32, 'job': '의적'}
+
+# 존재하지 않는 키를 조회했을 때, error가 나서 프로그램 종료가 될 수 있다.
+# >> 안전하게 값 조회하기 : get() -> Key가 없어도 에러 대신 기본값 반환
+# print(f"non-exist info: {user['salary']}")
+'''
+Traceback (most recent call last):
+  File "D:\lecture\15_python_for_LLM\01_python_for_LLM\01_basic_and_collections.py", line 66, in <module>
+    print(f"non-exist info: {user['salary']}")
+                             ~~~~^^^^^^^^^^
+KeyError: 'salary'
+'''
+
+# how to use : .get(키, 기본값) -> Key가 없을 때 지정한 기본값을 안전하게 반환
+email = user.get('email', 'No information')
+print(f"user email: {email}")  # user email: No information
+
