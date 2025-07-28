@@ -79,3 +79,361 @@ KeyError: 'salary'
 email = user.get('email', 'No information')
 print(f"user email: {email}")  # user email: No information
 
+users = [
+    {'name': 'Gildong', 'age': 30},
+    {'name': 'Sa-imdang', 'age': 45, 'job': 'Artist'}
+]
+
+# 첫 번째 사용자의 이름에 접근
+# print(f"first array: {users[0, 'name']}")
+'''
+Traceback (most recent call last):
+  File "D:\lecture\15_python_for_LLM\01_python_for_LLM\01_basic_and_collections.py", line 85, in <module>  
+    print(f"first array: {users[0, 'name']}")
+                          ~~~~~^^^^^^^^^^^
+TypeError: list indices must be integers or slices, not tuple
+'''
+
+print(f"첫번째 사용자: {users[0]['name']}")  # 첫번째 사용자: Gildong
+
+# 4. 얕은 복사(같은 주소, 주소가 같이 복사됨, 복사본 변경시 원본에도 영향) vs 깊은 복사(다른 주소, 복사본 변경해도 원본에 영향 X)
+# 원본 데이터를 지키려면 .copy()를 사용한 깊은 복사를 해야한다.
+prices = [10000, 20000]
+
+# 얕은 복사(지양) : 주소값만 복사
+"""
+prices_shallow_copy = prices
+prices_shallow_copy[0] = 9999
+print(f"original prices[]: {prices}")  # original prices[]: [9999, 20000]
+print(f"changed value : {prices_shallow_copy}")  # changed value : [9999, 20000]
+"""
+
+# 깊은 복사(지향): 값 자체를 복사해 새 객체 생성, .copy 사용
+new_prices = prices.copy()
+new_prices[0] = 8888
+print(f"[Deep copy] original: {prices}, copied: {new_prices}")
+# [Deep copy] original: [10000, 20000], copied: [8888, 20000]
+# You can see the change of deep copied object didn't influenced to the original array.
+
+'''
+When your Korean is printed broken at print window, check the setting of window
+> Time and language > Language and location > Related setting > Default language setting
+> Change system locale > Check non-checked option 'Beta: Use Unicode UTF-8 to assist global languages'
+> Restart computer and rerun the code with CTRL+ALT+N, than you can see the broken Korean prints normal now.
+'''
+
+# 1. 문자열(str) 핵심 기능 250728 11:20
+# slicing : 문자열 일부를 잘라낸다.
+txt = "hello-world"
+# [starting index:ending index]
+print(f"Slicing [0:5] : {txt[:5]}")  # Slicing [0:5] : hello
+# the ending index 5 doesn't included while slicing.
+# also when the index starts with 0, it may omitted.
+# 시작을 생략하면 처음부터 내가 지정한 인덱스까지
+
+# 끝을 생략하면 지정한 인덱스에서부터 끝까지
+print(f"Slicing [6:]: {txt[6:]}") # Slicing [6:]: world
+# 음수를 사용하면 문자열을 뒤집는다
+print(f"Reversed: {txt[::-1]}") # step -1로 주면 문자열을 뒤집는다
+# Reversed: dlrow-olleh
+
+'''
+.split() : 문자열을 특정 기준으로 나눠 리스트를 만든다.
+python은 데이터 분석에서 많이 사용되어 csv 파일을 자주 사용하게 되는데,
+이때 데이터 구분 및 추출을 위해 .split을 자주 사용한다.
+(예. CSV 데이터를 comma(,) 기준으로 나눌 때 사용)
+'''
+
+# 실제 csv 파일은 없지만 간단한 문자열 예시를 csv 파일이라 가정하고 실행해보자면
+csv_data = "Gildong,20,Seoul"
+user_list = csv_data.split(',')
+print(f"Result of split: {user_list}, name: {user_list[0]}") 
+# Result of split: ['Gildong', '20', 'Seoul'], name: Gildong
+# 리스트로 변환되었기 때문에 user_list[index] 형태로 조회도 가능해졌다.
+
+# Use 'if-else' (제어문 if, for)
+score = 85
+
+"""
+In Java...
+if (score >= 90) {
+    grade = "A"
+    System.out.println('Your score is A')
+    ......
+}
+"""
+# In Python...
+if score >= 90:
+    # you don't need to use {}
+    grade = 'A'
+elif score >= 80:
+    grade = 'B'
+else:
+    grade = 'D'
+
+print(f"Score: {score}, Grade: {grade}")  # Score: 85, Grade: B\
+
+# Use 'for-in' : For문으로 리스트와 딕셔너리 순회
+foods = ['Hamburger', "Chicken", "Malatang"]
+for food in foods:
+    '''
+    foods라는 리스트 하나하나를 반복해서
+    안에 있는 각각의 요소들을
+    food라는 이름으로 받아올 거예요.
+    '''
+    print(f"오늘의 메뉴: {food}")
+    # 오늘의 메뉴: Hamburger
+    # 오늘의 메뉴: Chicken
+    # 오늘의 메뉴: Malatang
+
+# Dictionary : use .items
+user_info= {'name' : 'Yi Sunshin', 'age' : 45}
+# .items()는 key와 value를 한 쌍으로 꺼내온다.
+# keys()는 key 값을 갖고온다.
+# values()는 value값을 갖고 온다.    
+for key, value in user_info.items():
+    print(f" - {key} : {value}")
+    #  - name : Yi Sunshin
+    # - age : 45
+
+prompt = f"User '{user_info['name']} '(Age: {user_info['age']})에 대한 요약 보고서를 작성해주세요."
+print("Manager John doe: ", prompt) 
+# Manager John doe:  User 'Yi Sunshin '(Age: 45)에 대한 요약 보고서를 작성해주세요.
+
+# 3. How to write the code more pythonic? 250728 12:06
+# 1) List Comprehension = 한 줄 for문
+# 기본 구조: [결과표현식 for 아이템 in 리스트 if 조건]
+
+# 1부터 10까지 제곱수로 이뤄진 리스트 만들기
+squares = [n**2 for n in range(1, 11)]
+print(squares)  # [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+
+# 두번째 예제: 과일 리스트에서 5글자 이상인 과일만 필터링해서 대문자로 바꾸기 13:03
+fruits = ['orange', 'apple', 'grape', 'peach', 'lemon', 'kiwi', 'ananas', 'fig']
+long_fruits = [fruit.upper() for fruit in fruits if len(fruit)>=5]
+# .upper() 배열 안 요소 모두 대문자로 바꿔준다
+print(long_fruits)  # ['ORANGE', 'APPLE', 'GRAPE', 'PEACH', 'LEMON', 'ANANAS']
+
+# 2. Dictionary Comprehension
+# 기본 구조: {키_표현식: 값_표현식 for 아이템 in 리스트}
+# List 선언
+student_names = ['Gildong', 'Saimdang', 'Sunshin']
+# {이름: 이름 길이}로 구성된 딕셔너리 만들기
+name_lengths = {name : len(name) for name in student_names}
+print(f"이름과 이름 길이: {name_lengths}")  # 이름과 이름 길이: {'Gildong': 7, 'Saimdang': 8, 'Sunshin': 7}
+
+# 3. Lambda (한 줄짜리 익명 함수(이름 없는 함수))
+add = lambda a, b: a+b
+# 익명함수 초기화 방법(예제)
+print(f"Lambda 함수 결과: {add(10,20)}")  # Lambda 함수 결과: 30
+# 보통 람다는 단독 사용보단 함수의 인자로 넣어질 때 사용됨
+
+students = [
+    {'name':'Gildong', 'score':90},
+    {'name':'Saimdang', 'score':100},
+    {'name':'Sunshin', 'score':81}
+]
+students.sort(key=lambda s: s['score'], reverse=True)
+# 정렬기준인 key값을 .sort에 전달해야함
+# reverse=True는 정렬 기준 내림차순.
+# lambda s: s['score']는 각 학생의 점수 값(90, 100, 81)을 반환할 것임
+print(f"고득점 순으로 정렬: {students}")
+# 고득점 순으로 정렬: [{'name': 'Saimdang', 'score': 100}, {'name': 'Gildong', 'score': 90}, {'name': 'Sunshin', 'score': 81}]
+
+'''
+https://www.notion.so/ohgiraffers/simple_test-23e649136c1180829e3ac81e4991dafc
+13:30(?)-
+당신은 게임 '오지라퍼스 온라인'의 개발자입니다.
+한 유저의 인벤토리 데이터(JSON 형태라고 가정)를 받아, 
+특정 조건의 아이템을 찾아내고, 
+상점에 팔 아이템 목록을 정리하는 프로그램을 만들어야 합니다.
+
+캐릭터의 인벤토리 데이터를 '딕셔너리의 리스트' 형태로 만드세요.
+
+1. inventory 라는 이름의 리스트 변수를 만드세요.
+2. 아래 4개의 아이템 정보를 각각 딕셔너리로 만들어 inventory 리스트에 담으세요.
+    - 아이템명: 'healing_potion', 타입: 'potion', 등급: 'common', 가격: 50
+    - 아이템명: 'sword_of_legend', 타입: 'weapon', 등급: 'legendary', 가격: 10000
+    - 아이템명: 'iron_shield', 타입: 'armor', 등급: 'rare', 가격: 1500
+    - 아이템명: 'mana_potion', 타입: 'potion', 등급: 'common', 가격: 40
+
+`for`문과 `if`문을 사용해 인벤토리에서 타입(`type`)이 'potion'인 아이템들의 "이름과 가격만" 형식에 맞춰 출력하세요.
+
+**요구사항:**
+
+- `inventory` 리스트를 `for`문으로 순회하세요.
+- `if`문을 사용해 아이템의 `type`이 'potion'인지 확인하세요.
+- `f-string`을 사용하여 아래와 같은 형식으로 출력해야 합니다.
+-> f-string 사용 = print(f"...: {}")
+
+**출력 예시**
+
+물약 정보: healing_potion (가격: 50 G)
+
+물약 정보: mana_potion (가격: 40 G)
+
+1. 등급(grade)이 'rare' 이상인 아이템들의 **이름만** 뽑아서 새로운 리스트를 만드세요. 이때, **List Comprehension**을 사용해서 단 한 줄로 해결해 보세요.
+
+1. valuable_items 라는 이름의 새 리스트를 만드세요.
+2. List Comprehension을 사용하여 inventory에서 grade가 'rare' 이거나 'legendary'인 아이템의 name 값만 valuable_items에 담으세요.
+3. 결과를 print로 확인하세요.
+
+---
+
+1. 인벤토리의 모든 아이템을 가격(price)이 비싼 순서대로 정렬하여 출력하세요. list.sort() 메서드와 "lambda 함수"를 사용합니다.
+'''
+# 2. 아래 4개의 아이템 정보를 각각 딕셔너리로 만들어 inventory 리스트에 담으세요. -> multi dictionary list
+inventory = [
+    {"name": 'healing_potion', "type": 'potion', "grade": 'common', "price": 50}, 
+    {"name": 'sword_of_legend', "type": 'weapon', "grade": 'legendary', "price": 10000},
+    {"name": 'iron_shield', "type": 'armor', "grade": 'rare', "price": 1500},
+    {"name": 'mana_potion', "type": 'potion', "grade": 'common', "price": 40}
+]
+
+# 2-1. `for`문과 `if`문을 사용해 인벤토리에서 타입(`type`)이 'potion'인 아이템들의 "이름과 가격만" 형식에 맞춰 출력하세요.
+# - `f-string`을 사용하여 아래와 같은 형식으로 출력해야 합니다.
+# -> f-string 사용 = print(f"...: {}")
+for items in inventory:
+    if items['type'] == 'potion':
+        print(f"물약 정보: {items['name']} (가격: {items['price']} G)")
+'''
+물약 정보: healing_potion (가격: 50 G)
+물약 정보: mana_potion (가격: 40 G)
+'''
+
+# 3. 등급(grade)이 'rare' 이상인 아이템들의 **이름만** 뽑아서 새로운 리스트를 만드세요. 이때, **List Comprehension**을 사용해서 단 한 줄로 해결해 보세요.
+# 1) List Comprehension = 한 줄 for문
+# 기본 구조: [결과표현식 for 아이템 in 리스트 if 조건]
+# precious = [{good_grade['name']} for good_grade in inventory if good_grade['grade'] == 'rare', 'legendary']
+valuable_items = [items2['name'] for items2 in inventory if items2['grade'] == 'rare' or items2['grade'] == 'legendary']
+print(f"희귀도 상위 아이템: {valuable_items}")  # 희귀도 상위 아이템: ['sword_of_legend', 'iron_shield']
+
+# 4. valuable_items 라는 이름의 새 리스트를 만드세요.
+# 4-1. List Comprehension을 사용하여 inventory에서 grade가 'rare' 이거나 'legendary'인 아이템의 name 값만 valuable_items에 담으세요.
+# 4-2. 결과를 print로 확인하세요.
+# 위 4번 문제는 3번과 동일한 문제. 3번 문제 정답에서 새 리스트 변수명을 valuable_items로 바꾸는 것으로 문제를 다시 푸는 걸 대체한다.
+
+# ---
+
+# 5. 인벤토리의 모든 아이템을 가격(price)이 비싼 순서대로 정렬하여 출력하세요. list.sort() 메서드와 "lambda 함수"를 사용합니다.
+# reverse= True
+# (쌤이 깊은 복사 후 정렬하셨길래...) 깊은 복사 하는 법: list.copy()
+# !! 추가 조건 사항: 1. **원본 데이터를 보존하기 위해** items_to_sell이라는 새 리스트에 깊은 복사를 하세요. (매우 중요한 습관입니다!)
+# 2. 정렬된 items_to_sell 리스트를 출력하여 확인하세요.
+items_to_sell = inventory.copy()
+items_to_sell.sort(key=lambda p: p['price'], reverse=True)
+print(f"\n--- 상점에 팔 아이템 목록 (비싼 순) ---")
+print(items_to_sell)
+'''
+[{'name': 'sword_of_legend', 'type': 'weapon', 'grade': 'legendary', 'price': 10000}, 
+ {'name': 'iron_shield', 'type': 'armor', 'grade': 'rare', 'price': 1500},
+ {'name': 'healing_potion', 'type': 'potion', 'grade': 'common', 'price': 50}, 
+ {'name': 'mana_potion', 'type': 'potion', 'grade': 'common', 'price': 40}]
+'''
+# 250728 14:28 문제 풀기 완료
+
+# requests : 파이썬으로 HTTP 요청을 쉽게 보낼 수 있게 해주는 라이브러리
+import requests
+# os : 운영체제와 상호작용하는 기능을 제공하는 내장 모듈 (환경 변수 접근 등)
+import os
+# dotenv: .env 파일에 정의된 변수를 환경 변수로 로드해주는 라이브러리.
+# .env 파일을 필요로 한다 (.env 파일은 깃허브 같은 공개된 장소에 공유하면 안 된다!!!)
+# -> .gitignore 파일을 하나 같은 폴더 내에 만들어서 .env 적으면 끝
+from dotenv import load_dotenv
+
+# 1. 환경 변수 로드
+'''
+같은 폴더나 상위 폴더에 있는 .env 파일을 찾아
+안의 내용을 시스템 환경 변수처럼 쓸 수 있게 메모리에 올려줌
+'''
+load_dotenv()
+
+# 2. API 키 안전하게 불러오기
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    raise ValueError("OPENAI의 API키가 환경 변수에 설정되지 않았습니다.(없다!)")
+
+# 3. API 요청 정보 설정
+api_url = "https://api.openai.com/v1/chat/completions"
+
+# HTTP 요청 헤더를 갖고 와야함
+header = {
+    "Authorization" : f"Bearer {api_key}",
+    "Content-Type" : "application/json" # 어떤 형식의 데이터를 보내는지: JSON
+}
+# LLM에게 '어떤' 데이터를 보낼건지? (Dictionary 형태로 설정)
+data = {
+    "model" : "gpt-3.5-turbo",  # 사용하려는 LLM 모델
+    "messages" : [
+        {
+            "role": 'user',
+            "content" : '파이썬의 f-string에 대해 50자 이내로 설명해줘.'
+        }
+    ],
+    "temperature" : 0.7  # 답변의 창의성을 조절하는 갑 (0~2)
+}
+
+# 4. API 요청 보내기 및 응답 처리 : response 변수에 담는다, mapping method 다음에 url과 header 값은 꼭 들어가야한다.
+# API에 POST 요청을 보낸다.
+# json=data 옵션은 딕셔너리를 자동으로 JSON 문자열로 변환하고, 헤더에 맞게 전송해준다.
+response = requests.post(api_url, headers=header, json=data)
+
+# raise_for_status : 성공(200번대) 코드가 아닐 경우 에러를 발생시키는 메서드(?).
+response.raise_for_status()
+
+# 5. 응답 파싱
+# 응답받은 값을 json 형태로 다시 변환, JSON 문자열을 파이썬 딕셔너리로 다시 변환
+result = response.json()
+
+import json
+# json에서 제공해주는 dumps를 이용해, 깔끔한 형태로 확인할 수 있도록 변경
+# dumps = dump String의 약자abbreviation
+print(json.dumps(result, indent=2, ensure_ascii=False))
+
+"""
+[Running] python -u "d:\lecture\15_python_for_LLM\01_python_for_LLM\05_api_and_env.py"
+{
+  "id": "chatcmpl-ByBOgVFxm3YqPOYxI02fhqHlGCm3I",
+  "object": "chat.completion",
+  "created": 1753683190,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "f-string은 문자열 포맷팅 방법 중 하나로, 문자열 앞에 'f'를 붙여 사용하며 중괄호({}) 안에 변수나 표현식을 넣어 자동으로 값을 대입해주는 기능을 제공한다.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 31,
+    "completion_tokens": 70,
+    "total_tokens": 101,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+"""
+
+answer = result['choices'][0]['message']['content']
+print("LLM의 답변: " + answer)
+# LLM의 답변: f-string은 문자열 내에 변수를 포함하여 표현하는 파이썬의 기능이다. 문자열 앞에 'f'를 붙여 사용하며, 중괄호 안에 변수명을 넣어 해당 변수의 값을 문자열에 삽입할 수 있다..
+
+# 프로젝트 2차 관련 회의
+https://www.notion.so/ohgiraffers/2-23e649136c1180749fc9dc9396722266?source=copy_link
