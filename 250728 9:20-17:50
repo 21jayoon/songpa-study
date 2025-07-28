@@ -547,3 +547,144 @@ userPwd: "(encrypted password)"
           setUserInfo(userData);
           setUserRole(userData.admin ? 2 : 1);
 로그인 유저 정보 노출 더 이상 없는 거 확인 완료.
+
+
+# ADsP 모의고사 오답노트
+# 순차분석 : 동시 구매될 가능성이 큰 상품군을 찾아내는 연관성 측정에 시간이라는 개념을 포함시켜
+'순차'적인 구매 가능성이 큰 상품군을 찾아내는 데이터 마이닝 기법t getProfileInfo = () => {
+    if (userRole === 1) {
+      // 권한 1: 일반고객 - 고객이름과 아이디
+      return {
+        displayName: userInfo?.userName || "홍길동",
+        displayId: userInfo?.userId || "customer123",
+        circleText: userInfo?.userName?.charAt(0) || "홍",
+        isCustomer: true
+      };
+
+2. Layout.jsx 수정
+(Now)
+// 사용자 정보 로드
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('토큰이 없어 로그인이 안 된 사용자입니다.');
+          setUserRole(null);
+          setIsLoading(false);
+          return;
+        }
+
+        // 백엔드 사용자 정보 조회 API 엔드포인트
+        const response = await fetch('http://localhost:8080/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const responseData = await response.json();
+          const userData = responseData.data;
+
+          setUserInfo(userData);
+          setUserRole(userData.admin ? 2 : 1);
+
+(Before)
+console -----
+Layout: 사용자 정보 로드 성공:      D:\lecture\Header-Fr…ayout\Layout.jsx:52 
+Object
+admin: true
+userCode: 102
+userId: "user001"
+userName: "임꺽정"
+userPhone: "010-1234-2345"
+userPwd: "(encrypted password)"
+[[Prototype]]: Object
+-------------
+// 사용자 정보 로드
+  useEffect(() => {
+    // 여기에 loadUserInfo 함수 정의가 정확히 들어가야 합니다.
+    const loadUserInfo = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('토큰이 없어 로그인이 안 된 사용자입니다.');
+          setUserRole(null);
+          setIsLoading(false);
+          return;
+        }
+
+        // 백엔드 사용자 정보 조회 API 엔드포인트
+        const response = await fetch('http://localhost:8080/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const responseData = await response.json();
+          const userData = responseData.data;
+
+          console.log('Layout: 사용자 정보 로드 성공:', userData); //이 부분 삭제
+          setUserInfo(userData);
+          setUserRole(userData.admin ? 2 : 1);
+로그인 유저 정보 노출 더 이상 없는 거 확인 완료.
+
+
+# 왜 '관리자 페이지 접근 감지', '고객 페이지 접근 감지'가 두 번씩 뜰까?
+문제 분석: useEffect의 이중 호출
+제공해주신 Next.js 코드에서 "관리자 페이지 접근 감지" 또는 "고객 페이지 접근 감지" 메시지가 두 번씩 출력되는 이유는 Next.js 13+ 버전에서 개발 모드(Development Mode)일 때 발생하는 Strict Mode의 이중 렌더링(Double Rendering) 때문입니다.
+
+1. Strict Mode의 작동 방식
+Next.js (그리고 React)의 Strict Mode는 개발 단계에서 잠재적인 문제를 미리 감지하고 알려주기 위한 도구입니다. 이 모드가 활성화되면 컴포넌트의 일부 로직(특히 useEffect 내부)이 두 번 실행됩니다. 이는 다음과 같은 이점을 제공합니다.
+
+부수 효과(Side Effect) 정리 검증: useEffect의 클린업 함수가 제대로 작동하는지 확인하여 메모리 누수나 예상치 못한 동작을 방지합니다.
+
+비멱등성(Idempotency) 검증: 컴포넌트가 마운트되고 언마운트된 다음 다시 마운트되는 시나리오를 시뮬레이션하여, 마운트/언마운트 시점에 부수 효과가 한 번만 발생하는지 확인합니다. 이는 특히 외부 API 호출이나 이벤트 리스너 등록 등에서 중요합니다.
+
+2. 코드 내 useEffect와 이중 실행
+제공해주신 코드에서 문제가 되는 부분은 useMenuLogic 훅 내의 useEffect입니다:
+
+JavaScript
+
+useEffect(() => {
+  if (userRole === 2) { // 샵 관리자만
+    if (pathname.startsWith('/myshop') && viewMode !== 'admin') {
+      console.log('관리자 페이지 접근 감지: 관리자 모드로 전환');
+      onViewModeChange?.('admin');
+    } else if (pathname.startsWith('/shops') && viewMode !== 'customer') {
+      console.log('고객 페이지 접근 감지: 고객 모드로 전환');
+      onViewModeChange?.('customer');
+    }
+  }
+}, [pathname, userRole, viewMode, onViewModeChange]);
+이 useEffect는 컴포넌트가 마운트될 때, 그리고 pathname, userRole, viewMode, onViewModeChange 중 하나라도 변경될 때 실행됩니다. 개발 모드의 Strict Mode에서는 이 useEffect가 다음과 같이 두 번 실행됩니다:
+
+첫 번째 실행: 컴포넌트가 마운트될 때 pathname을 확인하고 조건에 맞으면 console.log가 한 번 출력됩니다.
+
+두 번째 실행 (Strict Mode에 의해 시뮬레이션): React는 이펙트가 다시 실행되기 전에 "정리(cleanup)" 함수를 실행하고, 그 다음 이펙트를 다시 실행합니다. 이 과정에서 console.log가 다시 한번 출력됩니다.
+
+따라서 개발 모드에서 콘솔 메시지가 두 번씩 나타나는 것입니다.
+
+해결 방안
+이 현상은 개발 모드에서만 발생하며, 프로덕션 빌드(Production Build)에서는 Strict Mode가 비활성화되므로 메시지가 한 번만 출력됩니다. 따라서 실제 서비스 운영에는 아무런 문제가 없습니다.
+
+하지만 개발 중 콘솔 메시지가 거슬린다면 다음과 같은 방법들을 고려해볼 수 있습니다.
+
+1. (권장) 개발 모드의 특성 이해 및 무시
+가장 권장하는 방법입니다. Strict Mode는 개발 편의를 위한 것이므로, 이러한 이중 실행은 의도된 동작이며 실제 애플리케이션의 버그를 의미하지 않습니다. 개발이 완료되고 프로덕션으로 배포하면 해당 메시지는 한 번만 나타납니다.
+
+2. useEffect 내부 로직 조정 (신중하게)
+만약 useEffect 내부의 특정 로직(예: 외부 API 호출, 전역 이벤트 리스너 등록)이 두 번 실행되어 문제가 된다면, 해당 로직을 멱등하게(idempotent) 작성하거나, 클린업 함수를 사용하여 중복 실행을 방지해야 합니다. 하지만 단순히 console.log만 두 번 출력되는 것이라면 굳이 수정할 필요는 없습니다.
+
+결론
+콘솔에 메시지가 두 번 출력되는 것은 Next.js 개발 모드에서 React의 Strict Mode가 활성화되어 useEffect가 이중으로 실행되기 때문입니다. 이는 정상적인 개발 환경 동작이며, 프로덕션 환경에서는 발생하지 않습니다. 따라서 특별히 수정할 필요는 없습니다.
+
+
+# ADsP 모의고사 오답노트
+# https://quizlet.com/kr/1062635738/adsp-%EB%AA%A8%EC%9D%98%EA%B3%A0%EC%82%AC-1%ED%9A%8C-flash-cards/?i=6b0ke0&x=1jqt
+# 순차분석 : 동시 구매될 가능성이 큰 상품군을 찾아내는 연관성 측정에 시간이라는 개념을 포함시켜
+'순차'적인 구매 가능성이 큰 상품군을 찾아내는 데이터 마이닝 기법
+# 민감도 : 양성이라고 판단되는 값(TP, True Positive) / 실제 양성 값(TP+FN)
+* FN = False Negative
+# 회귀분석의 가정= 선형성, 등분산성, 독립성, 비상관성, 정규성
