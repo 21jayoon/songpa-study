@@ -1,0 +1,95 @@
+# 08. trun python into JSON data and handling exception
+import json
+
+structed_data = [
+    {
+        "id":1,
+        "category": "python",
+        "question": "파이썬의 장점은?",
+        "answer": "간결한 문법과 강력한 라이브러리 생태계입니다.",
+        "tags": ["python", "programming", "strength"]
+    },
+    {
+        "id":2,
+        "category": "python",
+        "question": "리스트와 튜플의 차이는?",
+        "answer": "리스트는 mutable(가변)하고, 튜플은 immutable(불변)합니다.",
+        "tags": ["list", "tuple", "data-structure"]
+    }
+]
+output_filename = 'structed_data.json'
+
+# 1. 파이썬 객체를 JSON 파일로 저장하기
+# 오류를 잡기 위해 try/except문으로 명령해야함
+print(f"'{output_filename}' 파일로 데이터를 저장합니다.")
+try:
+    # file을 'w'(쓰기) 모드로 엽니다. with 구문은 파일을 안전하게 열고 자동으로 닫아준다.
+    # encoding='utf-8'은 한글 처리를 위한 필수 옵션!!
+    with open(output_filename, 'w', encoding='utf-8') as f:
+        # 'w'는 writing의 약자로 reading / writing 모두가 있음
+        # json.dump(data, file) : 파이썬 객체(list, dictionary)를 JSON 파일에 쓴다(JSON파일로 바꾼다).
+        json.dump(structed_data, f, indent=2, ensure_ascii=False)
+        # python에는 load와 dump라는 중요 객체가 있음. 이 중 dump는 ......
+        #dump는 어떤 데이터를 json으로 쓸 건지 컴퓨터에 알려줌.
+        # indent는 들여쓰기해준다는 의미 (부수(필수x), 가독성 관련)
+        # ensure_ascii는 안 깨지게 해준다는 의미 (부수, 가독성 관련)  
+        # with 구분을 빠져나오면 따로 뭐 close이런 거 해줄 필요 없이 with구문이 닫힌 것으로 이해가 됨.
+    print("File save completed")
+except Exception as e: # 특정 익셉션 말고 그냥 익셉션 전체를 가장 상위 예외인 Exception으로 잡음
+      print(f"파일 저장 중 오류 발생: {e}") 
+      # 자바에서는 try/catch였다면 python에서는 try/except 구문임
+
+# 2. JSON파일을 다시 파이썬 객체로 불러오기
+print(f"\n'{output_filename} 파일을 다시 읽어옵니다.")
+try:
+    # 파일을 'r'(읽기) 모드로 연다.
+    with open(output_filename, 'r', encoding='utf-8') as f:
+          # json.load()는 파일 객체를 받아, JSON 문자열을 파싱하여 파이썬 객체로 변환해준다.
+          # dumps, loads 형태로도 사용가능
+          loaded_data = json.load(f)
+    print("Succeed reading file")
+    print("불러온 데이터의 타입: ", type(loaded_data))
+    # type 메소드를 활용해서 해당 데이터의 타입을 확인할 수 있다
+    print(loaded_data[0]['question']) # list dictionary 타입으로 변환될 것이기 때문에 0번째 리스트인덱스의 특정 부분 확인 가능
+    print(loaded_data[1]['tags'])
+except FileNotFoundError:
+     print(f"{output_filename} cannot find.")
+except json.JSONDecodeError:
+     print(f"{output_filename} file is wrote in invalid JSON type")
+except Exception as e:     
+     print(f"An error occurred while reading files: {e}") 
+     # exception은 세세한(구체적인) 것부터 핸들링하고 마지막에 가장 포괄적인 익셉션을 던져야한다. 순서가 그렇다.
+
+# 3. JSON 문자열과 파이썬 객체 변환
+# 파일이 아니라 변수 안에 들어있는 JSON 형태의 문자열을 다룰 때는 's'가 붙은 복수형 함수를 사용한다.
+
+#  파이썬 딕셔너리 -> JSON 문자열로 변환
+my_dict = {"name": 'Superman', "power": 100}
+# 아까는 JSON 파일로 만들어서 dump를 사용했지만 이번엔 JSON 문자열로 변환할 것이기 때문에 dumps로 사용
+json_string = json.dumps(my_dict, indent=2, ensure_ascii=False)
+print(json_string)
+print(type(json_string))
+"""
+{
+  "name": "Superman",
+  "power": 100
+}
+<class 'str'>
+"""
+
+# JSON 문자열 -> 파이썬 딕셔너리로 변환
+retrieved_string = '{"id": "user1", "isActive": true}'
+retrieved_dict = json.loads(retrieved_string)
+
+print(retrieved_dict)
+print(type(retrieved_dict))
+print(type(retrieved_string))
+print("사용자 활성 상태: ", retrieved_dict[ 'isActive' ])
+"""
+{'id': 'user1', 'isActive': True}
+<class 'dict'>
+<class 'str'>
+사용자 활성 상태:  True
+"""
+# 5_api_and_env에서의 result = response.json()이 json.load한 것과 동일하다
+# 같은 5번 파일에서 response = requests.post(......, json=data)라고 한 것이 json.dumps한 것과 동일하다
