@@ -93,3 +93,122 @@ print("사용자 활성 상태: ", retrieved_dict[ 'isActive' ])
 """
 # 5_api_and_env에서의 result = response.json()이 json.load한 것과 동일하다
 # 같은 5번 파일에서 response = requests.post(......, json=data)라고 한 것이 json.dumps한 것과 동일하다
+
+
+Package2 : module_project
+1. Make qa_data.txt
+Q: 파이썬의 장점은?
+A: 간결한 문법과 강력한 라이브러리 생태계입니다. 
+===
+Q: 리스트와 튜플의 차이는?
+A: 리스트는 가변(mutable)하고, 튜플은 불변(immutable)합니다.
+===
+Q: 
+A: 이 데이터는 질문이 비어있어 처리하면 안 됩니다.
+===
+Q: f-string이란?
+A: 파이썬 3.6부터 도입된 편리한 문자열 포맷팅 방법입니다.
+
+2. Write my_parser.py
+# qa_data.txt를 변환해주기 위한 함수를 정의한다.
+# 함수 정의 시 def 문구 사용
+def parse_qa_data_to_list(file_path: str) -> list[dict] :
+    """ 텍스트 파일을 읽어와서, Q&A 딕셔너리들의 리스트로 변환하는 함수입니다."""
+    qa_list = []
+    # 변환된 리스트를 담을 빈 리스트 qa_list 선언
+    # 오류 발생 가능성이 있기 때문에 try/except로 익셉션 처리
+    try:
+        # 파일을 읽을 때 사용할 수 있는 구문 with open()
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            # 질문이 없는 것도 있고, 불필요한 ===같은 것도 있기 때문에 가공이 필요하다.
+            # 따라서 f.read() 이후 가공 관련된 걸 설명하는 코드를 작성한다.
+        blocks = content.strip().split('===')
+
+        for block in blocks:
+            # 아무것도 없는 비어있는 애는 건너뛴다(continue)
+            if not block.strip(): continue
+            # \n 줄바꿈을 기준으로 나눈다. 
+            lines = block.strip().split('\n')
+            if len(lines) >= 2:
+                question = lines[0].replace('Q: ', '').strip()
+                answer = lines[1].replace('A: ', '').strip()
+                if question and answer:
+                    qa_list.append({"question": question, "answer": answer})
+    except FileNotFoundError:
+        print("I cannot find that file.")
+    except Exception as e:
+        print("An error occurred while processing: {e}")
+    return qa_list
+
+3. Write main.py
+from my_parser import parse_qa_data_to_list
+# 아까 적은 my_parser의 parse_qa_data_to_list 함수를 import 한다.
+import os
+import json
+
+# def로 함수 정의
+def run_pipeline():
+    """전체 데이터 처리 파이프라인을 실행하는 메인 함수"""
+    print("text를 JSON으로 변환하는 파이프라인 시작")
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # __file__ 는 파이썬이 내부에서 관리하는 함수로,
+    # 현재 실행 중인 스크립트 타입의 경로를 갖고 있다.
+    input_file_path = os.path.join(base_dir, 'data', 'qa_data.txt')
+    output_file_path = os.path.join(base_dir, 'qna_for_llm.json')
+
+    qa_data = parse_qa_data_to_list(input_file_path)
+
+    if qa_data:
+        try:
+            print(f"{output_file_path}(으)로 데이터를 저장합니다.")
+            with open(output_file_path, 'w', encoding='utf-8') as f:
+                # file로 내보내기 위해 .dump 구문 사용
+                json.dump(qa_data, f, indent=2, ensure_ascii=False)
+            print(f"데이터가 성공적으로 저장되었습니다.")    
+        except Exception as e:
+            print(f"파일 저장 중 오류 발생 {e}")
+    else:
+        print("처리할 유효한 데이터가 없습니다.")
+
+# main.py 파일이 직접 실행되었을 때만 if 블록 안의 코드를 실행하라는 관용구 코드
+if __name__ == '__main__':
+    run_pipeline()        
+    # 파이썬에서 중요한 관용구. main파일에 있는 특정 함수(run_pipeline)이 자동으로 실행되는 걸 막는다.
+    # run_pipeline()을 직접 실행시킨다(자동 실행 막음)
+
+"""
+text를 JSON으로 변환하는 파이프라인 시작
+처리할 유효한 데이터가 없습니다.
+
+-> 1.  print(input_file_path)로 파일 오류 없는지 확인
+-----
+d:\lecture\15_python_for_LLM\02_module_project\data\qa_data.txt
+-----
+잘 나옴
+-> 2. 다른 문제 없나 확인
+qa_data.txt 저장 안 된 거 확인, 저장 후 main.py 재실행
+-----
+text를 JSON으로 변환하는 파이프라인 시작
+d:\lecture\15_python_for_LLM\02_module_project\qna_for_llm.json(으)로 데이터를 저장합니다.
+데이터가 성공적으로 저장되었습니다.
+-----
+⭐ qa_data.txt를 저장 안 한 상태라서 '처리할 유효한 데이터가 없습니다.'라고 떴단 걸 확인할 수 있음
+-> 3. qna_for_llm.json 파일 생성되었나 확인
+[
+  {
+    "question": "파이썬의 장점은?",
+    "answer": "간결한 문법과 강력한 라이브러리 생태계입니다."
+  },
+  {
+    "question": "리스트와 튜플의 차이는?",
+    "answer": "리스트는 가변(mutable)하고, 튜플은 불변(immutable)합니다."
+  },
+  {
+    "question": "f-string이란?",
+    "answer": "파이썬 3.6부터 도입된 편리한 문자열 포맷팅 방법입니다."
+  }
+]
+확인완료
+"""
