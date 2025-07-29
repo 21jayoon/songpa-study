@@ -313,3 +313,14 @@ if __name__ == '__main__':
 
 생성 확인 완료
 """
+
+
+# 프로그램 2차 피드백:
+# 공통 로직? 코드 공통화? 는 무엇일까?
+https://aimk12.tistory.com/157
+https://fubabaz.tistory.com/34
+https://velog.io/@ann0905/Spring-%EA%B3%B5%ED%86%B5-%EB%A1%9C%EC%A7%81-%EC%B2%98%EB%A6%AC-Filter-Interceptor-AOP
+https://sowon-dev.github.io/2021/09/14/210915DB-commonCodeGrup/
+https://tech.socarcorp.kr/dev/2021/08/17/common-code-management.html
+https://blog.b2en.com/366
+https://parkmuhyeun.github.io/woowacourse/2023-05-05-Filter-Interceptor/
