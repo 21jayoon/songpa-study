@@ -184,7 +184,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 
 # 저장 후 CTRL+ALT+ENTER로 실행
-# 결과:
+# 결과: -----------
 더운 날에는 시원하고 가볍게 먹을 수 있는 음식이 좋겠죠! 이런 메뉴를 추천드려요:
 
 1. **냉면** – 시원한 육수에 쫄깃한 면발이 더위를 싹 가셔줄 거예요.
@@ -195,3 +195,240 @@ print(response.choices[0].message.content)
 
 음료로는 아이스커피, 시원한 식혜, 얼음 동동 띄운 오미자차도 추천드려요!  
 오늘 점심 맛있게 드시고, 더위도 잘 이겨내시길 바랄게요😊
+# -----------
+
+
+# 패턴 1: 페르소나 & Few-Shot(기사 제목 교정)
+## 기자들이 송고한 제목에서 맞춤법, 의미, 어조 등의 교정작업을 수행한다.
+## (프랑스 AFP시스템에서 최초 적용)
+
+from openai import OpenAI
+
+# 이번에는 함수형태로 변경해 재사용성을 높인다.
+def correct_title (query, temperature=0.3):
+    # 1. client 설정
+    client=OpenAI(api_key=OPENAI_API_KEY)
+
+    #2. system prompt를 변수에 할당
+    #(들어가는 내용: 페르소나, 지켜야 할 규칙, Few-Shot예시)
+    # 샵 3개는 굳이 안 넣어도 되지만 각 prompt의 구분을 위해 넣어주었다.
+    system_instruction = """
+    기자들이 송고한 제목, 즉 현재의 기사 제목을 교정해줘.
+    
+    ### 지시사항 ###
+    - 기사의 제목이 명확하고 주제와 잘 맞도록 수정해주세요.
+    - 독자의 관심을 끌 수 있도록 간결하고 임팩트있는 표현을 사용해주세요.
+    - 비속어, 은어 등은 제거하고, 의미가 유지되도록 제목을 교정해주세요.
+
+    ### 출력 형식 ###
+    - 원래 제목: [기사의 원래 제목]
+    - 교정한 제목: [기사의 교정된 제목]
+
+    ### 예시 ###
+    - 원래 제목: "어제 태국에서 총격 사건이 일어나서 시장에 있던 수많은 사람들이 대피했다."
+    - 교정한 제목: "태국 시장 총격 사건, 수십명 대피"
+
+    """
+
+    user_msg = f"""
+    다음 제목을 교정해주세요.
+    제목: {query}
+    """
+
+    #def correct_title 안에 response가 들어갈 수 있도록 들여쓰기 한 칸 더 넣음
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[ 
+            #대화의 히스토리를 리스트 형태로 전달. 각 요소는 role과 content를 가진 딕셔너리이다.
+            {
+                "role": "system", # 시스템의 전반적인 지시사항 전달. 대화의 가장 처음에 위치해 모델의 행동 기준을 설정함
+                "content": [
+                    {
+                        # 타입과 텍스트(역할)를 다 전달해야함
+                        "type": "text",
+                        "text": system_instruction
+                    }
+                ]
+            },
+            {
+                "role": "user",  # 사용자의 실제 요청 전달
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user_msg
+                    }
+                ]
+            }
+        ],
+        response_format={
+            'type': "text"
+        },
+        temperature=temperature, # 대답 창의성에 관한 설정(기본값: 1), 0~2까지 설정 가능
+        max_tokens=2048, # 응답에 사용될 토큰 수(응답 최대토큰수)
+        top_p=1, # 사용할 상위누적확률
+        frequency_penalty=0, # 토큰 사용 빈도수에 대한 패널티
+        presence_penalty=0 # 토큰 재사용에 대한 패널티
+    )
+    return response.choices[0].message.content
+
+print(correct_title('이은지의 FM 개꿀 라디오 방송에 주목해주세요~!'))
+print(correct_title('미친 물난리로 졸라 고생하는 한국 공무원들에게 보상이 이뤄져야한다.')) # 교정이 제대로 되는지 확인 위해 일부러 비속어와 은어를 넣음.
+
+# 결과: ----------
+- 원래 제목: 이은지의 FM 개꿀 라디오 방송에 주목해주세요~!
+- 교정한 제목: 이은지의 FM 라디오, 청취자 관심 집중
+- 원래 제목: 미친 물난리로 졸라 고생하는 한국 공무원들에게 보상이 이뤄져야한다.
+- 교정한 제목: 폭우 피해 대응한 한국 공무원, 합당한 보상 필요
+# ----------------
+
+
+# 다음과 같이 system instuction을 바꾸면 또 다른 답변이 출력된다.
+system_instruction = """
+    기자들이 송고한 제목, 즉 현재의 기사 제목을 교정해줘.
+    
+    ### 지시사항 ###
+    - 기사의 제목이 명확하고 주제와 잘 맞도록 수정해주세요.
+    - 독자의 관심을 끌 수 있도록 간결하고 임팩트있는 표현을 사용해주세요.
+    - 비속어, 은어 등은 제거하고, 의미가 유지되도록 제목을 교정해주세요.
+
+    ### 출력 형식 ###
+    - 원래 제목: [기사의 원래 제목]
+    - 교정한 제목: 
+        [기사의 교정된 제목1]
+        [기사의 교정된 제목2]
+        [기사의 교정된 제목3]
+
+    ### 예시 ###
+    - 원래 제목: "어제 태국에서 총격 사건이 일어나서 시장에 있던 수많은 사람들이 대피했다."
+    - 교정한 제목: 
+        "태국 시장 총격 사건, 수십명 대피"
+        "태국 시장 총격 사건, 충격"
+        "태국에서 충격적인 총격 사건 발생"
+
+    """
+
+# 결과: ----------
+- 원래 제목: 이은지의 FM 개꿀 라디오 방송에 주목해주세요~!
+- 교정한 제목: 
+    "이은지의 FM 라디오, 청취자 관심 집중"
+    "이은지, 새 FM 라디오 방송으로 주목"
+    "이은지의 FM 라디오, 기대감 높아져"
+- 원래 제목: 미친 물난리로 졸라 고생하는 한국 공무원들에게 보상이 이뤄져야한다.
+- 교정한 제목: 
+    "폭우 피해 대응한 한국 공무원, 정당한 보상 필요"
+    "폭우 속 헌신한 공무원들, 보상 대책 마련 시급"
+    "물난리 대응 공무원, 합당한 보상 이뤄져야"
+# ---------------
+
+from openai import OpenAI
+import json
+
+# 함수 선언형으로 재사용성 높인 코드 작성
+def extract_eng_words(query, temperature=0.5):
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
+    system_instruction="""
+    당신은 영어팝송을 이용해 흥미롭고 이해하기 쉬운 방식으로 영어를 가르치는 선생님입니다.
+
+    # 처리단계
+    1. 주어진 팝송 가사에서 자주 사용되는 영어단어 3개를 무작위로 추출해줘.
+    2. 각 단어의 품사와 의미를 한글로 알려줘.
+    
+    # 출력형식
+    - 출력형식은 json 형식입니다.
+
+    # 출력예시
+    {
+        "json_list": [
+            {
+                "빈출 단어 3가지" : "yesterday", "love", "you"               
+            },
+            {
+                "단어" : "yesterday"
+                "품사와 의미" : "명사 - 어제" 
+            },
+            {
+                 "단어" : "love"
+                "품사와 의미" : "명사 혹은 동사 - 사랑, 사랑하다" 
+            },
+            {
+                 "단어" : "you"
+                "품사와 의미" : "명사 - 너, 당신" 
+            }
+        ]
+    }
+    """
+
+    user_msg = f"""
+    노래 가사: {query}
+    """
+
+    #def correct_title 안에 response가 들어갈 수 있도록 들여쓰기 한 칸 더 넣음
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[ 
+            #대화의 히스토리를 리스트 형태로 전달. 각 요소는 role과 content를 가진 딕셔너리이다.
+            {
+                "role": "system", # 시스템의 전반적인 지시사항 전달. 대화의 가장 처음에 위치해 모델의 행동 기준을 설정함
+                "content": [
+                    {
+                        # 타입과 텍스트(역할)를 다 전달해야함
+                        "type": "text",
+                        "text": system_instruction
+                    }
+                ]
+            },
+            {
+                "role": "user",  # 사용자의 실제 요청 전달
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user_msg
+                    }
+                ]
+            }
+        ],
+        response_format={
+            #이번에는 text 형태로 받는 게 아니라 json 형태로 받기 때문에 "text"에서 수정 필요
+            # 응답의 content는 반드시 JSON 객체 형식의 문자열이어야한다고 명시적으로 요구
+            'type': "json_object"
+        },
+        temperature=temperature, # 대답 창의성에 관한 설정(기본값: 1), 0~2까지 설정 가능
+        max_tokens=2048, # 응답에 사용될 토큰 수(응답 최대토큰수)
+        top_p=1, # 사용할 상위누적확률
+        frequency_penalty=0, # 토큰 사용 빈도수에 대한 패널티
+        presence_penalty=0 # 토큰 재사용에 대한 패널티
+    )
+    return json.loads(response.choices[0].message.content) # 응답 json 문자열을 파이썬 객체로 변환
+
+lyrics = """
+No clouds in my stones
+Let it rain, I hydroplane in the bank
+Comin' down with the Dow Jones
+When the clouds come, we go, we Roc-A-Fella 
+We fly higher than weather, in G5's or better
+You know me (You know me)
+In anticipation for precipitation, stack chips for the rainy day
+Jay, Rain Man is back
+With Little Miss Sunshine, Rihanna, where you at?
+
+You have my heart, and we'll never be worlds apart
+May be in magazines but you'll still be my star
+Baby, 'cause in the dark, you can't see shiny cars
+And that's when you need me there
+With you, I'll always share because
+
+When the sun shine, we shine together
+Told you I'll be here forever
+Said "I'll always be your friend"
+Took an oath, I'ma stick it out 'til the end
+Now that it's rainin' more than ever
+Know that we'll still have each other
+You can stand under my umbrella
+"""
+
+print(extract_eng_words(lyrics))
+
+# 결과: ----------
+{'json_list': [{'빈출 단어 3가지': ['rain', 'shine', 'together']}, {'단어': 'rain', '품사와 의미': '명사 혹은 동사 - 비, 비가 오다'}, {'단어': 'shine', '품사와 의미': '동사 - 빛나다, 빛을 내다'}, {'단어': 'together', '품사와 의미': '부사 - 함께, 같이'}]}
+# ---------------
