@@ -847,4 +847,6 @@ Output is truncated. View as a scrollable element or open in a text editor. Adju
 
 # Coding-test : HttpServletRequest, HttpServletResponse import class 자체가 안 뜨는 상황 발생
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
-build.gradle에 추가
+build.gradle에 추가 -> 해결 완료
+
+# 각 유저 로그인 시 토큰 각각 다른 걸로 생성되는지 확인 완료 -> 프로젝트로 썼던 코드 그대로 사용해도 될 듯 250730 16:23
