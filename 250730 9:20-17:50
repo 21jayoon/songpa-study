@@ -432,3 +432,413 @@ print(extract_eng_words(lyrics))
 # 결과: ----------
 {'json_list': [{'빈출 단어 3가지': ['rain', 'shine', 'together']}, {'단어': 'rain', '품사와 의미': '명사 혹은 동사 - 비, 비가 오다'}, {'단어': 'shine', '품사와 의미': '동사 - 빛나다, 빛을 내다'}, {'단어': 'together', '품사와 의미': '부사 - 함께, 같이'}]}
 # ---------------
+
+
+# system_instruction 변경
+# 함수 선언형으로 재사용성 높인 코드 작성
+def extract_eng_words(query, temperature=0.5):
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
+    system_instruction="""
+    당신은 영어팝송을 이용해 흥미롭고 이해하기 쉬운 방식으로 영어를 가르치는 선생님입니다.
+
+    # 처리단계
+    1. 주어진 팝송 가사에서 자주 사용되는 영어단어 3개를 무작위로 추출해줘.
+    2. 각 단어의 품사와 의미를 한글로 알려줘.
+    3. 각 단어의 유의어도 단어 하나당 유의어 하나씩 알려줘.
+    4. 유의어에 대한 예시문장은 유의어 하나 당 2개씩 작성해줘.
+    
+    # 출력형식
+    - 출력형식은 json 형식입니다.
+
+    # 출력예시
+    {
+        "json_list": [
+            {
+                "빈출 단어 3가지" : "yesterday", "love", "you"               
+            },
+            {
+                "단어" : "yesterday"
+                "품사와 의미" : "명사 - 어제" 
+                "유의어": [
+                    {
+                        "유의어1": "last-night",
+                        "예시문장": ["Last-night, Sarah was gone", "It was fun last night"]
+                    }
+                ]
+            },
+            {
+                "단어" : "love"
+                "품사와 의미" : "명사 혹은 동사 - 사랑, 사랑하다" 
+                 "유의어": [
+                    {
+                        "유의어1": "adore",
+                        "예시문장": ["Jane adores her daughter", "Since they loved each other, they named their son 'adore'"]
+                    }
+                ]
+            },
+            {
+                "단어" : "you"
+                "품사와 의미" : "명사 - 너, 당신" 
+                 "유의어": [
+                    {
+                        "유의어1": "deer",
+                        "예시문장": ["deer Mr.simple. Where have you been?", "my deer, my!"]
+                    }
+                ]
+            }
+        ]
+    }
+    """
+
+# 결과: ----------
+{'json_list': [{'빈출 단어 3가지': ['rain', 'shine', 'together']}, {'단어': 'rain', '품사와 의미': '명사, 동사 - 비, 비가 오다', '유의어': [{'유의어1': 'drizzle', '예시문장': ['It started to drizzle on our way home.', 'The drizzle made the streets wet and shiny.']}]}, {'단어': 'shine', '품사와 의미': '동사 - 빛나다, 빛을 내다', '유의어': [{'유의어1': 'glow', '예시문장': ['The stars glow brightly in the night sky.', 'Her face began to glow with happiness.']}]}, {'단어': 'together', '품사와 의미': '부사 - 함께, 같이', '유의어': [{'유의어1': 'jointly', '예시문장': ['They worked jointly on the project.', 'The two companies announced the plan jointly.']}]}]}
+# ---------------
+
+
+# 출력 형태 변경
+result = extract_eng_words(lyrics)
+words = result['json_list']
+
+# words라는 리스트를 만들고 그걸 for문으로 돌리면서
+# 영어 사전 형태로 각 요소를 출력
+for word_dict in words:
+    print(f'단어: {word_dict["단어"]}')
+    print(f'의미: {word_dict["의미"]}')
+
+    for sim_word_obj in word_dict['유의어']:
+        print(f'유사어: {sim_word_obj['유의어1']}')
+
+        for sentence in sim_word_obj['예시문장']:
+            print(f'예제: {sentence}')
+
+# 결과: ----------
+KeyError                                  Traceback (most recent call last)
+Cell In[18], line 134
+    131 # words라는 리스트를 만들고 그걸 for문으로 돌리면서
+    132 # 영어 사전 형태로 각 요소를 출력
+    133 for word_dict in words:
+--> 134     print(f'단어: {word_dict["단어"]}')
+    135     print(f'의미: {word_dict["의미"]}')
+    137     for sim_word_obj in word_dict['유의어']:
+
+KeyError: '단어'
+# ---------------
+# 왜 이런 오류가?? 강의코드와 달리 내 system structure의 구조는 
+{ 
+    "빈출 단어 3가지" : "yesterday", "love", "you"               
+},
+가 상단에 있어서 구조를 파악 후, 다른 코드를 사용해야 했음.
+
+# 1차 수정
+for word_dict in words:
+    print(f'빈출 3단어: {word_dict['빈출 단어 3가지']}')
+
+    for word_meaning in word_dict.get('단어 목록', []):
+        print(f'단어: {word_meaning["단어"]}')
+        print(f'의미: {word_meaning["의미"]}')
+
+        for sim_word_obj in word_meaning['유의어']:
+            print(f'유사어: {sim_word_obj['유의어1']}')
+
+            for sentence in sim_word_obj['예시문장']:
+                print(f'예제: {sentence}')
+
+# 결과: 
+빈출 3단어: ['rain', 'shine', 'together']
+---------------------------------------------------------------------------
+KeyError                                  Traceback (most recent call last)
+Cell In[24], line 134
+    131 # words라는 리스트를 만들고 그걸 for문으로 돌리면서
+    132 # 영어 사전 형태로 각 요소를 출력
+    133 for word_dict in words:
+--> 134     print(f'빈출 3단어: {word_dict['빈출 단어 3가지']}')
+    136     for word_meaning in word_dict.get('단어 목록', []):
+    137         print(f'단어: {word_meaning["단어"]}')
+
+KeyError: '빈출 단어 3가지'
+# ------
+
+# Gemini에게 질문: https://g.co/gemini/share/6afe1a1adb88
+
+# 수정
+if words and "빈출 단어 3가지" in words[0]:
+    frequent_words = words[0]['빈출 단어 3가지']
+    if isinstance(frequent_words, list):
+        print(f"빈출 3단어: {', '.join(frequent_words)}")
+    else: # If it's a single string like "yesterday", "love", "you"
+        print(f"빈출 3단어: {frequent_words}")
+
+for word_entry in words[1:]: # Start from the second item in the list
+    if "단어" in word_entry: # Check if it's a word entry
+        print(f'단어: {word_entry["단어"]}')
+        # Using .get() for safety
+        print(f'의미: {word_entry.get("품사와 의미", "의미 없음")}')
+
+        if "유의어" in word_entry and isinstance(word_entry["유의어"], list):
+            for sim_word_obj in word_entry['유의어']:
+                if "유의어1" in sim_word_obj:
+                    print(f'유사어: {sim_word_obj['유의어1']}')
+
+                if "예시문장" in sim_word_obj and isinstance(sim_word_obj["예시문장"], list):
+                    for sentence in sim_word_obj['예시문장']:
+                        print(f'예제: {sentence}')
+
+# 결과: -----------
+빈출 3단어: rain, shine, together
+단어: rain
+의미: 명사/동사 - 비, 비가 오다
+유사어: drizzle
+예제: It started to drizzle on our way home.
+예제: I love walking outside when there's a light drizzle.
+단어: shine
+의미: 동사 - 빛나다, 빛을 내다
+유사어: glow
+예제: The stars glow brightly at night.
+예제: Her face seemed to glow with happiness.
+단어: together
+의미: 부사 - 함께, 같이
+유사어: jointly
+예제: They worked jointly on the project.
+예제: The decision was made jointly by both teams.
+# -----------------
+
+
+
+# 생각의 사슬 Chain-of-Thought (냉털 마스타 - ReAct)
+# * Reason + Act 기법으로 현재 상황에 대한 통찰 이후, 다음 행동에 대한 작성을 유도하는 기법이다.
+
+from openai import OpenAI
+import json
+
+def finish_my_refregator(query, temperature=1.0):
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
+    system_instruction="""
+    너는 냉장고에 남아있는 재료를 활용해 창의적이고, 실용적인 저녁 식사 아이디어를 제안하는 요리 전문가다.
+    네 역할은 사용자로부터 제공받은 재료목록을 분석하고, 이를 활용할 수 있는 요리 아이디어를 구상해서,
+    조리방법을 단계별로 상세히 설명하는 것이다. 이 때 요리의 이름은 실제로 있는 음식 이름을 출력합니다.
+    (예시: 마라 닭고기 당면볶음 대신 닭고기 마라샹궈로 출력)
+    만약 최종 요리에 필요없거나 쓸 데가 마땅치 않은 재료는 무시하고 가장 마지막에 '냉장고에 [남은 재료]가 아직 남아있습니다.'라고 출력합니다.
+
+    # 출력 예시
+    1. 상황 분석 Reason
+    - 현재 냉장고에 있는 재료는 [사용자가 입력한 재료]입니다.
+    - 주재료인 닭고기와 다양한 채소들이 있는 것으로 파악됩니다.
+    - 이 재료들은 스튜, 볶음, 찜요리에 적합합니다.
+
+    2. 행동 계획 Reason/plan
+    - 가장 쉽게 만들 수 있는 요리로 닭고기 스튜를 제안합니다.
+    - 각 요리에 필요한 재료와 조리도구를 확인합니다.
+    - 부족한 재료가 있다면 대체 가능한 옵션을 제시합니다.
+    - 조리 과정을 단계별로 상세히 설명합니다.
+    - 맛을 더 향상시키기 위한 꿀팁과 주의사항 또한 제공합니다.
+
+    3. 실행 Act
+    - 여기에 상세레시피를 단계별로 작성합니다.
+    """
+
+    user_msg = f"""
+    사용자의 냉장고에는 현재 {query}가 있습니다.
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[ 
+            #대화의 히스토리를 리스트 형태로 전달. 각 요소는 role과 content를 가진 딕셔너리이다.
+            {
+                "role": "system", # 시스템의 전반적인 지시사항 전달. 대화의 가장 처음에 위치해 모델의 행동 기준을 설정함
+                "content": [
+                    {
+                        # 타입과 텍스트(역할)를 다 전달해야함
+                        "type": "text",
+                        "text": system_instruction
+                    }
+                ]
+            },
+            {
+                "role": "user",  # 사용자의 실제 요청 전달
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user_msg
+                    }
+                ]
+            }
+        ],
+        response_format={
+            'type': "text"
+        },
+        temperature=1.0, # 대답 창의성에 관한 설정(기본값: 1)
+        max_tokens=2048, # 응답에 사용될 토큰 수(응답 최대토큰수)
+        top_p=1, # 사용할 상위누적확률
+        frequency_penalty=0, # 토큰 사용 빈도수에 대한 패널티
+        presence_penalty=0 # 토큰 재사용에 대한 패널티
+    )
+    return response.choices[0].message.content
+
+print(finish_my_refregator("당근, 닭고기, 알배추, 당면, 마라소스, 낫또"))
+
+# 결과: ----------
+1. 상황 분석 Reason  
+- 현재 냉장고에 있는 재료는 당근, 닭고기, 알배추, 당면, 마라소스, 낫또입니다.  
+- 주재료인 닭고기와 함께 당근, 알배추 등 채소류, 그리고 당면이 있어 중국식 볶음 또는 전골류 요리에 적합합니다.  
+- 마라소스가 있으므로 매콤하고 감칠맛 나는 ‘닭고기 마라샹궈’를 추천할 수 있습니다.  
+- 낫또는 향과 조직상 다른 요리에 잘 어울리지 않으므로 이번 메뉴에서는 사용하지 않을 계획입니다.  
+
+2. 행동 계획 Reason/plan  
+- 쉽게 만들 수 있는 닭고기 마라샹궈를 제안합니다.  
+- 필요한 재료: 닭고기, 당근, 알배추, 마라소스, 당면 (모두 냉장고에 있음)  
+- 필요한 도구: 프라이팬(또는 웍), 냄비(당면용), 칼, 도마, 집게나 주걱  
+- 조리 과정은 당면을 불리고, 야채와 닭고기를 먹기 좋은 크기로 손질한 후 볶아 마라샹궈를 완성합니다.  
+- 만약 구운 땅콩, 대파, 마늘, 고수 등이 있다면 마지막에 곁들이면 좋지만 없어도 무방합니다.  
+- 매운맛 조절은 마라소스 양으로 유연하게 하면 됩니다.  
+- 꿀팁: 당면은 미리 삶아서 넣어야 끝에 양념이 잘 배고 불지 않습니다.  
+
+3. 실행 Act  
+[닭고기 마라샹궈] 레시피  
+
+1) 재료 준비  
+- 닭고기: 200g 정도(목살, 안심, 다리살 등 상관없음), 먹기 좋은 크기로 썰기  
+- 당근: 반 개, 길게 채썰기  
+- 알배추: 3~4잎, 한 입 크기로 썰기  
+- 당면: 적당량(1인분 기준 한 줌), 미리 물에 20분간 불린 후 끓는 물에 4~5분간 삶고 찬물에 헹궈 준비  
+- 마라소스: 기호에 맞게(2~3큰술), 짜거나 맵다면 조절  
+* 소금, 후추, 식용유(없다면 아무 오일 가능) 준비  
+...
+- 닭고기 대신 돼지고기, 해산물 등도 응용 가능  
+- 당면 대신 우동면, 넓적당면도 활용 가능  
+
+냉장고에 낫또가 아직 남아있습니다.
+Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+# --------------
+
+# 역할극 & 실전 적용 (면접 질문 생성)
+from openai import OpenAI
+import json
+
+def job_interview(job_posting, temperature=0.5):
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
+    system_instruction = """
+    당신은 풀스택 개발 분야의 10년차 전문가이면서, 해당 분야의 면접 전문가입니다.
+    사용자가 제공한 구인공고에 근거해서 핵심적인 질문들로 지원자를 평가할 수 있어야합니다.
+    """
+
+    user_msg = f"""
+    아래 채용공고의 직무에 대해 예상 면접질문과 모범답안을 작성해주세요.
+
+    -- 가이드 --
+    하드 스킬과 소프트스킬 2개의 섹션으로 나눠 작성해주세요.
+    각 섹션별로 3개의 질문과 답변을 준비해주세요.
+
+    -- 출력 형식 --
+    # 1. 하드 스킬
+    질문1)
+    답변1)
+
+    질문2)
+    답변2)
+    
+    질문3)
+    답변3)
+
+    # 2. 소프트스킬
+    질문1)
+    답변1)
+
+    질문2)
+    답변2)
+    
+    질문3)
+    답변3)
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[ 
+            #대화의 히스토리를 리스트 형태로 전달. 각 요소는 role과 content를 가진 딕셔너리이다.
+            {
+                "role": "system", # 시스템의 전반적인 지시사항 전달. 대화의 가장 처음에 위치해 모델의 행동 기준을 설정함
+                "content": [
+                    {
+                        # 타입과 텍스트(역할)를 다 전달해야함
+                        "type": "text",
+                        "text": system_instruction
+                    }
+                ]
+            },
+            {
+                "role": "user",  # 사용자의 실제 요청 전달
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user_msg
+                    }
+                ]
+            }
+        ],
+        response_format={
+            'type': "text"
+        },
+        temperature=temperature, # 대답 창의성에 관한 설정(기본값: 1)
+        max_tokens=2048, # 응답에 사용될 토큰 수(응답 최대토큰수)
+        top_p=1, # 사용할 상위누적확률
+        frequency_penalty=0, # 토큰 사용 빈도수에 대한 패널티
+        presence_penalty=0 # 토큰 재사용에 대한 패널티
+    )
+    return response.choices[0].message.content
+
+job_posting = """
+담당업무: 글로벌 모바일뱅킹 앱 백엔드 서버 레퍼런스 모델 개발 및 현지화
+현지 금융사 및 파트너사와 협업을 통한 신규 은행 시스템 구축 및 운영
+
+필수경험과 역량: Java(kotlin), Spring 기반의 웹 어플리케이션 개발 및 운영 경험 3년 이상인 분
+Server, Network, DB 등 IT기술 전반에 대한 이해가 있는 분
+개발 생산성 향상 및 운영 환경 개선에 적합한 오픈소스 솔루션 활용에 관심이 많은 분
+영어로 진행하는 회의에 참여하는 데 지장이 없는 분
+지속적인 기술 습득을 통한 개인 및 조직의 역량 강화에 관심이 많은 분
+
+우대사항: 외국계 기업 또는 다국적 환경에서의 근무 경험이 있는 분
+다양한 환경의 Cloud 기반 개발 및 운영 경험이 있는 분
+동시 접속량이 많은 시스템 설계 및 개발 경험이 있는 분
+성능 및 부하 테스트를 통한 서비스 개선 및 최적화 경험이 있는 분
+금융 서비스 또는 핀테크 산업 경험이 있는 분
+서비스를 안정적이고 효율적으로 제공하기 위한 시스템 구축 및 운영 경험이 있는 분
+"""
+
+print (job_interview(job_posting))
+
+# 결과:---------
+채용공고 전문이 누락되어 있어, 예시로 "React와 Node.js 기반의 풀스택 개발자" 채용공고를 기준으로 작성하겠습니다. 만약 특정 공고가 있다면, 전문을 제공해주시면 맞춤형으로 작성해드릴 수 있습니다.
+
+---
+
+# 1. 하드 스킬
+
+질문1)  
+React에서 상태 관리 방법에는 어떤 것들이 있으며, 실제 프로젝트에서 어떤 방법을 선택했는지 설명해 주세요.
+
+답변1)  
+React에서 상태 관리는 컴포넌트 내부 상태, Context API, Redux, MobX, Recoil 등 다양한 방법이 있습니다. 저는 규모가 작은 프로젝트에서는 useState와 Context API를 주로 사용했고, 복잡한 상태와 여러 컴포넌트 간의 데이터 공유가 필요한 대규모 프로젝트에서는 Redux를 도입했습니다. 예를 들어, 쇼핑몰 프로젝트에서는 Redux Toolkit을 활용해 상태를 효율적으로 관리하고, 미들웨어로 redux-thunk를 적용해 비동기 작업을 처리했습니다.
+
+질문2)  
+Node.js에서 비동기 처리를 어떻게 구현하며, 콜백 지옥(Callback Hell)을 방지하는 방법은 무엇인지 설명해 주세요.
+
+답변2)  
+Node.js에서 비동기 처리는 주로 콜백, Promise, async/await를 사용해 구현합니다. 콜백 지옥을 방지하기 위해 Promise 체이닝을 사용하거나, ES8에서 도입된 async/await 문법을 활용합니다. async/await는 코드의 가독성을 높여주고, 에러 핸들링도 try-catch로 직관적으로 할 수 있어 실제 프로젝트에서 선호하여 사용하고 있습니다.
+
+질문3)  
+RESTful API 설계의 주요 원칙은 무엇이며, 실제로 어떻게 적용했는지 사례를 들어 설명해 주세요.
+
+답변3)  
+RESTful API 설계의 주요 원칙은 자원(Resource) 기반 URI 설계, HTTP 메서드(GET, POST, PUT, DELETE)의 명확한 사용, 클라이언트-서버의 분리, 무상태성(Stateless), 계층화 구조 등이 있습니다. 예를 들어, 사용자 정보를 다루는 경우 `/users`, 특정 사용자는 `/users/{id}`와 같이 URI를 설계했습니다. 또한, GET 메서드는 데이터 조회, POST는 생성, PUT은 수정, DELETE는 삭제에 각각 매핑하여 일관성 있게 API를 설계했습니다.
+
+---
+...
+
+---
+
+채용공고 전문을 제공해주시면 더욱 맞춤화된 질문과 답변을 드릴 수 있습니다!
+Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+# --------------
