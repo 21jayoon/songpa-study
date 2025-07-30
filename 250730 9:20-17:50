@@ -842,3 +842,9 @@ RESTful API 설계의 주요 원칙은 자원(Resource) 기반 URI 설계, HTTP 
 채용공고 전문을 제공해주시면 더욱 맞춤화된 질문과 답변을 드릴 수 있습니다!
 Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
 # --------------
+
+
+
+# Coding-test : HttpServletRequest, HttpServletResponse import class 자체가 안 뜨는 상황 발생
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+build.gradle에 추가
