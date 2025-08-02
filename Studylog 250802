@@ -1,0 +1,33 @@
+# 배포
+https://pine-fibula-aee.notion.site/Daily-Log-1e0fc892a16f800ba3f9c9ea860e777f
+
+계정에 비용이 있으면 서버 2개 띄워놓고 할 수도 있음.
+깃 액션을 사용하는 방법은 workflow.yml 작성하는 법이 끝
+
+* 배포 시엔 local DB 사용 불가
+1. workflow.yml 같은 곳에 DB를 전부 적어서 가능
+2. MySQL 무료 사용 사이트 사용
+3. RML(?) 사용 가능 : but 비용 비싸니 지양(수업 때 배우지 않을 것)
+
+
+1) docker hub 가입 (깃허브 연동 가임)
+2) coderabbit (깃허브 연동 가입)
+
+
+* Spring web 의존성 주입 이유!!!
+Thymeleaf 쓸 때, 내장 Apache 필요할 때, RESTful한 web build할 때 필요함
+
+* 이름변경 단축키: CTRL+F6
+
+
+* RestController = Controller와 ResponseBody가 합쳐진 어노테이션
+@Controller 
+@ResponseBody
+public @interface RestController {
+    @AliasFor(
+        annotation = Controller.class
+    )
+    String value() default "";
+}
+
+https://devinn.dev/blog/detail.html?id=216
