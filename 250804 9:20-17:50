@@ -19,3 +19,8 @@ RAG
 Retrieval
 
 Linux 환경에서의 CTRL+V(붙여넣기)는 SHIFT+INSERT
+
+# 배포 시 첫 번째 할 일
+# github action에 EC2_USERID(=퍼블릭 IVcP4 주소), EC2_USERNAME(=ubuntu), EC2_SECRET_KEY(=.pev 파일) 등록
+
+# 배포 시 고려사항: 도메인 구매? -> 도메인 구매 확정 16:52
