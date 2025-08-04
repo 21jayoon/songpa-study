@@ -1,0 +1,21 @@
+# LLM : Large Language Model
+# 대규모 데이터를 기반으로 학습된 초거대 "언어 모델"로, 자연어 생성, 번역, 요약 등 다양한 언어 관련 작업을 수행할 수 있는 딥러닝 모델
+
+# Langchain
+# https://python.langchain.com/v0.1/docs/modules/
+
+# 환경세팅
+# Hugging Face 가입
+# Organization create할 필요 없이 Access Tokens에서 새로운 토큰 발급
+# Read(읽기 전용)으로 create Token
+# VS Code에서 .env와 .gitignore 추가
+# .env 파일에 HuggingFace Token 값 저장
+# .gitignore에 .env추가
+
+# Streamlit = Web framework
+[ ] 깃허브에서 01_langchian_overview.ipynb 받아오기
+
+RAG
+Retrieval
+
+Linux 환경에서의 CTRL+V(붙여넣기)는 SHIFT+INSERT
