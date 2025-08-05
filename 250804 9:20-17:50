@@ -15,8 +15,8 @@
 # Streamlit = Web framework
 [ ] 깃허브에서 01_langchian_overview.ipynb 받아오기
 
-RAG
-Retrieval
+RAG 검색 증강 생성
+Retrieval 검색
 
 Linux 환경에서의 CTRL+V(붙여넣기)는 SHIFT+INSERT
 
