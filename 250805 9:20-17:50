@@ -1,0 +1,266 @@
+좋아! 아래는 `LangChain`을 이용해서 **LLM 체인 (LLM Chain)** 을 만드는 예제 코드와 각 단계에 대한 **자세한 설명**이야.
+너는 이 코드를 통해서, “어떤 포켓몬이 가장 강해?”라는 질문을 AI에게 물어보는 과정을 단계별로 배울 수 있어.
+초보 고등학생을 대상으로 쉽게 설명할게!
+
+---
+
+### 🔧 사용 도구
+
+* `PromptTemplate`: AI에게 어떤 방식으로 질문할지 형식을 정해주는 도구
+* `LLM`: 실제로 AI 모델이 대답을 만들어내는 부분
+* `StrOutputParser`: AI가 준 대답을 사람이 보기 쉽게 문자열로 바꿔주는 도구
+
+---
+
+## ✅ 전체 목표
+
+> "어떤 포켓몬이 가장 강해?"라는 질문을 LLM에게 물어보고, 결과를 문자열로 출력하기!
+
+---
+
+## 📦 1단계: PromptTemplate 만들기
+
+```python
+from langchain_core.prompts import PromptTemplate
+
+prompt = PromptTemplate(
+    input_variables=["question"],
+    template="질문: {question}\nAI의 대답:"
+)
+```
+
+### 🧑‍🏫 설명:
+
+* `PromptTemplate`은 질문을 어떤 **형식으로** AI에게 줄지 결정하는 도구야.
+* `input_variables=["question"]`: 여기에 나중에 우리가 궁금한 질문을 넣을 거야.
+* `template`: 실제로 AI가 보게 될 템플릿이야. 여기서 `{question}`은 나중에 실제 질문으로 바뀔 부분이야.
+* 결과적으로 AI는 이런 식으로 질문을 받게 돼:
+
+  ```
+  질문: 어떤 포켓몬이 가장 강해?
+  AI의 대답:
+  ```
+
+---
+
+## 🤖 2단계: LLM 모델 선택하기
+
+```python
+# 이거 틀린 코드 from langchain_community.llms import ChatOpenAI
+# 실제 코드에선 오류 안 나게 고침
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
+```
+
+### 🧑‍🏫 설명:
+
+* `ChatOpenAI`는 OpenAI에서 만든 대화형 AI 모델을 사용하는 거야.
+* `model_name="gpt-3.5-turbo"`: 어떤 모델을 쓸지 정해주는 부분. 여기서는 GPT-3.5를 사용해.
+* `temperature=0.7`: 창의성 정도야. 숫자가 클수록 더 자유롭고 다양하게 대답해.
+
+---
+
+## 🧹 3단계: OutputParser 사용하기
+
+```python
+from langchain_core.output_parsers import StrOutputParser
+
+parser = StrOutputParser()
+```
+
+### 🧑‍🏫 설명:
+
+* LLM이 대답을 해주긴 하는데, 그 대답이 사람이 보기엔 복잡할 수 있어.
+* `StrOutputParser()`는 AI가 대답한 내용을 **문자열로 정리**해주는 도구야.
+* 즉, 보기 좋게 깔끔하게 만들어주는 거지!
+
+---
+
+## 🔗 4단계: LLMChain 만들기 + 질문하기
+
+```python
+from langchain_core.runnables import RunnableSequence
+
+chain = RunnableSequence(
+    #steps=[
+        prompt,  # 1단계: 질문 형식 만들기
+        llm,     # 2단계: AI 모델에게 전달
+        parser   # 3단계: 결과 정리하기
+    #] 이 steps 부분  필요 없었음. 오히려 오류남.
+    # 삭제하고 RunnableSequence[prompt, llm, parser]로만 돌리니 잘 돌아감
+)
+
+result = chain.invoke({"question": "어떤 포켓몬이 가장 강해?"})
+print(result)
+```
+
+### 🧑‍🏫 설명:
+
+* `RunnableSequence`: 위에서 만든 `prompt → llm → parser` 순서를 연결해주는 도구야.
+* `chain.invoke(...)`: 실제로 질문을 AI에게 던지고, 결과를 받는 부분이야.
+* `print(result)`: 최종 결과를 화면에 출력해줘!
+
+---
+
+## ✅ 전체 코드 정리
+
+```python
+from langchain_core.prompts import PromptTemplate
+from langchain_community.llms import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableSequence
+
+# 1. Prompt 만들기
+prompt = PromptTemplate(
+    input_variables=["question"],
+    template="질문: {question}\nAI의 대답:"
+)
+
+# 2. LLM (AI 모델) 불러오기
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
+
+# 3. OutputParser 설정
+parser = StrOutputParser()
+
+# 4. 순서대로 연결한 체인 만들기
+chain = RunnableSequence(
+    steps=[
+        prompt,
+        llm,
+        parser
+    ]
+)
+
+# 실제 질문을 던지고 결과 출력
+result = chain.invoke({"question": "어떤 포켓몬이 가장 강해?"})
+print(result)
+```
+
+---
+
+## 🎓 요약
+
+| 단계                   | 설명                       |
+| -------------------- | ------------------------ |
+| 1단계 (PromptTemplate) | AI에게 질문을 어떤 형식으로 줄지 정해줌  |
+| 2단계 (LLM)            | 실제로 AI가 생각해서 대답함         |
+| 3단계 (OutputParser)   | AI의 복잡한 응답을 사람이 보기 쉽게 정리 |
+| 4단계 (Chain)          | 위 단계를 차례대로 실행해서 결과 도출    |
+
+---
+
+# llm practice
+### Chain을 이용한 Simple LLM
+흐름: Prompt -> LLM -> OutputParser
+1. Prompt
+2. LLM
+3. OutputParser
+
+# 1. PromptTemplate
+'''from langchain_core.prompts import PromptTemplate
+
+prompt = PromptTemplate(
+    input_variables=["question"],
+    template="질문: {question}\nAI의 대답:"
+)
+내가 Gpt로 작성한 부분
+'''
+from langchain_core.prompts import ChatPromptTemplate
+
+prompt_template = ChatPromptTemplate([  # 배열에 튜플을 전달함
+    ('system', '너는 애니메이션 포켓몬스터를 좋아하는 챗봇이야. 사용자의 질문에 포켓몬스터 캐릭터 냐옹이의 말투로 대답해줘.'),
+    ('user', '{question}') # 변경 가능한 변수
+])
+
+# 2. Model
+from langchain_openai import ChatOpenAI
+
+'''llm = ChatOpenAI(
+    model_name="gpt-3.5-turbo", 
+    temperature=0.7
+)'''
+model = ChatOpenAI(
+    model_name="gpt-4o",
+    temperature=1
+)
+
+# 3. OutpurParser (StrOutputParser - langchain_core.output_parsers 임포트 필요)
+from langchain_core.output_parsers import StrOutputParser
+
+# 3-1. 객체 생성
+parser = StrOutputParser()
+
+# 3-2. 아웃풋 파서로 체인 연결
+# 왜 String으로 변경? -> chain에서 나오는 값을 문자열로 반환받고자 함 -> StrOutputParser 사용
+
+# 4. Chain -> 질의
+'''from langchain_core.runnables import RunnableSequence
+
+chain = RunnableSequence(
+
+        prompt,  # 1단계: 질문 형식 만들기
+        llm,     # 2단계: AI 모델에게 전달
+        parser   # 3단계: 결과 정리하기
+    
+)'''
+chain = prompt_template | model | parser
+
+# question: 어떤 포켓몬이 가장 강해?
+result = chain.invoke({"question": "어떤 포켓몬이 가장 강해?"})
+# 위에서 튜플 형태로 전달을 했기 때문에 question 부분에 dictionary 형태로 질문 전달
+print(result)
+"""1: gpt
+포켓몬의 강함은 종류나 상황에 따라 다를 수 있지만, 전투력이 높은 포켓몬으로는 뮤츠, 레지기가스, 라티아스 등이 있습니다.
+하지만 포켓몬 게임에서는 전략과 조합이 더 중요하기 때문에 단순히 강한 포켓몬이라고만 말하기는 어렵습니다.
+"""
+
+"""2
+음머... 어떤 포켓몬이 가장 강한지는 상황에 따라 다를 수 있지만, 아마도 뮤츠가 아주 강하다고 할 수 있을 거야옹.
+전설적인 포켓몬에, 초능력 타입이라니 강력하지 않겠냐옹? 하지만 모든 포켓몬은 각자의 장점이 있으니까, 상황에 맞게 전략을 짜는 게 중요하답니다옹!
+"""
+
+
+
+# Memory
+# 컨택스트를 구현하기 위한 모듈, Langchain의 또다른 핵심
+# 이전 입력에 답변했던 걸 바탕으로 적절하고 연속적인 응답을 가능케 함
+
+# RunnableWithMessageHistory
+
+from langchain_core.chat_history import BaseChatMessageHistory
+# BCMH는 자바의 추상클래스와 동일. 대화를 저장하는 규격이나 규칙을 저장해놓은 것 뿐.
+
+# class [className] ([상속받고자하는 객체])
+# 인메모리 기억 저장소
+class InMemoryHistory(BaseChatMessageHistory): 
+    def __init__(self):  # self = Java의 this
+        self.messages = []  # InMemoryHistory = 대화 메세지 내역을 저장하는 용도
+
+    def add_messages(self, messages):
+        self.messages.extend(messages)  # 전달된 리스트 안에 메세지를 하나씩 추가
+        # add나 append 말고 extend 사용
+
+    def clear(self):
+        self.messages = []
+
+    # 부가적인 설명
+    # class를 인스턴스화했을 때 호출되는 메소드
+    # 인스턴스 호출했을 때 동작하는 애를 __repr__로 만들 수 있음
+    def __repr__(self): 
+        return str(self.messages)
+
+store = {} # empty dictionary (Key(session ID) and Value(inmemoryhistory's object) needed)
+
+# 세션 단위로 객체 생성(세션 아이디를 전달받아서 해당 아이디와 일치하는 게 저장소에 있다면 그걸 반환)
+def get_by_session_id(session_id):
+    if session_id not in store:
+        store[session_id] = InMemoryHistory()  # 없는 키 값에 새 value를 넣으면 새로운 키-벨류가 생긴다.
+    return store[session_id]
+
+history_a = get_by_session_id('test')  # 호출
+history_a  # []
+
+history_a.add_messages(['hello','hi', 'how are you?'])  # message 추가
+history_a.add_messages(['I am fine', 'what about you?'])
+history_a  # ['hello', 'hi', 'how are you?', 'I am fine', 'what about you?']
