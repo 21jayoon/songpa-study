@@ -312,8 +312,9 @@ print(response)
 # 갈비찜인데 닭볶음탕으로 인식했다....... 어떻게 그럴 수가! 저렇게 촉촉하고 부드러워 보이는 갈비찜을 다른 걸로 착각하다니
 
 
+
 # Kaggle : 가장 큰 공개 데이터 회사
-# Pinecone  Vector DB
+# Pinecone Vector DB
 1. Environment settings
 from dotenv import load_dotenv
 load_dotenv()
@@ -331,3 +332,160 @@ print(len(documents)) # 129971
 documents[0]
 # Document(metadata={'source': './winemag-data-130k-v2.csv', 'row': 0}, page_content=": 0\ncountry: Italy\ndescription: Aromas include tropical fruit, broom, brimstone and dried herb. The palate isn't overly expressive, offering unripened apple, citrus and dried sage alongside brisk acidity.\ndesignation: Vulkà Bianco\npoints: 87\nprice: \nprovince: Sicily & Sardinia\nregion_1: Etna\nregion_2: \ntaster_name: Kerin O’Keefe\ntaster_twitter_handle: @kerinokeefe\ntitle: Nicosia 2013 Vulkà Bianco  (Etna)\nvariety: White Blend\nwinery: Nicosia")
 
+# pinecone 사용
+# %pip install langchain_pinecone
+
+from pinecone import Pinecone, ServerlessSpec
+pc = Pinecone(api_key="{my_secret_api_key)")
+
+# .env 파일에 pinecone API key 저장
+# pinecone에서 create new index하고 "ai-sommelier-rag"라는 이름으로 인덱스 생성, configuration은 text-embedding-3-small
+
+# Generate Pinecone Vector DB client 
+# Pinecone 클라이언트
+from langchain_pinecone import PineconeVectorStore
+import os
+
+PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
+PINECONE_NAMESPACE = os.getenv('PINECONE_NAMESPACE')
+PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+
+vector_db = PineconeVectorStore.from_documents(
+    documents,
+    embeddings,
+    # 아래 3가지는 env파일에서 값 불러다가 사용(import os 필수)
+    index = PINECONE_INDEX_NAME,
+    namespace=PINECONE_NAMESPACE,
+    pinecone_api_key=PINECONE_API_KEY
+)
+
+# AI Sommelier RAG
+# 1. 환경 설정
+from dotenv import load_dotenv
+load_dotenv()
+
+from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+
+#아까 프롬프트 전달하고 했던 것을 이번에는 함수로 전달
+def describe_dish_flavor(query):
+    prompt = ChatPromptTemplate.from_messages([
+        ('system', '''
+         Persona: You are professional gourmet who works at this field over the 10 years. You have a deep understanding of culinary techniques, flavor profiles, and ingredient pairings. You have a passion for exploring diverse cuisines and an ability to articulate the sensory experience of food. Your insights are backed by both practical experience and theoretical knowledge, making you a trusted source in the culinary field.
+        
+         Role: As a professional gourmet, your role is to analyze the flavors, textures, and aromas of various dishes. You provide detailed evaluations of ingredients and cooking methods, helping others understand how to create balanced and harmonious dishes. You also educate individuals on how to enhance their cooking skills and appreciate the art of gastronomy.
+         
+         Examples:
+
+         When asked to analyze the flavor profile of a dish, you describe the balance between acidity, sweetness, bitterness, and umami, explaining how these elements interact to create a complex taste experience.
+         If someone inquires about the best techniques for enhancing a specific ingredient, you offer practical advice, such as how to caramelize onions for depth of flavor or how to properly season meat to bring out its natural taste.
+         When discussing food pairings, you suggest complementary ingredients and flavors, explaining the rationale behind each choice, such as pairing citrus with seafood to brighten the dish or using herbs to elevate the overall taste.
+         '''),
+         ('user', '이미지를 분석해서 요리명과 예상되는 풍미를 한 문장으로 요약해줘.')
+    ])
+    prompt += HumanMessagePromptTemplate.from_template([query])
+    model= ChatOpenAI(model_name='gpt-4.1', temperature=0)
+    output_parser = StrOutputParser()
+
+    # chain 연결
+    chain = prompt | model | output_parser
+    return chain
+
+
+# runnable lambda 사용
+# RunnableLamba란? : wrapper class. 위에서 일반 함수로 선언한 describe_dish_flavor를 RL로 감싸주면 Langchain 객체가(Langchain객체인 것처럼) 된다.
+# (일반 함수(예: describe_dish_flavor)를 LangChain 표현식 언어(LCEL)의 일부인 Runnable 객체로 변환해주는 래퍼 클래스)
+# 그러면 Langchain에서 사용 가능(이를 통해 일반 함수도 LangChain 체인의 일부로 파이프 연결a|b 하거나 병렬 실행할 수 있게 됩니다.)
+from langchain_core.runnables import RunnableLambda
+
+chain = RunnableLambda(describe_dish_flavor)
+chain.invoke({'image_url': 'https://www.recipetineats.com/tachyon/2023/06/Hungarian-Goulash-_6.jpg?resize=900%2C1125&zoom=0.72'})
+"""
+'이 요리는 ‘비프 스튜’로, 부드럽게 익은 소고기와 감자, 당근이 진한 토마토 베이스의 국물과 어우러져 깊고 풍부한 감칠맛과 은은한 허브 향이 조화를 이루는 따뜻한 풍미가 예상됩니다.'
+"""
+
+# Pinecone에 넣었던 records의 리뷰에서 와인 검색
+from langchain_openai.embeddings import OpenAIEmbeddings
+from langchain_pinecone import PineconeVectorStore
+import os
+
+PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
+PINECONE_NAMESPACE = os.getenv('PINECONE_NAMESPACE')
+PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+
+# 와인 찾기 위한 함수 정의
+def search_wines(query):
+    # 이 함수에서 해줘야할 것 """ """ 안에 있음
+    """
+    :param query: 요리설명 텍스트
+    :return: 요리 설명에 어울리는 와인 추천 결과
+    """
+
+    # 임베딩 모델 만들기
+    embeddings = OpenAIEmbeddings(model='text-embedding-3-small')
+
+    # vector db를 쓸 거예요.
+    vector_db = PineconeVectorStore(
+        embeddings=embeddings,
+        index_name=PINECONE_INDEX_NAME,
+        namespace=PINECONE_NAMESPACE,
+        pinecone_api_key=PINECONE_API_KEY
+    )
+    results = vector_db.similarity_search(
+        query,
+        k=5,
+        namespace=PINECONE_NAMESPACE
+    )
+    return {
+        "dish_flavor": query,
+        "wine_reviews": "\n".join([doc.page_content for doc in results])
+    }
+
+# chain을 runnablelambda로 감싸주는 과정 필요
+chain = RunnableLambda(search_wines)
+chain.invoke("이 요리는 ‘비프 스튜’로, 부드럽게 익은 소고기와 감자, 당근이 진한 토마토 베이스의 국물과 어우러져 깊고 풍부한 감칠맛과 은은한 허브 향이 조화를 이루는 따뜻한 풍미가 예상됩니다.")
+
+# TROUBLE OCCURRED
+TypeError                                 Traceback (most recent call last)
+Cell In[8], line 3
+      1 # chain을 runnablelambda로 감싸주는 과정 필요
+      2 chain = RunnableLambda(search_wines)
+----> 3 chain.invoke("이 요리는 ‘비프 스튜’로, 부드럽게 익은 소고기와 감자, 당근이 진한 토마토 베이스의 국물과 어우러져 깊고 풍부한 감칠맛과 은은한 허브 향이 조화를 이루는 따뜻한 풍미가 예상됩니다.")
+
+File c:\Users\User\miniconda3\envs\pythonstudy_env\Lib\site-packages\langchain_core\runnables\base.py:4775, in RunnableLambda.invoke(self, input, config, **kwargs)
+   4761 """Invoke this Runnable synchronously.
+   4762 
+   4763 Args:
+   (...)   4772     TypeError: If the Runnable is a coroutine function.
+   4773 """
+   4774 if hasattr(self, "func"):
+-> 4775     return self._call_with_config(
+   4776         self._invoke,
+   4777         input,
+   4778         ensure_config(config),
+   4779         **kwargs,
+   4780     )
+   4781 msg = "Cannot invoke a coroutine function synchronously.Use `ainvoke` instead."
+   4782 raise TypeError(msg)
+
+File c:\Users\User\miniconda3\envs\pythonstudy_env\Lib\site-packages\langchain_core\runnables\base.py:1939, in Runnable._call_with_config(self, func, input_, config, run_type, serialized, **kwargs)
+   1935     child_config = patch_config(config, callbacks=run_manager.get_child())
+...
+     33     "dish_flavor": query,
+     34     "wine_reviews": "\n".join([doc.page_content for doc in results])
+     35 }
+
+TypeError: PineconeVectorStore.__init__() got an unexpected keyword argument 'embeddings'
+# -> Change line 'embeddings=embeddings,' into 'embedding=embeddings,'
+# Result
+"""
+{'dish_flavor': '이 요리는 ‘비프 스튜’로, 부드럽게 익은 소고기와 감자, 당근이 진한 토마토 베이스의 국물과 어우러져 깊고 풍부한 감칠맛과 은은한 허브 향이 조화를 이루는 따뜻한 풍미가 예상됩니다.',
+ 'wine_reviews': ": 103099\ncountry: US\ndescription: A smoky nose carries a strong suggestion of bacon fat, wrapped around tightly wound blackberry fruit. Flavors play out broadly and thin out quickly, but this young wine offers solid value and immediate pleasure.\ndesignation: \npoints: 87\nprice: 18.0\nprovince: Oregon\nregion_1: Oregon\nregion_2: Oregon Other\ntaster_name: Paul Gregutt\ntaster_twitter_handle: @paulgwine\ntitle: Jezebel 2013 Pinot Noir (Oregon)\nvariety: Pinot Noir\nwinery: Jezebel\n: 10027\ncountry: US\ndescription: With an inviting strawberry sundae nose, this bright pink rosé of Syrah from the longtime organically minded team at Buttonwood is all about summertime hedonism. There's creaminess on the palate, with some apple tartness in the middle and, again, long strawberry elements on the finish. Pair with beef sliders on soft, sweet rolls that are adorned with gourmet condiments and cheeses.\ndesignation: Estate\npoints: 89\nprice: 18.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Buttonwood 2013 Estate Rosé (Santa Ynez Valley)\nvariety: Rosé\nwinery: Buttonwood\n: 11324\ncountry: US\ndescription: Tarry, savory notes of dried beef, soy, charred lamb and underlying blackberry combine for a nose that screams umami. The palate carries a similar effect of grilled, lavender-covered lamb shank, black peppercorns and black sesame.\ndesignation: \npoints: 93\nprice: 35.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Pace 2013 Syrah (Santa Ynez Valley)\nvariety: Syrah\nwinery: Pace\n: 126414\ncountry: Israel\ndescription: Made from 80% Cabernet Sauvignon and 20% Petit Verdot, this is a ripe and lush wine that boasts big, jammy black-fruit aromas and flavors. Touches of licorice and sage add depth to the palate, while a soft toasty accent lingers on the medium-length finish.\ndesignation: Yogev\npoints: 86\nprice: 15.0\nprovince: Galilee\nregion_1: \nregion_2: \ntaster_name: Lauren Buzzeo\ntaster_twitter_handle: @laurbuzz\ntitle: Binyamina 2010 Yogev Red (Galilee)\nvariety: Bordeaux-style Red Blend\nwinery: Binyamina\n: 41690\ncountry: US\ndescription: With an inviting strawberry sundae nose, this bright pink rosé of Syrah from the longtime organically minded team at Buttonwood is all about summertime hedonism. There's creaminess on the palate, with some apple tartness in the middle and, again, long strawberry elements on the finish. Pair with beef sliders on soft, sweet rolls that are adorned with gourmet condiments and cheeses.\ndesignation: Estate\npoints: 89\nprice: 18.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Buttonwood 2013 Estate Rosé (Santa Ynez Valley)\nvariety: Rosé\nwinery: Buttonwood"}
+"""
+
+
+# 개인 프로젝트: Get your bonds
+1. 이슈 템플릿 등록
+https://amaran-th.github.io/Github/[Github]%20Issue%20&%20PR%20Template%20%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0/
+# 기본 제시 템플릿 사용, 추가로 Add feature라는 이름으로 Blank Template 생성
