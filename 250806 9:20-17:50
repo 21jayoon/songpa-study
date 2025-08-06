@@ -149,3 +149,185 @@ chain = prompt | model | StrOutputParser()
 
 chain.invoke({'query': '난쟁이는 몇명인가요?', 'context': retrieval})
 """ '난쟁이는 일곱 명이에요! 동화 속에서 난쟁이들은 언제나 힘을 합쳐서 멋진 모험을 떠나지요. 너도 언젠가 멋진 친구들과 함께 신나는 모험을 할 수 있을 거예요!'  """
+
+
+# 요리에 어울리는 와인 추천받기
+
+# 필요한 것들 import
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+
+prompt = ChatPromptTemplate([
+    # 리스트 안 쪽에 튜플 형식으로 넣어줌
+    ('system', '''
+    Persona: You are a knowledgeable and experienced sommelier with a passion for wine and food pairings. You possess an extensive understanding of various wine regions, grape varieties, and tasting notes. Your demeanor is friendly and approachable, making wine accessible to everyone, whether they are novices or connoisseurs.
+
+    Role: As a sommelier, your role is to provide expert recommendations for wine selections that perfectly complement a variety of cuisines. You guide individuals in exploring new wines and help them understand the intricacies of wine tasting. Your goal is to enhance their dining experience by matching the right wine with the right dish.
+
+    Examples:
+
+    When asked for a wine recommendation for grilled garlic butter shrimp, you suggest a Chardonnay or Albariño, explaining how the wine's acidity balances the richness of the dish.
+    If someone inquires about affordable yet high-quality wines, you recommend specific options from different regions, highlighting their flavor profiles and food pairings.
+    When discussing wine storage, you provide practical advice on temperature, humidity, and ideal conditions to preserve wine quality.
+     '''),
+     ('human', '''
+    다음 요리에 어울리는 와인을 한국어로 답변해주세요.
+    요리명: {query}
+    ''')
+])
+
+model = ChatOpenAI(
+    model_name='gpt-4.1',
+    temperature=1
+)
+
+output_parser = StrOutputParser()
+
+chain = prompt | model | output_parser
+
+response = chain.invoke({'query': '떡갈비'})
+print(response)
+
+
+# 와인에 어울리는 요리 추천받기
+from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+
+# 함수 정의
+def recommend_dishes(query):
+    prompt= ChatPromptTemplate([
+    ('system', """
+    Persona: You are a knowledgeable and experienced chef who has been work as sommlier too. And you have a passion for wine and food pairings. You possess an extensive understanding of various wine regions, grape varieties, and tasting notes. Your demeanor is friendly and approachable, making wine accessible to everyone, whether they are novices or connoisseurs.
+
+    Role: As a chef, your role is to provide expert recommendations for food selections that perfectly complement a variety of wines. You guide individuals in exploring new foods and help them understand the intricacies of wine tasting. Your goal is to enhance their dining experience by matching the right dish with the right wine.
+
+    Examples:
+
+    When asked for a food recommendation for pinot noir, you suggest a gambas de alahiyo, explaining how the food's tastes balances with the freshness of the wine.
+    If someone inquires about affordable yet high-quality wines, you recommend specific options from different regions, highlighting their flavor profiles and food pairings.
+    """),
+    HumanMessagePromptTemplate.from_template([
+        {'text': '다음 와인에 어울리는 요리를 한국말로 답변해주세요.'},
+        {'image_url': '{image_url}'}
+        ])
+    ])
+
+    model = ChatOpenAI(
+        model_name='gpt-4.1',
+        temperature=1
+    )
+
+    output_parser= StrOutputParser()
+
+    chain = prompt | model | output_parser
+
+    return chain.invoke(query)
+
+print(recommend_dishes({'image_url': 'https://images.vivino.com/thumbs/iE_y2NRLSWKWw--znVRE3Q_pb_x600.png'}))
+
+chain = prompt | model | output_parser
+
+"""
+이 와인은 독일 라인가우 지역의 **리슬링 트로켄(Riesling Trocken)** 와인입니다. 리슬링은 산미가 높고, 깔끔하면서도 과일향이 풍부한 것이 특징입니다. 특히 드라이(트로켄)한 스타일은 음식과의 페어링이 매우 좋아요.
+
+### 어울리는 한식 요리 추천
+
+1. **해산물 파전**
+   - 리슬링 특유의 산미와 가벼움이 해산물과 잘 어울립니다. 특히 파전의 기름짐을 산뜻하게 잡아줍니다.
+
+2. **양념치킨**
+   - 은은한 단맛과 함께 산도가 높아 매콤달콤한 양념치킨과 궁합이 좋습니다.
+
+3. **골뱅이무침**
+   - 매콤하고 새콤한 골뱅이무침의 소스와 리슬링의 산미가 조화를 이룹니다.
+
+4. **산낙지 초무침**
+   - 신선한 산낙지와 매콤, 새콤한 양념이 리슬링의 청량감과 찰떡입니다.
+
+5. **오이무침, 나박김치 등 아삭하고 산뜻한 반찬**
+   - 산도를 강조하는 가벼운 반찬들과도 조화롭습니다.
+
+### 페어링 팁
+리슬링 트로켄은 조미료가 강하지 않고, 재료 본연의 맛을 살리는 음식, 특히 신맛과 매운맛이 있는 요리에 잘 어울립니다. 생선회나 해산물 요리도 좋고, 새콤달콤한 한식과도 멋진 궁합을 자랑해요!
+
+혹시 더 자세한 음식이나 다른 장르(예: 양식, 일식 등)와의 페어링이 궁금하다면 추가로 질문해 주세요!
+"""
+
+# 요리 이미지로 해당 요리에 어울리는 와인 추천받기
+# 필요한 것들 import
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+
+prompt = ChatPromptTemplate([
+    # 리스트 안 쪽에 튜플 형식으로 넣어줌
+    ('system', '''
+    Persona: You are a knowledgeable and experienced sommelier with a passion for wine and food pairings. You possess an extensive understanding of various wine regions, grape varieties, and tasting notes. Your demeanor is friendly and approachable, making wine accessible to everyone, whether they are novices or connoisseurs.
+
+    Role: As a sommelier, your role is to provide expert recommendations for wine selections that perfectly complement a variety of cuisines. You guide individuals in exploring new wines and help them understand the intricacies of wine tasting. Your goal is to enhance their dining experience by matching the right wine with the right dish.
+
+    Examples:
+
+    When asked for a wine recommendation for grilled garlic butter shrimp, you suggest a Chardonnay or Albariño, explaining how the wine's acidity balances the richness of the dish.
+    If someone inquires about affordable yet high-quality wines, you recommend specific options from different regions, highlighting their flavor profiles and food pairings.
+    When discussing wine storage, you provide practical advice on temperature, humidity, and ideal conditions to preserve wine quality.
+     '''),
+     ('human', '''
+    다음 요리에 어울리는 와인을 한국어로 답변해주세요.
+    요리명: {img_url}
+    ''')
+])
+
+model = ChatOpenAI(
+    model_name='gpt-4.1',
+    temperature=1
+)
+
+output_parser = StrOutputParser()
+
+chain = prompt | model | output_parser
+
+response = chain.invoke({'img_url': 'https://static.wtable.co.kr/image/production/service/recipe/1944/19517cdf-75c9-4e9d-87cf-4eb682808d05.jpg?size=800x800'})
+print(response)
+
+"""
+사진 속 요리는 닭볶음탕(매콤한 닭고기 조림)으로 보입니다. 매콤하고 진한 양념의 한국식 닭볶음탕에는 다음과 같은 와인을 추천드립니다.
+
+**추천 와인 1: 쉬라(Shiraz/Syrah)**
+- 매콤한 양념에는 적당한 바디감과 풍부한 과일 향을 가진 쉬라가 잘 어울립니다. 쉬라의 스파이시한 노트와 다크 베리 향이 닭볶음탕의 매콤함과 잘 어우러집니다.
+
+**추천 와인 2: 젠핀델(Zinfandel)**
+- 진한 풍미와 살짝 달큰한 면이 있는 젠핀델도 닭볶음탕의 매콤달콤한 양념과 조화를 이룹니다. 특히 캘리포니아 젠핀델을 추천드립니다.
+
+**추천 와인 3: 램브루스코(Lambrusco)**
+- 가볍게 마실 수 있는 약간 스파클링한 레드 와인으로, 매운 음식과 잘 어울립니다. 적당한 단맛과 산미가 매운맛을 부드럽게 해주어 부담 없이 즐길 수 있습니다.
+
+**와인 페어링 팁:**
+와인을 너무 차갑게 혹은 너무 따뜻하게 마시지 말고, 레드 와인은 약 16~18℃ 정도로 살짝 식혀 드시면 음식과 더욱 잘 어울립니다.
+
+더 궁금한 점이 있으면 언제든 말씀해 주세요!
+"""
+# 갈비찜인데 닭볶음탕으로 인식했다....... 어떻게 그럴 수가! 저렇게 촉촉하고 부드러워 보이는 갈비찜을 다른 걸로 착각하다니
+
+
+# Kaggle : 가장 큰 공개 데이터 회사
+# Pinecone  Vector DB
+1. Environment settings
+from dotenv import load_dotenv
+load_dotenv()
+
+2. load csv file that downloaded from kaggle
+# csv file load
+from langchain_community.document_loaders import CSVLoader
+
+loader = CSVLoader('./winemag-data-130k-v2.csv', encoding='utf-8')
+# csv 파일 깨지지 않게 만들기 위해 encoding='utf-8' 추가
+
+documents = loader.load()
+
+print(len(documents)) # 129971
+documents[0]
+# Document(metadata={'source': './winemag-data-130k-v2.csv', 'row': 0}, page_content=": 0\ncountry: Italy\ndescription: Aromas include tropical fruit, broom, brimstone and dried herb. The palate isn't overly expressive, offering unripened apple, citrus and dried sage alongside brisk acidity.\ndesignation: Vulkà Bianco\npoints: 87\nprice: \nprovince: Sicily & Sardinia\nregion_1: Etna\nregion_2: \ntaster_name: Kerin O’Keefe\ntaster_twitter_handle: @kerinokeefe\ntitle: Nicosia 2013 Vulkà Bianco  (Etna)\nvariety: White Blend\nwinery: Nicosia")
+
