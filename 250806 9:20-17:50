@@ -37,6 +37,11 @@ docs
 
 
 
+
+# 멱등성?? : 연산을 여러 번 적용하더라도 결과가 달라지지 않는 성질
+https://www.maeil-mail.kr/question/90
+https://velog.io/@tosspayments/%EB%A9%B1%EB%93%B1%EC%84%B1%EC%9D%B4-%EB%AD%94%EA%B0%80%EC%9A%94
+
 # 오늘 수업
 # 임베딩 모델(어제 한 결과물 벡터화)
 1. 임베딩 모델 사용 위해 필요 요소 import
@@ -484,8 +489,284 @@ TypeError: PineconeVectorStore.__init__() got an unexpected keyword argument 'em
  'wine_reviews': ": 103099\ncountry: US\ndescription: A smoky nose carries a strong suggestion of bacon fat, wrapped around tightly wound blackberry fruit. Flavors play out broadly and thin out quickly, but this young wine offers solid value and immediate pleasure.\ndesignation: \npoints: 87\nprice: 18.0\nprovince: Oregon\nregion_1: Oregon\nregion_2: Oregon Other\ntaster_name: Paul Gregutt\ntaster_twitter_handle: @paulgwine\ntitle: Jezebel 2013 Pinot Noir (Oregon)\nvariety: Pinot Noir\nwinery: Jezebel\n: 10027\ncountry: US\ndescription: With an inviting strawberry sundae nose, this bright pink rosé of Syrah from the longtime organically minded team at Buttonwood is all about summertime hedonism. There's creaminess on the palate, with some apple tartness in the middle and, again, long strawberry elements on the finish. Pair with beef sliders on soft, sweet rolls that are adorned with gourmet condiments and cheeses.\ndesignation: Estate\npoints: 89\nprice: 18.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Buttonwood 2013 Estate Rosé (Santa Ynez Valley)\nvariety: Rosé\nwinery: Buttonwood\n: 11324\ncountry: US\ndescription: Tarry, savory notes of dried beef, soy, charred lamb and underlying blackberry combine for a nose that screams umami. The palate carries a similar effect of grilled, lavender-covered lamb shank, black peppercorns and black sesame.\ndesignation: \npoints: 93\nprice: 35.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Pace 2013 Syrah (Santa Ynez Valley)\nvariety: Syrah\nwinery: Pace\n: 126414\ncountry: Israel\ndescription: Made from 80% Cabernet Sauvignon and 20% Petit Verdot, this is a ripe and lush wine that boasts big, jammy black-fruit aromas and flavors. Touches of licorice and sage add depth to the palate, while a soft toasty accent lingers on the medium-length finish.\ndesignation: Yogev\npoints: 86\nprice: 15.0\nprovince: Galilee\nregion_1: \nregion_2: \ntaster_name: Lauren Buzzeo\ntaster_twitter_handle: @laurbuzz\ntitle: Binyamina 2010 Yogev Red (Galilee)\nvariety: Bordeaux-style Red Blend\nwinery: Binyamina\n: 41690\ncountry: US\ndescription: With an inviting strawberry sundae nose, this bright pink rosé of Syrah from the longtime organically minded team at Buttonwood is all about summertime hedonism. There's creaminess on the palate, with some apple tartness in the middle and, again, long strawberry elements on the finish. Pair with beef sliders on soft, sweet rolls that are adorned with gourmet condiments and cheeses.\ndesignation: Estate\npoints: 89\nprice: 18.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Buttonwood 2013 Estate Rosé (Santa Ynez Valley)\nvariety: Rosé\nwinery: Buttonwood"}
 """
 
+# 3. 와인 추천
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+
+# 세번째 함수, 와인 추천받을 recommend_wines 함수
+def recommend_wines(query):
+    prompt = ChatPromptTemplate([
+        ('system', """
+        Persona: You are a knowledgeable and experienced sommelier with a passion for wine and food pairings. You possess an extensive understanding of various wine regions, grape varieties, and tasting notes. Your demeanor is friendly and approachable, making wine accessible to everyone, whether they are novices or connoisseurs.
+
+        Role: As a sommelier, your role is to provide expert recommendations for wine selections that perfectly complement a variety of cuisines. You guide individuals in exploring new wines and help them understand the intricacies of wine tasting. Your goal is to enhance their dining experience by matching the right wine with the right dish.
+
+        Examples:
+
+        When asked for a wine recommendation for grilled garlic butter shrimp, you suggest a Chardonnay or Albariño, explaining how the wine's acidity balances the richness of the dish.
+        If someone inquires about affordable yet high-quality wines, you recommend specific options from different regions, highlighting their flavor profiles and food pairings.
+        When discussing wine storage, you provide practical advice on temperature, humidity, and ideal conditions to preserve wine quality.
+        """),
+        # image url도 전달해야하기 때문에 ('human', '')같은 방식 말고 HMPT를 쓴다.
+        HumanMessagePromptTemplate.from_template("""
+        와인페어링을 아래 사진 속의 요리와 풍미, 와인리뷰만을 참고하여 한글로 추천해주세요.
+        요리와 풍미:
+        {dish_flavor}
+        와인리뷰:
+        {wine_reviews} 
+        """)
+    ])
+
+    model = ChatOpenAI(
+        model_name='gpt-4.1',
+        temperature=1
+    )
+
+    output_parser = StrOutputParser()
+
+    chain = prompt | model | output_parser
+    return chain
+
+# 일반 함수를 RL로 감싸기
+chain = RunnableLambda(recommend_wines)
+chain.invoke({'dish_flavor': '이 요리는 ‘비프 스튜’로, 부드럽게 익은 소고기와 감자, 당근이 진한 토마토 베이스의 국물과 어우러져 깊고 풍부한 감칠맛과 은은한 허브 향이 조화를 이루는 따뜻한 풍미가 예상됩니다.', 
+              'wine_reviews': ': 103099\ncountry: US\ndescription: A smoky nose carries a strong suggestion of bacon fat, wrapped around tightly wound blackberry fruit. Flavors play out broadly and thin out quickly, but this young wine offers solid value and immediate pleasure.\ndesignation: \npoints: 87\nprice: 18.0\nprovince: Oregon\nregion_1: Oregon\nregion_2: Oregon Other\ntaster_name: Paul Gregutt\ntaster_twitter_handle: @paulgwine\ntitle: Jezebel 2013 Pinot Noir (Oregon)\nvariety: Pinot Noir\nwinery: Jezebel\n: 10027\ncountry: US\ndescription: With an inviting strawberry sundae nose, this bright pink rosé of Syrah from the longtime organically minded team at Buttonwood is all about summertime hedonism. There is creaminess on the palate, with some apple tartness in the middle and, again, long strawberry elements on the finish. Pair with beef sliders on soft, sweet rolls that are adorned with gourmet condiments and cheeses. designation: Estate  points: 89 price: 18.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Buttonwood 2013 Estate Rosé (Santa Ynez Valley)\nvariety: Rosé\nwinery: Buttonwood\n: 11324\ncountry: US\ndescription: Tarry, savory notes of dried beef, soy, charred lamb and underlying blackberry combine for a nose that screams umami. The palate carries a similar effect of grilled, lavender-covered lamb shank, black peppercorns and black sesame.\ndesignation: \npoints: 93\nprice: 35.0\nprovince: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Pace 2013 Syrah (Santa Ynez Valley)\nvariety: Syrah\nwinery: Pace\n: 126414\ncountry: Israel\ndescription: Made from 80% Cabernet Sauvignon and 20% Petit Verdot, this is a ripe and lush wine that boasts big, jammy black-fruit aromas and flavors. Touches of licorice and sage add depth to the palate, while a soft toasty accent lingers on the medium-length finish.\ndesignation: Yogev\npoints: 86\nprice: 15.0\nprovince: Galilee\nregion_1: \nregion_2: \ntaster_name: Lauren Buzzeo\ntaster_twitter_handle: @laurbuzz\ntitle: Binyamina 2010 Yogev Red (Galilee)\nvariety: Bordeaux-style Red Blend\nwinery: Binyamina\n: 41690\ncountry: US\ndescription: With an inviting strawberry sundae nose, this bright pink rosé of Syrah from the longtime organically minded team at Buttonwood is all about summertime hedonism. There is creaminess on the palate, with some apple tartness in the middle and, again, long strawberry elements on the finish. Pair with beef sliders on soft, sweet rolls that are adorned with gourmet condiments and cheeses. designation: Estate points: 89  price: 18.0  province: California\nregion_1: Santa Ynez Valley\nregion_2: Central Coast\ntaster_name: Matt Kettmann\ntaster_twitter_handle: @mattkettmann\ntitle: Buttonwood 2013 Estate Rosé (Santa Ynez Valley)\nvariety: Rosé\nwinery: Buttonwood'})
+"""
+'네, 비프 스튜는 부드럽고 진한 토마토 베이스의 국물, 감칠맛, 허브 향이 어우러진 풍미가 매력적인 요리입니다. 이 요리에 어울릴 만한 와인을 위에 소개된 네 가지 와인 리뷰만 참고해서 각각의 추천 이유와 함께 설명드리겠습니다.\n\n---\n\n
+**1. Pace 2013 Syrah (Santa Ynez Valley)**\n- **와인 특징**: 깊은 우마미와 타르, 말린 소고기, 간장, 라벤더를 입힌 양고기, 블랙 페퍼, 블랙베리 등 요리의 풍미와 유사한 노트를 가지고 있습니다.\n- **페어링 추천 이유**: Syrah의 짙은 풍미와 강렬한 풍부함, 허브와 향신료, 육류 노트가 비프 스튜의 깊은 감칠맛, 허브, 토마토 베이스 국물과 아주 잘 어울립니다. 특히 진한 국물과 고기와의 조화를 최대한 살릴 수 있는 클래식한 페어링입니다.\n- **추천 한 줄 요약**: "농축된 와인과 진한 스튜의 맛의 깊이가 서로를 끌어올리는 완벽한 만남입니다."\n\n---\n\n
+**2. Binyamina 2010 Yogev Red (Galilee)**\n- **와인 특징**: 카베르네 소비뇽과 쁘띠 베르도가 블렌딩되어 진한 블랙프루트, 리코리스, 세이지, 토스티함을 가진 와인입니다.\n- **페어링 추천 이유**: 진한 과실미와 허브의 뉘앙스, 부드러운 피니시가 비프 스튜와 함께 할 때 고기의 풍미를 더욱 살려주며, 토마토의 산미와도 자연스럽게 어울립니다. 너무 무겁지 않으면서도 충분한 구조감을 가졌기 때문에 부담 없이 곁들일 수 있습니다.\n- **추천 한 줄 요약**: "적절한 가격에 스튜와 밸런스가 좋은 모던한 보르도 블렌드 스타일입니다."\n\n---\n\n
+**3. Jezebel 2013 Pinot Noir (Oregon)**\n- **와인 특징**: 스모키한 향, 짙은 베이컨 팻, 블랙베리, 즉각적이고 경쾌한 점, 단단하게 짜여진 구조감을 가지고 있습니다.\n- **페어링 추천 이유**: Pinot Noir 특유의 중량감 덜한 동시에 스모키함, 베이컨 뉘앙스가 스튜에 녹아든 고소함과 조화롭습니다. 비프 스튜가 너무 무겁지 않고, 좀 더 산뜻하게 즐기고 싶을 때 추천드립니다.\n- **추천 한 줄 요약**: "가볍지만 스모키한 향이 스튜와 함게 식사의 무게감을 조화롭게 만들어줍니다."\n\n---\n\n
+**4. Buttonwood 2013 Estate Rosé (Santa Ynez Valley)**\n- **와인 특징**: 딸기, 크리미함, 사과의 상큼함, 긴 피니시를 가진 Syrah 로제 스타일입니다.\n- **페어링 추천 이유**: 비프 스튜가 너무 묵직하게 느껴질 때 신선하고 산뜻한 로제 와인을 곁들이면 느끼함을 잡으며 풍미의 균형을 맞출 수 있습니다. 여름철 가볍게 먹는 비프 스튜라면 이 pairing도 좋은 선택입니다.\n- **추천 한 줄 요약**: "산뜻한 과실향과 크리미함으로 식사의 무게를 덜어주면서 스튜의 감칠맛도 잘 살려줍니다."\n\n---\n\n
+### 정리\n- 진하고 풍부한 풍미, 허브와 감칠맛이 특징인 **비프 스튜**에는 "짙은 Syrah", "구조감 있는 레드 블렌드"가 가장 좋은 매칭이 될 수 있습니다.\n
+- **무겁지 않은 Pinot Noir** 또는 **산뜻한 Rosé**도 좀 더 가볍게 스튜를 즐기고 싶을 때 훌륭한 선택입니다.\n\n혹시 특정 스타일이나 가격대가 궁금하시다면 추가로 알려주시면 더 세부적으로 추천해 드릴 수 있습니다!'
+"""
+
+from langchain_core.runnables import RunnableLambda
+
+# 3가지 함수를 모두 chain 연결
+chain = RunnableLambda(describe_dish_flavor) | RunnableLambda(search_wines) | RunnableLambda(recommend_wines)
+
+print(chain.invoke({'image_url': 'https://www.recipetineats.com/tachyon/2023/06/Hungarian-Goulash-_6.jpg?resize=900%2C1125&zoom=0.72'}))
+
+"""
+비프 스튜에 어울리는 와인 페어링을 제안해드릴게요. 비프 스튜는 진한 토마토 베이스의 국물과 부드러운 소고기, 감자, 당근, 허브의 향이 어우러지는 깊은 감칠맛과 따뜻함이 느껴지는 요리입니다. 여러 와인 리뷰를 참고하여, 각각의 와인이 어떻게 이 요리와 어울릴지 한글로 설명해드리겠습니다.
+
+---
+
+### 1. Pace 2013 Syrah (Santa Ynez Valley, California)
+
+- **풍미 리뷰:** 말린 소고기, 간장, 구운 양고기, 블랙베리, 라벤더, 블랙 페퍼, 검은깨 등 짙은 감칠맛과 우마미, 허브, 스파이시함이 조화됨.
+- **페어링 이유:** Syrah는 진한 풍미와 스파이시한 노트, 그리고 육류 요리와 잘 어울리는 검은 과실의 깊은 맛이 특징입니다. 비프 스튜의 진한 토마토 베이스와 여러 허브, 그리고 부드럽게 익은 소고기와 매우 잘 맞아 서로의 풍미를 한층 증폭시켜줍니다.
+
+**추천도: ★★★★★ (가장 추천)**
+
+---
+
+### 2. Jezebel 2013 Pinot Noir (Oregon)
+
+- **풍미 리뷰:** 훈연된 베이컨과 블랙베리, 풍부하나 가벼운 마무리, 즉각적인 기쁨을 주는 와인.
+- **페어링 이유:** Pinot Noir는 비프 스튜와도 잘 어울립니다. 특히 오리건 Pinot Noir 특유의 산도와 가벼운 바디감은 토마토 베이스의 산미와 잘 어우러지면서 스튜의 복합적인 풍미를 깨끗하게 정리해줍니다. 다만 풍미가 너무 진한 스튜보다는 약간 라이트하거나 허브향이 강조된 스튜와 이상적입니다.
+
+**추천도: ★★★★☆ (드라이하면서도 클래식한 매력)**
+
+---
+
+### 3. Binyamina 2010 Yogev Red (Galilee, 이스라엘)
+
+- **풍미 리뷰:** 카베르네 소비뇽 80%, 쁘띠 베르도 20%; 풍부하고 잘 익은 블랙베리류 과일, 감초, 세이지, 토스티 터치.
+...
+**가장 추천하는 페어링은 Pace 2013 Syrah**입니다. 비프 스튜의 깊고 진한 감칠맛, 허브향, 부드러운 육질 모두 Syrah의 다층적 풍미와 우마미, 스파이시함과 멋지게 어우러져 최고의 조화를 만들어냅니다.  
+Syrah가 준비되지 않았다면, Pinot Noir 또는 Cabernet Sauvignon 블렌드도 훌륭한 선택이니 스튜의 타입(진함, 허브 강조도)에 따라 골라보시면 좋겠습니다.
+
+와인과 함께 따뜻하고 풍성한 비프 스튜의 맛을 만끽하시길 바랍니다!
+"""
+
+
 
 # 개인 프로젝트: Get your bonds
 1. 이슈 템플릿 등록
 https://amaran-th.github.io/Github/[Github]%20Issue%20&%20PR%20Template%20%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0/
 # 기본 제시 템플릿 사용, 추가로 Add feature라는 이름으로 Blank Template 생성
+
+2. IntelliJ git reconnect
+# 왜인지 모르겠으나 해당 레포지토리의 main branch와의 연결이 끊겼다.-> 재연결
+    git init
+    git remote add origin https://github.com/21jayoon/getyourbond-springdata-jpa.git
+    git fetch origin
+    git checkout feature/1-feature-make-html-into-javascript-and-css
+
+# local branch master 내용과 동기화
+   git fetch origin
+   git reset --hard origin/main
+(git pull origin main 명령어는 git fetch origin과 git merge origin/main 명령어를 합쳐놓은 명령어)
+
+# local branch master : Rebase 'main' onto 'master'
+# 해결! 이제 origin(원격저장소) main과 master내용이 같아졌음  14:50
+
+# Merge 'feature/1......' into 'main'
+# Checkout feature/1 branch
+PS D:\lecture\12_jpa\getyourbond-springdata-jpa> git branch     
+* feature/1-feature-make-html-into-javascript-and-css
+  main
+  master
+
+3. gitignore 파일에서 DEVELOP_LOG.md 삭제
+
+
+
+# 팀 프로젝트 2차 개발
+# 마크다운 문법 도와주는 페이지
+https://www.3rabbitz.com/markdown_guide
+
+1. UI/UX 통일(피드백 받은 부분 개선)
+1-1. 비 로그인 상태로 '샵 관리하기' 버튼 누를 경우 나타나는 에러 페이지, 코드 위치 찾기
+Layout.jsx에서 발견
+
+```javascript
+// 권한 정보가 없을 때 (로그인 필요)
+  if (userRole === null) {
+    return (
+      <div className="auth-required">
+        <div>로그인이 필요합니다.</div>
+      </div>
+    );
+  }
+```
+
+Header.jsx나 Footer.jsx가 적용되어 있지 않음.
+-> Header, Footer 적용
+// 권한 정보가 없을 때 (로그인 필요)
+  if (userRole === null) {
+    return (
+      <div className="auth-required">
+        {/* 헤더 추가 */}
+        <Header
+            isSideMenuOpen={isSideMenuOpen}
+            toggleSideMenu={toggleSideMenu}
+            userRole={userRole}
+        />
+        <div>로그인이 필요합니다.</div>
+
+        {/* 푸터 */}
+        <Footer />
+      </div>
+    );
+  }
+
+
+# UX 고민
+"로그인이 필요합니다"
+-> "로그인 후 사용가능한 페이지입니다."
+-> "로그인 후 접근 가능한 페이지입니다."
+-> "로그인이 필요한 페이지입니다."
+# 뭐가 제일 사용자 편의적일까?
+
+# "샵 관리하기"버튼 미 로그인 상태로 클릭 시 나타날 페이지 최종
+// 권한 정보가 없을 때 (로그인 필요)
+  if (userRole === null) {
+    // UI/UX 통일, 그러나 CSS 파일 추가 않기 위해 inline 스타일 사용
+    return (
+        <>
+      <div className="auth-required" style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        width: '100vw'
+      }}>
+        {/* UI 통일을 위한 헤더 추가 */}
+        <Header
+            isSideMenuOpen={isSideMenuOpen}
+            toggleSideMenu={toggleSideMenu}
+            userRole={userRole}
+        />
+        <div style={{
+          width: '100%',
+          maxWidth: '400px',
+          padding: '32px',
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <h2 align={'center'}>🚨 <br/> 로그인이 필요한 페이지 입니다.</h2>
+        </div>
+
+      </div>
+        {/* 푸터 */}
+        <Footer />
+        </>
+    );
+  }
+
+
+JWT Token API Git Repository 환경변수 설정에 넣어주어야 함
+
+2. Backend 이메일 인증 구현
+2-1. /users 회원가입 페이지에 이메일 입력란 추가 필요?
+
+3. /auth/verification-code에 회원가입 시 입력한 이름과 정보 넘어올 수 있게 변경
+# Original
+const [formData, setFormData] = useState({
+            userName: '',
+            userPhone: '',
+        });
+     
+# Try
+import Signup from "@/app/auth/users/page.js";
+
+const [userName] = Signup.userName
+    const [userPhone] = Signup.userPhone
+    const [formData, setFormData] = useState({
+            userName: {userName},
+            userPhone: {userPhone}
+        });
+
+# ERROR!!!!
+Runtime Error
+Error: undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+
+src\app\auth\verification-code\page.js (7:24) @ Verification
+   5 |
+   6 | export default function Verification() {
+>  7 |     const [userName] = Signup().userName
+     |                        ^
+   8 |     const [userPhone] = Signup().userPhone
+   9 |     const [formData, setFormData] = useState({
+  10 |         userName: {userName},
+
+
+Signup().userName, Signup().userPhone으로 해도 똑같은 오류가 난다.
+
+
+# Try2
+export default function Verification() {
+    const [userName] = Signup(userName)
+    const [userPhone] = Signup(userPhone)
+    const [formData, setFormData] = useState({
+        userName: {userName},
+        userPhone: {userPhone}
+    });
+
+# NEW ERROR!!
+Runtime Error
+Error: Cannot access 'userName' before initialization
+src\app\auth\verification-code\page.js (7:31) @ Verification
+
+   5 |
+   6 | export default function Verification() {
+>  7 |     const [userName] = Signup(userName)
+     |                               ^
+   8 |     const [userPhone] = Signup(userPhone)
+   9 |     const [formData, setFormData] = useState({
+  10 |         userName: {userName},
+
+
+# How to initialize when using function at the other file?
+    const { userName, userPhone } = Signup(); // this is the way how to initialize external function
+    const [formData, setFormData] = useState({
+        userName: {userName},
+        userPhone: {userPhone}
+    });
+-> 근데 입력 값이 넘어오진 않음. 내일 재확인 필요
