@@ -1,8 +1,8 @@
 https://pine-fibula-aee.notion.site/Make-AI-sommelier-and-run-with-streamlit-248fc892a16f805eb649c01729b7366d
 
 # 04_ai_sommlier_rag.py
-# jupyter notebook 파일 말고 .py파일로 생성
-# 환경변수 설정
+# jupyter notebook 파일(.ipynb) 말고 .py파일로 생성
+# 1. 환경변수 설정
 from dotenv import load_dotenv
 load_dotenv()
 # CTRL+SHIFT+P눌러서 pythoon_env로 인터프리터 가상환경 설정
