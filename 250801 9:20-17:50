@@ -1,9 +1,10 @@
 https://www.notion.so/Using-streamlit-audio-recorder-242fc892a16f803085ace8c857cc318f?source=copy_link
 https://digitalbourgeois.tistory.com/133
 
-https://pine-fibula-aee.notion.site/Daily-Log-1e0fc892a16f800ba3f9c9ea860e777f?p=242fc892a16f808c96dfdcb255c72846&pm=s
+https://www.notion.so/Solve-malworking-streamlit-242fc892a16f808c96dfdcb255c72846
 
-app.py
+
+1. app.py
 import streamlit as st
 from audiorecorder import audiorecorder
 import openai_api
@@ -74,7 +75,7 @@ if __name__ == '__main__':
     main() 
 
 
-session_state.py
+2. session_state.py
 # 20250801 9:30
 import streamlit as st
 
@@ -106,7 +107,7 @@ if st.button('Increment - st.session_state Count'):
 st.write(f'전역변수 Count: {st.session_state['count']}')
 
 
-openai_api.py
+3. openai_api.py
 # 여기에서 함수를 정의해놓고 import해서 사용할 것임
 from dotenv import load_dotenv
 from openai import OpenAI
