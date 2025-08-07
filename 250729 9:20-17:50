@@ -1,4 +1,4 @@
-# 08. trun python into JSON data and handling exception
+# 08. turn python into JSON data and handling exception
 import json
 
 structed_data = [
