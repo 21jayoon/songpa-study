@@ -508,6 +508,18 @@ D:\lecture\18_fastAPI>cd _02_params
 D:\lecture\18_fastAPI\_02_params>python -m uvicorn main:app --reload
 
 
+# run은 main.py에서
+# main.py
+from typing import Union
+
+from fastapi import FastAPI, Query
+from form_urlencoded import router as form_urlencoded_router
+from form_multipart import router as form_multipart_router
+
+app = FastAPI()
+
+app.include_router(router=form_urlencoded_router)
+app.include_router(router=form_multipart_router)
 # FastAPI의 장점중의 하나= 자동으로 Swagger를 생성해준다
 # Reference: https://chaechae.life/blog/fastapi-swagger-change
 
@@ -750,3 +762,119 @@ async def read_items(
     return results
 
 # pip install python-multipart
+
+# python -m uvicorn main:app --reload
+로 정상 동작 확인
+
+
+# query.py (_03_validation)
+from typing import Annotated, Literal, List
+# fastAPI에서는 Query 등의 파라미터를 추가하면 자동으로 유효성 검사를 해준다.
+# java에서 DTO의 유효성을 검증할 때 @Valid 어노테이션을 썼던 것과 비슷한 역할을 한다.
+from fastapi import APIRouter, Query
+
+router = APIRouter(prefix="/query", tags=["query"])
+
+# Query()를 통해 쿼리매개변수를 정의할 수 있다.
+# - default: 기본값
+# - max_length: 최대 길이
+# - min_length: 최소 길이
+# - pattern: 정규식
+# - gt/lt/ge/le: 크다/작다/크거나 같다/작거나 같다
+# - alias: 별칭(변수명 대신 사용)
+# - title/description: 제목/설명
+# - example: 예시
+
+# Annotated[type, metadata]를 통해 메타데이터를 추가할 수 있다.
+@router.get("/items/")
+# async def read_items(q: str | None = Query(default=None, max_length=50)):
+async def read_items(
+        q: Annotated[
+            str | None, Query(min_length=3, max_length=50, pattern="^query\d+$")
+        ] = None,
+        # =None 은 optional로, 필수입력하지 않아도 됨
+):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+
+# pydantic을 이용한 검증
+from pydantic import BaseModel, Field
+
+
+# pydantic.BaseModel을 상속받아 데이터 모델을 정의할 수 있다.
+# BaseModel은 Spring의 DTO와 비슷한 역할을 한다
+class FilterParams(BaseModel):
+    # 정의된 필드외 사용금지
+    # model_config = {"extra": "forbid"}
+
+    # 아까 path나 query로 값을 전달했던 것과 조금 다르게, 이번에는 Field를 사용
+    limit: int = Field(100, gt=0, le=100)
+    offset: int = Field(0, ge=0)
+    order_by: Literal["created_at", "updated_at"] = "created_at"
+    # Literal은 enum과 비슷하다.
+    # Literal [A, B] A, B 중 하나의 값만 들어갈 수 있다. 
+    # = "created_at" 근데 정하지 않았다면 "created_at"이 기본값으로 들어간다는 의미
+    tags: List[str] = [] # str를 요소로하는 List
+    # tags: 에는 ?tags=python&tags=fastapi 같은 기능으로 str ["python", "fastapi"]가 들어감
+
+
+@router.get("/products/")
+# 경로 매개변수 아니고 query parameter. 그래서 Annotated 사용
+async def read_products(filter_query: Annotated[FilterParams, Query()]):
+    return filter_query
+
+
+
+# _04_form
+# form_multipart.py
+from typing import Annotated
+
+from fastapi import APIRouter, File, Form, UploadFile
+
+router = APIRouter(prefix="/form_multipart", tags=["form_multipart"])
+
+
+# 파일이 포함된 요청(form-data/multipart)인 경우 File()을 통해 처리할 수 있다.
+@router.post("/files/")
+async def create_file(
+        file: Annotated[UploadFile, File()],
+        token: Annotated[str, Form()],
+):
+    return {
+        "file_size": file.size,
+        "file_content_type": file.content_type,
+        "token": token,
+    }
+
+# form_urlencoded.py
+from fastapi import APIRouter, Form
+from typing import Annotated
+
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/form_urlencoded", tags=["form_urlencoded"])
+
+
+@router.post("/login/")
+async def login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    # fastAPI는 Form()만 있으면 formUrlEncoded구나 하고 자동으로 form 형태로 파싱함
+    return {"username": username}
+
+
+# 폼모델을 작성해서 form 내용을 한 번에 처리하는 것 또한 가능하다.
+class FormData(BaseModel):
+    # binding 객체 만들어서 사용한 것과 동일한 흐름
+    username: str
+    password: str
+
+
+@router.post("/login2/")
+async def login(data: Annotated[FormData, Form()]):
+    # data.username  <- username 필드값이 여기 들어간다
+    # data.password  <- password 필드값은 여기 들어감
+    # FormData 사용하면 form에 대한 값을 한 번에 다룰 수 있어서 편리하다
+    # FormData 사용하면 form 내용을 객체로 사용 가능
+    return data
