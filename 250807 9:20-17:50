@@ -1,3 +1,5 @@
+https://pine-fibula-aee.notion.site/Make-AI-sommelier-and-run-with-streamlit-248fc892a16f805eb649c01729b7366d
+
 # 04_ai_sommlier_rag.py
 # jupyter notebook 파일 말고 .py파일로 생성
 # 환경변수 설정
@@ -161,6 +163,8 @@ import requests as rq
 from PIL import Image
 # import PIL import Image <- 왜 안 되나했더니 import 구문을 2번 씀
 from io import BytesIO
+# To import 04_ai_sommlier_rag, edit the file name into 'ai_sommlier_rag'
+# When I tried with 'import 04_ai_sommlier_rag', it didn't worked due to the file naming convention.
 import ai_sommlier_rag as ai_sommelier_rag
 
 # PIL = Python Image Library (called 'Pillow')
@@ -202,7 +206,7 @@ else:
 
 
 # RUN streamlit
-# !!! Mind that running streamlit must played in cmd not a powershell
+# !!! Mind that running streamlit must worked in cmd not a powershell
 (pythonstudy_env) D:\lecture\17_langchain>cd 04_ai_sommelier_rag
 
 (pythonstudy_env) D:\lecture\17_langchain\04_ai_sommelier_rag>streamlit run app.py
@@ -249,7 +253,7 @@ https://recipe1.ezmember.co.kr/cache/recipe/2016/04/18/618714c513dc25a83212b7b91
 # !!! ERROR
 There's an error while loading the image: name 'query' is not defined
 
-# I think this part in the at_sommlier_rag.py was the problem
+# I think this part in the ai_sommlier_rag.py was the problem
 # 2. 와인 찾기 위한 함수 정의
 def search_wines(dish_flavor):
     # 임베딩 모델 만들기
@@ -294,7 +298,7 @@ def search_wines(dish_flavor):
  # Than I thought the full running flow from the start.
  # 1. There is a parameter 'query' at the function describe_dish_flavor().
  # 2. This parameter 'query' pass on to the next function search_wines()
- # -> 'Maybe the differenece of the name is the reason of the error'
+ # -> 'Maybe the difference of the name is the reason of the error'
  # 3. Revise the all of dish_flavor parameter into query again.
  def search_wines(query):
     # 임베딩 모델 만들기
@@ -354,3 +358,153 @@ Château Musar 2009 Musar Jeune White (Bekaa Valley)
 결론:
 “Yatir Syrah” 혹은 “Carmel Shiraz”와 샥슈카의 페어링을 추천합니다. 와인의 산도, 풍부한 과일과 허브의 향이 요리의 산미와 허브, 그리고 달걀의 고소한 맛과 더불어 멋진 하모니를 만들어낼 것입니다. 맛있는 식사와 즐거운 와인 경험이 되시길 바랍니다!
 ```
+
+
+# VS code에서 터미널 열기 단축키 : CTRL+백틱 키
+
+
+
+# New chapter 18_fastAPI
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+# spring의 annotaion과 같은 역할을 하는 decoration(python에선 데코라고 부름)
+# fastAPI는 비동기 지원을 기본적으로 해주고 있음
+async def root():
+    return {"message": "Hello World"}
+
+@app.get("/hello/{name}")
+async def say_hello(name: str):
+    # java에서 @PathVairable String name으로 사용하던 걸 (name: str)로 사용
+    return {"message": f"Hello {name}"}
+
+        # install uvicorn, uvicorn acts like a tomcat server
+        D:\lecture\18_fastAPI>cd _01_fastapi
+        D:\lecture\18_fastAPI\_01_fastapi>pip install fastAPI
+        ......
+        D:\lecture\18_fastAPI\_01_fastapi>pip install uvicorn
+        Defaulting to user installation because normal site-packages is not writeable
+        Collecting uvicorn
+          Using cached uvicorn-0.35.0-py3-none-any.whl.metadata (6.5 kB)
+        Requirement already satisfied: click>=7.0 in c:\users\user\appdata\roaming\python\python313\site-packages (from uvicorn) (8.2.1)
+        Requirement already satisfied: h11>=0.8 in c:\users\user\appdata\roaming\python\python313\site-packages (from uvicorn) (0.16.0)
+        Requirement already satisfied: colorama in c:\users\user\appdata\roaming\python\python313\site-packages (from click>=7.0->uvicorn) (0.4.6)
+        Using cached uvicorn-0.35.0-py3-none-any.whl (66 kB)
+        Installing collected packages: uvicorn
+          WARNING: The script uvicorn.exe is installed in 'C:\Users\User\AppData\Roaming\Python\Python313\Scripts' which is not on PATH.
+          Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+        Successfully installed uvicorn-0.35.0
+        
+        D:\lecture\18_fastAPI\_01_fastapi>uvicorn main:app --reload
+        'uvicorn' is not recognized as an internal or external command,
+        operable program or batch file.
+        
+        D:\lecture\18_fastAPI\_01_fastapi> python -m uvicorn main:app --reload
+        INFO:     Will watch for changes in these directories: ['D:\\lecture\\18_fastAPI\\_01_fastapi']
+        INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+        INFO:     Started reloader process [11924] using StatReload
+        INFO:     Started server process [30444]
+        INFO:     Waiting for application startup.
+        INFO:     Application startup complete.
+
+
+# path_params.py
+from fastapi import APIRouter
+
+router = APIRouter(prefix='/path_params', tags=['path_params'])
+
+# 경로매개변수
+@router.get("/items/{item_id}") # 동적 경로
+async def read_item(item_id: int):
+    return {"item_id": item_id}
+
+"""
+경로 작동은 순차적으로 실행되기 때문에 /users/{user_id} 이전에 /users/me를 먼저 선언해야 한다.
+"""
+
+@router.get("/users/me")
+# 위와 같이 '고정된 경로'("/users/me")를 항상 @@
+async def read_user_me():
+    return {"user_id": "the current user"}
+
+
+@router.get("/users/{user_id}")
+# 이 위와 같은 '동적 경로'("/users/{user_id}")보다 위에 작성해야한다. @@
+async def read_user(user_id: str):
+    return {"user_id": user_id}
+
+
+from enum import Enum, StrEnum
+
+"""
+Enum을 이용해서 매개변수를 지정한 값목록안에서만 처리할 수 있다.
+
+- Enum클래스가 str, Enum 또는 StrEnum을 상속하면, Enum객체를 str처럼 사용가능하다.
+    - enum객체 is ModelName.alexnet
+    - enum객체.value == "lenet"
+    위와 같이 쓰지 않고, 직접 비교 가능하다.
+    - enum객체 == 'alexnet'
+"""
+# 원래는 model_name == ModelName.alexnet 이런 식으로 사용해야하는데
+# 위처럼 enum 객체 'alexnet'으로 등록하면 반복적으로 같은 내용의 코드를 작성할 필요 없이
+# alexnet처럼 간단한 형태로 사용이 가능하다.
+class ModelName(StrEnum):
+    alexnet = "alexnet"
+    resnet = "resnet"
+    lenet = "lenet"
+
+
+@router.get("/models/{model_name}") # 동적 경로
+async def get_model(model_name: ModelName):
+    # if model_name is ModelName.alexnet:
+    if model_name == 'alexnet':
+        return {"model_name": model_name, "message": "Deep Learning FTW!"}
+
+    if model_name == "lenet":
+        return {"model_name": model_name, "message": "LeCNN all the images"}
+
+    return {"model_name": model_name, "message": "Have some residuals"}
+
+
+# query_params.py
+from fastapi import APIRouter
+
+router = APIRouter(prefix='/query_params', tags=['query_params'])
+
+# 쿼리매개변수 (wep 개발 기본)
+# 방금 path_params.py에서 decoration(=java의 annotation)을 사용한 경로매개변수를 봤다. 
+# - 경로매개변수가 아닌 매개변수는 쿼리매개변수로 사용가능하다.
+# - 자료형, 기본값 지정이 가능하다.
+# - 기본값을 None으로 지정하지 않으면 필수값이다.
+
+# 가상 데이터 베이스. java에서 List<Map<String, String>>의 형태와 
+# While the Python data structure is a list of dictionaries, 
+# it serves the same purpose as a List<Map<String, String>> in Java. 
+# Both are used to store an ordered collection of records, where each record is a set of key-value pairs.
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
+
+@router.get("/items/")
+# 함수매개변수 중 skip이나 limit이 지정되어 있지 않은 변수를 fastAPI는 자동으로
+# 쿼리매개변수(query_parameter)라고 인식한다.
+async def read_item(skip: int = 0, limit: int = 10):
+    return fake_items_db[skip : skip + limit]
+
+
+@router.get("/products/{product_id}")
+async def read_product(product_id: str, q: str | int = None):
+    if q:
+        return {"product_id": product_id, "q": q}
+    return {"product_id": product_id}
+
+
+# Terminate _01_fastapi folder and run _02_params directory.
+D:\lecture\18_fastAPI\_01_fastapi>cd..
+
+D:\lecture\18_fastAPI>cd _02_params
+D:\lecture\18_fastAPI\_02_params>python -m uvicorn main:app --reload
+
+
+# FastAPI의 장점중의 하나= 자동으로 Swagger를 생성해준다
+# Reference: https://chaechae.life/blog/fastapi-swagger-change
