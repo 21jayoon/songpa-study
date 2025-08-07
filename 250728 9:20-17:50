@@ -548,10 +548,7 @@ userPwd: "(encrypted password)"
           setUserRole(userData.admin ? 2 : 1);
 로그인 유저 정보 노출 더 이상 없는 거 확인 완료.
 
-
-# ADsP 모의고사 오답노트
-# 순차분석 : 동시 구매될 가능성이 큰 상품군을 찾아내는 연관성 측정에 시간이라는 개념을 포함시켜
-'순차'적인 구매 가능성이 큰 상품군을 찾아내는 데이터 마이닝 기법t getProfileInfo = () => {
+const getProfileInfo = () => {
     if (userRole === 1) {
       // 권한 1: 일반고객 - 고객이름과 아이디
       return {
