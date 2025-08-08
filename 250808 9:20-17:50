@@ -1,0 +1,171 @@
+https://pine-fibula-aee.notion.site/LLM-FastAPI-practice-249fc892a16f8017ae49d2f00f0444ee
+
+# main.py
+
+''' .env 파일에서 API 키를 로드합니다. '''
+from dotenv import load_dotenv
+# env 파일을 로드하기 위해서 dotenv로부터 load_dotenv 불러오기
+import os
+#환경변수에 저장되어 있는 값들을 읽어오기 위해 os 불러오기
+from pydantic import BaseModel
+# Pydantic은 Python에서 데이터 유효성 검사 및 설정 관리를 위한 라이브러리, 데이터를 구조화하고 검증하는 데 유용
+# BaseModel은 Pydantic의 핵심 클래스 중 하나로, 데이터 모델을 정의하는 데 사용
+# 출처: https://mobicon.tistory.com/627 [AI Convergence:티스토리]
+from langchain_openai import ChatOpenAI
+
+
+# .env 파일 로드
+load_dotenv()
+# CTRL+SHIFT+P 눌러서 python:interpreter select -> pythonstudy_env 선택
+
+# 환경변수(env파일)에서 토큰 읽어오기
+oa_token = os.getenv("OPENAI_API_KEY")
+
+''' FastAPI 앱을 초기화합니다. '''
+from fastapi import FastAPI
+
+app = FastAPI() # FastAPI 초기화
+
+
+# [1단계]: 기본 API 서버 구축
+# FastAPI를 사용하여 간단한 "Hello World" API 엔드포인트를 만듭니다.
+#
+# 1. get_root 함수를 선언하여 '/' 경로로 GET 요청이 오면
+#    {"message": "Hello, AI Agent!"} JSON을 반환하도록 코드를 작성하세요.
+@app.get("/")
+async def root():
+    return {"message": "Hello, AI Agent!"}
+
+# 2. 터미널에서 'uvicorn main:app --reload' 명령어로 서버를 실행하세요.
+
+# 3. http://127.0.0.1:8000/ 로 접속했을 때 메시지가 정상적으로 표시되는지 확인하세요.✅
+#  {"message":"Hello, AI Agent!"}
+# ===============================================================================
+
+    
+
+
+# [2단계]: LangChain 기본 LLM 연동
+# FastAPI에 LangChain을 통합하여 기본적인 언어 모델을 호출하는 API를 만듭니다.
+#
+#  - 사용자로부터 질문(query)을 JSON 형태로 입력받습니다. (아래 UserQuery 모델 사용)
+#  - 생성된 답변을 JSON 형태로 클라이언트에게 반환하세요.
+# ===============================================================================
+
+# POST 요청 본문을 위한 Pydantic 모델
+class UserQuery(BaseModel):
+    query: str
+
+
+@app.post("/chat")
+def chat_with_llm(user_query: UserQuery):
+    # ChatOpenAI를 초기화하고 사용자 질문에 답변하는 코드를 작성하세요.
+    # 1. ChatOpenAI 모델 초기화
+
+    # 초기화가 이걸 말하는 건가? 한 번 시도해보자. 
+    # 1) 코드 상단에서 OpenAI 불러오기 : from langchain_openai import ChatOpenAI
+    # 2) model 적용하기
+    model = ChatOpenAI(
+        model_name='gpt-4.1',
+        temperature=0.5
+    )
+    
+    # 2. 모델을 사용하여 답변 생성
+    response = model.invoke(user_query.query)
+
+    # 3. 답변 내용 반환
+    return {"response": response.content}
+"""
+{
+  "response": "동기(Synchronous) 방식은 작업이 순차적으로 진행되어, 앞선 작업이 끝나야 다음 작업이 시작된다.  \n비동기(Asynchronous) 방식은 작업이 동시에 진행될 수 있어, 앞선 작업이 끝나지 않아도 다음 작업을 시작할 수 있다.  \n동기는 코드가 직관적이지만, 긴 작업이 전체 흐름을 지연시킬 수 있다.  \n비동기는 효율적이지만, 코드가 복잡해질 수 있다.  \n예를 들어, 파일 읽기에서 동기는 파일을 다 읽을 때까지 기다리지만, 비동기는 읽는 동안 다른 작업을 할 수 있다."
+}
+"""    
+
+
+
+# [3단계 과제]: RAG(Retrieval-Augmented Generation) 파이프라인 구축
+# 특정 문서의 내용을 기반으로 질문에 답변하는 RAG API를 구축합니다.
+# 참고 : "question" : RunnablePassthrough() 사용
+# ===============================================================================
+
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+
+@app.post("/rag-qa")
+def rag_qa(user_query: UserQuery):
+    # 아래의 RAG 파이프라인 구축 코드를 단계별로 완성하세요.
+
+    # 1. 문서 로드 my_document.txt
+    # langchain_community.document_loaders 사용해야할지도 14:55
+    from langchain_community.document_loaders import TextLoader
+    loader=TextLoader("my_document.txt")
+    documents = loader.load()
+
+    # 2. 텍스트 분할 (Text Splitting)
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    # RecursiveCharacterTextSplitter : 긴 텍스트를 재귀적으로 분석하여 작은 조각으로 분할하는 TextSplitter의 구현체
+    
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=100,
+        chunk_overlap=10
+    )
+    #chunk_size=글자 수 몇 개를 기준으로 해서 쪼갤거냐(보통은 1000을 기준으로 함)
+    # 문단 단위로 쪼개온다고 할 때, 유실이 될 수도 있음. 
+    # 그래서 문단 앞 뒤를 살짝 겹치게 쪼개와야한다.
+    # chunk_overlap=겹칠 글자 수
+
+    texts = splitter.split_documents(documents)
+    
+
+    # 3. 벡터 저장소 생성 (Vector Store) - FAISS 사용
+    from langchain_openai import OpenAIEmbeddings
+    from langchain.vectorstores import FAISS
+
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    vector_store = FAISS.from_documents(texts, embeddings)
+    # 2번에서 text 분할을 하라고 했으니 . 기준으로 분할되 텍스트들인 texts를 이용
+    # 따라서 from_documents가 말고 from_texts 사용해야함
+
+    # 4. 검색기 생성 (Retriever) 
+    retriever = vector_store.as_retriever()
+    
+
+    # 5. 프롬프트 템플릿 정의 및 RAG 체인 구성
+    from langchain_core.prompts import ChatPromptTemplate
+    template = """당신은 주어진 문맥(context)만을 사용하여 질문에 답변하는 유쾌한 AI 어시스턴트 입니다.
+    문맥에서 답을 찾을 수 없다면, '주어진 정보만으로는 답변할 수 없습니다.'라고 말하세요. 절대 내용을 꾸며내지 마세요.
+
+    Context: {context}
+
+    Question: {question}
+
+    Answer:
+    """
+
+    prompt = ChatPromptTemplate.from_template(template)
+    
+    from langchain_core.runnables import RunnablePassthrough
+
+
+    # 6. 프롬프트, 모델, 아웃풋파서(StrOutputParser) 만들어서  chain 연결
+    model = ChatOpenAI(
+        model_name='gpt-4.1',
+        temperature=0.5
+    )
+
+    output_parser= StrOutputParser()
+    
+    chain = (
+        {"context": retriever, "question": RunnablePassthrough()}
+        | prompt
+        | model
+        | output_parser
+    )
+    
+        
+    # 7. RAG 체인 실행 및 결과 반환
+    response = chain.invoke(user_query.query)
+
+    return {"response": response}
+
+    # 2단계 3단계 테스트는 http://127.0.0.1:8000/docs 에서 수
