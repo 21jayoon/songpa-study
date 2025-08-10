@@ -1,3 +1,47 @@
+# 250810
+# Try to make IAM user at AWS
+https://pine-fibula-aee.notion.site/How-to-add-IAM-id-in-AWS-24afc892a16f80309c07e375626a0ca3
+
+# CS 지식 채우기!!  Fill out the CS knowledge!!
+# https://m.blog.naver.com/okyongss/222852186047
+# RAM = Random Access Memory의 약자. 
+# 컴퓨터 작동에 필요한 데이터를 '임시 저장'하는 메모리. (휘발성 메모리 -> 컴퓨터 전원 꺼지면 RAM에 있던 정보도 날아감)
+# 프로그램 실행과 데이터 처리에 중요한 역할을 하며 컴퓨터 및 노트북의 실행 속도와 관련이 있다.
+# (CPU가 데이터를 빠르게 읽고 쓸 수 있도록 하여 프로그램 실행 속도를 높여줌)
+# 단위 = GB
+
+# -> 현재 내 노트북 RAM이 4GB더라. 어쩐지 IntelliJ 잘 안 돌아가고 속도가 느리더라.....
+# (After studying about RAM, I checked my laptop's RAM. And it was 4GB... Now I know why my IntelliJ worked really slow....)
+
+
+# https://semiconductor.samsung.com/kr/support/tools-resources/dictionary/semiconductor-glossary-solid-state-drive-ssd/
+# SSD = Solid State Drive
+# 메모리 반도체를 저장매체로 사용하는 대용량 저장장치
+# HDD(Hard Disk Drive)를 대체한다.
+# OS(컴퓨터 운영체제)와 컴퓨터의 데이터를 저장하는 보조기억장치로, 
+# NAND Flash Memory(반도체 칩)에 정보가 저장된다.
+# 크게 데이터 저장용 메모리인 NAND Flash(낸드 플래시 메모리)와 
+# Controller(인터페이스와 메모리 사이의 데이터 교환작업 제어),
+# DRAM(디램, 외부 장치와 캐시메모리 역할을 함)으로 구성됨
+# 단위 = GB, TB
+
+# 요즘 노트북은 최소 256GB는 기본, 많으면 기본 장착으로 1TB까지도 나오는 듯 하다.
+# -> 노트북 용량 168GB (168GB SSD INTEL ssdsckkw180h6) 였음. 2025년 출시된 노트북 보니 다들 256GB부터 시작하던데... 
+# 저장용량이 자꾸 부족해지는 이유가 있었다.
+# (Same as before, the storage(ssd) of my laptop was 168GB. Now I can tell why my notebook needs deletions periodically)
+
+
+# RAM = 컴퓨터 처리속도. 숫자가 높을수록 동시처리가능한 capacity가 늘어 속도가 빠르다. (RAM 4GB보단 16GB가 빠르고, 16GB보단 32GB가 빠르다), 휘발성 메모리
+# SSD = 컴퓨터 저장 용량. 핸드폰 저장용량 생각하면 됨. 비휘발성 메모리인 NAND Flash memory를 사용해 데이터의 영속성을 보장한다.
+
+# RAM = 가게 물건 나르는 직원 수, SSD = 가게 물품 저장하는 창고 크기
+# RAM = the number of clerks who deliver the items at the shop. If the clerks are big, the items can deliver faster.
+# SSD = the size of the shop's warehouse. If it's big, you can store more items to sell(=datas in computer to use).
+
+
+
+
+# 250809
 # Review number one: Network
 # Reference : Gene (2018). 그림으로 배우는 네트워크 원리. (김성훈, 역). 영진닷컴.
 # 기타미 류지 (2022). 그림으로 이해하는 네트워크 용어. (성창규, 역). 길벗.
