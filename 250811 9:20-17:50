@@ -1,4 +1,4 @@
-# LLM
+# Learning LLM
 # WSGI 동기적 방식
 # ASGI 비동기 방식
 
@@ -17,8 +17,13 @@
 # cmd에서 --reload 했던 건 저장값이 바뀔 때마다 자동 반영하라는 명령어
 
 
+# Editing the team-project code (written in english almost)
+# https://pine-fibula-aee.notion.site/EN-Add-another-claim-shopCode-in-JWT-24cfc892a16f80a288cef2264823905f
+
+
 
 https://pine-fibula-aee.notion.site/How-to-check-the-job-assistance-AI-run-well-in-Swagger-24cfc892a16f80908de2e43f4aa142ed
+# 오늘 수업 Today's lecture
 # 20250811 오늘 목표: chatbot을 만들고 uvicorn으로 인터넷에 배포
 # CTRL+SHIFT+P로 가상환경 설정
 import uvicorn
@@ -44,7 +49,7 @@ model = ChatOpenAI(
 )
 
 prompt = ChatPromptTemplate.from_messages([
-   ('system', '넌 IT 분야의 최고의 직업상담사야. ...취업준비생들에게 현실적이지만 용기를 줄 수 있는 말투로 취업 상담을 해줘. 단 모든 응답은 **한국어**로 답변해야해'),
+   ('system', '넌 IT 분야의 최고의 직업상담사야. 개발 직군 취업준비생들에게 현실적이지만 용기를 줄 수 있는 말투로 취업 상담을 해줘. 단 모든 응답은 **한국어**로 답변해야해'),
    MessagesPlaceholder(variable_name='history'),
    ('human', '{query}')
 ])
@@ -62,6 +67,11 @@ def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
     """
     if session_id not in store:
         store[session_id] = InMemoryChatMessageHistory()  # Langchain이 기본으로 제공하는 인메모리 기반 대화 이력 관리 클래스
+        '''
+        InMemoryChatMessageHistory는 Langchain에서 제공하는 간단한 대화 이력 저장용 클래스이며,
+        메모리 내에서만 데이터를 유지하기 때문에 세션 단위 임시 저장에 적합함
+        이를 파일이나 DB 기반 저장소로 바꾸고 싶다면 Redis, PostgreSQL와 같은 다른 ChatMessageHistory 구현체를 사용해야 함
+        '''
     return store[session_id]
 
 chain_with_history = RunnableWithMessageHistory(
@@ -77,6 +87,121 @@ app = FastAPI(title="IT 진로 상담 챗봇 API")
 # decoration(same as java's annotation)이용, 엔드포인트 매핑
 @app.post("/chatbot", summary="챗봇에게 메시지 전송")
 async def chatbot(query: Annotated[str, Form(...)], session_id: Annotated[str, Form(...)]):
+    # chain_with_history .invoke로 실행
+    response = chain_with_history.invoke(
+        {'query': query},
+        config={'configurable': {'session_id': session_id}}
+    )
+    return response.content
+
+@app.post("/init_conversation")
+async def init_conversation():
+    #uuid4(랜덤) 사용
+    session_id = str(uuid.uuid4())
+    get_by_session_id(session_id) # session ID 생성
+    return {"session_id": session_id}
+
+@app.delete("/remove_conversation")
+async def remove_conversation(session_id: Annotated[str, Form(...)]):
+    if session_id in store:
+        store.pop(session_id)
+    else:
+        raise HTTPException(status_code=404, detail="session_id not found")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # host=0.0.0.0이란 건 localhost로 지정한다는 소리겠지...? 10:14
+    '''
+    아니요, `host="0.0.0.0"`은 모든 네트워크 인터페이스에서 접근 가능하도록 설정하는 것입니다.
+    즉, 웹 서버가 로컬 컴퓨터뿐만 아니라 네트워크 상의 다른 컴퓨터에서도 접근할 수 있도록 하는 설정입니다.
+    자세한 설명:
+    if __name__ == "__main__"::
+        이 부분은 현재 스크립트가 "직접 실행"되었을 때만 실행되도록 하는 파이썬 구문입니다.
+        (모듈로 임포트되었을 때는 실행되지 않습니다.)
+    uvicorn.run(app, host="0.0.0.0", port=8000):
+        이 부분은 uvicorn 서버를 실행하는 코드입니다.
+    app, :
+        실행할 FastAPI 애플리케이션 객체를 지정합니다.
+    host="0.0.0.0" :
+        서버가 모든 네트워크 인터페이스에서 요청을 수신 대기하도록 설정. 
+        이렇게 하면 로컬 네트워크 또는 다른 네트워크에 있는 클라이언트가 서버에 접근 가능
+    port=8000:
+        서버가 사용할 포트 번호 지정, 8000번 포트 사용.
+    # host=0.0.0.0이란 건 localhost로 지정한다는 소리겠지...?:
+        질문에서 제시된 주석은 잘못된 이해입니다. `host="0.0.0.0"`은 로컬호스트(localhost)를 의미하지 않습니다. 
+        로컬호스트로 접근하려면 host="127.0.0.1" 또는 `host="localhost"`로 설정해야 합니다.  10:34
+    '''   
+
+
+# Using Docker with Dockerfile
+# main.py
+# 20250811 오늘 목표: gunicorn으로 인터넷에 배포
+# CTRL+SHIFT+P로 가상환경 설정
+import uvicorn
+from dotenv import load_dotenv
+import uuid
+# 고유한 세션 아이디를 생성해주는 library: uuid
+from typing import List, Annotated
+
+from fastapi import FastAPI, Form, HTTPException, Request
+
+from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
+from langchain_core.messages import BaseMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import ChatOpenAI
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from pydantic import BaseModel, Field
+
+load_dotenv()
+
+model = ChatOpenAI(
+    model_name = 'gpt-4.1',
+    temperature=0.7
+)
+
+prompt = ChatPromptTemplate.from_messages([
+   ('system', '넌 IT 분야의 최고의 직업상담사야. 개발 직군 취업준비생들에게 현실적이지만 용기를 줄 수 있는 말투로 취업 상담을 해줘. 단 모든 응답은 **한국어**로 답변해야해'),
+   MessagesPlaceholder(variable_name='history'),
+   ('human', '{query}')
+])
+
+# chain 연결
+chain = prompt | model
+
+# store라는 빈 딕셔너리 형성.
+store={}
+
+def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
+    """
+    get_by_session_id는 세션 ID를 받아서 해당 아이디에 맞는  대화 기록 객체를 반환하는 함수.
+    만약 store에 해당 세션 ID가 없다면, 새로운 대화 기록 객체를 생성하고 store에 저장한다.
+    """
+    if session_id not in store:
+        store[session_id] = InMemoryChatMessageHistory()  # Langchain이 기본으로 제공하는 인메모리 기반 대화 이력 관리 클래스
+        '''
+        InMemoryChatMessageHistory는 Langchain에서 제공하는 간단한 대화 이력 저장용 클래스이며,
+        메모리 내에서만 데이터를 유지하기 때문에 세션 단위 임시 저장에 적합함
+        이를 파일이나 DB 기반 저장소로 바꾸고 싶다면 Redis, PostgreSQL와 같은 다른 ChatMessageHistory 구현체를 사용해야 함
+        '''
+    return store[session_id]
+
+chain_with_history = RunnableWithMessageHistory(
+    runnable=chain,
+    get_session_history=get_by_session_id,  # session_id를 받아 history를 반환하는 함수 전달
+    input_messages_key='query',
+    history_messages_key='history'  # {'query': '(사용자질문)', 'history':[...대화기록]}와 같은 기능, 다른 형식
+)
+
+#fastAPI instance 생성
+app = FastAPI(title="IT 진로 상담 챗봇 API")
+
+# decoration(same as java's annotation)이용, 엔드포인트 매핑
+@app.post("/chatbot", summary="챗봇에게 메시지 전송")
+async def chatbot(query: Annotated[str, Form(...)], session_id: Annotated[str, Form(...)]):
+    # 아래 부분 추가
+    if session_id not in store:
+        raise HTTPException(status_code=404, detail="session_id_not_found")
+    # HTTP exception 핸들링 끝!
     # chain_with_history .invoke로 실행
     response = chain_with_history.invoke(
         {'query': query},
