@@ -3,3 +3,6 @@ https://pine-fibula-aee.notion.site/KOR-Prompt-that-check-if-my-method-will-perf
 
 # 로그인 안 되는 오류 해결
 https://pine-fibula-aee.notion.site/Edit-getAuthentication-to-fix-the-login-error-255fc892a16f80e9b774f563bf2b430a
+
+# /password-reset 페이지 cursor로 생성 후 배포를 위해 아래 코드 추가
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/password-reset`, {
