@@ -107,10 +107,8 @@ JWT의 만료 시간을 잘 설정해야 한다.
 어떤 인증 방식을 선택할지는 프로젝트의 요구사항에 따라 달라진다.
 # https://f-lab.kr/insight/jwt-vs-session-authentication-20240823
 
-보안이 중요한 경우: 
-세션 기반 인증이 더 안전할 수 있다.
-확장성이 중요한 경우:
-JWT 인증이 더 유리함.
+보안이 중요한 경우엔 세션 기반 인증이 더 안전할 수 있다.
+확장성이 중요한 경우에는 JWT 인증이 더 유리하다.
 
 간단한 프로젝트: 세션 기반 인증이 더 간단하게 구현할 수 있다.
 복잡한 프로젝트: JWT 인증이 더 유연하게 대처할 수 있다.
@@ -120,3 +118,22 @@ JWT는 특히 모바일 앱, API 서버 등에서 많이 사용되며,
 마이크로서비스 아키텍처에서도 유용.
 하지만, JWT의 보안 취약점을 고려하여
 안전한 JWT 사용 방법을 숙지해야 한다.
+
+-> In our project, I decided using JWT.
+Since I have a problem that closing browser tab doesn't guarantee logout,
+I need to handle a refresh token, also where to store it.
+When I received mentoring from a senior backend developer, he said his company stores the two JWTs (accessToken and refreshToken) in separate places.
+At first, they kept both tokens in the same local storage, but due to security concerns, they realized that storing both tokens in the same place could be dangerous.
+So, they decided to store them separately.
+Currently, we only store the accessToken in Local Storage.
+
+https://www.inflearn.com/chats/1007618/jwt-token-%EC%9D%84-%EC%96%B4%EB%94%94%EC%97%90-%EC%A0%80%EC%9E%A5%ED%95%98%EB%A9%B4-%EC%A2%8B%EC%9D%80%EA%B0%80%EC%9A%94?srsltid=AfmBOooBei_Q6O8DLyA9yM3gYVgQ9KsAF3C2PwEFskqvi3gdDa1w465W
+Wait, I found another way to prevent a persistent login issue.
+This person is considering where to store the accessToken and compared three methods.
+From this post, I learned that the method I’m currently using is vulnerable to XSS attacks.
+So, I decided to try the header storage method instead.
+
+But I cannot find 
+ localStorage.setItem("access-token",data.accessToken);
+this sort of cods in backend. 
+So I thought this sort of codes are not located in backend.  (21:31)
