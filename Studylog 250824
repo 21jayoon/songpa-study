@@ -22,8 +22,11 @@ After authorization, the user can access to the system resource or some particul
 
 인가 방식 How to authorize:
 다양한 인가 방식이 있으며, 접근 제어 목록 (ACL), 역할 기반 접근 제어 (RBAC) 등이 대표적이다.
--> I choose the authorization protocol with a RBAC(역할 기반 접근 제어).
-RBAC is form of an access control
+-> I chose the authorization protocol using RBAC.
+RBAC is a form of access control that assigns separate responsibilities when multiple roles are involved.
+Since our team decided to define the roles of customer and boss, 
+and because every team member needs to clearly understand these authority, 
+I wrote the code based on RBAC.
 
 Reference : https://www.ibm.com/kr-ko/think/topics/rbac
 https://security.stackexchange.com/questions/63518/mac-vs-dac-vs-rbac
