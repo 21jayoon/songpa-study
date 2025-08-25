@@ -1,0 +1,98 @@
+https://pine-fibula-aee.notion.site/FEATURE-profile-update-25afc892a16f805d9314d49e0d6eb49d?pvs=74
+백엔드에서 빈 input 상태로 정보 수정 시
+empty 값으로 업데이트되는 부분 수정
+
+// 4. 도메인 메서드를 통한 정보 수정
+        if (userDTO.getUserPwd() != null ) user.modifyUserPassword(userDTO.getUserPwd());
+        if (userDTO.getUserPhone() != null) user.modifyUserPhone(userDTO.getUserPhone());
+        if (userDTO.getUserName() != null) user.modifyUserName(userDTO.getUserName());
+
+Now
+// 4. 도메인 메서드를 통한 정보 수정
+        if (isNotEmpty(userDTO.getUserPwd())) user.modifyUserPassword(userDTO.getUserPwd());
+        if (isNotEmpty(userDTO.getUserPhone())) user.modifyUserPhone(userDTO.getUserPhone());
+        if (isNotEmpty(userDTO.getUserName())) user.modifyUserName(userDTO.getUserName());
+
+빈 상태로 값을 넘겨줘도 DB에 반영되지 않도록 수정 완료
+근데 중복값 처리가 안 되는 상황이 발생함.
+(일부러 이전 전화번호와 같은 010-4567-1234로 수정을 시도했는데, 정상적으로 값이 수정됨)
+
+그리고 형상관리자가 테스트 해봤을 때 비밀번호 수정 시
+encrypted된 값이 아니라 입력한 문자값 그대로 DB에 저장되는 보안 문제 제기.
+        if (isNotEmpty(userDTO.getUserPwd())) user.modifyUserPassword(userDTO.getUserPwd());
+이 부분 수정 필요.
+
+        if (isNotEmpty(userDTO.getUserPwd())) passwordEncoder.encode(user.modifyUserPassword(userDTO.getUserPwd()));
+메소드 콜 앞에 passwordEncoder.encode를 붙이는 방법 사용,
+modifyUserPassword의 자료형을 CharSequence로 바꾸라는 알람 뜸.
+
+public void modifyUserPassword(String newPwd) {
+        this.userPwd = newPwd;
+    }
+이 형태였던 modifyUserPassword 메소드를  
+
+public CharSequence modifyUserPassword(String newPwd) {
+        this.userPwd = newPwd;
+        return newPwd;
+    }
+이렇게 바꿈.
+
+순환참조 오류 뜸
+Reference: https://myvelop.tistory.com/119
+https://green-bin.tistory.com/52
+
+JwtTokenProvider를 보면 getAuthentication 에서 userSerivce에 의존하고 있다.
+      public Authentication getAuthentication(String token) {
+        // 1. 클레임 파싱
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+
+        // 2. JWT에서 사용자 ID를 추출해 UserService로 사용자 정보 로드 (이전처럼 userService.findByUserId 사용 가능)
+        String userId = claims.getSubject();
+        LoginUserDTO loginUserDTO = userService.findByUserId(userId);
+        
+수정된 UserService에선 usePwd를 수정하기 위해 passwordEncoder를 사용하고 있다.
+        if (isNotEmpty(userDTO.getUserPwd())) passwordEncoder.encode(user.modifyUserPassword(userDTO.getUserPwd()));
+
+SecurityConfig는 jwtTokenProvider를 상속받으며, PasswordEncoder의 Bean은 SecurityConfig 내부에서 등록된다.
+  @Autowired
+      private JwtTokenProvider jwtTokenProvider;
+      ......
+      /**
+       * 비밀번호 암호화를 위한 BCryptPasswordEncoder를 빈으로 등록합니다.
+       * @return PasswordEncoder 인스턴스
+       */
+      @Bean
+      public PasswordEncoder passwordEncoder() {
+          return new BCryptPasswordEncoder();
+      }
+
+세 가지를 정리해보자면
+
+jwtTokenProvider는 UserService를 참조하고 있다.
+UserService는 PasswordEncoder를 참조(의존)하고 있다.
+PasswordEncoder의 Bean은 SecurityConfig 내부에서 등록된다.
+SecurityConfig는 jwtTokenProvider를 참조하게 되면서 순환 참조가 발생한다.
+
+해결 방법 1:
+userService 앞에 lazy annotaion 붙이기
+public JwtTokenProvider(@Value("${jwt.secret}") String secret,
+                            @Value("${jwt.expiration}") long tokenValidityTime,
+                            @Lazy UserService userService) {
+        // 시크릿 키를 Base64 디코딩하여 Key 객체 생성
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expiration = tokenValidityTime;
+        this.userService = userService;
+    }
+-> 순환참조 해결 완료
+
+# (EN) Solving Circular Reference :
+# https://pine-fibula-aee.notion.site/Solve-circular-reference-25afc892a16f803eb1b2e72609e995ee
+
+순환 참조는 해결했으나 
+"/profile"의 정보 수정 기능이 작동하지 않음.
+문제는 실제로 기능은 작동하지 않으나, 
+alert는 '정보 수정이 완료되었습니다!'라고 떠서 사용자에게 혼란을 줌.
+
+main.py까지 같이 run하고(돌리고) 정보 수정 시도한 결과 db에 저장이 잘 되는 것을 확인함.
+
+근데 또 다른 사용자의 정보를 수정하려고 했더니 안 됨.
