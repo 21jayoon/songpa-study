@@ -1,2 +1,5 @@
 https://pine-fibula-aee.notion.site/Solve-the-error-Claim-property-name-cannot-be-null-or-empty-24dfc892a16f80ee806eca9d82ec62ae
 
+팀 동료들의 기능 구현에서 shopCode가 필요해진 상황.
+하지만 shopCode는 user에 따라서 있는 사람도 있고 없는 사람도 있다.
+이를 생각하면서 JWT에 shopCode를 추가하는 기능을 구현 시작했다.
