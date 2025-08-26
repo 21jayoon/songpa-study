@@ -1,4 +1,7 @@
 # Study about difference between AccessToken and RefreshToken
 https://inpa.tistory.com/entry/WEB-%F0%9F%93%9A-Access-Token-Refresh-Token-%EC%9B%90%EB%A6%AC-feat-JWT
 
+영어 기록:
 https://pine-fibula-aee.notion.site/Insert-shopCode-into-the-JWT-24efc892a16f800aaf33fe0eb12308a4
+어제에 이어 JWT에 shopCode를 추가하고자 계속 시도하였으나 제대로 들어가지 않았고,
+error도 여러 건 터져서 해결하는 데 모든 시간을 쏟음.
