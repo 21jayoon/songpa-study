@@ -56,3 +56,6 @@ public class SignupDTO {
                 .body(new ResponseDTO(HttpStatus.CREATED, "회원가입 성공", userFacadeService.registerUser(signupDTO)));
 	              //signUpDTO got an error because the registerUser's parameter is not a SignupDTO
     }
+
+# 영어로 작성한 개발일
+# https://pine-fibula-aee.notion.site/FEATURE-Email-verification-25cfc892a16f8058b1b8d5e032b1a8d8
