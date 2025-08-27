@@ -1,0 +1,58 @@
+# 1. session에 이메일과 인증번호를 저장하고 저장한 세션 정보를 불러와 확인하는 방법
+# (세션 유지시간이 기본적으로 30분임. 추가적으로 지정할 필요가 없다는 장점이 있음)
+# 2. local cache 사용하는 방법 
+# (서버 다운되면 같이 날아간다는 매우 치명적인 단점이 있음. 그러나 redis 캐시나 로컬이나 사용법 거의 비슷해서 바꿀 게 많지 않다는 장점 있음. 팀원은 카페인 사용했다고 함.)
+# https://enai.tistory.com/29
+
+# 세션을 사용하기로 함. 
+# https://www.maeil-mail.kr/question/110
+단일 책임 원칙(Single Responsibilty Principle)에 의거해 
+본인인증 전용 컨트롤러를 하나 더 생성하기로 결정.
+
+# 잠깐, 여기서 SecurityConfig 살펴보니
+ @Beanhttps://github.com/21jayoon/songpa-study/pulls
+    public SecurityFilterChain filterChain(HttpSecurity http, ShopService shopService) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(withDefaults())
+                // 세션 관리 전략을 STATELESS로 설정 (세션을 사용하지 않음)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+세션을 사용하지 않는 걸로 설정했는데, 세션에 저장할 수 있으려나? 11:51
+
+# https://softwaresaramdle.tistory.com/73
+# 이메일 형식 검사 필요
+https://taedonn.tistory.com/18
+
+
+# SessionAttributes 사용법
+https://sundaland.tistory.com/320
+
+# 백엔드 SignupDTO에 userEmail, verifyCode 추가
+@Getter
+@Setter
+@ToString
+public class SignupDTO {
+    private Integer userCode;
+    private String userName; //필수 입력 값
+    private String userPhone; //필수 입력 값
+    private String userEmail; // 이메일 인증 시 필요
+    private String userId;
+    private String userPwd;
+    private LocalDate birthday;
+    private String verifyCode;
+    /*고민! 여기서 회원가입할 사람이 알아서 골라 받는 거 아니고
+    shopLocation 등록하거나 등록상태(shopStatus) '영업 중'인 경우에는
+    자동으로 ADMIN 되게끔 만들어야 함.
+    shopLocation이 삭제되어 shopCode를 하나도 갖고 있지 않게 되거나
+    '폐업'한 경우에는 ADMIN 권한 삭제되도록 만들어야 함 13:47
+    17:00 해결 완료. DevelopingLog.md 250707 12번 참고 바람*/
+}
+
+# UserController의 매개변수 SignupDTO로 수정
+@PostMapping("/users")
+    public ResponseEntity<ResponseDTO> signup(@RequestBody SignupDTO signupDTO) {    // 회원 가입 정보를 받아 냄
+        return ResponseEntity
+                .ok()
+                .body(new ResponseDTO(HttpStatus.CREATED, "회원가입 성공", userFacadeService.registerUser(signupDTO)));
+	              //signUpDTO got an error because the registerUser's parameter is not a SignupDTO
+    }
