@@ -57,5 +57,5 @@ public class SignupDTO {
 	              //signUpDTO got an error because the registerUser's parameter is not a SignupDTO
     }
 
-# 영어로 작성한 개발일
+# 영어로 작성한 개발일지
 # https://pine-fibula-aee.notion.site/FEATURE-Email-verification-25cfc892a16f8058b1b8d5e032b1a8d8
