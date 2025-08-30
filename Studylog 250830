@@ -1,0 +1,49 @@
+# Team project
+Looking back why the login doesn't work when the user('ADMIN' user) has two or more shpoCode?
+
+https://github.com/BOA-with-elephant/Header-backend/pull/271/files#diff-91b053bb0f9f9e1ed7a0904f03abb06fc7107f42eda9b475e9aa600a9237b234
+
+When the user login, 
+loginSuccesshandler controll the shopCode with this code.
+
+```java
+// 2. JWT 토큰 생성 및 사용자 정보 포함 로직
+        if (loginUserDTO != null) {
+            ShopDTO shopDTO;
+
+            shopDTO = shopService.findFirstShopByAdminCode(loginUserDTO.getUserCode());
+
+            if (shopDTO != null) {
+                loginUserDTO.setAdmin(true);
+            } else {
+                loginUserDTO.setAdmin(false);
+```
+
+There is a exception handling with the case of shopDTO is null,
+but there is no handling for the case when the shopCode is more than one.
+Also when see a findShopCodeByUserCodeMatchWithAdminCode, the data type was Optional.
+/* shop DB의 adminCode를 찾아온다 */
+    @Query("SELECT s.shopCode AS shopCode, s.shopName AS shopName, s.adminInfo.userCode AS adminUserCode FROM Shop s WHERE s.adminInfo.userCode = :adminCode")
+    Optional<ShopAdminInfo> findShopCodeByUserCodeMatchWithAdminCode(@Param("adminCode") Integer adminCode);
+
+https://www.elancer.co.kr/blog/detail/265
+Optional data type is a singular, so when the shopCode became more than one,
+this data type couldn't work well.
+I guess this is why the ADMIN user who has more than one shopCode couldn't logged in.
+
+⚠️ Potential issue
+
+민감정보(비밀번호/해시) 노출 가능성 — userInfo 전체 객체 반환 금지
+
+loginUserDTO에는 userPwd가 포함될 가능성이 높습니다. 그대로 직렬화하면 클라이언트로 유출됩니다. 필요한 필드만 선별해 내려주세요.
+
+-            responseBody.put("userInfo", loginUserDTO);
++            Map<String, Object> safeUser = new HashMap<>();
++            safeUser.put("userCode", loginUserDTO.getUserCode());
++            safeUser.put("userId", loginUserDTO.getUserId());
++            safeUser.put("userName", loginUserDTO.getUserName());
++            safeUser.put("admin", loginUserDTO.isAdmin());
++            responseBody.put("userInfo", safeUser);
+
+//TODO: 위 방식으로 채택시 비밀번호 노출은 막을 수 있지만 프론트에서 loginuserDTO를 통째로 가져오는 것 같아 프론트엔드 코드 관련 연구가 필요함.
+(이전에 위와 비슷한 형태로 userInfo 일부만 반환하는 방식을 택했는데 로그인이 안 되는 경우가 있었음)
