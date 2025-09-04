@@ -1,0 +1,9 @@
+When provide all the shopCode with JWT(accessToken),
+there is the vulnerability with security.
+Anyone can encrypt each user's JWT with console log,
+if the shopCode and other things the hacker can use it in user's stored informations.
+
+There is the alternative plan: using refresh Token.
+
+Feature of refresh token: (compared with accessToken)
+Longer lifespan like days or weeks.
