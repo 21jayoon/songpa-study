@@ -7,3 +7,7 @@ There is the alternative plan: using refresh Token.
 
 Feature of refresh token: (compared with accessToken)
 Longer lifespan like days or weeks.
+Stored securely in . 
+(-> Studying after storing JWT, ()
+I determined to store refreshToken in different place with accessToken: 
+Does not carry shopCodes/roles — just a unique identifier to validate in DB)
