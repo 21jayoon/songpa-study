@@ -1,0 +1,90 @@
+// Studying javascript
+// coding test refactoring
+Try:
+function solution(n) {
+    var answer = 0;
+
+    if (0 < n <= 1) {
+        //1 팩토리얼은 1
+        answer = 1;
+    } else if(1 < n <= 5){
+        //2팩토리얼은 2
+        answer = 2;
+    } else if(5 < n <= 23) {
+        answer = 3;
+    } else if(24 <= n <120) {
+        //4factorial = 24
+        answer = 4;
+    } else if(120 < n <= 720) {
+        //5factorial = 120
+        answer = 5;
+    } else if(720 < n <= 5039) {
+        //6factorial = 720
+        answer = 6;
+    } else if(5040 <= n < 40320) {
+        //7! = 5040
+        answer = 7;
+    } else if(40320 <= n < 362880) {
+        //8! = 40320
+        answer = 8;
+    } else if(362880 <= n < 3628800) {
+        answer = 9;
+    } else {
+        answer = 10;
+    }
+    return answer;
+}
+
+console.log(solution(3628800));
+console.log(solution(7));
+
+This code doesn't work.
+I don't know the reason so I asked to AI.
+
+/* Answer(KOR):
+무작정 많은 if-else로 처리하지 말고 문제 본질(팩토리얼 계산)을 이용해 푸는 것이 
+유지보수성, 안정성, 확장성 모두에 유리해요.
+
+-문제점 분석 (단계별)
+1. 비교 연산자 체인 사용 오류
+JavaScript에서 0 < n <= 1 같은 체인식 비교는 python과 다르게 동작해요. 
+먼저 0 < n이 평가되어 boolean(true/false)이 되고, 그 boolean이 숫자(1 또는 0)로 강제 변환된 뒤 <= 1과 비교됩니다. 
+의도한 범위 검사가 되지 않아요.
+올바른 표현은 0 < n && n <= 1 처럼 논리연산자 &&를 써야 합니다.
+
+2. 범위 방식 자체의 취약성
+모든 범위를 수작업으로 하드코딩하면 실수, 중복, 누락이 발생하기 쉽고 유지보수가 어렵습니다. 또한 현재 코드의 범위 경계들이 일관적이지 않아요(예: 5 < n <= 23 vs 24 <= n <120 등).
+
+3. var 사용
+ES6 이후 var 대신 let 또는 변경 불가능한 값에 const를 권장합니다.
+var는 스코프가 함수 단위여서 의도치 않은 버그를 초래할 수 있어요.
+
+4. 더 간단한 알고리즘 가능
+코드가 사실상 "n이 어느 팩토리얼 사이에 있는지"를 찾는 문제로 보입니다. 
+그러면 매번 범위를 나열하기보다 팩토리얼을 차례로 계산해서 찾는 방법이 더 명확하고 유지보수에 좋습니다.
+
+5. 개선된 구현 (권장)
+팩토리얼을 1, 2, 3, ... 순서로 곱해가며 k! <= n 인 최대 k를 찾아 반환하는 방식이 간단하고 안전해요.
+let 사용, 입력 검증, 간단한 루프 사용으로 구현하겠습니다.
+*/
+
+Clone coding with recommended codes:
+function solution(n) {
+    if (n < 1) {
+      return 0;
+    }
+    
+    let factorial =1;
+    let k = 0;
+
+    while(factorial <= n) {
+        k++;
+        factorial *= k;
+    }
+    return k -1;
+    // The result of iteration(while loop) stops 
+    // after meeting factorial < n, 
+    // but encountering n means 
+    // k already goes one more compared to n.
+    // That is why the return value should be k-1, not just k.
+}
