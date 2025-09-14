@@ -1,4 +1,43 @@
 // Studying javascript
+// In Javascript, if you forgot the semicolon, 
+// but when the each codes seperated with entered,
+// javascript insert the semicolon automatically.
+/** example:
+ * cosole.log(15)
+ * cosole.log(16)
+ * -> I didn't wrote semicolon at last, 
+ * but the javascript recognize it as if has semicolon.
+ */
+
+// Data type: number(integer(정수(음수,0,양수)), floating point(소수)), 
+// string and the boolean are the primitive data types(원시 데이터 타입).
+
+
+// An abstraction(추상화) means simplify the complicated things with the purpose.
+// Abstract = simplify
+// -> Clarify the purpose, Conceal the unnecessary, Reveal only the essentials.
+
+/** e.g. When input some number repeatedly, could make some typo.
+ * Also it's difficult to convey the meaning to their colleagues.
+ * -> This is why the variable(변수) needed in programming.
+ * 
+ * How to declare the variable in JS?
+ * Use 'let'
+ * e.g.
+ * let espressoPrice;
+ * espressoPrice = 3000;
+ * 프로그래밍에서 등호 하나(=)는 '할당연산자'로, 오른쪽에 있는 값을 왼쪽(보통 변수)에 '할당한다'는 의미가 있다.
+ * 변수는 '선언과 동시에 할당'이 가능하다.
+ */
+
+// Function means the set of orders.
+
+// How to call the function? (함수 호출 방법)
+// 함수 이름();
+
+// Exponentiation (**) is prior to multiplication(*)
+
+
 // coding test refactoring
 Try:
 function solution(n) {
@@ -88,3 +127,13 @@ function solution(n) {
     // k already goes one more compared to n.
     // That is why the return value should be k-1, not just k.
 }
+
+/* 설명
+초기 factorial = 1, k = 0 으로 시작해요.
+루프 내에서 k를 증가시키고 factorial에 k를 곱합니다. 루프 종료 시 factorial > n 이므로 k-1이 최대 정수입니다.
+시간복잡도는 k(결과값) 만큼으로 충분히 빠릅니다(팩토리얼 값이 급격히 커지므로 k는 작음).
+
+- 추가 권장사항 / 베스트프랙티스
+함수 내부에 console.log 대신 반환값만 남기고 테스트 환경에서 출력하도록 하는 것이 함수 재사용성에 좋아요.
+변수명은 의미 있게 (factorial, k) 짓는 게 가독성에 도움됩니다.
+*/
