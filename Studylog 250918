@@ -19,3 +19,22 @@ But now I got questioned about difference between using .isempty and null.
 https://stackoverflow.com/questions/13689033/any-difference-between-string-null-and-string-isempty
 
 Referring this question and answers above the link, 
+if I use == null, it returns
+true when the input value is null,
+false when the input value is "", which means actual 'nothing' inserted but the computer may not recognize it,
+false when the input value has something like "somet".
+
+If I use isEmpty, it returns
+nullpointerexception when the field is null,
+true(=Yes it is empty) when the field is "",
+false(=No it's filled) when the field has something like "someth".
+
+With this summary, I decided to use 'isEmpty' instead of ==null.
+Because,
+1. It can distinguish empty value like '' unlike the ==null.
+2. It can meet all the requirements from null to filled input value.
+
+Finally I changed the code from == null into
+    if (userDTO.getUserId().isEmpty() || userDTO.getUserPhone().isEmpty() || userDTO.getUserName().isEmpty()) {
+        throw new IllegalArgumentException("필수 입력값이 누락되었습니다.");
+    }
