@@ -1,0 +1,21 @@
+https://pine-fibula-aee.notion.site/KOR-EN-The-different-condition-in-validation-273fc892a16f803bbac5f8eda52d33d8
+
+While I developing resetPwd method, I found my must-filled validation is written like this.
+팀프로젝트 내용 중 reserPwd method를 수정하는 과정에서, 유효성 검사가 아래 코드와 같이 되어있는 걸 확인했다.
+
+if (userDTO.getUserId() == null || userDTO.getUserPhone() == null || userDTO.getUserName() == null) {
+            throw new IllegalArgumentException("필수 입력값이 누락되었습니다.");
+        }
+
+Actually, this code is referenced by AI-referenced code.
+Before when I known little about programming, I was in a hurry to meet the deadline.
+But now I got questioned about difference between using .isempty and null.
+사실 이 코드는 인공지능에게 짜달라고 했던 코드를 참고해서 직접 작성한 것인데,
+이전에 마감기한을 지키기 위해 큰 비판 없이 코드를 최대한 사용했던 것에 반해
+왜 이러한 코드로 작성된 것인지 생각해봐야겠다고 느꼈고,
+유효성 검사에서 isEmpty를 쓰는 것과 == null을 쓰는 것의 차이를 알고 코드를 수정/유지해야겠다고 생각했다.
+
+
+https://stackoverflow.com/questions/13689033/any-difference-between-string-null-and-string-isempty
+
+Referring this question and answers above the link, 
