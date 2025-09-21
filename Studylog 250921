@@ -1,0 +1,88 @@
+# Study python and LLM with Colab
+import gradio as gr
+
+# 캐릭터 추측 챗봇
+def which_character_am_I(message, chat_history):
+  if message == "":
+    return "", chat_history
+  else:
+    completion=client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", 
+             "content": """
+             You are the expert of Arthur Conan Doyle's novel. Especially you are the Sherlockian. 
+             You have read all of the Sherlock Holme's novel series multiple times 
+             and know all the characters from Doctor Watson to the minor character that shows once in the novel. 
+             If the user send some characteristic feature, analyze it and 
+             derive the most similar character in Sherlock Holmes series, Arthur Conan Doyle's novel. 
+             
+             The example of input and the response must be Korean, 
+             and the response will be like this. 
+             
+             '당신이 보내준 성격을 분석해보니 (유쾌하고 당차지만 엉뚱한 걸 잘 믿어버리는) 성격을 갖고 있군요! 
+             당신은 셜록 홈즈 시리즈에서 (자베즈 윌슨 Jabez Wilson)으로 활약했을 것 같습니다! 
+             그는 1892년 출간된 (셜록홈즈의 모험)에 수록된 작품 중 (붉은 머리 연맹)이라는 단편에 사건의 의뢰인으로 나왔습니다!' 
+            
+             The example should include the summary of input strings, and the similar character with input chracteristic,
+             and the story that character appears.
+             
+             Also, if the user asking unrelated question with Sherlock Holmes character, respond with 
+             
+             '죄송합니다. 해당 내용은 현재 챗봇에서 구현할 수 없는 내용입니다'. 
+             """},
+             {"role": "user", "content": message}
+        ]
+    )
+    chat_history.append([message, completion.choices[0].message.content])
+    return "", chat_history
+
+# 챗 내역 되돌리기    
+def chat_bot_undo(chat_history):
+  if len(chat_history) > 1:
+    chat_history.pop()
+  return chat_history
+
+# 챗 완전 초기화
+def reset_the_chatbot(chat_history):
+  chat_history=[[None, "셜로키언인 당신! 셜록 홈즈 세계관에 들어간다면 어떤 캐릭터일까요?"]]
+  return chat_history
+
+# 챗봇 레이아웃
+with gr.Blocks(theme='earneleh/paris') as app:
+  with gr.Tab("나는 셜록홈즈 세계관에서 어떤 캐릭터일까?"):
+    gr.Markdown(
+        value="""
+        # <center> 내가 셜록홈즈 세계관에 들어간다면?</center>
+        <center>셜로키언인 당신! 홈즈가 사는 런던에 떨어지게 된다면 어떤 인물로 살게되었을까요?</center>
+        """
+    )
+
+    sh_chatbot=gr.Chatbot(
+        value=[[None, "셜로키언인 당신! 셜록 홈즈 세계관에 들어간다면 어떤 캐릭터일까요?"]],
+        show_label=False
+    )
+    with gr.Row():
+      user_input=gr.Text(
+          lines=1,
+          placeholder="성격을 입력하세요.",
+          container=False,
+          scale=9
+      )
+      send_btn=gr.Button(
+          value="보내기",
+          scale=1,
+          variant="primary",
+          icon="https://cdn-icons-png.flaticon.com/128/12439/12439334.png"
+      )
+    with gr.Row():
+      gr.Button(value="되돌리기").click(fn=chat_bot_undo, inputs=sh_chatbot, outputs=sh_chatbot)
+      gr.Button(value="초기화").click(fn=chat_bot_undo, inputs=sh_chatbot, outputs=sh_chatbot)
+    
+    # 입력 값 보내는 방법1
+    send_btn.click(fn=which_character_am_I, inputs=[user_input, sh_chatbot], outputs=[user_input, sh_chatbot])
+    # 입력 값 보내는 방법2
+    user_input.submit(fn=which_character_am_I, inputs=[user_input, sh_chatbot], outputs=[user_input, sh_chatbot])
+    
+
+app.launch()  
