@@ -15,4 +15,95 @@ for (let key in user){
   console.log(key, ":", user[key]);
 }
 
-//Array 배열
+//배열 Array
+//1. 배열 생성
+let fruits = ['apple', 'banana', 'cherry'];
+// String array
+
+//2. 배열 순차 출력
+for (let fruit of fruits) {
+  console.log(fruit);
+}
+// apple
+// banana
+// cherry
+
+// Javascript method: pop, shift, splice
+// Array.prototype.pop https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/pop
+// Array.prototype.shift
+// Array.prototype.splice
+let arr = ['a', 'b', 'c']
+// Remove the last node 마지막 요소 제거
+arr.pop();
+console.log(arr); //['a','b']
+// If we insert pop() in some variable and print it, the printing will show 'c'
+const last = arr.pop();
+console.log(last); // c
+
+// Delete the first node 첫 번째 요소 제거
+arr.shift();
+console.log(arr); // ['b']
+
+// Detach the specific node 특정 위치 요소 추가/제거
+// splice() needs parameter
+arr.splice(0, 1, 'x');
+console.log(arr); // ['x']
+
+// 참조형 데이터
+// 00. primitive data type(기본형 데이터) = 값을 변수에 그대로 할당해 직접적으로 사용
+let primitive_d1 = 10; // 10
+let primitive_d2 = primitive_d1; //10
+// 값 재할당
+primitive_d2 = 20;
+console.log(primitive_d1); // 10
+console.log(primitive_d2); // 20
+// 서로 영향 없음
+
+// 01. reference data type(참조형 데이터)
+let obj1 = { name: 'Code'};
+// obj2에 obj1 할당
+let obj2 = obj1;
+// obj2에 재할당
+obj2.name = 'Tom';
+console.log(obj1.name); // Tom (Referencing same object)
+console.log(obj2.name); // Tom (Referencing same object)
+// JS에선 객체와 배열, 함수가 참조형임.
+/* I think this is similar with 'shallow copy'.
+-> 
+*/
+
+// JS는 Camel case로 이름을 적는다
+// let namingPromise = 'camelCase';
+
+// Pascal case = all capital
+
+//배열 두 개를 이용한 할당: destucturing
+const arr1 = [1, 2, 3];
+const [a, b, c] = arr1;
+console.log(a); //1
+console.log(b); //2
+console.log(c); //3
+
+// ...의 사용: 배열 구조 분할 할당(분해 할당)
+const arr2 = [1, 2, 3];
+const [d, ...rest] = arr2;
+console.log(d); //1
+console.log(rest); //[2, 3]
+
+// Using JSON.parse
+const value = '{ "a": 1, "b": 2 }';
+let object = JSON.parse(value);
+
+// Handling exception: Using try-catch
+const value2 = '{"a":1, "b":';
+let object2 = null;
+// value2 이용 시 제대로 된 JSON 데이터 형식이 아니기 때문에 error occurred.
+try {
+  object2 = JSON.parse(value2);
+} catch (error) {
+  console.error(error);
+}
+
+// arrow function 화살표 함수
+const multiply = (a, b) => a * b;
+console.log(multiply(1,2)); // 2
