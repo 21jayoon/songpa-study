@@ -116,6 +116,7 @@ console.log(multiply(1,2)); // 2
 
 
 // Mission
+//1)
 const nums = [1, 2, 3, 4];
 
 // nums 배열의 각 요소를 2를 곱하여 doubledNums를 생성하세요.
@@ -132,3 +133,196 @@ console.log(doubledNums);
 // arrow function 화살표 함수
 const multiply = (a, b) => a * b;
 console.log(multiply(1,2)); // 2
+
+//2)
+const nums = [2, 4, 6, 8];
+
+// 모든 요소가 짝수인지 검사하여 isAllEven 변수를 설정하세요.
+const isAllEven = nums.every(num => num % 2 == 0);
+// const isAllEven = nums.filter((num) => num % 2 == 0); 
+//[2,4,6,8]
+
+// 적어도 하나의 요소가 5보다 큰지 검사하여 hasGreaterThanFive 변수를 설정하세요.
+const hasGreaterThanFive = nums.some(num => num > 5);
+// const hasGreaterThanFive = nums.filter((num) => num > 5);
+//[6,8]
+
+// 아래 테스트 코드는 수정하지 마세요.
+console.log(isAllEven);
+console.log(hasGreaterThanFive);
+
+// 3)
+const nums = [5, 3, 8, 1, 2];
+
+// sortedNums 배열을 만들고 오름차순으로 정렬하세요.
+const sortedNums = [...nums];
+sortedNums.sort();
+//const sortedNums = nums;
+//sortedNums.sort();
+// [1, 2, 3, 5, 8]
+// [1, 2, 3, 5, 8]
+
+// 아래 테스트 코드는 수정하지 마세요.
+console.log(nums); // [5, 3, 8, 1, 2]
+console.log(sortedNums); // [1, 2, 3, 5, 8]
+
+//4)
+// 여기에 코드를 입력하세요.
+/* let i = 1;
+let j = 1;
+let multi = 0;
+
+while(i < 10){
+  i++;
+  while(j < 10){
+    console.log(${i} x ${j} = ${i * j});
+    j++;
+  }
+} */
+
+let i = 1;
+while (i <= 9) {
+  let j = 1; // 내부 루프 변수를 외부 루프 안에서 초기화
+  while (j <= 9) {
+    console.log(`${i} x ${j} = ${i * j}`); // 템플릿 리터럴로 가독성 향상
+    j++; // 출력 후 증가
+  }
+  i++; // 외부 루프 출력이 끝난 뒤 증가
+}
+
+//5)
+// 여기에 코드를 입력하세요.
+/** let n = 1;
+
+for(let i = 1; i <= 100; i++){
+  if(i = 3 * n){
+    console.log("Fizz");
+  } else if(i = 5 * n) {
+    console.log("Buzz");
+  } else if(i = 15 * n) {
+    console.log("FizzBuzz")
+  } else{
+    return i;
+  }
+} */
+
+//나눗셈/나머지 연산 누락: 
+// "배수"를 판별하려면 i % 3 === 0처럼 
+// 나머지 연산을 사용해야 해요. 
+// (나머지가 0이면 배수)
+
+//잘못된 종료: 
+// 루프 안에서 return i;를 사용하면 
+// 함수 바깥에서는 문법/런타임 오류가 나거나 즉시 종료돼요.
+// 출력은 console.log(i)처럼 해야 해요.
+
+/** for(let i = 1; i <= 100; i++){
+  if(i % 3 == 0){
+    console.log("Fizz");
+  } else if(i % 5 == 0) {
+    console.log("Buzz");
+  } else if(i % 15 ==0) {
+    console.log("FizzBuzz")
+    // 30 is printed as "Fizz", not "FizzBuzz".
+    // i % 15 == 0 sould be the first I think...
+  } else{
+    console.log(i);
+  }
+} */
+
+for(let i = 1; i <=100; i++){
+  if(i % 15 == 0){
+    console.log("FizzBuzz");
+  } else if (i % 3 == 0){
+    console.log("Fizz");
+  } else if (i % 5 == 0){
+    console.log("Buzz");
+  } else {
+    console.log(i);
+  }
+}
+
+//6)
+// 여기에 코드를 입력하세요
+function reverseString(str) {
+//   for (let i = 0; i < str.length; i++){
+//     str.split(i); 
+//   }
+// string.reverse();
+// return string
+ return str.split('').reverse().join('');
+}
+/** Another recommende version
+ * function reverseString(str) {
+  const result = [];
+  for (let i = 0; i < str.length; ++i) {
+    result.push(str[str.length - 1 - i]);
+  }
+  const reversedString = result.join('');
+  return reversedString;
+} */
+
+// 아래 테스트 코드는 수정하지 마세요.
+console.log(reverseString('hello')); // "olleh"
+console.log(reverseString('o')); // "o"
+console.log(reverseString('')); // ""
+
+
+//7)
+function removeDuplicates(str){
+  for(let i = 0; i < str.length; i++){
+    let letter = str.charAt(i);
+    if (letter(i) == letter(i-1)){
+      str.remove(letter(i-1));
+    }
+  }
+  return str;
+}
+/**
+문제와 에러의 원인, 개선 방안, 권장 구현 방법을 단계별로 정리할게요.
+
+문제 요약 및 에러 원인
+
+- 에러 메시지 TypeError: letter is not a function은 변수 letter가 문자열인데 함수처럼 letter(i)로 호출해서 발생했어요. letter는 이미 str.charAt(i)로 얻은 문자(문자열)입니다.
+- str.remove(...)는 자바스크립트에 존재하지 않는 메서드예요. 문자열은 불변(immutable)이므로 기존 문자열에서 특정 문자를 직접 제거하는 API가 없습니다.
+- 인덱스 접근에서 i가 0일 때 i-1을 참조하면 음수 인덱스가 되어 의도치 않은 동작이 될 수 있어요.
+
+개선 아이디어(단계별)
+1. 같은 문자를 비교할 때는 각 문자를 함수처럼 호출하지 말고 값으로 비교하세요. 예: if (letter === str.charAt(i-1))
+2. 문자열을 직접 수정하려 하지 말고, 결과를 담을 새로운 문자열이나 배열을 만들어 누적하세요.
+3. 반복은 인덱스 1부터 시작하면 i-1 참조 시 범위 문제를 피할 수 있어요.
+4. 불필요한 연산을 줄이려면 마지막으로 추가된 문자만 비교하면 됩니다(즉, 결과의 마지막 문자 vs 현재 문자).
+5. 정규식을 선호하면 간단하게 처리할 수도 있어요(대신 정규식 이해가 필요).
+
+수정된 예시 코드 (설명용)
+function removeDuplicates(str) {
+  if (!str) return '';
+  let result = str[0];
+  for (let i = 1; i < str.length; i++) {
+    const ch = str[i];
+    if (ch !== result[result.length - 1]) {
+      result += ch;
+    }
+  }
+  return result;
+}
+
+대체(간단한) 방법: 정규식을 쓰는 법
+function removeDuplicates(str) {
+  return str.replace(/(.)\1+/g, '$1');
+}
+*/
+
+/** Example answer:
+function removeDuplicates(str) {
+  const result = [str[0]];
+  for (let i = 1; i < str.length; ++i) {
+    const last = result[result.length - 1];
+    if (last !== str[i]) {
+      result.push(str[i]);
+    }
+  }
+  const removedStr = result.join('');
+  return removedStr;
+}
+*/
