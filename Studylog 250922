@@ -106,4 +106,29 @@ try {
 
 // arrow function 화살표 함수
 const multiply = (a, b) => a * b;
+/** const multiply = (a, b) => {
+ *    return a * b;
+ * }
+ * 위 multiply method(간략화된 버전)와 아래 return이 있는 함수는 같은 함수이다.
+ * 화살표 함수는 return과 중괄호{}를 생략할 수 있다.
+ */
+console.log(multiply(1,2)); // 2
+
+
+// Mission
+const nums = [1, 2, 3, 4];
+
+// nums 배열의 각 요소를 2를 곱하여 doubledNums를 생성하세요.
+const doubledNums = nums.map(num => num * 2);
+/* const doubledNums = 
+* for (num in nums) {
+*  return num * 2;
+}; */
+
+// 아래 테스트 코드는 수정하지 마세요.
+console.log(doubledNums);
+
+
+// arrow function 화살표 함수
+const multiply = (a, b) => a * b;
 console.log(multiply(1,2)); // 2
