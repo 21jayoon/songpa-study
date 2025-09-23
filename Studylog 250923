@@ -1,0 +1,150 @@
+// Javascript mission (Practice)
+// required:
+// Make the function return true if the string is palindrome, and return false if it's not
+
+//First try
+function isPalindrome(str) {
+  for(let i = 0; i < str.length; i++){
+    let arr = str.charAt(i);
+  if(str.length % 2 == 0 &&
+    arr.charAt[0] == arr.charAt[str.length] &&
+    arr.charAt[1] == arr.charAt[str.length - 1]){
+      return true;
+  } else {
+    for(let j = 0; j < (str.length / 2 + 1); i++){
+      arr.charAt[0] == arr.charAt[str.length];
+      arr.charAt[1] == arr.charAt[str.length - 1];
+    }
+    return true;
+  }
+  }
+}
+// Why did I wrote code like this?
+/** I want to maked loop with for iteration so that I can access to each char(one alphabet).
+* And I allocate those chars into the variable 'arr'.
+* Moreover, I thought the approaching method should be different whether the string has even length or odd length.
+* So I put if statement to check if the string has even length.
+* (At this point, I feel weird about 'str.length % 2 == 0' this code.
+* should I use arr.length instead of str.length? ......
+* No. My intent was check the length of full input strings and differentiate the approaching method.
+* I think str.length % 2 is right)
+*
+* If the str has even length, the comparing chars will be symmetrical(대칭).
+* I wanted my code comparing tha first char and the last char,
+* second char and the (lase - 1) char, and so on.
+* If the str has odd length, I intended the comparing each char works until the (str.length dividing 2 +1).
+* I put these limit because as I calculate, all of odd number has exact middle index if the length / 2 +1 inserts.
+* (At this point, I found that I misunderstanding about length method.
+* All of index starts with 0 not 1, so if I wanted to try for iteration, I should give condition as ((str.length +1) / 2 +1),
+* because, for example when the str has 5 characters('apple'), its length will be 4(0a 1p 2p 3l 4e),
+* so I should add one with str.length to give precise condition.)
+*
+* When variable j is going up, the char will compare from the last character to ((str.length +1) / 2 +1) +1 character.
+* (Just one after character from the center located character)
+*/
+
+/** While I wrote the comprehension above, I found two critical errors.
+* (I think this made the infinite loop)
+* First, the Iterator/Updater of second for loop was wrong.
+*     for(let j = 0; j < (str.length / 2 + 1); i++){
+* The variable of this for loop was 'j', but I put 'i'++ instead.
+* When I change i++ into j++, the executed code prints three true instead of endless loop.
+* But I need 'true, false, true' value not all true value.
+* Also I found it may need to put nested for loop in first if statement and the else statement.
+*/
+
+
+//Second try
+function isPalindrome(str) {
+  for(let i = 0; i < str.length; i++){
+    let arr = str.charAt(i);
+  if(str.length % 2 == 0 &&
+    arr[0] == arr.charAt[str.length] &&
+    arr[1] == arr.charAt[str.length - 1]){
+    return true;
+  } else {
+    for(let j = 0; j < (str.length / 2 + 1); j++){
+      for(let k = 0; k < ((str.length + 1) / 2 +1); k++) {
+        arr[j] == arr.charAt[str.length - k];
+    }
+        return true;
+    }
+  }
+  }
+}
+
+
+/** 주요 오류 요약
+
+- str.charAt[i]처럼 메서드를 배열처럼 호출했어요. 올바른 호출은 str.charAt(i) 또는 str[i]예요.
+- let arr = str.charAt(i);로 한 문자만 받아놓고 arr[0], arr[j]처럼 전체 문자열처럼 사용했어요.
+- 마지막 문자의 인덱스는 str.length - 1인데 str.length를 사용했어요.
+- 루프 증감 변수가 잘못되어 무한루프가 날 수 있어요 (i++ 대신 j++ 등).
+- 비교 결과를 사용하지 않고 항상 return true 하도록 로직이 잘못돼 있어요.
+*/
+
+// As the raised error, erased all the return true; codes.
+//Third try
+// 여기에 코드를 입력하세요
+function isPalindrome(str) {
+  for(let i = 0; i < str.length; i++){
+    let arr = str.charAt(i);
+  if(str.length % 2 == 0 &&
+    arr[0] == arr.charAt[str.length] &&
+    arr[1] == arr.charAt[str.length - 1]){
+  } else {
+    for(let j = 0; j < (str.length / 2 + 1); j++){
+      for(let k = 0; k < ((str.length + 1) / 2 +1); k++) {
+        arr[j] == arr.charAt[str.length - k];
+    }
+    }
+  }
+}
+}
+
+//Recommended code
+//1)
+function isPalindrome(str) {
+  for (let i = 0; i < Math.floor(str.length / 2); i++) {
+    if (str[i] !== str[str.length - 1 - i]) {
+      return false;
+    }
+  }
+  return true;
+}
+/** Math.floor is the method that always truncate(버림) the input number. 
+* (https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Math/floor)
+* So if I use Math.floor(str.length / 2) means, for example,
+* if the str is 'level' (length = 5), it returns 2 because 5/2 = 2.5 and truncate of 2.5 is 2.
+* And here is the key. The index number of 2 is actually the center(3) of 'level'.
+* Morevoer, when you look at the condition of if statement...
+* when you insert 'level' as an argument,
+* each character will show as a str[i] according to for iteration condition.
+* str[0] means 'l', and 
+* str[str.length - 1 - i] is same as str[str.length - 1 - 0],
+* str[5 - 1] and str[4].
+* With 'level', str[4] is the last character, 'l'.
+* The first (str[0]) character and the last(str[4]) was same, it contunued to the next index 
+* because for loop ordered to going up until the i meets truncation of (str.length / 2) (in here, it's 2)
+* The second character get a same iteration. 
+* Check the 'e'(str[1]) and str[str.length - 1 - 1] is same.
+* str[str.length - 1 - 1] is same as str[5 - 2], str[3]. And str[3] is 'e'.
+* since both character are same and the next i got stuck with condition(until i <2), the for loop stopped.
+* Finally there was only true results(no false value that filtered out with if statement),
+* isPalindrome('level') prints 'true'.
+*/
+
+//2)
+function isPalindrome(str) {
+  return str === str.split('').reverse().join('');
+}
+/**
+* There was also an example answer, which is much more simple compared to the code above.
+* First, I thought I could only understand str.split('').reverse()
+* because I comprehenced it will compare the right version(str) and the reverse version(rts) character one by one.
+* But when I assuming seriously about the join('')'s role, something crossed my mind.
+* This code contrasts the original string and the reversed version of string 
+* which splited and reversed and finally combined as new word.
+* Without thinking about mathematically, it just judge the string as if reflecting in the mirror.
+* Now I see this code is much more convenient and (maybe) memory saving.
+*/
