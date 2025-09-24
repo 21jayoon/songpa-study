@@ -108,4 +108,12 @@ class Book{
 }
 
 const result = new Book;
-result.printInfo("JS프로그래밍 입문", "해냄출판사");
+//new Book()이어도 되고 new Book이어도 기능은 제대로 작동함.
+result.printInfo("모던 JS프로그래밍", "길벗춭판사");
+//제목: 모던 JS프로그래밍, 저자: 길벗춭판사
+
+// const result2 = new Book("JS프로그래밍 입문", "해냄출판사");
+// result.printInfo(); // 제목: undefined, 저자: undefined
+
+// const result2 = new Book("JS프로그래밍 입문", "해냄출판사");
+// console.log(result);  //Book { title: undefined, author: undefined }
