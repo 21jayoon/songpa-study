@@ -13,14 +13,24 @@
 //   - "world" → 대문자 변환
 //   - 결과를 출력하세요.
 import getRadius from "./circle.js";
-import reverseString from "./utils.js";
-import { toUpperCase } from "./utils.js";
+import reverseString, { toUpperCase } from "./utils.js";
+
 // import { reverseString, toUpperCase } from './utils.js';
 /** This is the wrong approach since the reverseString is called by default export.
 * {}중괄호로 utils.js에 있던 함수 두개를 동시에 불러오려고 했는데
 * reverseString은 defaul로 정의되어서 그런지 중괄호로 불러와지지 않았다.
 * SyntaxError: The requested module './utils.js' does not provide an export named 'reverseString'
 * 대신 SyntaxError가 뜸.
+*/
+
+// At last, I combine the import statement with importing both function.
+/**
+* Now
+* import reverseString, { toUpperCase } from "./utils.js";
+*
+* before 
+* import reverseString from "./utils.js";
+* import { toUpperCase } from "./utils.js";
 */
 
 console.log(getRadius(5));
