@@ -88,3 +88,24 @@ export function toUpperCase(str){
   let result = str.toUpperCase();
   return result;
 }
+
+
+//Javascript Class and Instance practice
+// - Book 클래스 작성 및 인스턴스 만들기
+//   - Book 클래스를 작성하세요.
+//     - 속성property: title, author
+//     - 메서드method: printInfo() → "제목: OOO, 저자: XXX" 형식으로 출력
+//     - new 키워드로 인스턴스를 만들고 메서드를 실행하세요.
+class Book{
+  constructor(title, author){
+    this.title = title;
+    this.author = author;
+  }
+
+  printInfo(title, author){
+    console.log(`제목: ${title}, 저자: ${author}`);
+  }
+}
+
+const result = new Book;
+result.printInfo("JS프로그래밍 입문", "해냄출판사");
