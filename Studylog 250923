@@ -148,3 +148,102 @@ function isPalindrome(str) {
 * Without thinking about mathematically, it just judge the string as if reflecting in the mirror.
 * Now I see this code is much more convenient and (maybe) memory saving.
 */
+
+
+
+// Javascript mission2 (Practice2)
+// required:
+// Return the mode from given number array, if the mode is more than one, return one of them.
+
+//First try
+/** function findMostFrequent(arr){
+*   arr.sort();
+*   let maxFrequent = arr.__count__(Math.max(sortedArr));
+*   return maxFrequent;
+* }
+*/
+
+//Recommended Code
+//1)
+function findMostFrequent(nums) {
+  const counts = {};
+  let maxNum = null; //숫자 값을 넣기 위한 manNum = null 할당
+  for (let i = 0; i < nums.length; ++i) {
+    const num = nums[i];
+    if (!counts[num]) {
+      counts[num] = 1;
+    } else {
+      counts[num] += 1;
+    }
+    if (maxNum === null || counts[num] > counts[maxNum]) {
+      maxNum = num;
+    }
+  }
+  return maxNum;
+}
+
+//2)
+function findMostFrequent(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return null;
+  const counts = {};
+  let maxNum = null;
+  let maxCount = 0;
+
+  for (const v of arr) {
+    counts[v] = (counts[v] || 0) + 1;
+    if (counts[v] > maxCount) {
+      maxCount = counts[v];
+      maxNum = v;
+    }
+  }
+  return Number(maxNum); // 필요하면 숫자형으로 변환
+}
+
+//Mission 3
+//Make a function that return after adding each index of number array.
+
+//First try
+function sumDigits(num) {
+  for(let i = 0; i < num.length; i++){
+    num[i] += ;
+  }
+  return num;
+}
+
+//Second try
+let j = 0;
+function sumDigits(num) {
+  for(let i = 0; i < num.length; i++){
+    j += num[i];
+  }
+  return j;
+}
+
+//Recommended code
+//1)
+function sumDigits(num) {
+  // String 변환 후 더하는 방법 선택
+  const digits = String(num).split('');
+  let result = 0;
+  for (let i = 0; i < digits.length; i++){
+    result += Number(digits[i]);
+    //Number method 이용해 문자열이었던 digits 숫자로 변환
+  }
+  return result;
+}
+/** What is different with first or second code?
+* First, I didn't knew that '.length' can only use in string data type.
+* That was the fundamental thing that I missed.
+* Also there was an easy way to 
+*/
+
+//2)
+function sumDigits(num) {
+  num = Math.abs(Math.floor(num)); // 음수나 소수가 들어와도 안전하게 정수 절대값으로 처리
+  let result = 0;
+  while (num > 0) {
+    result += num % 10;
+    num = Math.floor(num / 10);
+  }
+  return result;
+}
