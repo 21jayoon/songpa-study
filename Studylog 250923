@@ -234,12 +234,18 @@ function sumDigits(num) {
 /** What is different with first or second code?
 * First, I didn't knew that '.length' can only use in string data type.
 * That was the fundamental thing that I missed.
-* Also there was an easy way to 
+* Also there was an easy way(using method) to convert num seperately,
+* but I tried using for loop to split it.
+* Lastly, compared with the first-try code,
+* I misunderstood about using += in JS.
+* += needs both left and right-hand side.
 */
 
 //2)
 function sumDigits(num) {
-  num = Math.abs(Math.floor(num)); // 음수나 소수가 들어와도 안전하게 정수 절대값으로 처리
+  //num = Math.abs(Math.floor(num)); // 음수나 소수가 들어와도 안전하게 정수 절대값으로 처리
+  //This code above is beyond my ablility now. 
+  // But I think it is necessary if I gonna use number in project or real service.
   let result = 0;
   while (num > 0) {
     result += num % 10;
