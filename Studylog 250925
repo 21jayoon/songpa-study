@@ -1,4 +1,15 @@
-//Encapsulattion in Javascript
+/** Asked to lecturer:
+* 추상화: 드러나는 기능(인터페이스)이 있을 때 ‘이건 넌 모르고 있어도 돼’라고 하는 것. 인터페이스만 보이게, 내부 기능은 복잡해도 괜찮은 것.
+* 캡슐화: 겉으로 드러낼 것과 숨기는(숨길) 것을 구별/구분하는 것.
+* 
+* Abstraction : When the feature(interface) exposed,noticing 'You don't have to know specific things about this'.
+* Showing only interface, the internal(inner) feature is fine to be get complexity.
+* Encapsulation : Distinguishing what to expose and what to conceal.
+*
+* https://www.geeksforgeeks.org/java/difference-between-abstraction-and-encapsulation-in-java-with-examples/
+*/
+
+//Encapsulation in Javascript
 // Different with Java, I have to put # infront of the argument.
 //Example
 class Animal {
