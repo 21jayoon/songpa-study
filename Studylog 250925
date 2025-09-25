@@ -28,4 +28,29 @@ class Animal {
 
 // How to use
 const a = new Animal('Mammal', 10);
-a.name();
+a.#name();
+a.weight();
+
+
+//Inheritance in JS -> using 'extends'
+clasee Animal {
+  constructor(name) {
+    this.#name = name;
+  }
+  speak() {
+    console.log(`${this.#name} is speaking sth`);
+  }
+}
+class Dog extends Animal{
+// class Dog is extending(inheritants) class Animal
+// class Dog is the sub class(child class) of Animal
+// Animal is the super class(parent class) of class Dog
+  bark(){
+    //bark is a function in JS class
+    console.log(`${this.getName()} is barking! woof!`);
+  }
+}
+
+const d = new Dog('puppy');
+d.speak(); //puppy is speaking sth
+d.bark(); //puppy is barking! woof!
