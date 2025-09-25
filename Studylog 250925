@@ -1,0 +1,31 @@
+//Encapsulattion in Javascript
+// Different with Java, I have to put # infront of the argument.
+//Example
+class Animal {
+  #name; // Private property(프라이빗 속성)
+  weight; // public property
+
+  constructor(name, weight){
+    this.name = name;
+    this.#weight = weight;
+  }
+
+  // getter: class 외부에서 a.name처럼 접근 가능
+  get name() {
+    return this.name;
+  }
+
+  //setter: class 외부에서 a.name = "값"처럼 접근 가능
+  set name(newName) {
+    /** Setter에서는
+    *   if (typeof newName != 'string') {
+    *    throw new Error('Name should be String');
+    *   } 와 같이 인자값 조건을 지정해줄 수도 있음
+    */
+    this.name = newName;
+  }
+}
+
+// How to use
+const a = new Animal('Mammal', 10);
+a.name();
