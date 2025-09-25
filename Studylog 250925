@@ -54,3 +54,6 @@ class Dog extends Animal{
 const d = new Dog('puppy');
 d.speak(); //puppy is speaking sth
 d.bark(); //puppy is barking! woof!
+
+// JS cannot inheritant multi super class
+//JS는 여러 개의 상속을 받을 수 없다!! (오직 하나의 부모 클래스만 상속가능)
