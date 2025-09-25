@@ -68,3 +68,51 @@ d.bark(); //puppy is barking! woof!
 
 // JS cannot inheritant multi super class
 //JS는 여러 개의 상속을 받을 수 없다!! (오직 하나의 부모 클래스만 상속가능)
+
+
+// Understanding encapsulation and abstraction with example code
+class Book{
+  #royalties;
+  // 인세 금액은 대외비, 따라서 private field 사용. 이를 통해 캡슐화 적용이 되었다고 할 수 있는가?
+
+  constructor(title, author, years){
+    this.title = title;
+    this.author = `${author}`;
+    this.years = years;
+  }
+
+  printInfo(title, author){
+    console.log(`제목: ${title}, 저자: ${author}`);
+  }
+
+  #royalties_calculate(years){
+    this.#royalties = years * 1234560 - 10000 + 50 / 2 * 3;
+    return this.#royalties;
+  }
+
+  royalties_secret (author){
+    // 이 메소드(?)에서 추상화와 캡슐화가 둘 다 적용되었다고 할 수 있을까요?
+    this.#royalties_calculate(this.years);
+    // 인세 금액을 드러내지 않는 것 = 캡슐화 적용
+    // 복잡한 인세 구하기 공식을 rotalties_secret에서 굳이 알 필요가 없게 하는 것 = 추상화 적용
+    console.log(`${author}` + "작가님 인세는 " + this.#royalties + "원입니다.");
+  }
+}
+
+// 위와 같은 Book 클래스 안에 있는 여러 가지 메소드(메소드가 맞을까요?)를
+// 회계부서 동료가 사용한다고 가정할 때, '추상화가 적용되었다'고 할 수 있을까요?
+// (회계부서는 Book 클래스 내부의 구체적인 로직(?)까진 알지 못함)
+
+const result = new Book("Harry Potter", "J.K. Rowling", 5);
+result.royalties_secret("J.K. Rowling");
+// J.K. Rowling작가님 인세는 6162875원입니다.
+
+
+// async  비동기
+// 비동기는 자바스크립트의 핵심 특징이다.
+function sayHi() {
+  console.log('Hi');
+}
+
+setTimeout(sayHi, 2000); // 전달된 sayHi는 2초(2000ms)가 지난 후 실행할 '콜백 함수'
+//setTimeout의 첫 번째 인자로, sayHi를 콜백함수로 넣음
