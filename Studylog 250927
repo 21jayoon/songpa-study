@@ -1,0 +1,72 @@
+// Study Python
+// Will the Python can structure the front-end?
+import reflex as rx
+
+import reflex as rx 
+class State(rx.State):
+    count: int = 0
+
+    def increment(self):
+        self.count += 1
+
+    def decrement(self):
+        self.count -= 1
+def index():
+    return rx.hstack(
+        rx.button(
+            "Decrement",
+            color_scheme="ruby",
+            on_click=State.decrement,
+        ),
+        rx.heading(State.count, font_size="2em"),
+        rx.button(
+            "Increment",
+            color_scheme="grass",
+            on_click=State.increment,
+        ),
+        spacing="4",
+    )
+app = rx.App()
+app.add_page(index)
+
+# 아래는 제미나이가 만들어준 코드
+# # 1. 상태(State) 정의: 백엔드 데이터와 로직을 정의합니다.
+# class State(rx.State):
+#     """앱의 상태를 정의합니다."""
+#     count: int = 0 # 카운트 변수 (초기값 0)
+
+#     def increment(self):
+#         """카운트를 1 증가시키는 함수 (파이썬 함수)"""
+#         self.count += 1
+
+# # 2. UI 정의: 파이썬 함수로 프론트엔드 요소를 선언합니다.
+# def index():
+#     return rx.center( # HTML의 <div> 역할을 하는 컨테이너
+#         rx.vstack( # 세로로 요소를 쌓는 컨테이너
+#             rx.heading(f"현재 카운트: {State.count}"), # H1 태그, 파이썬 변수를 직접 참조
+#             rx.button(
+#                 "증가",
+#                 on_click=State.increment # 버튼 클릭 시 파이썬 함수를 실행하도록 선언
+#             ),
+#         ),
+#         height="100vh",
+#     )
+
+# # 3. 앱 생성
+# app = rx.App() 
+# app.add_page(index)
+
+# 250927 sat 5:43
+# 처음 시도했을 때는 디자인(버튼 2개 또는 하나, 숫자 올라가는 거 보여줄 수 있는 간단한 string 창)만
+# 나오고 실제 기능은 클릭 및 이루어지지 않아서 그냥 여기까지 reflex 다운 받고 활용해본 거에
+# 만족해야곘다 싶었는데, 뭐가 또 안 되어서 control+C로 나왔다가 다시 reflex run하니까
+# 여기 Python101.py 코드에 내가 써놨던 거 (긴 내용 아니라서 다행) 다 사라지고
+# 또 그 새로운 reflex 기본 기초 페이지 떴다.
+# 그래서 그냥 제대로 파일 형성된 거에 내가 원하는 코드를 넣자 싶어서
+# 제미나이가 만들어줬던 코드 넣어 reflex run 다시 둘렸다.
+# 근데 그랬더니 이제 '증가' 버튼 클릭하면 숫자가 하나씩 올라간다!!
+# 진짜 기능이 구현된다! 신기함.   5:53
+# https://reflex.dev/docs/getting-started/introduction/
+# 오!! 여기에 reflex 공식 홈페이지에 있는 예시 코드도 갖다 붙였더니
+# 아까 디자인만 나왔던 것과 다르게 'Decrement' 버튼 누르면 숫자 내려가고
+# 'Increment' 누르면 올라가는 기능까지 제대로 구현됐다!! 신기하다. 5:56
