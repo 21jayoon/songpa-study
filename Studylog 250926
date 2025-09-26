@@ -1,0 +1,44 @@
+// Promise all은 모든 promise가 fulfilled될 때 promise를 반환해 
+// 종합적인 비동기처리를 돕는 메서드다.
+// https://www.w3schools.com/jsref/jsref_promise_all.asp
+// https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Promise/all
+const p1 = new Promise((resolve, reject)=> 
+  setTimeout(() => resolve('First phase'), 2000)
+);
+
+const p2 = new Promise(
+  (resolve, reject) => setTimeout(() => resolve('Second phase'), 2000)
+);
+
+const p3 = new Promise((resolve) => 
+  setTimeout(() => resolve('Third phase'), 1500)
+);
+
+// Promise 앞에 await를 붙일 수도 있다. -> await Promise.all
+await Promise.all([p1, p2, p3])
+  .then((results) => {
+    console.log(results);
+    //[ 'First phase', 'Second phase', 'Third phase' ]
+  })
+  .catch((error) => {
+    console.error(error);
+  }) 
+// .all은 static method이다.
+
+ /** Promise all을 사용함으로써 
+ * p1.then((msg) => {
+ * })
+ * p2.then((msg) => {
+ * })
+ * p3.them((msg) =>{
+ * })
+ * 이렇게 복잡한 구문을 간단한 방식으로 사용할 수 있다.
+ * 또한 Promise를 쓰면 (예시)fetch를 썼더라도 비동기처리가 되어서
+ * 7초 걸리던 게 3.5초로 줄어드는 시간 효율성이 생길 수 있다. 
+ */
+
+//실행시간 확인하는 메서드: timeEnd()
+/** How to use-> console.time('How long it takes?'); 
+ * (The code that you want to know how long the time takes)
+ * console.timeEnd('How long it takes?'); */
+
