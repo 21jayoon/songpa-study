@@ -1,0 +1,403 @@
+# Javascript mission
+//1. Article.js
+// In JS, the class recommended in seperate js files.
+//JS에서는 클래스를 각각 다른 파일에 저장해서 사용하길 권장한다.
+/* Conditions:
+class 키워드를 이용해서 Article 클래스를 만들어 주세요.
+Article 클래스는 title(제목), content(내용), writer(작성자), likeCount(좋아요 수) 프로퍼티를 가집니다.
+Article 클래스는 like method를 가집니다. like 메소드가 호출될 경우 좋아요 수가 1 증가합니다.
+
+250927
+Article 요청 함수 구현하기 (심화)
+Article 클래스에 createdAt(생성일자) 프로퍼티를 만들어 주세요. (새로운 객체가 생성되어 constructor가 호출될 시 createdAt에 현재 시간을 저장합니다.)
+-> class에 프로퍼티를 만들라는 게 꼭 constructor의 필드로 넣어야한다는 거는 아니구나.
+강사님께 여쭤봤더니 모범 답안은 유미님이 하신대로
+constructor(title, content, writer, likeCount){
+  this.title=title;
+  ......
+  this.createdAt=new Date();
+}
+라고 하심.
+강사님 왈 확실한 정답 하나가 있는 건 아니라고 생각,
+관점이 차이일 뿐. 내가 한 방식은
+constructor(title, content, writer, likeCount, createdAt){
+    this.title=title;
+    this.content=content;
+    this.writer=writer;
+    this.likeCount=likeCount;
+    this.createdAt=createdAt;
+  }
+createdAt에 들어갈 값을 서버에 맡긴(?) 좀 더 유연한 방식이라고 하셨고
+유미님이 하신 방식은 createdAt을 확정적이고 명시적으로,
+수정되거나 바뀔 수 없게 만든 버전이라고 하심. 13:18
+근데 조건 생각하면 유미님께 맞는 거 같아서 내 코드 수정함 251002 13:26
+*/
+class Article{
+  constructor(title, content, writer, likeCount){
+    this.title=title;
+    this.content=content;
+    this.writer=writer;
+    this.likeCount=likeCount;
+    this.createdAt=new Date();
+  }
+  like(){
+    let addLike = this.likeCount +1;
+    return addLike;
+  }
+}
+
+//2. Product.js
+// In JS, the class recommended in seperate js files.
+//JS에서는 클래스를 각각 다른 파일에 저장해서 사용하길 권장한다.
+//따라서 Product.js, ElectronicProduct.js를 만들어서 각 파일에
+// 각 클래스를 옮겨왔다.
+export class Product{
+  constructor(name, description, price, tags, images, favoriteCount){
+    this.name= name;
+    this.description=description;
+    this.price= price;
+    this.tags=tags;
+    this.images=images;
+    this.favoriteCount=favoriteCount ?? 0;
+    //왜 this.favoriteCount=favoriteCount; 삭제하고 favoriteCount=0;하면 
+    // main.js에서 favoriteCount가 안 뜰까? 1002 16:23
+  }
+
+  /**Conditions:
+   * Product class has the method 'favorite'.
+   * When the favorite is called, the number of 'liked' increases by 1
+   * Product 클래스는 favorite 메소드를 가집니다. 
+   * favorite 메소드가 호출될 경우 찜하기 수가 1 증가합니다.
+   */
+  // favorite이라는 이름을 가진 method 정의
+  /**  매개변수가 필요할까? Will the parameter needed?
+   * No.. Click 이벤트 핸들링은 필요할 거 같은데, 원시 자료형 매개변수가 필요한지는 모르겠음
+   * I think the eventhandling is needed in favorite method,
+   * but I'm not sure about the primitive data types.
+   * -> No parameter, just put a formula.
+  */ 
+  favorite(){
+    let liked = this.favoriteCount + 1;
+    return liked;
+  }
+}
+
+//3. ElectronicProduct.js
+// In JS, the class recommended in seperate js files.
+//JS에서는 클래스를 각각 다른 파일에 저장해서 사용하길 권장한다.
+/* 18:40 각기 다른 파일에서 클래스 상속하려면 export & import 필수라고 한다.
+ * 따라서 export & import 사용
+ * I was curious about if the inheritance in different files available,
+ * I searched on the internet.
+ * It said I must need export and import, 
+ * so I add those code in Product.js and E-Product.js.
+ * https://stackoverflow.com/questions/59325349/how-can-i-inherit-a-js-class-from-another-js-class-which-are-separate-files
+ */
+import { Product } from "./Product.js";
+/** Conditions:
+ * ElectronicProduct 클래스는 Product를 상속하며, 
+ * 추가로 manufacturer(제조사) 프로퍼티를 가집니다. 
+ * The class ElectronicProduct inherit class Product,
+ * and has a manufacturer property. */
+export class ElectronicProducts extends Product {
+  constructor(
+    name, description, price, tags, images, favoriteCount, manufacturer
+  ){
+    //ElectronicProducts class가 Product class를 상속했고 
+    //추가 프로퍼티 manufacturer가 있기 때문에
+    //super를 통해 부모 생성자를 호출하는 과정이 필요하다.
+    // Since the ElectronicProducts class inheritants Product,
+    // and it has new property named 'manufacturer',
+    // this class should call the parents constructor with super().
+    super(name, description, price, tags, images, favoriteCount);
+    this.manufacturer=manufacturer;
+  }
+}
+
+//4. Articleservice.js
+const API_URL = 'https://panda-market-api-crud.vercel.app';
+
+/* The swagger url looks like this,
+https://panda-market-api-crud.vercel.app/docs/#/Article/CreateArticle
+I was confused from where I should use the endpoint.
+`/#/Article/ListArticles` vs `/Article/ListArticles`
+So I asked to gemini and got an answer.
+Then revise codes with no-# endpoints.
+https://g.co/gemini/share/6b23700fe84e
+ */
+export function getArticleList({ page, pageSize, keyword }) {
+  const params = new URLSearchParams({ page, pageSize, keyword});
+  // Instead of URLSearchParams, you can use hardcoding with URL like
+  // const url = `${API_URL}/articles?page=${page}&pageSize=${pageSize}&keyword=${keyword}`;
+  // 251013 10:34
+  const url = `${API_URL}/articles/?${params}`;
+  
+  return fetch(url)
+    .then(response => {
+      if (!response.ok){
+        console.error(`HTTP 오류 발생: ${response.status} (${response.statusText})`);
+        throw new Error(`getArtiList Response failed: ${response.status} ${response.statusText}`);
+      }
+      return response.json(); //response를 json 형태로 바꿔서 받아온다.
+    })
+    .then(data => {
+      // console.log('articleList:', data); 이거 지워도 data 그대로 출력되려나? 1001 22:51
+      return data; //필요한 경우를 위해 data 반환
+    })
+    .catch(error => {
+      console.error(`ArtiList API error `, error);
+      throw error;
+    });
+}
+
+export function getArticle(articleId){
+  const url = `${API_URL}/articles/${articleId}`;
+  /*fetch() 함수는 method 옵션을 지정하지 않으면 
+  기본값으로 GET 메소드를 사용하도록 설계되어 있다.
+  따라서 데이터를 조회하는 일반적인 GET 요청의 경우,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(newArticle)
+  } 이런 부분 필요 없이
+  아래와 같이 코드를 간결하게 작성할 수 있다.
+  */
+  return fetch(url)
+    .then(response => {
+      if (!response.ok){
+        console.error(`HTTP error: ${response.status} (${response.statusText})`);
+        throw new Error(`getArti request failed: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      // console.log(data);
+      return data;
+    })
+    .catch(error => {
+      console.error('getArti API error: ', error);
+    });
+}
+
+export function createArticle({title, content, image}) {
+  //https://g.co/gemini/share/a845840e327f (createdAt 관련 심화 내용)
+  const url = `${API_URL}/articles`;
+  const newArticle = { title, content, image }; 
+
+  return fetch(url, {
+    method: 'POST', // HTTP 메소드를 POST로 지정
+    headers: {
+      'Content-Type': 'application/json', // 보내는 데이터 형식을 JSON으로 지정
+    },
+    body: JSON.stringify(newArticle) 
+    // JavaScript 객체를 stringify 메소드를 통해 JSON 문자열로 변환
+  })
+   .then(res => {
+    if(!res.ok) {
+      console.error(`HTTP error: ${res.status} (${res.statusText})`);
+      throw new Error(`createArti Failed request: ${res.status} ${res.statusText}`);
+    }
+    return res.json();
+   })
+   .then(data => {
+    // console.log(data);
+    return data;
+   })
+   .catch(error =>{
+    console.error('createArti API error: ', error);
+   });
+}
+
+export function patchArticle(articleId, updateData) {
+  const url = `${API_URL}/articles/${articleId}`;
+
+  return fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(updateData)
+  })
+   .then(res => {
+    if(!res.ok){
+      throw new Error(`Failed request: ${res.status} ${res.statusText}`);
+    }
+    return res.json(); // 서버 응답을 JSON으로 파싱
+   })
+   .then(data => {
+    return data;
+   })
+   .catch(error => {
+    console.log('patchArti API error: ', error);
+    return error;
+    //main.js에서 호출자가 .catch()를 통해 오류를 처리하도록 에러를 다시 던진다.
+   });
+}
+
+export function deleteArticle(articleId) {
+  const url = `${API_URL}/articles/${articleId}`;
+
+  return fetch(url, {
+    method: 'DELETE'
+  })
+    .then(res => {
+      if(!res.ok){
+        throw new Error(`Failed request: ${res.status} (${res.statusText})`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      return data; // 서버가 반환한 성공 메시지나 객체 반환
+    })
+    .catch(error => {
+      console.error(`deleteArti API `, error);
+      throw error; //main.js에서 호출자가 .catch()를 통해 오류를 처리하도록 에러를 다시 던진다.
+    });
+}
+
+//5. Productservice.js
+// 공부를 위해 product 관련 함수에서는 axios 사용
+/* https://panda-market-api-crud.vercel.app/docs Product API를 이용하여 
+아래 함수들을 구현해 주세요.
+- async/await 을 이용하여 비동기 처리를 해주세요.
+- 구현한 함수들을 아래와 같이 파일을 분리해 주세요.
+-- export를 활용해 주세요.
+-- ProductService.js 파일 Product API 관련 함수들을 작성해 주세요.
+-- ArticleService.js 파일에 Article API 관련 함수들을 작성해 주세요.
+- 이외의 코드들은 모두 main.js 파일에 import를 활용해서 작성해 주세요.
+*/
+import axios from "axios";
+import { Product } from "./Product.js";
+import {ElectronicProducts} from "./ElectronicProduct.js";
+
+const instance = axios.create({
+  baseURL: 'https://panda-market-api-crud.vercel.app',
+  timeout: 5000
+  //timeout: xnnn = x초 내에 연결이 되지 않으면 error return
+});
+
+/* 🚨 getProductList() : GET 메소드를 사용해 주세요.
+  -- page, pageSize, keyword 쿼리 파라미터를 이용해 주세요. */
+export async function getProductList({page, pageSize, keyword}){
+  // - try/catch 를 이용하여 오류 처리를 해주세요.
+  /* try and catch는 function 안에 들어가야 동작한다.
+    처음에 했던대로 try { export async function ....(){} } catch{}
+    시도하면 오류남 251001 22:27
+  */
+  try{
+  const res = await instance.get(`/products`, {
+    params: {page, pageSize, keyword}
+  });
+  /* getProductList()를 통해서 받아온 상품 리스트를 
+  각각 인스턴스로 만들어(-> 인스턴스로 만들어= map 메소드 사용)
+  products 배열에 저장해 주세요.
+  - 해시태그에 "전자제품"이 포함되어 있는 상품들은 Product 클래스 대신 
+  ElectronicProduct 클래스를 사용해 인스턴스를 생성해 주세요.
+  - 나머지 상품들은 모두 Product 클래스를 사용해 인스턴스를 생성해 주세요. */
+  
+  // 1. 위 res를 통해 갖고온 API 데이터 중에 실제 상품 리스트 배열을 가져오고
+  const productList = res.data.list; //res.data;
+
+  //2. map 메서드를 통해 각 상품(item)을 Product 클래스의 인스턴스로 변환한다.
+  const products = productList.map(item =>{
+      //여기서 foreach 말고 map 쓰는 게 맞나?
+    if (item.tags.includes("전자제품") || item.tags.includes("전자 제품")) {
+      return new ElectronicProducts(
+        item.name,
+        item.description,
+        item.price,
+        item.tags,
+        item.images,
+        item.favortieCount,
+        item.manufacturer
+      );
+      //want: item의 속성(key value)이 key name과 일치하는 곳으로 들어감
+      //real: ⭐️item 전체가 ElectronicProducts의 첫번째 매개변수인 name에 들어감⭐️
+      //need: item의 각 속성과 이름이 같은 ElectronicProducts의 각 매개변수를 매칭시켜주는 것. 15:50 251002
+    } else {
+      return new Product(
+        item.name,
+        item.description,
+        item.price,
+        item.tags,
+        item.imgaes,
+        item.favortieCount
+      );
+    }
+    });
+  //3. 인스턴스들로 구성된 최종 배열 반환
+    return products;
+  } catch(error){
+    console.log("getProdL err.stat: ", error.response.status);
+    return error.response.data;
+/* console.log("getProdL error!", error.data);
+    throw error;
+    실제 에러 발생 시 원인을 빠르게 파악하기 위해 위 코드를 삭제하고 현재 코드로 수정하였음
+    이후 전체 함수 catch return 값 일괄 변경
+    1009 22:37
+    */
+  };
+}
+/* Axios는 비동기 요청을 Promise로 처리하고, async/await를 사용하면 이를 더 간단하게 다룰 수 있다.
+조금 더 정확히 표현해야 해요.
+Axios 자체는 비동기적으로 동작해요. (axios.get()은 Promise를 반환함)
+async/await는 비동기 처리를 더 직관적이고 동기적인 코드 스타일로 작성할 수 있게 해주는 문법이에요.
+따라서 axios + async/await를 쓰면 비동기 요청을 깔끔하게 처리할 수 있지만,
+"async/await를 쓰면 비동기처리가 된다"는 설명은 살짝 오해의 소지가 있어요.
+
+📖 더 정확한 설명:
+Axios는 비동기 HTTP 요청을 Promise 기반으로 처리한다.
+async/await를 사용하면 Axios의 비동기 요청을 마치 동기 코드처럼 순차적으로 다룰 수 있다.
+*/
+
+// 🚨 getProduct() : GET 메소드를 사용해 주세요.
+export async function getProduct(productId){
+  try{
+  const response = await instance.get(`/products/${productId}`, )
+  return response.data;
+  } catch(error){
+    cconsole.log("getProd err.stat: ", error.response.status);
+    return error.response.data;
+  };
+}
+
+// 🚨 createProduct() : POST 메소드를 사용해 주세요.
+// - request body에 {name, description, price, tags, images} 를 포함해 주세요.
+export async function createProduct({name, description, price, tags, images}){
+  // 메소드에 유연성을 주기 위해서, 매개변수를 post의 두 번째 인자로(두 번째 자리에) 직접 넣지 않고 새 변수에 할당한 후 해당 변수를 전달한다
+  // (구조분해할당 사용. 객체 구조 분해= parameter destructing)
+  // For more flexibility, declare new varialbe with the parameters of this method. 1009 21:46
+  const newProduct = {name, description, price, tags, images};
+
+  try{
+    const res = await instance.post(`/products`, newProduct);
+    return res.data;
+  } catch(error) {
+    console.log("creatPd err.stat: ", error.response.status);
+    return error.response.data;
+  };
+}
+
+// 🚨 patchProduct() : PATCH 메소드를 사용해 주세요.
+export async function patchProduct(productId, updates) {
+  try{
+    const res = await instance.patch(`/products/${productId}`, updates);
+    return res.data;
+  } catch(error) {
+    console.log("patPd err.stat: ", error.response.status);
+    return error.response.data;
+  }
+}
+
+// 🚨 deleteProduct() : DELETE 메소드를 사용해 주세요.
+export async function deleteProduct(productId){
+  try{
+    const res = await instance.delete(`/products/${productId}`);
+    return res.data;
+  } catch(error) {
+    console.log("deltPd err.stat: ", error.response.status);
+    return error.response.data;
+  }
+}
