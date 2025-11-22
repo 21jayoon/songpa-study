@@ -123,4 +123,7 @@ function bodyGenerator(requestIndex) {
         password: uniquePassword
     });
 }
+
+Today's trouble-shooting:
+https://pine-fibula-aee.notion.site/TrShot-Solving-400-error-occurred-in-stress-test-2b4fc892a16f80c1a20dfa99f5300129
 */
